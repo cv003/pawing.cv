@@ -11,7 +11,8 @@
 <html>
 <head>
     <title>cv</title>
-    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAWlBMVEVYT0waFhX32LchGRckHxuEgIXk0r8qJSDy5dsrJCAnIBxqYV+5q6H217TCo4VXRkL99ef44Mbhy7bZu56tkHWaelqHb1N1XENnSjFUPy5JOCs4MCcuKCEfGxaHRclLAAAAHnRSTlMCHkVQhpeaq8bI3fj6/Pz9//7////////////+/v4NkalSAAABI0lEQVR42s2TQWrkMBBF3y/L3cHds8li7n/ChIFJ2lHb9QNGCPkEyduIop6qPgLxCxADAVCAuD+gPmklZXIwF7ZWb/j+H0ET9Ff/ijjYOKgB0QW/v4KAua18zk+XjS6AFnB48xRGeeWFrbWCgw8p9FEJwWrazX6mjuO2Z0o5i8EIOs4kvdYQB3d1YeeGFGlt9XINkOOGxwkCUjCDE9Evd2EVj69SPVcsCTGGNCyieGUWYEEnaJhwIXdnBSRuGgXpU0Fc9scmAiSNQRK0oFKoL3A9unCagMR0neoSlwhad2pCx/z50hQC5HPIVkrL2qbr9A5+o6FF4kRhwNDDyWhY0VqSunLKkIBt0xBGvGpcIY3j3zC504Xd75hkB0OC4Yx+8m9+A/UFa6dIqhfZAAAAAElFTkSuQmCC" />
+    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAWlBMVEVYT0waFhX32LchGRckHxuEgIXk0r8qJSDy5dsrJCAnIBxqYV+5q6H217TCo4VXRkL99ef44Mbhy7bZu56tkHWaelqHb1N1XENnSjFUPy5JOCs4MCcuKCEfGxaHRclLAAAAHnRSTlMCHkVQhpeaq8bI3fj6/Pz9//7////////////+/v4NkalSAAABI0lEQVR42midtextTQWrkMBBF3y/L3cHds8li7n/ChIFJ2lHb9QNGCPkEyduIop6qPgLxCxADAVCAuD+gPmklZXIwF7ZWb/j+H0ET9Ff/ijjYOKgB0QW/v4KAua18zk+XjS6AFnB48xRGeeWFrbWCgw8p9FEJwWrazX6mjuO2Z0o5i8EIOs4kvdYQB3d1YeeGFGlt9XINkOOGxwkCUjCDE9Evd2EVj69SPVcsCTGGNCyieGUWYEEnaJhwIXdnBSRuGgXpU0Fc9scmAiSNQRK0oFKoL3A9unCagMR0neoSlwhad2pCx/z50hQC5HPIVkrL2qbr9A5+o6FF4kRhwNDDyWhY0VqSunLKkIBt0xBGvGpcIY3j3zC504Xd75hkB0OC4Yx+8m9+A/UFa6dIqhfZAAAAAElFTkSuQmCC" />
+    <link rel="preload" href="/assets/fonts/gothic.woff" as="font" type="font/woff" crossorigin>
     <style>
         @font-face {
             font-family: "gothic";
@@ -28,12 +29,39 @@
         }
 
         body {
-            background: #a6a4b1; font: 8px/.55 "Consolas";
+            background: black; font: 8px/.55 "Consolas";
             display: flex; white-space: pre; 
             align-items: center; justify-content: center;
             width: 100vw; height: 100vh;
             overflow: hidden; margin: 0; letter-spacing: 0; 
         }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* .bgold {
+            position: fixed; z-index: -1; inset: 0;
+            background: linear-gradient(170deg, #9e9fb1, #a598a8 41%, #988ea0 48%, #ab94a2 52%, #988597 66%, #978495 76%, #757182)
+        } */
+        .bg {
+            position: fixed; z-index: -1; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;  opacity: 0;
+        }
+        .bg.playing {opacity: 1}
+        .bgfallback {
+            position: fixed; z-index: -2; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .bgloading {
+            position: fixed; z-index: -3; inset: 0;
+            background: #000;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
         span {font: 16px/.55 "Consolas"}
 
         .bottom {
@@ -66,14 +94,12 @@
             max-width: 400px; max-width: 50%; height: auto;
         }
         .s1 {line-height: 1}
-        .s2 {font-size: 10px; color: #ccc}
-        .s3 {font-size: 8px; color: #bbb}
-        .s3:any-link, .morebutton {text-decoration: underline wavy #ffffff31 0.5px}
+        .midtext {font-size: 10px; color: #ccc}
+        .bigtext {font-size: 8px; color: #bbb}
+        .bigtext:any-link, .morebutton {text-decoration: underline wavy #ffffff31 0.5px}
 
-        .bg {
-            position: fixed; z-index: -1; inset: 0;
-            background: linear-gradient(170deg, #9e9fb1, #a598a8 41%, #988ea0 48%, #ab94a2 52%, #988597 66%, #978495 76%, #757182)
-        }
+        /*//////////////////////////////////////////////////////////////////////*/
+
         .copied {
             position: absolute;
             left: 50%; top: 50%; transform: translate(-50%, -50%);
@@ -83,43 +109,56 @@
             border-radius: 4px; margin-bottom: 4px; z-index: 99;
         }
 
-        [alt="cv"] {
+        .cv {
             image-rendering: pixelated;
             height: 72px; padding: 3em;
+            position: fixed;
+            z-index: 999;
             animation: spin 3s linear infinite
         }
+        .cvtuah {
+            image-rendering: pixelated;
+            height: 72px; padding: 3em;
+            opacity: 0.5;
+            animation: spin 3s linear infinite
+        }
+
         @keyframes spin {
             0% {transform: rotateY(0)}
-            to {transform: rotateY(1turn)}
+            to {transform: rotateY(360deg)}
         }
+
     </style>
+
     <noscript>
-        <style>.morebutton, .status {display:none}</style>
+        <style>.morebutton, .status {display: none}</style>
     </noscript>
+    
 </head>
 <body>
-    <div class="bg"></div>
+    <!-- <div class="bgold"></div> -->
     <div class="copied"><a>copied!</a></div>
 
-    <!-- this is a horrifying approach. since you peeked into the code you"ll have to endure it now. no, i won"t be fixing it -->
-    <center>
-        <img alt="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
+    <!-- this is a horrifying approach. since you peeked into the code you'll have to endure it now. no, i won't be fixing it -->
+    <center class="main">
+        <img draggable="false" class="cvtuah" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
+        <img draggable="false" class="cv" id="bounce" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
         <span><a href=//x.com/cvsilly_>twitter</a> // <a href=//discord.com/users/763502120333869116>discord</a></span>
     </center>
 
     <div class="bottom">
-        <span class="s3">middle click to copy!</span>
+        <span class="bigtext">middle click to copy!</span>
         <div class="buttons">
             <a href="//s.soggy.cat"><img class="button smooth" src="//coolsite.cv/assets/images/88x31/ssoggycat.webp"></a>
             <a href="//coolsite.cv/swatchlings"><img class="button smooth" src="//coolsite.cv/assets/images/88x31/swatchlings.gif"></a>
-            <a><img alt="MS YURI ⚢ (@museofdeity) on Twitter:
-                pride flag i made for people who just don"t know" class="button" src="//coolsite.cv/assets/images/88x31/idk.webp"></a>
-            <a><img alt="emoji from bluemoji.io" class="button smooth" src="//coolsite.cv/assets/images/88x31/bluemoji.webp"></a>
+            <a><img title="MS YURI ⚢ (@museofdeity) on Twitter:
+pride flag i made for people who just don't know" class="button" src="//coolsite.cv/assets/images/88x31/idk.webp"></a>
+            <a><img title="emoji from bluemoji.io" class="button smooth" src="//coolsite.cv/assets/images/88x31/bluemoji.webp"></a>
         </div>
-        <span class="s2 morebutton">see more buttons..</span>
+        <span class="midtext morebutton">see more buttons..</span>
         <div class="more">
             <div class="section">
-                <span class="s3">cool people!</span>
+                <span class="bigtext">cool people!</span>
                 <div class="buttons">
                     <a href="//s1nez.nekoweb.org"><img class="button" data-src="//coolsite.cv/assets/images/88x31/s1nez.gif"></a>
                     <a href="//theawesomeblue.nekoweb.org"><img class="button" data-src="/assets/images/88x31/hq/blue.gif"></a>
@@ -129,7 +168,7 @@
                 </div>
             </div>
             <div class="section">
-                <span class="s3">other stuff</span>
+                <span class="bigtext">other stuff</span>
                 <div class="buttons">
                     <a href="//ne0nbandit.art/cable"><img class="button" data-src="//coolsite.cv/assets/images/88x31/swatch.gif"></a>
                     <a href="//spacehey.com/holidaygirl1224"><img class="button" data-src="//coolsite.cv/assets/images/88x31/hq/holidaygirl.gif"></a>
@@ -140,7 +179,7 @@
                     <a href="//wavesmiley.com"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/hq/wavesmiley.gif"></a>
                     <a href="//tracker.archiveteam.org"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/archiveteam.gif"></a>
                     <a href="//ezgif.com"><img class="button" data-src="//coolsite.cv/assets/images/88x31/hq/ezgif.gif"></a>
-                    <a><img alt="from germanpit.de" class="button" data-src="//coolsite.cv/assets/images/88x31/w3c.webp"></a>
+                    <a><img title="from germanpit.de" class="button" data-src="//coolsite.cv/assets/images/88x31/w3c.webp"></a>
                     
                     <!-- FML -->
                     <a><iframe style="padding-right:4.001px;padding-left:2px" data-src="//incr.easrng.net/badge?key=sog" width="88" height="31" frameborder="0" style="background:url('//incr.easrng.net/bg.gif')"></iframe></a>
@@ -152,22 +191,23 @@
             </div>
         </div>
     </div>
+    <div class="status"><span>loading..</span><span class="midtext">(if nothing appears, try refreshing)</span></div>
 
-    <div class="status"><span>loading..</span><span class="s2">(if nothing appears, try refreshing)</span></div>
     <script>
-
         
         fetch("https://status.cafe/users/meow/status.json").then(r=>r.json()).then(r=>{
             document.querySelector(".status").innerHTML = `
             <span class="s1">${r.content}</span>
-            <span class="s2">${r.face} · ${r.timeAgo}</span>
-            <a class="s3" href="https://status.cafe/users/meow" target="_blank">status.cafe</a>`
+            <div style="display:inline;font-size:0.5em"><span class="midtext">${r.timeAgo}</span> · <a class="bigtext" href="https://status.cafe/users/meow" target="_blank">status.cafe</a></div>
+            `
         });
+
+        /*//////////////////////////////////////////////////////////////////////*/
 
         let moreBUTTs = false;
         const moreBUTT = document.querySelector(".more");
 
-        // unload / load stuff. if you don"t have js enabled then you"re not seeing it EVER screw you
+        // unload / load stuff. if you don't have js enabled then you're not seeing it EVER screw you
         document.querySelector(".morebutton").addEventListener("click", function() {
             if (moreBUTT.style.display === "flex") {
                 moreBUTT.style.display = "none";
@@ -244,6 +284,363 @@
                 }, 100); return false;
             }
         });
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        // video + audio loop 
+        // audio is separate as it's MUCH easier to make a perfect loop of.
+        function initbackgroundvideo() {
+
+            const videofiles = ['whoamuted.webm', 'dystopiamuted.webm'];
+            const selectedvideo = videofiles[Math.floor(Math.random() * videofiles.length)];
+            const videoname = selectedvideo.replace('.webm', '').replace('muted', '');
+            const videopath = `/assets/videos/${selectedvideo}`;
+            const audiopath = `/assets/audio/${videoname}.ogg`;
+            const fallbackpath = `/assets/images/thumb/${videoname}.png`;
+            const loadingbg = document.createElement('div');
+
+            loadingbg.className = 'bgloading';
+            document.body.appendChild(loadingbg);
+            const fallbackimg = document.createElement('img');
+            fallbackimg.className = 'bgfallback'; fallbackimg.alt = '';
+            document.body.appendChild(fallbackimg);
+
+            const audiocontext = new (window.AudioContext || window.webkitAudioContext)();
+            const audiovolume = audiocontext.createGain();
+            audiovolume.gain.value = 0;
+            audiovolume.connect(audiocontext.destination);
+
+            let audiobuffer = null;
+            let audiosource = null;
+            let videoduration = 0;
+            let muted = true;
+            let hasstarted = false;
+            let bufferingtimeout = null;
+            let rafid = null;
+            let videostarttime = 0;
+            let audiostarttime = 0;
+            let currentvideo = 0;
+            let crossfadestarttime = 0;
+            let iscrossfading = false;
+
+            const video1 = document.createElement('video');
+            video1.className = 'bg'; video1.style.zIndex = '-1';
+            video1.muted = true; video1.playsInline = true;
+            video1.preload = 'auto'; video1.loop = false;
+            
+            const video2 = document.createElement('video');
+            video2.className = 'bg'; video2.style.opacity = '0';
+            video2.style.zIndex = '-2'; video2.muted = true;
+            video2.playsInline = true; video2.preload = 'auto';
+            video2.loop = false;
+
+            const videoelements = [video1, video2];
+
+            function unmuteoninteraction() {
+                if (muted) {
+                    muted = false;
+                    audiovolume.gain.value = 0.5;
+                    if (audiobuffer && !audiosource) {
+                        startaudioloop();
+                    }
+                }
+            }
+
+            function startaudioloop() {
+                if (!audiobuffer || muted) return;
+                if (audiosource) {
+                    try {
+                        audiosource.stop(0);
+                    } catch(e) {}
+                    audiosource.disconnect();
+                }
+                audiosource = audiocontext.createBufferSource();
+                audiosource.buffer = audiobuffer;
+                audiosource.connect(audiovolume);
+                audiosource.loop = true;
+                audiosource.loopStart = 0;
+                audiosource.loopEnd = audiobuffer.duration;
+                let videooffset = 0;
+                const currentvid = videoelements[currentvideo];
+                if (videoduration > 0 && currentvid.readyState >= 2) {
+                    videooffset = currentvid.currentTime % videoduration;
+                    videooffset = Math.max(0, Math.min(videooffset, audiobuffer.duration));
+                }
+                audiostarttime = audiocontext.currentTime;
+                try {
+                    audiosource.start(0, videooffset);
+                } catch(e) {
+                    audiosource.start(0, 0);
+                }
+            }
+
+            fallbackimg.onload = function() {
+                if (!hasstarted) {
+                    fallbackimg.style.opacity = '1';
+                }
+            };
+            fallbackimg.src = fallbackpath;
+
+            function setupvideolisteners(vid, isprimary) {
+                vid.addEventListener('loadstart', function() {
+                    if (isprimary) {
+                        bufferingtimeout = setTimeout(function() {
+                            if (!hasstarted) {
+                                fallbackimg.style.opacity = '1';
+                            }
+                        }, 500);
+                    }
+                });
+                vid.addEventListener('loadedmetadata', function() {
+                    if (videoduration === 0 || Math.abs(videoduration - vid.duration) > 0.1) {
+                        videoduration = vid.duration;
+                    }
+                });
+                vid.addEventListener('durationchange', function() {
+                    if (vid.duration && (videoduration === 0 || Math.abs(videoduration - vid.duration) > 0.1)) {
+                        videoduration = vid.duration;
+                    }
+                });
+                if (isprimary) {
+                    vid.addEventListener('canplay', function() {
+                        clearTimeout(bufferingtimeout);
+                        if (!hasstarted) {
+                            vid.play().then(function() {
+                                hasstarted = true;
+                                vid.classList.add('playing');
+                                fallbackimg.style.opacity = '0';
+                                loadingbg.style.display = 'none';
+                            }).catch(function() {
+                                fallbackimg.style.opacity = '1';
+                            });
+                        }
+                    });
+                    vid.addEventListener('playing', function() {
+                        clearTimeout(bufferingtimeout);
+                        if (!hasstarted) {
+                            hasstarted = true;
+                            vid.classList.add('playing');
+                            fallbackimg.style.opacity = '0';
+                            loadingbg.style.display = 'none';
+                        }
+                        if (rafid === null) {
+                            rafid = requestAnimationFrame(loopvideo);
+                        }
+                    });
+                    vid.addEventListener('waiting', function() {
+                        if (hasstarted) {
+                            fallbackimg.style.opacity = '1';
+                        }
+                    });
+                    vid.addEventListener('canplaythrough', function() {
+                        clearTimeout(bufferingtimeout);
+                        if (!hasstarted) {
+                            hasstarted = true;
+                            vid.classList.add('playing');
+                            fallbackimg.style.opacity = '0';
+                            loadingbg.style.display = 'none';
+                        }
+                    });
+                    vid.addEventListener('error', function() {
+                        clearTimeout(bufferingtimeout);
+                        fallbackimg.style.opacity = '1';
+                        loadingbg.style.display = 'none';
+                    });
+                }
+            }
+            setupvideolisteners(video1, true);
+            setupvideolisteners(video2, false);
+
+            const audiorequest = new XMLHttpRequest();
+            audiorequest.open('GET', audiopath, true);
+            audiorequest.responseType = 'arraybuffer';
+            audiorequest.onload = function() {
+                if (audiorequest.status === 200 || audiorequest.status === 0) {
+                    audiocontext.decodeAudioData(audiorequest.response).then(function(decodedbuffer) {
+                        audiobuffer = decodedbuffer;
+                        if (videoduration === 0) {
+                            videoduration = decodedbuffer.duration;
+                        }
+                    }).catch(function(e) {});
+                }
+            }; audiorequest.send();
+
+            video1.src = videopath; video2.src = videopath;
+            video1.load(); video2.load();
+
+            function loopvideo() {
+                if (videoduration > 0) {
+                    const currentvid = videoelements[currentvideo];
+                    const nextvid = videoelements[1 - currentvideo];
+                    
+                    const currentReady = currentvid.readyState >= 2;
+                    const nextReady = nextvid.readyState >= 2;
+                    
+                    if (currentReady) {
+                        const currenttime = currentvid.currentTime;
+                        const fadestart = videoduration - 0.05;
+                        
+                        if (currenttime >= fadestart && !iscrossfading && nextReady) {
+                            iscrossfading = true;
+                            crossfadestarttime = currenttime;
+                            nextvid.currentTime = 0;
+                            nextvid.style.zIndex = '-1';
+                            currentvid.style.zIndex = '-2';
+                            nextvid.play().catch(function() {});
+                            nextvid.style.opacity = '0';
+                            nextvid.classList.add('playing');
+                        }
+                        
+                        if (iscrossfading) {
+                            const fadeprogress = Math.min(1, (currenttime - fadestart) / 0.05);
+                            if (fadeprogress >= 1 || currenttime >= videoduration) {
+                                currentvid.style.opacity = '0';
+                                currentvid.style.zIndex = '-2';
+                                currentvid.pause();
+                                currentvid.currentTime = 0;
+                                currentvid.classList.remove('playing');
+                                
+                                currentvideo = 1 - currentvideo;
+                                
+                                const newCurrent = videoelements[currentvideo];
+                                newCurrent.style.opacity = '1';
+                                newCurrent.style.zIndex = '-1';
+                                if (newCurrent.paused) {
+                                    newCurrent.play().catch(function() {});
+                                }
+                                
+                                iscrossfading = false;
+                            } else {
+                                const nextopacity = fadeprogress;
+                                const currentopacity = 1 - fadeprogress;
+                                nextvid.style.opacity = nextopacity.toString();
+                                currentvid.style.opacity = currentopacity.toString();
+                                nextvid.style.zIndex = '-1';
+                                currentvid.style.zIndex = '-2';
+                            }
+                        } else {
+                            if (currenttime >= videoduration) {
+                                currentvid.currentTime = 0;
+                                if (currentvid.paused) {
+                                    currentvid.play().catch(function() {});
+                                }
+                            }
+                        }
+                    }
+                }
+                if (videoduration > 0) {
+                    rafid = requestAnimationFrame(loopvideo);
+                }
+            }
+            document.addEventListener('click', function() {
+                unmuteoninteraction();
+                if (audiobuffer && !audiosource && !muted) {
+                    startaudioloop();
+                }
+            }, {once: false});
+            document.addEventListener('touchstart', function() {
+                unmuteoninteraction();
+                if (audiobuffer && !audiosource && !muted) {
+                    startaudioloop();
+                }
+            }, {once: false});
+            document.body.appendChild(video1);
+            document.body.appendChild(video2);
+        }
+        initbackgroundvideo();
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        // dvd screensaver
+        (function() {
+            const cv = document.getElementById('bounce');
+            if (!cv) return;
+
+            let x = 0; let y = 0;
+            let dx = 2; let dy = 2;
+            let isanimating = false;
+            let animationid = null;
+
+            function getdimensions() {
+                const rect = cv.getBoundingClientRect();
+                return {
+                    width: rect.width,
+                    height: rect.height
+                };
+            }
+            function animate() {
+                const dims = getdimensions();
+                const maxx = window.innerWidth - dims.width;
+                const maxy = window.innerHeight - dims.height;
+
+                x += dx; y += dy;
+                if (x <= 0 || x >= maxx) {
+                    dx = -dx;
+                    x = Math.max(0, Math.min(x, maxx));
+                }
+                if (y <= 0 || y >= maxy) {
+                    dy = -dy;
+                    y = Math.max(0, Math.min(y, maxy));
+                }
+
+                cv.style.left = x + 'px';
+                cv.style.top = y + 'px';
+                animationid = requestAnimationFrame(animate);
+            }
+
+            function startanimation() {
+                if (isanimating) return;
+                
+                isanimating = true;
+                const dims = getdimensions();
+                x = window.innerWidth / 2 - dims.width / 2;
+                y = window.innerHeight / 2 - dims.height / 2;
+                cv.style.left = x + 'px';
+                cv.style.top = y + 'px';
+                animate();
+            }
+
+            function initializeposition() {
+                const cvtuah = document.querySelector('.cvtuah');
+                if (cvtuah) {
+                    const rect = cvtuah.getBoundingClientRect();
+                    cv.style.left = rect.left + 'px';
+                    cv.style.top = rect.top + 'px';
+                } else {
+                    const dims = getdimensions();
+                    cv.style.left = (window.innerWidth / 2 - dims.width / 2) + 'px';
+                    cv.style.top = (window.innerHeight / 2 - dims.height / 2) + 'px';
+                }
+                const currentrect = cv.getBoundingClientRect();
+                x = currentrect.left;
+                y = currentrect.top;
+            }
+            if (cv.complete) {
+                initializeposition();
+            } else {
+                cv.addEventListener('load', initializeposition);
+            }
+            cv.addEventListener('click', startanimation);
+
+            let resizetimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizetimeout);
+                resizetimeout = setTimeout(function() {
+                    // if you change page width it gets funky but idrc
+                    if (!isanimating) {
+                        initializeposition();
+                    } else {
+                        const dims = getdimensions();
+                        const maxx = window.innerWidth - dims.width;
+                        const maxy = window.innerHeight - dims.height;
+                        x = Math.max(0, Math.min(x, maxx));
+                        y = Math.max(0, Math.min(y, maxy));
+                        cv.style.left = x + 'px';
+                        cv.style.top = y + 'px';
+                    }
+                }, 100);
+            });
+        })();
     </script>
 </body>
 </html>
