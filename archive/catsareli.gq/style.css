@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@600&display=swap');
+
+body {
+  background: url("image.png");
+  background-size: 200%;
+  position: fixed;
+  justify-content: center;
+  align-items: center;
+}
+
+img {
+  position: absolute;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.logo {
+  width: 50vw;
+  top: 9vw;
+  left: 25vw;
+  right: 25vw;
+  z-index: 2;
+}
+
+.elem1 {
+  filter: blur(8px);
+  width: 20vw;
+  top: 35vw;
+  left: 10vw;
+}
+
+.elem2 {
+  filter: blur(8px);
+  width: 15vw;
+  top: 7vw;
+  left: 45vw;
+  animation: rotation 20s infinite linear;
+}
+
+.elem3 {
+  filter: blur(8px);
+  width: 13vw;
+  top: 25vw;
+  left: 75vw;
+}
+
+.button {
+  position: fixed;
+  background-image: linear-gradient(92.88deg, #2a475e 9.16%, #1b2838 64.72%);
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  height: 6rem;
+  padding: 0 3.6rem;
+  text-align: center;
+  box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
+  transition: all .5s;
+  user-select: none;
+  touch-action: manipulation;
+  opacity: 0.9;
+  top: 25vw;
+  left: 35vw;
+}
+
+.button1 {
+  position: fixed;
+  background-image: linear-gradient(92.88deg, #fc2336 9.16%, #c01c32 64.72%);
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  height: 6rem;
+  padding: 0 3.6rem;
+  text-align: center;
+  box-shadow: #c01c32 0 1px 30px;
+  transition: all .5s;
+  user-select: none;
+  touch-action: manipulation;
+  opacity: 0.9;
+  top: 25vw;
+  right: 35vw;
+}
+
+.button2 {
+  position: fixed;
+  background-image: linear-gradient(92.88deg, #01875f 9.16%, #40a587 64.72%);
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  height: 6rem;
+  padding: 0 2.6rem;
+  text-align: center;
+  box-shadow: #40a587 0 1px 30px;
+  transition: all .5s;
+  user-select: none;
+  touch-action: manipulation;
+  opacity: 0.9;
+  top: 33vw;
+  left: 35vw;
+}
+
+.button3 {
+  position: fixed;
+  background-image: linear-gradient(92.88deg, #313132 9.16%, #4c4c50 64.72%);
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  height: 6rem;
+  padding: 0 2.6rem;
+  box-shadow: #313132 0 1px 30px;
+  transition: all .5s;
+  user-select: none;
+  touch-action: manipulation;
+  opacity: 0.9;
+  top: 33vw;
+  right: 35vw;
+}
+
+#icon, #icon1, #icon2, #icon3 {
+  width: 30px;
+  top: 7px;
+  right: 6px;
+  position: relative;
+}
+
+.twt {
+  position: fixed;
+  width: 3vw;
+  bottom: 8px;
+  right: 4vw;
+}
+
+.dsc {
+  position: fixed;
+  width: 3vw;
+  bottom: 8px;
+  right: 0.8vw;
+}

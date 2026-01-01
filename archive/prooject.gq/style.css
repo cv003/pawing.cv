@@ -1,0 +1,285 @@
+/* messy css, not sorted */
+/* попутаний css, не сортований */
+
+@import url('https://fonts.googleapis.com/css2?family=Pangolin&display=swap');
+
+html, body {
+  min-height: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: 'Pangolin', cursive;
+  background: #333333;
+  display: flex;
+  padding: 2em 0;
+  justify-content: center;
+  align-items: center;
+  line-height: 3vw;
+  overflow: hidden;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+p {
+  text-align: center;
+  color: #000000;
+}
+
+span {
+  color: #ffffff;
+  -webkit-animation: glow 1s ease-in-out infinite alternate;
+  -moz-animation: glow 1s ease-in-out infinite alternate;
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+/* it's 12am and i'm wasting my time on this, my sleep schedule will soon be literally non-existent */
+/* зараз 12:00 і я витрачаю час на це, скоро мій графік сну буквально пропаде */
+
+img {
+  margin: 5px;
+}
+
+@-webkit-keyframes glow {
+  from {
+    text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #e60073, 0 0 40px #e60073, 0 0 50px #e60073, 0 0 60px #e60073, 0 0 70px #e60073;
+  }
+  to {
+    text-shadow: 0 0 20px #ffffff, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
+  }
+}
+
+#title {
+  font-size: 3vw;
+}
+
+#boring-text-that-no-one-will-ever-read {
+  font-size: 1.8vw;
+  text-align: left !important;
+  margin: 5px;
+}
+
+#boring-text-that-no-one-will-ever-read-rebirth {
+  font-size: 2vw;
+  text-align: left !important;
+  margin: 5px;
+}
+
+.page {
+  width: 30vw;
+  height: 44vw;
+  background-color: #111111;
+  float: left;
+  background: left top no-repeat;
+  background-size: cover;
+}
+.page:nth-child(even) {
+  clear: both;
+}
+.book {
+  perspective: 250vw;
+  transition: opacity 0.4s 0.2s;
+  position: absolute;
+}
+.book .pages {
+  width: 60vw;
+  height: 44vw;
+  position: relative;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  border-radius: 4px;
+}
+.book .page {
+  float: none;
+  clear: none;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  width: 30vw;
+  height: 44vw;
+  transform-origin: 0 0;
+  transition: transform 1s;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  user-select: none;
+  background-color: #f0f0f0;
+}
+.book .page:before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.7s;
+}
+.book .page:nth-child(odd) {
+  pointer-events: all;
+  right: 0;
+  border-radius: 0 4px 4px 0;
+  background-image: linear-gradient(to right, rgba(0,0,0,.15) 0%, rgba(0,0,0,0) 10%);
+}
+
+.book .page:nth-child(odd):hover {
+  transform: rotateY(-15deg);
+}
+
+.book .page:nth-child(even) {
+  pointer-events: none;
+  transform: rotateY(170deg);
+  transform-origin: 100% 0;
+  left: 0;
+  border-radius: 4px 0 0 4px;
+  border-color: black;
+  background-image: linear-gradient(to left, rgba(0,0,0,.12) 0%, rgba(0,0,0,0) 10%);
+}
+
+.book .page.flipped:nth-child(odd) {
+  pointer-events: none;
+  transform: rotateY(-170deg);
+}
+
+.book .page.flipped:nth-child(even) {
+  pointer-events: all;
+  transform: rotateY(10deg);
+}
+
+.book .page.flipped:nth-child(even):hover {
+  transform: rotateY(15deg);
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+.wave {
+    background: rgb(255 255 255 / 25%);
+    border-radius: 1000% 1000% 0 0;
+    position: fixed;
+    width: 200%;
+    height: 12em;
+    animation: wave 10s -3s linear infinite;
+    transform: translate3d(0, 0, 0);
+    opacity: 0.8;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.wave:nth-of-type(2) {
+    bottom: -1.25em;
+    animation: wave 18s linear reverse infinite;
+    opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+    bottom: -2.5em;
+    animation: wave 20s -1s reverse infinite;
+    opacity: 0.9;
+}
+
+@keyframes wave {
+    2% {
+        transform: translateX(1);
+    }
+
+    25% {
+        transform: translateX(-25%);
+    }
+
+    50% {
+        transform: translateX(-50%);
+    }
+
+    75% {
+        transform: translateX(-25%);
+    }
+
+    100% {
+        transform: translateX(1);
+    }
+}
+
+#hellobar-bar {
+    font-family: Arial, Helvetica, sans-serif;
+    width: 100%;
+    margin: 0;
+    height: 30px;
+    display: table;
+    top: 0;
+    font-weight: 400;
+    padding: .33em .5em;
+    -webkit-font-smoothing: antialiased;
+    color: #ed4c40;
+    position: fixed;
+    background-color: #ed4c40;
+    box-shadow: 0 1px 3px 2px rgba(0,0,0,0);
+}
+
+#hellobar-bar.regular {
+    height: 30px;
+    padding: .2em .5em;
+}
+
+.hb-content-wrapper {
+    text-align: center;
+    text-align: center;
+    position: relative;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.hb-content-wrapper p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.hb-text-wrapper {
+    margin-right: 20px;
+    display: inline-block;
+    line-height: 1.3;
+}
+
+.hb-text-wrapper .hb-headline-text {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#hellobar-bar .hb-cta {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 5px 0;
+    color: #ffffff;
+    background-color: #ed4c40;
+    border-color: #ed4c40;
+}
+
+.hb-close-wrapper {
+    display: table-cell;
+    width: 10px;
+}
+
+.hb-close-wrapper .icon-close {
+    top: 15px;
+    right: 25px;
+    width: 15px;
+    height: 15px;
+    opacity: .3;
+    color: #ffffff;
+    cursor: pointer;
+    position: absolute;
+    text-align: center;
+    line-height: 15px;
+    z-index: 1000;
+    text-decoration: none;
+}
+
+.page:nth-child(odd){
+  background-position: right top;
+}

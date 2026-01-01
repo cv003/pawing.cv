@@ -1,0 +1,5 @@
+ErrorDocument 400 http://owot.gq/404/
+ErrorDocument 401 http://owot.gq/404/
+ErrorDocument 403 http://owot.gq/404/
+ErrorDocument 404 http://owot.gq/404/
+ErrorDocument 503 http://owot.gq/404/

@@ -1,0 +1,73 @@
+<html lang="en" class=" ktqwujuoz idc0_344"><head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  
+		<title>benbot.js</title>
+  
+   <link rel="shortcut icon" type="image/png" href="https://ourworldoftext.com/static/favicon.png">
+  
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+   <script>hljs.highlightAll();</script>
+  
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Sono:wght@300&display=swap');
+
+  * {
+    font-family: 'Sono', sans-serif;
+    margin: auto !important;
+  }
+  </style>
+  
+  </head>
+	<body>
+    
+ <pre><code class="language-js">
+const BOT_USER = ["🐶📞", "#a77474"];
+const BOT_OWNER = "cv"; // Set this to your username.
+const responses = [ // Some values repeated for higher chances.
+    "Yea.",
+    "Yea.", // 33%
+    "No.",
+    "No.", // 33%
+    "Uuh.", // 16.5%
+    "Hohoho!" // 16.5%
+];
+let on_call = false;
+
+// Welcome message.
+w.on("chat", (e) => {
+network.chat("✔ | v1.0 - Simplified version by yagton, with some minor edits by cv! Use \"Ben\" to ask questions. Enter ben!call to start. [Owner only]", e.location, "🐶");
+}
+
+// Run if you want to stop the bot.
+function stop_ben() {
+    network.chat("[Tick! The call was ended by the bot owner.]", "page", "🐶☎");
+    on_call = false;
+}
+
+// This is the command handler.
+w.on("chat", (e) => {
+    // Only the bot owner should be allowed to use commands.
+    if (e.realUsername !== BOT_OWNER) return;
+
+    switch (e.message.trim()) {
+        case "ben!call":
+            on_call = true;
+            network.chat("𝘉𝘦𝘯.", e.location, ...BOT_USER);
+            break;
+        default:
+            // Message is not a command, so we'll do nothing.
+    }
+});
+
+// The fun bit. :)
+w.on("chat", (e) => {
+    if (e.message.toLowerCase().includes("ben") && e.id !== w.clientId) {
+        let reply = responses[Math.floor(Math.random() * responses.length)];
+        network.chat(reply, e.location, ...BOT_USER);
+    }
+});
+</code></pre>
+    
+</body>
+</html>
