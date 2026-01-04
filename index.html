@@ -160,18 +160,23 @@
             image-rendering: pixelated;
             height: 72px; padding: 3em;
             position: fixed;
+            left: 50%; top: 50%;
             z-index: 999; opacity: 1;
             animation: spin 3s linear infinite
         }
         .cvtuah {
             image-rendering: pixelated;
             height: 72px; margin: 3em; opacity: 1;
-            animation: spin 3s linear infinite;
+            animation: spinno 3s linear infinite;
             display: none; position: fixed;
             z-index: 999
         }
 
         @keyframes spin {
+            0% {transform: translate(-50%, -50%) rotateY(0)}
+            to {transform: translate(-50%, -50%) rotateY(360deg)}
+        }
+        @keyframes spinno {
             0% {transform: rotateY(0)}
             to {transform: rotateY(360deg)}
         }
@@ -405,19 +410,16 @@ pride flag i made for people who just don't know" class="button" src="//coolsite
                 const rect = cv.getBoundingClientRect();
                 x = rect.left; y = rect.top;
 
-                const computedStyle = window.getComputedStyle(cv);
-                const transform = computedStyle.transform;
                 cvtuah.style.left = x + 'px'; cvtuah.style.top = y + 'px';
-                cvtuah.style.transform = transform; cvtuah.style.display = 'block';
+                cvtuah.style.display = 'block';
                 
                 isanimating = true;
                 animate();
             }
 
             function initializeposition() {
-                const dims = getdimensions(cv);
-                cv.style.left = (window.innerWidth / 2 - dims.width / 2) + 'px';
-                cv.style.top = (window.innerHeight / 2 - dims.height / 2) + 'px';
+                cv.style.left = '50%';
+                cv.style.top = '50%';
             }
             if (cv.complete) {initializeposition()}
             else {cv.addEventListener('load', initializeposition)}
