@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title><- live preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link class="dynamic-favicon" rel="icon" type="image/svg+xml">
+
+    <style>
+        body {
+            padding-left: 0.25em;
+            background: #f7f7f8;
+            color: #222;
+            font-family: sans-serif;
+        }
+        .output {
+            margin-top: 1em; font-family: monospace;
+            font-size: 0.85em; padding: 0.5em; border-radius: 10px;
+            white-space: pre-wrap; word-break: break-all;
+            background:#f0f0f0;
+        }
+        .preview {
+            padding-top: 0.5em; padding-bottom: 0.5em;
+        }
+    </style>
+
+</head>
+<body>
+    <form class="favicon-form" autocomplete="off">
+        <div>
+            <label for="emoji">text -</label>
+            <textarea class="emoji" name="emoji" rows="2" style="resize:vertical;" required>🐈</textarea>
+            <span style="font-size:0.75em;color:rgba(0,0,0,0.25);">(you can use line breaks)</span>
+        </div>
+        <div>
+            <label for="font">font -</label>
+            <select class="font" name="font">
+                <option value="system-ui">system-ui</option>
+                <option value="Segoe UI Emoji,Segoe UI Symbol">Segoe UI Emoji</option>
+                <option value="Apple Color Emoji,Apple System,system-ui">Apple Color Emoji (mac)</option>
+                <option value="Noto Color Emoji,sans-serif">Noto Color Emoji (android)</option>
+                <option value="Arial,Helvetica,sans-serif">Arial</option>
+                <option value="Tahoma,sans-serif">Tahoma</option>
+                <option value="Times New Roman,serif" selected>Times New Roman</option>
+                <option value="Courier New,monospace">Courier New</option>
+                <option value="monospace">monospace</option>
+                <option value="serif">serif</option>
+                <option value="sans-serif">sans-serif</option>
+                <option value="fantasy">fantasy</option>
+            </select>
+        </div>
+        <div>
+            <label for="fontsize">text size -</label>
+            <input class="fontsize" name="fontsize" type="number" value="52" min="8" max="64" style="width:3.7em"> px
+        </div>
+        <div>
+            <label for="color">text color -</label>
+            <input class="color" name="color" type="color" value="#000000">
+        </div>
+    </form>
+    <div>
+        <div class="output"></div>
+        <div class="preview"></div>
+        <div>check the favicon of the page! ⤴</div>
+    </div>
+    
+    <script>
+        function escapesvg(s) {
+            return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function hasDescenders(text) {
+            const descenderChars = /[gjpqy]/i;
+            return descenderChars.test(text);
+        }
+        function svgfavicon(opts) {
+            let x = 32; let y = hasDescenders(opts.rawText) ? 32 : 37.5;
+            let f = opts.fontfamily.replace(/"/g, "&quot;");
+            let lines = opts.rawText.split("\n");
+            let lineheight = opts.fontsize * 1.2;
+            let totalheight = lines.length * lineheight;
+            let startY = y - (totalheight - lineheight) / 2;
+            
+            let tspans = lines.map((line, i) => {
+                let escapedline = escapesvg(line || " ");
+                return `<tspan x="${x}" dy="${i === 0 ? 0 : lineheight}" text-anchor="middle">${escapedline}</tspan>`;
+            }).join("");
+            
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text x="${x}" y="${startY}" font-size="${opts.fontsize}" fill="${opts.color}" font-family="${f}" text-anchor="middle" dominant-baseline="middle">${tspans}</text></svg>`;
+        }
+        function daturl(svg) {return "data:image/svg+xml;utf8," + encodeURIComponent(svg)}
+
+        function favicon(url) {
+            let l = document.querySelector(".dynamic-favicon");
+            if (!l) {
+                l = document.createElement("link");
+                l.className = "dynamic-favicon"; l.rel = "icon";
+                l.type = "image/svg+xml";
+                document.head.appendChild(l);
+            }
+            l.setAttribute("href", url);
+        }
+
+        function preview(svg) {
+            document.querySelector(".preview").innerHTML = `<img src="${daturl(svg)}" width="64" height="64" style="width:64px;height:64px;display:block;border:1px solid #bbb;border-radius:10px;background:#eee;">`;
+        }
+
+        function updfavicon() {
+            let t = document.querySelector(".emoji").value.trim() || "";
+            let f = document.querySelector(".font").value;
+            let s = parseInt(document.querySelector(".fontsize").value) || 52;
+            let c = document.querySelector(".color").value || "#000000";
+            let svg = svgfavicon({
+                text: escapesvg(t),
+                rawText: t,
+                fontfamily: f, fontsize: s, color: c
+            });
+            let url = daturl(svg);
+            preview(svg); favicon(url);
+            let htmlthing = `<link rel="icon" type="image/svg+xml" href="${url}">`;
+            document.querySelector(".output").textContent = htmlthing;
+        }
+
+        document.querySelector(".favicon-form").addEventListener("submit", function(e){
+            e.preventDefault();
+            updfavicon();
+        });
+        document.querySelector(".emoji").addEventListener("input", updfavicon);
+        document.querySelector(".font").addEventListener("change", updfavicon);
+        document.querySelector(".fontsize").addEventListener("input", updfavicon);
+        document.querySelector(".color").addEventListener("input", updfavicon);
+
+        document.addEventListener("DOMContentLoaded", function(){updfavicon()});
+    </script>
+
+</body>
+</html>
