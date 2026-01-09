@@ -16,7 +16,8 @@
     <style>
         @font-face {
             font-family: "gothic";
-            src: url("/assets/fonts/gothic.woff")
+            src: url("/assets/fonts/gothic.woff");
+            font-display: block;
         }
         * {
             color: #eee;
@@ -161,6 +162,7 @@
             height: 72px; padding: 3em;
             position: fixed;
             left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
             z-index: 999; opacity: 1;
             animation: spin 3s linear infinite
         }
@@ -382,6 +384,7 @@ pride flag i made for people who just don't know" class="button" src="//coolsite
             const cv = document.getElementById('bounce');
             const cvtuah = document.querySelector('.cvtuah');
             if (!cv || !cvtuah) return;
+            cv.style.transform = 'translate(-50%, -50%)';
 
             let x = 0; let y = 0; let dx = 2; let dy = 2;
             let isanimating = false; let animationid = null;
@@ -420,6 +423,7 @@ pride flag i made for people who just don't know" class="button" src="//coolsite
             function initializeposition() {
                 cv.style.left = '50%';
                 cv.style.top = '50%';
+                cv.style.transform = 'translate(-50%, -50%)';
             }
             if (cv.complete) {initializeposition()}
             else {cv.addEventListener('load', initializeposition)}
