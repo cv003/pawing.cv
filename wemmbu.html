@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>wemmbu torture device 💜</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'><path fill='%238f00d2' d='M0 0h160v160H0z'/><path fill='%2310003b' d='M93.498 122.981c-3.351.319-4.93-1.12-6.047-4.142.515-3.037.807-6.108.875-9.188a283 283 0 0 0-21.802-1.179c.392 4.03 3.868 10.908-3.277 12.245-5.388 1.009-6.433-9.028-6.992-12.904-.134-1.241.158-2.75.556-3.929.58-1.718 1.784-3.327 3.444-4.125 4.729-2.273 26.435-.906 31.44.859 2.552.9 4.513 2.459 5.68 4.949 1.69 3.607 1.286 10.001-.095 13.696-.734 1.965-1.92 2.871-3.782 3.718M30.461 72.878a4.935 4.935 0 1 1 1.84 9.697 4.935 4.935 0 0 1-1.84-9.697m91.882 2.761a4.933 4.933 0 1 1 2.812 9.457 4.933 4.933 0 0 1-2.812-9.457'/></svg>">
+
+    <style>
+        @font-face {
+            font-family: "noto sans";
+            src: url("/assets/fonts/notosansmedium.woff");
+            font-display: block;
+        }
+        body {
+            width: 100vw; height: 100vh;
+            margin: 0; padding: 0;
+            background: #8f00d2; color: white;
+            font-family: "noto sans";
+            overflow: hidden; position: relative;
+        }
+        .container {
+            width: 100%; height: 100%;
+            position: relative
+        }
+        .organs {
+            position: absolute;
+            user-select: none;
+            pointer-events: none;
+        }
+        .organs path {
+            pointer-events: auto;
+            cursor: move;
+        }
+        .ghost {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .ghost.hidden {display: none}
+
+        .controls {
+            position: fixed; display: flex;
+            align-items: center; justify-content: center;
+            user-select: none;
+            bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            gap: 10px; z-index: 1000;
+        }
+        .checks {
+            display: flex; align-items: center;
+            align-items: center; justify-content: center;
+            gap: 4px; font-size: 0.75em;
+            color: white;
+        }
+        .checkbox-svg {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="oldpos"></div>
+        <svg class="organs part2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+            <path fill="#10003B" d="M30.461 72.878C32.2134 72.5456 34.0087 73.1847 35.157 74.5495C36.3053 75.9144 36.6277 77.7927 36.0004 79.4623C35.3731 81.132 33.8936 82.3333 32.1307 82.6044C29.47 83.0135 26.9722 81.2148 26.5168 78.5616C26.0613 75.9084 27.8161 73.3797 30.461 72.878Z"/>
+        </svg>
+        <svg class="organs part3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+            <path fill="#10003B" d="M122.343 75.6387C124.485 75.0018 126.787 75.884 127.955 77.7891C128.759 79.1008 128.905 80.7125 128.35 82.1475C127.795 83.5824 126.602 84.6762 125.125 85.1053C122.514 85.8635 119.782 84.3668 119.016 81.7586C118.249 79.1504 119.737 76.4135 122.343 75.6387Z"/>
+        </svg>
+        <svg class="organs part1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+            <path class="smile" fill="#10003B" d="M59.9025 95.019C63.2534 94.7004 64.8318 96.1389 65.9485 99.1609C65.4339 102.198 65.1418 105.269 65.0745 108.349C72.3237 109.022 79.5963 109.416 86.8759 109.528C86.4844 105.498 83.0076 98.6203 90.1527 97.2828C95.5408 96.2742 96.5861 106.311 97.1455 110.187C97.2788 111.428 96.9868 112.937 96.5889 114.116C96.0084 115.834 94.8053 117.443 93.1453 118.241C88.4165 120.514 66.7095 119.147 61.7056 117.382C59.1535 116.482 57.1924 114.923 56.0253 112.433C54.3344 108.826 54.7386 102.432 56.1198 98.7371C56.8543 96.7719 58.0395 95.8659 59.9025 95.019Z"/>
+        </svg>
+    </div>
+    <div class="controls">
+        <svg width="0" height="0" style="position: absolute;">
+            <filter id="text-outline-black" x="-30%" y="-30%" width="160%" height="160%">
+                <feFlood flood-color="black" result="flood"/>
+                <feComposite in="flood" in2="SourceAlpha" operator="in" result="mask"/>
+                <feMorphology in="mask" operator="dilate" radius="2" result="dilated"/>
+                <feMerge>
+                    <feMergeNode in="dilated"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </svg>
+        <label class="checks">
+            <svg class="checkbox-svg oldposoverlay" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="true">
+                <path fill="#fff" d="M5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Z"/>
+                <path d="M5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Z"/>
+                <path d="M3 6h2v1h1v1h4V6h2v4H4V8H3Zm11-6h2v2h-2ZM0 0h2v2H0Z"/>
+            </svg>
+            <span style="filter: url(#text-outline-black);">show original position</span>
+        </label>
+        <label class="checks">
+            <svg class="checkbox-svg wemmbutwo" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="false">
+                <path fill="#fff" d="M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm9 0h2v2h-2Z"/>
+                <path d="M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Zm8-1h2v2h-2Z"/>
+                <path fill="#020202" d="M5 14h1v1H5Zm9-9h1v1h-1Zm-4-4h1v1h-1ZM5 1h1v1H5Z"/>
+            </svg>
+            <span style="filter: url(#text-outline-black);">wemmbu 2</span>
+        </label>
+    </div>
+    <script>
+
+        const classicwemmbu = "M59.9025 95.019C63.2534 94.7004 64.8318 96.1389 65.9485 99.1609C65.4339 102.198 65.1418 105.269 65.0745 108.349C72.3237 109.022 79.5963 109.416 86.8759 109.528C86.4844 105.498 83.0076 98.6203 90.1527 97.2828C95.5408 96.2742 96.5861 106.311 97.1455 110.187C97.2788 111.428 96.9868 112.937 96.5889 114.116C96.0084 115.834 94.8053 117.443 93.1453 118.241C88.4165 120.514 66.7095 119.147 61.7056 117.382C59.1535 116.482 57.1924 114.923 56.0253 112.433C54.3344 108.826 54.7386 102.432 56.1198 98.7371C56.8543 96.7719 58.0395 95.8659 59.9025 95.019Z";
+        const theforbiddenone = "M 91.394531 92.46875 C 94.289062 92.191406 95.738281 94.34375 96.574219 96.734375 C 100.71875 108.589844 90.296875 115.285156 79.671875 111.171875 C 78 110.523438 76.460938 109.597656 74.890625 108.875 C 73.777344 109.375 72.5625 109.738281 71.421875 110.171875 C 65.410156 112.457031 54.578125 112.335938 54.226562 103.679688 C 54.378906 100.125 56.324219 94.457031 60.320312 93.96875 C 64.949219 93.402344 66.71875 98.394531 63.421875 101.320312 C 63.121094 101.582031 62.492188 102.417969 62.210938 102.765625 C 69.230469 104.382812 71.480469 99.875 76.628906 99.464844 C 82.191406 99.023438 78.695312 105.253906 88.992188 103.886719 C 89.078125 101.617188 88.53125 99.628906 88.257812 97.394531 C 87.875 94.292969 88.550781 93.261719 91.394531 92.46875 Z M 91.394531 92.46875 ";
+
+        const part1 = document.querySelector(".part1");
+        const part2 = document.querySelector(".part2");
+        const part3 = document.querySelector(".part3");
+        const facepath = document.querySelector(".smile");
+        const ghostcontainer = document.querySelector(".oldpos");
+        const oldposoverlaycheckbox = document.querySelector(".oldposoverlay");
+        const wemmbutwocheckbox = document.querySelector(".wemmbutwo");
+        
+        // awful stretching noise
+        const audio = new Audio("/assets/audio/ow.ogg");
+        audio.loop = true;
+
+        const uncheckedsvg = "<path fill='#fff' d='M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm9 0h2v2h-2Z'/><path d='M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Zm8-1h2v2h-2Z'/><path fill='#020202' d='M5 14h1v1H5Zm9-9h1v1h-1Zm-4-4h1v1h-1ZM5 1h1v1H5Z'/>";
+        const checkedsvg = "<path fill='#fff' d='M5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Z'/><path d='M5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Z'/><path d='M3 6h2v1h1v1h4V6h2v4H4V8H3Zm11-6h2v2h-2ZM0 0h2v2H0Z'/>";
+
+        function updatecheckbox(checkbox, checked) {
+            checkbox.setAttribute("checked", checked);
+            checkbox.innerHTML = checked ? checkedsvg : uncheckedsvg;
+        }
+        function ischeckboxchecked(checkbox) {
+            return checkbox.getAttribute("checked") === "true";
+        }
+
+        function calculatesize() {
+            const vw = window.innerWidth, vh = window.innerHeight, size = 160,
+                scalex = vw / (size * 3),
+                scaley = vh / size,
+                scale = Math.min(scalex, scaley, 1) * 0.8;
+            return scale * size;
+        }
+        let svgsize = calculatesize();
+        const centerx = window.innerWidth / 2;
+        const centery = window.innerHeight / 2;
+        const originalpositions = {
+            part1: {x: centerx - svgsize * 0.5, y: centery - svgsize * 0.5},
+            part2: {x: centerx - svgsize * 0.5, y: centery - svgsize * 0.5},
+            part3: {x: centerx - svgsize * 0.5, y: centery - svgsize * 0.5}
+        };
+        const currentpositions = {
+            part1: {...originalpositions.part1},
+            part2: {...originalpositions.part2},
+            part3: {...originalpositions.part3}
+        };
+        function initparts() {
+            [part1, part2, part3].forEach(p => {
+                p.style.width = svgsize + "px";
+                p.style.height = svgsize + "px";
+            });
+            updatepositions();
+            ghostmaker();
+        }
+
+        function updatepositions() {
+            part1.style.left = currentpositions.part1.x + "px";
+            part1.style.top = currentpositions.part1.y + "px";
+            part2.style.left = currentpositions.part2.x + "px";
+            part2.style.top = currentpositions.part2.y + "px";
+            part3.style.left = currentpositions.part3.x + "px";
+            part3.style.top = currentpositions.part3.y + "px";
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function ghostmaker() {
+            ghostcontainer.innerHTML = "";
+            [part1, part2, part3].forEach((p, i) => {
+                const g = p.cloneNode(true);
+                g.classList.add("ghost");
+                g.classList.add(`ghost${i + 1}`);
+                g.style.left = originalpositions[`part${i + 1}`].x + "px";
+                g.style.top = originalpositions[`part${i + 1}`].y + "px";
+                g.style.width = svgsize + "px";
+                g.style.height = svgsize + "px";
+                g.style.pointerEvents = "none";
+                ghostcontainer.appendChild(g);
+            });
+            ghostupdater();
+        }
+        function ghostupdater() {
+            const ghosts = document.querySelectorAll(".ghost");
+            const ischecked = ischeckboxchecked(oldposoverlaycheckbox);
+            ghosts.forEach(g => {
+                if (ischecked) g.classList.remove("hidden");
+                else g.classList.add("hidden");
+            });
+        }
+        let dragelement = null;
+        let dragoffset = {x: 0, y: 0};
+        let dragdirection = null;
+        let startpos = {x: 0, y: 0};
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function getdragdirection(dx, dy) {
+            const absdx = Math.abs(dx), absdy = Math.abs(dy);
+            if (absdx < 5 && absdy < 5) return null;
+            if (absdx > absdy * 1.5) return "horizontal";
+            if (absdy > absdx * 1.5) return "vertical";
+            return "diagonal";
+        }
+        function startdrag(e) {
+            const path = e.currentTarget;
+            dragelement = path.closest(".organs");
+            const rect = dragelement.getBoundingClientRect();
+            const clientx = e.touches ? e.touches[0].clientX : e.clientX;
+            const clienty = e.touches ? e.touches[0].clientY : e.clientY;
+            dragoffset.x = clientx - rect.left;
+            dragoffset.y = clienty - rect.top;
+            startpos.x = currentpositions[getpartclass(dragelement)].x;
+            startpos.y = currentpositions[getpartclass(dragelement)].y;
+            dragdirection = null;
+            audio.play().catch(() => {});
+            e.preventDefault();
+        }
+        function drag(e) {
+            if (!dragelement) return;
+            const clientx = e.touches ? e.touches[0].clientX : e.clientX;
+            const clienty = e.touches ? e.touches[0].clientY : e.clientY;
+            let newx = clientx - dragoffset.x,
+                newy = clienty - dragoffset.y;
+            
+            if (!dragdirection) {
+                const dx = newx - startpos.x;
+                const dy = newy - startpos.y;
+                dragdirection = getdragdirection(dx, dy);
+            }
+
+            if (dragdirection === "horizontal") {
+                newy = startpos.y;
+            } else if (dragdirection === "vertical") {
+                newx = startpos.x;
+            } else if (dragdirection === "diagonal") {
+                const dx = newx - startpos.x;
+                const dy = newy - startpos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                newx = startpos.x + Math.cos(angle) * dist;
+                newy = startpos.y + Math.sin(angle) * dist;
+            }
+            
+            const maxx = window.innerWidth - svgsize,
+                maxy = window.innerHeight - svgsize;
+            newx = Math.max(0, Math.min(newx, maxx));
+            newy = Math.max(0, Math.min(newy, maxy));
+            
+            const partclass = getpartclass(dragelement);
+            currentpositions[partclass].x = newx;
+            currentpositions[partclass].y = newy;
+            updatepositions();
+            e.preventDefault();
+        }
+        function enddrag() {
+            if (dragelement) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            dragelement = null;
+            dragdirection = null;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function getpartclass(element) {
+            if (element.classList.contains("part1")) return "part1";
+            if (element.classList.contains("part2")) return "part2";
+            if (element.classList.contains("part3")) return "part3";
+            return "";
+        }
+        
+        // attach to paths
+        [part1, part2, part3].forEach(p => {
+            const path = p.querySelector("path");
+            if (path) {
+                path.addEventListener("mousedown", startdrag);
+                path.addEventListener("touchstart", startdrag);
+            }
+        });
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("touchmove", drag);
+        document.addEventListener("mouseup", enddrag);
+        document.addEventListener("touchend", enddrag);
+        document.addEventListener("mouseleave", enddrag);
+
+        oldposoverlaycheckbox.addEventListener("click", e => {
+            e.preventDefault();
+            const ischecked = ischeckboxchecked(oldposoverlaycheckbox);
+            updatecheckbox(oldposoverlaycheckbox, !ischecked);
+            ghostupdater();
+        });
+        wemmbutwocheckbox.addEventListener("click", e => {
+            e.preventDefault();
+            const ischecked = ischeckboxchecked(wemmbutwocheckbox);
+            updatecheckbox(wemmbutwocheckbox, !ischecked);
+            if (!ischecked) {
+                facepath.setAttribute("d", theforbiddenone);
+                const ouchAudio = new Audio("/assets/audio/ouch.ogg");
+                ouchAudio.play();
+            } else {facepath.setAttribute("d", classicwemmbu)}
+        });
+
+        window.addEventListener("resize", () => {
+            svgsize = calculatesize();
+
+            [part1, part2, part3].forEach(p => {
+                p.style.width = svgsize + "px";
+                p.style.height = svgsize + "px";
+            });
+            const maxx = window.innerWidth - svgsize;
+            const maxy = window.innerHeight - svgsize;
+
+            Object.keys(currentpositions).forEach(k => {
+                currentpositions[k].x = Math.max(0, Math.min(currentpositions[k].x, maxx));
+                currentpositions[k].y = Math.max(0, Math.min(currentpositions[k].y, maxy));
+            });
+            updatepositions();
+            ghostmaker();
+        });
+        initparts();
+
+    </script>
+</body>
+</html>
