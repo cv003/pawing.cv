@@ -171,12 +171,12 @@
 
         .sinnerinput {
             color: white; background: transparent;
-            width: 100%; padding: 1em; font-size: 2em;
+            width: 100%; max-height: 30vh;
+            padding: 1em; font-size: 2em;
             border: none !important; outline: none !important;
             resize: none; box-sizing: border-box;
             font-family: "8bitoperator";
-            scrollbar-width: thin;
-            scrollbar-color: white transparent;
+            scrollbar-width: thin; scrollbar-color: white transparent;
             white-space: pre-wrap; word-wrap: break-word;
             min-height: 2em; overflow-y: auto;
         }
@@ -281,6 +281,7 @@
         let prophecytext = '';
         let dialoguetext = '';
         let loadedfiles = 0;
+        let enterlast = false;
         const totalfiles = 2;
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -409,33 +410,45 @@
             });
             
             inputelement.innerHTML = html;
-            if (cursoroffset > 0) {
+            if (selection) {
+                selection.removeAllRanges();
                 const rang = document.createRange();
-                const walker = document.createTreeWalker(
-                    inputelement, NodeFilter.SHOW_TEXT,
-                    null, false
-                );
-                let currentoffset = 0;
-                let textnode = null;
-                let nodeoffset = 0;
-                
-                while (walker.nextNode()) {
-                    const node = walker.currentNode;
-                    const nodelength = node.textContent.length;
-                    if (currentoffset + nodelength >= cursoroffset) {
-                        textnode = node;
-                        nodeoffset = cursoroffset - currentoffset;
-                        break;
+                if (enterlast) {
+                    rang.selectNodeContents(inputelement);
+                    rang.collapse(false);
+                    enterlast = false;
+                } else if (cursoroffset > 0) {
+                    const walker = document.createTreeWalker(
+                        inputelement, NodeFilter.SHOW_TEXT,
+                        null, false
+                    );
+                    let currentoffset = 0;
+                    let textnode = null;
+                    let nodeoffset = 0;
+                    
+                    while (walker.nextNode()) {
+                        const node = walker.currentNode;
+                        const nodelength = node.textContent.length;
+                        if (currentoffset + nodelength >= cursoroffset) {
+                            textnode = node;
+                            nodeoffset = cursoroffset - currentoffset;
+                            break;
+                        }
+                        currentoffset += nodelength;
                     }
-                    currentoffset += nodelength;
+                    
+                    if (textnode) {
+                        rang.setStart(textnode, Math.min(nodeoffset, textnode.textContent.length));
+                        rang.setEnd(textnode, Math.min(nodeoffset, textnode.textContent.length));
+                    } else {
+                        rang.selectNodeContents(inputelement);
+                        rang.collapse(false);
+                    }
+                } else {
+                    rang.selectNodeContents(inputelement);
+                    rang.collapse(false);
                 }
-                
-                if (textnode) {
-                    rang.setStart(textnode, Math.min(nodeoffset, textnode.textContent.length));
-                    rang.setEnd(textnode, Math.min(nodeoffset, textnode.textContent.length));
-                    selection.removeAllRanges();
-                    selection.addRange(rang);
-                }
+                selection.addRange(rang);
             }
         }
 
@@ -503,6 +516,9 @@
         }
 
         if (wordinputelement) {
+            wordinputelement.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {enterlast = true}
+            });
             wordinputelement.addEventListener('input', function() {
                 setTimeout(checkwords, 0);
             });
