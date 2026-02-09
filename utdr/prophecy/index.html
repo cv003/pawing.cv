@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Are these words in the Prophecy?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- the css import is too slow so this will almost always load faster -->
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/8bitoperator.woff2" crossorigin>
+
+    <style>
+        @font-face {
+            font-family: "8bitoperator"; font-weight: 400;
+            src: url("/assets/fonts/8bitoperator.woff2") format("woff2");
+        }
+
+        body {
+            background: #09013b; color: white;
+            font-family: "8bitoperator"; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; 
+            image-rendering: pixelated; overflow: hidden;
+        }
+        .page {
+            width: 100%; max-width: 600px;
+            padding: 2em; position: relative; z-index: 1;
+        }
+        a, p, input {
+            font-family: "script"; text-align: center;
+            font-size: 72px; line-height: 72px;
+            -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale;
+            font-smooth: never; text-rendering: optimizeSpeed;
+            font-variant-ligatures: none; font-feature-settings: normal;
+            transform: translateZ(0); -webkit-transform: translateZ(0);
+        }
+        
+        /*//////////////////////////////////////////////////////////////////////*/
+        
+        .dim {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: -998;
+            pointer-events: none; animation: dimfade 3s ease-out forwards;
+        }
+        @keyframes dimfade {
+            0% {opacity: 1}
+            100% {opacity: 0.5}
+        }
+
+        .DEPTH_BG {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -999; pointer-events: none; overflow: hidden;
+        }
+        .DEPTH_IMAGE {
+            position: absolute;
+            top: 50%; left: 50%; width: 100vw; height: 100vh;
+            min-width: 100vw; min-height: 100vh;
+            margin-left: -50vw; margin-top: -50vh;
+            transform-origin: center center;
+            animation: DEPTH_OBACK 20s linear infinite;
+            background-image: url('assets/images/IMAGE_DEPTH.webp');
+            background-size: cover; background-repeat: no-repeat;
+            background-position: center center; image-rendering: pixelated;
+            mix-blend-mode: normal;
+            will-change: transform, opacity;
+        }
+        @keyframes DEPTH_OBACK {
+            0% {transform: scale(1); opacity: 0}
+            5% {opacity: 0.1}
+            10% {opacity: 0.2}
+            40% {transform: scale(1.4); opacity: 0.2}
+            45% {opacity: 0.18}
+            50% {transform: scale(1.6); opacity: 0.15}
+            55% {opacity: 0.12}
+            60% {transform: scale(1.8); opacity: 0.1}
+            65% {opacity: 0.08}
+            70% {transform: scale(2); opacity: 0.06}
+            75% {opacity: 0.04}
+            80% {transform: scale(2.1); opacity: 0.03}
+            85% {opacity: 0.02}
+            90% {transform: scale(2.2); opacity: 0.01}
+            95% {opacity: 0.005}
+            100% {transform: scale(2.3); opacity: 0}
+        }
+
+        /* i have tried to pull this stunt on soggy.cat and mat told me to
+           stop doing cssless effects. guess the only person who has access to this repo!
+           ME!!!! haha!!! */
+        .DEPTH_IMAGE:nth-child(1) { 
+            animation-delay: 0s; animation-fill-mode: both;
+            transform: scale(1); opacity: 0.2;
+        }
+        .DEPTH_IMAGE:nth-child(2) { 
+            animation-delay: -17.5s; animation-fill-mode: both;
+            transform: scale(2.1); opacity: 0.03;
+        }
+        .DEPTH_IMAGE:nth-child(3) { 
+            animation-delay: -15s; animation-fill-mode: both;
+            transform: scale(2); opacity: 0.06;
+        }
+        .DEPTH_IMAGE:nth-child(4) { 
+            animation-delay: -12.5s; animation-fill-mode: both;
+            transform: scale(1.8); opacity: 0.1;
+        }
+        .DEPTH_IMAGE:nth-child(5) { 
+            animation-delay: -10s; animation-fill-mode: both;
+            transform: scale(1.6); opacity: 0.15;
+        }
+        .DEPTH_IMAGE:nth-child(6) { 
+            animation-delay: -7.5s; animation-fill-mode: both;
+            transform: scale(1.4); opacity: 0.2;
+        }
+        .DEPTH_IMAGE:nth-child(7) { 
+            animation-delay: -5s; animation-fill-mode: both;
+            transform: scale(1.2); opacity: 0.25;
+        }
+        .DEPTH_IMAGE:nth-child(8) { 
+            animation-delay: -2.5s; animation-fill-mode: both;
+            transform: scale(1.1); opacity: 0.3;
+        }
+        .DEPTH_IMAGE:nth-child(9) { 
+            animation-delay: 0s; animation-fill-mode: both;
+            transform: scale(1); opacity: 0.2;
+        }
+        .DEPTH_IMAGE:nth-child(10) { 
+            animation-delay: -17.5s; animation-fill-mode: both;
+            transform: scale(2.1); opacity: 0.03;
+        }
+        .DEPTH_IMAGE:nth-child(11) { 
+            animation-delay: -15s; animation-fill-mode: both;
+            transform: scale(2); opacity: 0.06;
+        }
+        .DEPTH_IMAGE:nth-child(12) { 
+            animation-delay: -12.5s; animation-fill-mode: both;
+            transform: scale(1.8); opacity: 0.1;
+        }
+        .DEPTH_IMAGE:nth-child(13) { 
+            animation-delay: -10s; animation-fill-mode: both;
+            transform: scale(1.6); opacity: 0.15;
+        }
+        .DEPTH_IMAGE:nth-child(14) { 
+            animation-delay: -7.5s; animation-fill-mode: both;
+            transform: scale(1.4); opacity: 0.2;
+        }
+        .DEPTH_IMAGE:nth-child(15) { 
+            animation-delay: -5s; animation-fill-mode: both;
+            transform: scale(1.2); opacity: 0.25;
+        }
+        .DEPTH_IMAGE:nth-child(16) { 
+            animation-delay: -2.5s; animation-fill-mode: both;
+            transform: scale(1.1); opacity: 0.3;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        h1 {
+            font-size: 3em;
+            font-weight: 400; text-transform: uppercase;
+            font-variant-ligatures: none; user-select: none;
+            letter-spacing: 0.105em; text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
+            animation: SHINE 3s ease-in-out infinite;
+        }
+        @keyframes SHINE {
+            0%, 100% {text-shadow: 0 0 10px rgba(255, 255, 255, 0.5)}
+            50% {text-shadow: 0 0 10px rgba(255, 255, 255, 1)}
+        }
+
+        .sinnerinput {
+            color: white; background: transparent;
+            width: 100%; padding: 1em; font-size: 2em;
+            border: none !important; outline: none !important;
+            resize: none; box-sizing: border-box;
+            font-family: "8bitoperator";
+            scrollbar-width: thin;
+            scrollbar-color: white transparent;
+            white-space: pre-wrap; word-wrap: break-word;
+            min-height: 2em; overflow-y: auto;
+        }
+        .sinnerinput:empty:before {
+            content: attr(data-placeholder);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .sinnerinput::-webkit-scrollbar {
+            width: 6px; background: transparent;
+        }
+        .sinnerinput::-webkit-scrollbar-thumb {
+            background: white;
+            border-radius: 3px;
+        }
+
+        .funnybg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: 100% 100%; background-repeat: no-repeat;
+            background-position: center center;
+            image-rendering: pixelated; pointer-events: none;
+            opacity: 0; z-index: -998.5;
+            transition: opacity 0.75s ease-in-out;
+        }
+        .good {color: #00ff00}
+        .funnybg.joyous {background-image: url('assets/images/joyous.webp')}
+        .bad {color: #ff8080}
+        .funnybg.itsover {background-image: url('assets/images/itsover.webp')}
+        
+
+        .checkboxes {
+            margin-top: 1em; display: flex; opacity: 0.5;
+            align-items: center; justify-content: center;
+            flex-direction: row; gap: 1em; user-select: none;
+        }
+        .checkbox {
+            display: flex; align-items: center;
+            gap: 0.5em; font-weight: 400;
+        }
+        .checkboximage {
+            width: 16px; height: 16px;
+            cursor: pointer; flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .output {
+            text-align: center;
+            margin-top: 1em;
+            font-size: 1em;
+            min-height: 1.5em;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div class="DEPTH_BG">
+        <div class="DEPTH_IMAGE"></div> <div class="DEPTH_IMAGE"></div>
+        <div class="DEPTH_IMAGE"></div> <div class="DEPTH_IMAGE"></div>
+        <div class="DEPTH_IMAGE"></div> <div class="DEPTH_IMAGE"></div>
+        <div class="DEPTH_IMAGE"></div> <div class="DEPTH_IMAGE"></div>
+    </div>
+    <div class="funnybg joyous"></div>
+    <div class="funnybg itsover"></div>
+    <div class="dim"></div>
+
+    <div class="page">
+
+        <h1>Are these words <br> in the prophecy?</h1>
+
+        <div class="sinnerinput" contenteditable="true" data-placeholder="(type your sentence here)"></div>
+        
+        <div class="checkboxes">
+            <div class="checkbox">
+                <img class="checkboximage prophecycheck" src="data:image/octet-stream;base64,UklGRmIAAABXRUJQVlA4TFYAAAAvH8AHAAYHbSNJ0vGncxDnzdwBSGL++z8BHw9+o2qi/VJUVBXSFBNoFIhq6r2mUgKNAlFNPapFU4+qtjyzamj0hlUa1dQ7tvaWC+85kfAJmbt/wVAfBA==" alt="checkbox">
+                <label for="prophecycheck">prophecy panels</label>
+            </div>
+            <div class="checkbox">
+                <img class="checkboximage dialoguecheck" src="data:image/octet-stream;base64,UklGRiwAAABXRUJQVlA4TB8AAAAvH8AHADDTto350wnK7t0T89//CeBgp0CZ9sPQKQcBAA==" alt="checkbox">
+                <label for="dialoguecheck">ch1-4 strings</label>
+            </div>
+        </div>
+        <div class="output"></div>
+    </div>
+
+    <script>
+
+        const checkimage = "data:image/octet-stream;base64,UklGRmIAAABXRUJQVlA4TFYAAAAvH8AHAAYHbSNJ0vGncxDnzdwBSGL++z8BHw9+o2qi/VJUVBXSFBNoFIhq6r2mUgKNAlFNPapFU4+qtjyzamj0hlUa1dQ7tvaWC+85kfAJmbt/wVAfBA==";
+        const uncheckimage = "data:image/octet-stream;base64,UklGRiwAAABXRUJQVlA4TB8AAAAvH8AHADDTto350wnK7t0T89//CeBgp0CZ9sPQKQcBAA==";
+
+        const prophecycheckimage = document.querySelector(".prophecycheck");
+        const dialoguecheckimage = document.querySelector(".dialoguecheck");
+        const wordinputelement = document.querySelector(".sinnerinput");
+        const outputelement = document.querySelector(".output");
+        const goodbg = document.querySelector(".funnybg.joyous");
+        const badbg = document.querySelector(".funnybg.itsover");
+        
+        let prophecychecked = true;
+        let dialoguechecked = false;
+
+        let prophecytext = '';
+        let dialoguetext = '';
+        let loadedfiles = 0;
+        const totalfiles = 2;
+
+        /*//////////////////////////////////////////////////////////////////////*/
+        
+        function updatecheckbox(image, checked) {image.src = checked ? checkimage : uncheckimage}
+        function ischeckboxchecked(image) {return image.src === checkimage}
+
+        function funnybg(matchcount, totalwords) {
+            if (!goodbg || !badbg) return;
+
+            if (!totalwords || matchcount < 0) {
+                goodbg.style.opacity = "0"; badbg.style.opacity = "0";
+                return;
+            }
+
+            // =<25% for badbg and >=75% for goodbg 
+            if (matchcount / totalwords <= 0.25) {
+                goodbg.style.opacity = "0"; badbg.style.opacity = "0.25";
+            } else if (matchcount / totalwords >= 0.75) {
+                goodbg.style.opacity = "0.25"; badbg.style.opacity = "0";
+            } else {
+                goodbg.style.opacity = "0"; badbg.style.opacity = "0";
+            }
+        }
+
+        async function loadfiles() {
+            try {
+                const prophecyresponse = await fetch('assets/static/prophecy panels.txt');
+                prophecytext = await prophecyresponse.text();
+                loadedfiles++;
+                
+                const dialogueresponse = await fetch("assets/static/hushbugger's dialogue dump.txt");
+                dialoguetext = await dialogueresponse.text();
+                loadedfiles++;
+                
+                checkwords();
+            } catch (error) {
+                console.error('error loading txt files?!', error);
+                if (outputelement) {outputelement.textContent = 'error loading txt files?!'}
+            }
+        }
+
+        // groups two "words" into one for apostrophes but not dashes, idk if words with dashes should count
+        function extractwords(text) {
+            const words = new Set();
+            const matches = text.toLowerCase().match(/\b[a-z0-9]+(?:'[a-z0-9]+)*\b/gi);
+            if (matches) {
+                // the other way around - words like story's will count story too
+                matches.forEach(word => {
+                    const lowered = word.toLowerCase();
+                    words.add(lowered);
+                    const base = lowered.split("'")[0];
+                    if (base && base !== lowered) {words.add(base)}
+                });
+            }
+            return words;
+        }
+        function getplaintext(element) {
+            return element.innerText || element.textContent || '';
+        }
+        function highlightwords() {
+            if (loadedfiles < totalfiles) return;
+            
+            const inputelement = wordinputelement;
+            if (!inputelement) return;
+            const input = getplaintext(inputelement);
+            
+            if (!input.trim()) {
+                if (outputelement) {outputelement.textContent = '';}
+                return;
+            }
+            const combinedwords = new Set();
+            if (prophecychecked) {
+                const prophecywords = extractwords(prophecytext);
+                prophecywords.forEach(word => combinedwords.add(word));
+            }
+            if (dialoguechecked) {
+                const dialoguewords = extractwords(dialoguetext);
+                dialoguewords.forEach(word => combinedwords.add(word));
+            }
+            const selection = window.getSelection();
+            const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+            let cursoroffset = 0;
+            if (range) {
+                const preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(inputelement);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                cursoroffset = preCaretRange.toString().length;
+            }
+
+            const wordregex = /\b[a-z0-9]+(?:'[a-z0-9]+)*\b/gi;
+            const parts = [];
+            let lastindex = 0;
+            let match;
+            
+            while ((match = wordregex.exec(input)) !== null) {
+                if (match.index > lastindex) {
+                    parts.push({
+                        text: input.substring(lastindex, match.index),
+                        isword: false
+                    });
+                }
+                const word = match[0];
+                const wordlower = word.toLowerCase();
+                parts.push({
+                    text: word,
+                    isword: true,
+                    found: combinedwords.has(wordlower)
+                });
+                lastindex = match.index + word.length;
+            }
+            if (lastindex < input.length) {
+                parts.push({
+                    text: input.substring(lastindex),
+                    isword: false
+                });
+            }
+            let html = '';
+            parts.forEach(part => {
+                if (part.isword) {
+                    const classname = part.found ? 'good' : 'bad';
+                    html += `<span class="${classname}">${escapehtml(part.text)}</span>`;
+                } else {
+                    html += escapehtml(part.text);
+                }
+            });
+            
+            inputelement.innerHTML = html;
+            if (cursoroffset > 0) {
+                const rang = document.createRange();
+                const walker = document.createTreeWalker(
+                    inputelement, NodeFilter.SHOW_TEXT,
+                    null, false
+                );
+                let currentoffset = 0;
+                let textnode = null;
+                let nodeoffset = 0;
+                
+                while (walker.nextNode()) {
+                    const node = walker.currentNode;
+                    const nodelength = node.textContent.length;
+                    if (currentoffset + nodelength >= cursoroffset) {
+                        textnode = node;
+                        nodeoffset = cursoroffset - currentoffset;
+                        break;
+                    }
+                    currentoffset += nodelength;
+                }
+                
+                if (textnode) {
+                    rang.setStart(textnode, Math.min(nodeoffset, textnode.textContent.length));
+                    rang.setEnd(textnode, Math.min(nodeoffset, textnode.textContent.length));
+                    selection.removeAllRanges();
+                    selection.addRange(rang);
+                }
+            }
+        }
+
+        // NO FUN. sorry. maybe will remove at some point. the entirety of doom in an iframe is probably not in the prophecy
+        function escapehtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function checkwords() {
+            if (loadedfiles < totalfiles) return;
+            
+            const inputelement = wordinputelement;
+            if (!inputelement) return;
+            const input = getplaintext(inputelement);
+            
+            if (!input.trim()) {
+                if (outputelement) {outputelement.textContent = '';}
+                funnybg(0, 0);
+                highlightwords();
+                return;
+            }
+
+            // important regex! weewoo!
+            const inputmatches = input.toLowerCase().match(/\b[a-z0-9]+(?:'[a-z0-9]+)*\b/gi);
+            const inputwordarray = inputmatches ? inputmatches.map(word => word.toLowerCase()) : [];
+            
+            if (inputwordarray.length === 0) {
+                if (outputelement) {outputelement.textContent = '';}
+                funnybg(0, 0);
+                highlightwords();
+                return;
+            }
+            const combinedwords = new Set();
+            if (prophecychecked) {
+                const prophecywords = extractwords(prophecytext);
+                prophecywords.forEach(word => combinedwords.add(word));
+            }
+            if (dialoguechecked) {
+                const dialoguewords = extractwords(dialoguetext);
+                dialoguewords.forEach(word => combinedwords.add(word));
+            }
+            let matchcount = 0;
+            inputwordarray.forEach(word => {
+                if (combinedwords.has(word)) {matchcount++}
+            });
+            const percentage = (matchcount / inputwordarray.length) * 100;
+            if (outputelement) {
+                outputelement.textContent = `${matchcount} out of ${inputwordarray.length} words (${percentage.toFixed(2)}%) are found in the Prophecy.`;
+            }
+            funnybg(matchcount, inputwordarray.length);
+            highlightwords();
+        }
+        function enforcecheckboxrule(clickedimage) {
+            if (!prophecychecked && !dialoguechecked) {
+                if (clickedimage === prophecycheckimage) {
+                    dialoguechecked = true;
+                    updatecheckbox(dialoguecheckimage, true);
+                } else {
+                    prophecychecked = true;
+                    updatecheckbox(prophecycheckimage, true);
+                }
+            }
+        }
+
+        if (wordinputelement) {
+            wordinputelement.addEventListener('input', function() {
+                setTimeout(checkwords, 0);
+            });
+            wordinputelement.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                document.execCommand('insertText', false, text);
+            });
+        }
+        
+        prophecycheckimage.addEventListener('click', function(e) {
+            e.preventDefault();
+            prophecychecked = !prophecychecked;
+            updatecheckbox(prophecycheckimage, prophecychecked);
+            enforcecheckboxrule(prophecycheckimage);
+            checkwords();
+        });
+        
+        dialoguecheckimage.addEventListener('click', function(e) {
+            e.preventDefault();
+            dialoguechecked = !dialoguechecked;
+            updatecheckbox(dialoguecheckimage, dialoguechecked);
+            enforcecheckboxrule(dialoguecheckimage);
+            checkwords();
+        });
+
+        loadfiles();
+        
+    </script>
+</body>
+</html>
