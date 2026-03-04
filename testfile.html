@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>create placeholder files</title>
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2252%22%20fill%3D%22%23000000%22%20font-family%3D%22Times%20New%20Roman%2Cserif%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20dy%3D%220%22%20text-anchor%3D%22middle%22%3E%F0%9F%97%83%EF%B8%8F%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+
+        <style>
+            body {
+                padding-left: 0.25em;
+                background: #f7f7f8;
+                color: #222;
+                font-family: sans-serif;
+            }
+            label {
+                display: block;
+                margin-top: 16px;
+            }
+            .filelink {
+                display: block;
+                margin-top: 10px
+            }
+            .row {
+                margin-bottom: 10px
+            }
+            .info {
+                color: #aaa;
+                font-size: 0.95em;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div>
+            <label>file type:</label>
+            <select id="filetype">
+                <option value="png">png</option>
+                <option value="gif">gif</option>
+                <option value="mp4">mp4</option>
+            </select>
+            <div class="row">
+                <label>width (px):</label>
+                <input type="number" id="width" value="512" min="1" max="4096">
+            </div>
+            <div class="row">
+                <label>height (px):</label>
+                <input type="number" id="height" value="512" min="1" max="4096">
+            </div>
+            <div class="row" id="framesordurationdiv">
+                <label id="frameslabel">frame count (gif) / duration (mp4, seconds):</label>
+                <input type="number" id="duration" min="1" value="1">
+            </div>
+            <div class="row">
+                <label>target file size (mb)
+                    <span class="info">(best effort and for mp4/gif only)</span>:</label>
+                <input type="number" id="sizemb" min="0" value="0">
+            </div>
+            <button id="generatebtn">generate file</button>
+            <div id="result"></div>
+        </div>
+
+        <script>
+
+            // gif
+            function makeblackgif(width, height, framecount, delayms) {
+                var header = [
+                    "GIF89a",
+                    String.fromCharCode(width & 0xff, width >> 8, height & 0xff, height >> 8),
+                    "\x80",
+                    "\x00",
+                    "\x00",
+                    "\x00\x00\x00",
+                    "\xff\xff\xff"
+                ].join("");
+                var loopext = "\x21\xff\x0bnetscape2.0\x03\x01\x00\x00\x00";
+                function frame(delay) {
+                    var gce = "\x21\xf9\x04\x00" + String.fromCharCode(Math.floor(delay / 10), 0, 0) + "\x00";
+                    var id = "\x2c\x00\x00\x00\x00" + String.fromCharCode(width & 0xff, width >> 8, height & 0xff, height >> 8) + "\x00";
+                    var npixels = width * height,
+                        scanline = String.fromCharCode(0).repeat(width),
+                        colordata = "";
+                    for (var i = 0; i < height; ++ i) 
+                        colordata += scanline;
+                    
+                    var lzwdata = "\x02" + String.fromCharCode(npixels + 1) + "\x00";
+                    return gce + id + "\x02\x02\x44\x01\x00";
+                }
+                var gif = header + loopext;
+                for (var f = 0; f < framecount; ++ f) 
+                    gif += frame(delayms);
+                
+                gif += "\x3b";
+                var b64 = btoa(gif);
+                return "data:image/gif;base64," + b64;
+            }
+
+            // mp4
+            async function generateblackvideo(width, height, durationsec, targetmb) {
+                let canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                let ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#000";
+                ctx.fillRect(0, 0, width, height);
+                let stream = canvas.captureStream(30);
+                let chunks = [];
+                let options = {mimetype: "video/webm;codecs=vp9"};
+                if (targetmb && targetmb > 0) {
+                    options.videobitspersecond = Math.round((targetmb * 8 * 1000000) / durationsec);
+                }
+                let rec = new MediaRecorder(stream, options);
+                rec.ondataavailable = e => {
+                    if (e.data.size > 0) 
+                        chunks.push(e.data);
+                    
+                };
+                let stopped = new Promise(resolve => rec.onstop = resolve);
+                rec.start();
+                let start = Date.now();
+                let frameinterval = 1000 / 30;
+                let frame = 0;
+                let maxframes = Math.floor(durationsec * 30);
+                function drawframe() {
+                    frame++;
+                    if (frame < maxframes) {
+                        setTimeout(drawframe, frameinterval);
+                    }
+                }
+                drawframe();
+                await new Promise(res => setTimeout(res, durationsec * 1000));
+                rec.stop();
+                await stopped;
+                let blob = new Blob(chunks, {type: "video/webm"});
+                return blob;
+            }
+
+            // png
+            function generateblackpng(width, height) {
+                let canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                let ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#000";
+                ctx.fillRect(0, 0, width, height);
+                return canvas.toDataURL("image/png");
+            }
+
+            const filetypesel = document.getElementById("filetype");
+            const framesordurationdiv = document.getElementById("framesordurationdiv");
+            const frameslabel = document.getElementById("frameslabel");
+            filetypesel.addEventListener("change", function () {
+                if (filetypesel.value === "gif") {
+                    frameslabel.textContent = "frame count:";
+                    document.getElementById("duration").value = 24;
+                    document.getElementById("duration").min = 1;
+                    document.getElementById("duration").step = 1;
+                } else if (filetypesel.value === "mp4") {
+                    frameslabel.textContent = "duration (seconds):";
+                    document.getElementById("duration").value = 2;
+                    document.getElementById("duration").min = 1;
+                    document.getElementById("duration").step = 1;
+                } else {
+                    framesordurationdiv.style.display = "none";
+                    return;
+                } framesordurationdiv.style.display = "block";
+            });
+            if (filetypesel.value === "png") 
+                framesordurationdiv.style.display = "none";
+            
+
+            document.getElementById("generatebtn").onclick = async function () {
+                let filetype = document.getElementById("filetype").value;
+                let width = Math.max(1, + document.getElementById("width").value);
+                let height = Math.max(1, + document.getElementById("height").value);
+                let duration = + document.getElementById("duration").value || 1;
+                let targetmb = + document.getElementById("sizemb").value || 0;
+                let resultdiv = document.getElementById("result");
+                resultdiv.innerHTML = "";
+                if (filetype === "png") {
+                    let url = generateblackpng(width, height);
+                    let a = document.createElement("a");
+                    a.href = url;
+                    a.download = `black_${width}x${height}.png`;
+                    a.textContent = "download png";
+                    a.className = "filelink";
+                    resultdiv.appendChild(a);
+                    fetch(url).then(r => r.blob()).then(blob => {
+                        let sz = (blob.size / 1048576).toFixed(4);
+                        let info = document.createElement("div");
+                        info.textContent = `~${sz} mb`;
+                        info.className = "info";
+                        resultdiv.appendChild(info);
+                    });
+                } else if (filetype === "gif") {
+                    let framecount = duration;
+                    if (framecount > 120) {
+                        framecount = 120;
+                        alert("limiting to 120 frames for browser!");
+                    }
+                    let url = makeblackgif(width, height, framecount, 10);
+                    let a = document.createElement("a");
+                    a.href = url;
+                    a.download = `black_${width}x${height}_${framecount}f.gif`;
+                    a.textContent = "download gif";
+                    a.className = "filelink";
+                    resultdiv.appendChild(a);
+                    fetch(url).then(r => r.blob()).then(blob => {
+                        let sz = (blob.size / 1048576).toFixed(4);
+                        let info = document.createElement("div");
+                        info.textContent = `~${sz} mb`;
+                        info.className = "info";
+                        resultdiv.appendChild(info);
+                        if (targetmb && blob.size / 1048576 < targetmb) {
+                            let warn = document.createElement("div");
+                            warn.className = "info";
+                            warn.textContent = "warning: actual size is less than target.. increase dimensions or frames";
+                            resultdiv.appendChild(warn);
+                        }
+                    });
+                } else if (filetype === "mp4") {
+
+                    resultdiv.textContent = "generating video file (webm).. please wait";
+                    let blob = await generateblackvideo(width, height, duration, targetmb);
+                    let sz = (blob.size / 1048576).toFixed(4);
+                    let url = URL.createObjectURL(blob);
+                    let a = document.createElement("a");
+                    a.href = url;
+                    a.download = `black_${width}x${height}_${duration}s.mp4`;
+                    a.textContent = "download mp4/webm";
+                    a.className = "filelink";
+
+                    resultdiv.textContent = "";
+                    resultdiv.appendChild(a);
+                    let info = document.createElement("div");
+                    info.textContent = `~${sz} mb`;
+                    info.className = "info";
+
+                    resultdiv.appendChild(info);
+                    if (targetmb && blob.size / 1048576 < targetmb) {
+                        let warn = document.createElement("div");
+                        warn.className = "info";
+                        warn.textContent = "warning: actual size is less than target.. increase the width/height/duration";
+                        resultdiv.appendChild(warn);
+                    }
+
+                    let v = document.createElement("video");
+                    v.src = url; v.controls = true;
+                    v.height = 120; v.autoplay = false; v.muted = true;
+                    resultdiv.appendChild(v);
+                }
+            };
+        </script>
+    </body>
+</html>

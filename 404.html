@@ -12,7 +12,7 @@
     <meta name="google" content="notranslate">
 
     <script>
-        // redirect changedd urls to the new ones
+        // redirect moved urls to the new ones
         var path = location.pathname.replace(/^\/+|\/+$/g, "");
         if (path === "downloads" || path.startsWith("bookmark")) {
             location.replace("https://coolsite.cv/dl");
@@ -28,6 +28,9 @@
         }
         else if (path.startsWith("swatchling")) {
             location.replace("https://coolsite.cv/utdr/swatchlings");
+        }
+        else if (path.startsWith("gdaudio")) {
+            location.replace("https://coolsite.cv/gd/audio");
         }
     </script>
 

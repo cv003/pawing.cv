@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <!-- i spent several hours on this miserable website but
+     barely an hour piecing and filtering the records file..
+     biological illiteracy for coding is a terrible thing to live with -->
+
+    <meta charset="utf-8"/>
+    <!--meta name="viewport" content="width=device-width, initial-scale=1"/-->
+    <link rel="icon" href="favicon.ico"/>
+    <title>awesome page title</title>
+
+    <link rel="stylesheet" href="style.css"/>
+    <script src="script.js" defer></script>
+    <script src="howler.min.js"></script>
+
+    <script> // https://stackoverflow.com/a/25253988
+      const wait = (delay = 0) =>
+        new Promise(resolve => setTimeout(resolve, delay));
+      const setVisible = (elementOrSelector, visible) => 
+        (typeof elementOrSelector === "string"
+          ? document.querySelector(elementOrSelector)
+          : elementOrSelector
+        ).style.display = visible ? "block" : "none";
+    </script>
+
+  </head>
+  <body>
+
+  <div class="page">
+
+    <div class="top">
+        <img class="im" draggable="false" height="50px" width="50px" src="i/icon.webp">
+    </div>
+
+    <div class="space">
+      <img draggable="false" class="l logo cl" src="i/logo.webp">
+      <img draggable="false" class="l logom cl" src="i/logo2.webp">
+   </div>
+    <a class="c">check if your gd<span style="color:#696b6a">(boomlings.com)</span></a>
+    <a class="c">credentials were compromised by an infostealer.</a>
+
+    <form id="main">
+      <div class="space2">
+        <div class="bar">
+          <input class="search" id="search" type="text" name="query"
+                 placeholder="username / password" minlength="1" maxlength="50" required>
+          <input class="cl" type="image" draggable="false" height="47.5px" src="i/search.webp">
+        </div>
+      </div>
+    </form>
+
+  <div class="space2">
+    <div id="result">
+      
+  </div>
+
+  <div class="btm">
+    <div class="info">
+     <a1 class="title c">60,887</a1>
+     <a class="c">initial records</a> 
+    </div>
+
+    <div class="info">
+     <a1 class="title c">31,062</a1>
+     <a class="c">unique records</a> 
+    </div>
+  </div>
+
+  </div>
+
+    <div class="pick">
+      <p href="#" style="font-family:Aller; text-decoration:underline"
+         onclick="aller()">abc</p>
+      <p style="font-family:Arial">/</p>
+      <p href="#" style="font-family:Helvetica; text-decoration:underline"
+         onclick="helvetica()">abc</p>
+    </div>
+
+    <script>
+const form = document.getElementById("main");
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(form);
+    const query = formData.get("query");
+
+    fetch("http://cbf.rf.gd/find.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById("result").innerHTML = html;
+        setVisible("#result", true);
+    })
+    .catch(error => {
+        console.error(error);
+        document.getElementById("result").innerHTML = "An error occurred.";
+        setVisible("#result", true);
+    });
+});
+    </script>
+
+  </body>
+</html>

@@ -40,7 +40,6 @@
         /*//////////////////////////////////////////////////////////////////////*/
 
         /* wondrous jsless background */
-
         .bg {opacity: 0.5}
         .bggradient {
             position: fixed; z-index: -5; inset: 0;
@@ -113,7 +112,7 @@
         .bottom {
             display: flex; position: fixed; flex-direction: column;
             justify-content: center; align-items: center; flex-wrap: wrap;
-            bottom: 20px; width: 750px; max-width: 90%; height: auto;
+            bottom: 10px; width: 750px; max-width: 90%; height: auto;
             /* backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); */
             z-index: 1000;
         }
@@ -122,7 +121,7 @@
             display: flex; flex-direction: row;
             justify-content: center; flex-wrap: wrap;
         }
-        .more {display:none}
+        .more {display: none}
 
         .button {padding: 2px; image-rendering: pixelated; background-repeat: no-repeat}
         .button iframe {padding: 2px}
@@ -134,15 +133,15 @@
 
         .status {
             display: flex; position: fixed; white-space: pre-line !important;
-            flex-direction: column; top: 20px; right: 20px;
-            font-size: 16px; row-gap: 10px; text-align: right;
+            flex-direction: column; top: 10px; right: 10px;
+            row-gap: 5px; text-align: right;
             background: rgba(0,0,0,0.3);
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-            padding: 15px; border-radius: 15px;
+            padding: 10px; border-radius: 15px;
             max-width: 400px; max-width: 50%; height: auto;
         }
-        .s1 {line-height: 1}
-        .midtext {font-size: 10px; color: #ccc}
+        .s1 {line-height: 1; font-size: 14px}
+        .midtext {font-size: 8px; color: #ccc}
         .bigtext {font-size: 8px; color: #bbb}
         .bigtext:any-link, .morebutton {text-decoration: underline wavy rgba(255,255,255,0.2) 0.5px}
 
@@ -164,8 +163,9 @@
             left: 50%; top: 50%;
             transform: translate(-50%, -50%);
             z-index: 999; opacity: 1;
-            animation: spin 3s linear infinite
         }
+        .cv.spin {animation: spin 3s linear infinite}
+
         .cvtuah {
             image-rendering: pixelated;
             height: 72px; margin: 3em; opacity: 1;
@@ -176,11 +176,11 @@
 
         @keyframes spin {
             0% {transform: translate(-50%, -50%) rotateY(0)}
-            to {transform: translate(-50%, -50%) rotateY(360deg)}
+            100% {transform: translate(-50%, -50%) rotateY(360deg)}
         }
         @keyframes spinno {
             0% {transform: rotateY(0)}
-            to {transform: rotateY(360deg)}
+            100% {transform: rotateY(360deg)}
         }
 
     </style>
@@ -216,11 +216,11 @@
     <div class="bottom">
         <span class="bigtext">middle click to copy!</span>
         <div class="buttons">
-            <a href="//s.soggy.cat"><img class="button smooth" src="//coolsite.cv/assets/images/88x31/ssoggycat.webp"></a>
-            <a href="//coolsite.cv/utdr/swatchlings"><img class="button smooth" src="//coolsite.cv/assets/images/88x31/swatchlings.gif"></a>
+            <a href="//s.soggy.cat"><img class="button smooth" src="/assets/images/88x31/ssoggycat.webp"></a>
+            <a href="//coolsite.cv/utdr/swatchlings"><img class="button smooth" src="/assets/images/88x31/swatchlings.gif"></a>
             <a><img title="MS YURI ⚢ (@museofdeity) on Twitter:
-pride flag i made for people who just don't know" class="button" src="//coolsite.cv/assets/images/88x31/idk.webp"></a>
-            <a><img title="emoji from bluemoji.io" class="button smooth" src="//coolsite.cv/assets/images/88x31/bluemoji.webp"></a>
+pride flag i made for people who just don't know" class="button" src="/assets/images/88x31/idk.webp"></a>
+            <a><img title="emoji from bluemoji.io" class="button smooth" src="/assets/images/88x31/bluemoji.webp"></a>
         </div>
         <span class="midtext morebutton">see more buttons..</span>
         <div class="more">
@@ -228,7 +228,7 @@ pride flag i made for people who just don't know" class="button" src="//coolsite
                 <span class="bigtext">cool people!</span>
                 <div class="buttons">
                     <a href="//nazvex.neocities.org/"><img class="button" data-src="/assets/images/88x31/nazvex.gif"></a>
-                    <a href="//s1nez.nekoweb.org"><img class="button" data-src="//coolsite.cv/assets/images/88x31/s1nez.gif"></a>
+                    <a href="//s1nez.nekoweb.org"><img class="button" data-src="/assets/images/88x31/s1nez.gif"></a>
                     <a href="//theawesomeblue.nekoweb.org"><img class="button" data-src="/assets/images/88x31/hq/blue.gif"></a>
                     <a href="//shabble.fun"><img class="button" data-src="/assets/images/88x31/shabble.gif"></a>
                     <a href="//240109.xyz/buttons"><img class="button smooth" data-src="/assets/images/88x31/hq/simon.gif"></a>
@@ -238,22 +238,23 @@ pride flag i made for people who just don't know" class="button" src="//coolsite
             <div class="section">
                 <span class="bigtext">other stuff</span>
                 <div class="buttons">
-                    <a href="//ne0nbandit.art/cable"><img class="button" data-src="//coolsite.cv/assets/images/88x31/swatch.gif"></a>
-                    <a href="//spacehey.com/holidaygirl1224"><img class="button" data-src="//coolsite.cv/assets/images/88x31/hq/holidaygirl.gif"></a>
-                    <a href="//lyra.horse"><img class="button" data-src="//coolsite.cv/assets/images/88x31/rebane.webp"></a>
-                    <a href="//soap.systems"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/soap.webp"></a>
-                    <a href="//xpvm.net"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/neptune.webp"></a>
-                    <a href="//yugoslavia.best"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/penis.webp"></a>
-                    <a href="//wavesmiley.com"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/hq/wavesmiley.gif"></a>
-                    <a href="//tracker.archiveteam.org"><img class="button smooth" data-src="//coolsite.cv/assets/images/88x31/archiveteam.gif"></a>
-                    <a href="//ezgif.com"><img class="button" data-src="//coolsite.cv/assets/images/88x31/hq/ezgif.gif"></a>
-                    <a><img title="from germanpit.de" class="button" data-src="//coolsite.cv/assets/images/88x31/w3c.webp"></a>
+                    <a href="//ne0nbandit.art/cable"><img class="button" data-src="/assets/images/88x31/swatch.gif"></a>
+                    <a href="//spacehey.com/holidaygirl1224"><img class="button" data-src="/assets/images/88x31/hq/holidaygirl.gif"></a>
+                    <a href="//spamtonsucks.neocities.org/"><img class="button" data-src="/assets/images/88x31/KILL.gif"></a>
+                    <a href="//lyra.horse"><img class="button" data-src="/assets/images/88x31/rebane.webp"></a>
+                    <a href="//soap.systems"><img class="button smooth" data-src="/assets/images/88x31/soap.webp"></a>
+                    <a href="//xpvm.net"><img class="button smooth" data-src="/assets/images/88x31/neptune.webp"></a>
+                    <a href="//yugoslavia.best"><img class="button smooth" data-src="/assets/images/88x31/penis.webp"></a>
+                    <a href="//wavesmiley.com"><img class="button smooth" data-src="/assets/images/88x31/hq/wavesmiley.gif"></a>
+                    <a href="//tracker.archiveteam.org"><img class="button smooth" data-src="/assets/images/88x31/archiveteam.gif"></a>
+                    <a href="//ezgif.com"><img class="button" data-src="/assets/images/88x31/hq/ezgif.gif"></a>
+                    <a><img title="from germanpit.de" class="button" data-src="/assets/images/88x31/w3c.webp"></a>
                     
                     <!-- FML -->
                     <a><iframe style="padding-right:4.001px;padding-left:2px" data-src="//incr.easrng.net/badge?key=sog" width="88" height="31" frameborder="0" style="background:url('//incr.easrng.net/bg.gif')"></iframe></a>
                     <!-- <a class="button utbutton">
                         <style>.utbutton{width:88px;height:31px;overflow:hidden;position:relative}.ut{width:733px;height:258px;transform:scale(0.12);transform-origin:top left;position:absolute;top:0;left:0}</style>
-                        <iframe data-src="//coolsite.cv/undertale/index.html" width="733" height="258" frameborder="0" class="ut" scrolling="no"></iframe>
+                        <iframe data-src="/undertale/index.html" width="733" height="258" frameborder="0" class="ut" scrolling="no"></iframe>
                     </a> -->
                 </div>
             </div>
@@ -263,191 +264,221 @@ pride flag i made for people who just don't know" class="button" src="//coolsite
 
     <script>
 
-        fetch("https://status.cafe/users/meow/status.json").then(r=>r.json()).then(r=>{
-            document.querySelector(".status").innerHTML = `
-            <span class="s1">${r.content}</span>
-            <div style="display:inline;font-size:0.5em"><span class="midtext">${r.timeAgo}</span> · <a class="bigtext" href="https://status.cafe/users/meow" target="_blank">status.cafe</a></div>
-            `
-        });
+        fetch("https://status.cafe/users/meow/status.json")
+            .then(function(response) {return response.json()})
+            .then(function(data) {
+                document.querySelector(".status").innerHTML = `
+                    <span class="s1">${data.content}</span>
+                    <div style="display:inline;font-size:0.5em">
+                        <span class="midtext">${data.timeAgo}</span>
+                        &nbsp;·&nbsp;
+                        <a class="bigtext" href="//status.cafe" target="_blank">status.cafe</a>
+                    </div>
+                `;
+            }).catch(function(error) {
+                console.error("failed to fetch status?! ", error);
+            });
 
-        /*//////////////////////////////////////////////////////////////////////*/
-
+        // performance testing, to show set opacity to 1 :p
         (function() {
-            const testfps = document.createElement('div');
-            testfps.style.display = 'flex'; testfps.style.position = 'fixed';
-            testfps.style.whiteSpace = 'pre-line'; testfps.style.flexDirection = 'column';
-            testfps.style.top = '20px'; testfps.style.left = '20px';
-            testfps.style.fontSize = '16px'; testfps.style.background = 'rgba(0,0,0,0.3)';
-            testfps.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
-            testfps.style.padding = '15px'; testfps.style.borderRadius = '15px';
-            testfps.style.height = 'auto'; testfps.style.zIndex = 2000;
-            testfps.style.color = '#5dc9ff'; testfps.style.fontFamily = '"Consolas", monospace';
-            testfps.style.userSelect = 'none'; testfps.textContent = "60 fps"; testfps.style.opacity = "0"
-            document.body.appendChild(testfps);
+            const fpsdiv = document.createElement("div");
+            Object.assign(fpsdiv.style, {
+                display: "flex", position: "fixed",
+                whiteSpace: "pre-line", flexDirection: "column",
+                top: "20px", left: "20px",
+                fontSize: "16px", background: "rgba(0,0,0,0.3)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+                padding: "15px", borderRadius: "15px", height: "auto",
+                zIndex: 2000, color: "#5dc9ff", userSelect: "none", opacity: "0"
+            });
+            fpsdiv.textContent = "60 fps";
+            document.body.appendChild(fpsdiv);
 
-            let last = performance.now(), frames = 0, fps = 0;
+            let last = performance.now();
+            let frames = 0;
             function loop() {
-                frames++; const now = performance.now();
-                if (now - last >= 500) {
-                    fps = frames * 1000 / (now - last);
-                    testfps.textContent = Math.round(fps) + " fps";
-                    last = now; frames = 0;
+                frames++;
+                const now = performance.now();
+                if ((now - last) >= 500) {
+                    const fps = frames * 1000 / (now - last);
+                    fpsdiv.textContent = Math.round(fps) + " fps";
+                    last = now;
+                    frames = 0;
                 }; requestAnimationFrame(loop);
             }; requestAnimationFrame(loop);
         })();
 
-        let moreBUTTs = false;
-        const moreBUTT = document.querySelector(".more");
+        /*//////////////////////////////////////////////////////////////////////*/
 
-        // unload / load stuff. if you don't have js enabled then you're not seeing it EVER screw you
-        document.querySelector(".morebutton").addEventListener("click", function() {
-            if (moreBUTT.style.display === "flex") {
-                moreBUTT.style.display = "none";
-                this.textContent = "see more buttons..";
-                const iframes = moreBUTT.querySelectorAll("iframe[src]");
-                iframes.forEach(iframe => {
-                    iframe.setAttribute("data-src", iframe.src);
-                    iframe.removeAttribute("src");
-                });
-            } else {
-                moreBUTT.style.display = "flex";
-                this.textContent = "see less buttons..";
-                if (!moreBUTTs) {
-                    const images = moreBUTT.querySelectorAll("img[data-src]");
-                    images.forEach(img => {
-                        img.src = img.dataset.src;
-                        img.removeAttribute("data-src");
+        (function() {
+            let loaded = false;
+            const more = document.querySelector(".more");
+            const morebtn = document.querySelector(".morebutton");
+            morebtn.addEventListener("click", function () {
+                const showing = more.style.display === "flex";
+                if (showing) {
+                    more.style.display = "none";
+                    this.textContent = "see more buttons..";
+                    more.querySelectorAll("iframe[src]").forEach(function (iframe) {
+                        let src = iframe.src;
+                        iframe.setAttribute("data-src", src);
+                        iframe.removeAttribute("src");
                     });
-                    const iframes = moreBUTT.querySelectorAll("iframe[data-src]");
-                    iframes.forEach(iframe => {
-                        iframe.src = iframe.dataset.src;
-                        iframe.removeAttribute("data-src");
-                        // if (iframe.classList.contains("ut")) {
-                        //     iframe.src = "https://coolsite.cv/undertale/index.html";
-                        // }
-                    });
-                    moreBUTTs = true;
                 } else {
-                    const iframes = moreBUTT.querySelectorAll("iframe[data-src]");
-                    iframes.forEach(iframe => {
-                        iframe.src = iframe.dataset.src;
-                        iframe.removeAttribute("data-src");
-                        // if (iframe.classList.contains("ut")) {
-                        //     iframe.src = "https://coolsite.cv/undertale/index.html";
-                        // }
-                    });
+                    more.style.display = "flex";
+                    this.textContent = "see less buttons..";
+                    if (!loaded) {
+                        more.querySelectorAll("img[data-src]").forEach(function (img) {
+                            let src = img.dataset.src; img.src = src;
+                            img.removeAttribute("data-src");
+                        });
+                        more.querySelectorAll("iframe[data-src]").forEach(function (iframe) {
+                            let src = iframe.dataset.src; iframe.src = src;
+                            iframe.removeAttribute("data-src");
+                        });
+                        loaded = true;
+                    } else {
+                        more.querySelectorAll("iframe[data-src]").forEach(function (iframe) {
+                            let src = iframe.dataset.src; iframe.src = src;
+                            iframe.removeAttribute("data-src");
+                        });
+                    }
                 }
-            }
-        });
+            });
+        })();
 
-        // copy buttons on middle click
-        document.addEventListener("mousedown", (e) => {
-            let el = e.target.closest(".button") || e.target.closest("iframe"); if (!el) return;
-            if (e.button === 1) {
-                e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-                
-                let copiablebutton;
-                if (el.tagName === "IMG") {copiablebutton = el.parentElement}
-                else {copiablebutton = el}
-                let clone = copiablebutton.cloneNode(true);
-                function removegarbage(node) {
+        (function() {
+            document.addEventListener("mousedown", function (e) {
+                const el = e.target.closest(".button") || e.target.closest("iframe");
+                if (!el) return;
+                if (e.button !== 1) return;
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                const copiable = el.tagName === "IMG" ? el.parentElement : el;
+                const clone = copiable.cloneNode(true);
+                (function cleannode(node) {
                     if (node.removeAttribute) {
                         node.removeAttribute("style");
                         node.removeAttribute("class");
+                        if (node.tagName === "IMG" || node.tagName === "IFRAME") {
+                            if (node.hasAttribute("src")) {
+                                let src = node.getAttribute("src");
+                                if (src && !src.startsWith("//coolsite.cv/")) {
+                                    node.setAttribute("src", "//coolsite.cv/" + src.replace(/^\/+/, ''));
+                                }
+                            }
+                            if (node.hasAttribute("data-src")) {
+                                let dsrc = node.getAttribute("data-src");
+                                if (dsrc && !dsrc.startsWith("//coolsite.cv/")) {
+                                    node.setAttribute("data-src", "//coolsite.cv/" + dsrc.replace(/^\/+/, ''));
+                                }
+                            }
+                        }
                     }
-                    for (let child of node.childNodes) {removegarbage(child)}
-                }; removegarbage(clone);
+                    Array.from(node.childNodes).forEach(cleannode);
+                })(clone);
                 navigator.clipboard.writeText(clone.outerHTML);
-                document.querySelector(".copied a").textContent = "copied!";
-                document.querySelector(".copied").style.opacity = "1";
-                setTimeout(function() {document.querySelector(".copied").style.opacity = "0"}, 1000);
-                
-                let buttonlink = el.tagName === "A" ? el : el.closest("a");
-                let buttonlhref = null;
-                if (buttonlink && buttonlink.href) {
-                    buttonlhref = buttonlink.href;
-                    buttonlink.removeAttribute("href");
-                }
 
-                setTimeout(() => {
-                    if (buttonlink && buttonlhref) {
-                        buttonlink.href = buttonlhref;
-                    }
-                }, 100); return false;
-            }
-        });
+                const copied = document.querySelector(".copied");
+                const copa = copied && copied.querySelector("a");
+                if (copa) copa.textContent = "copied!";
+                if (copied) {
+                    copied.style.opacity = "1";
+                    setTimeout(function() {copied.style.opacity = "0"}, 1000);
+                }
+                const link = el.tagName === "A" ? el : el.closest("a");
+                let href = null;
+                if (link && link.href) {
+                    href = link.href;
+                    link.removeAttribute("href");
+                }
+                setTimeout(function () {if (link && href) {link.href = href}}, 100);
+                return false;
+            });
+        })();
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        // dvd screensaver
         (function() {
-            const cv = document.getElementById('bounce');
-            const cvtuah = document.querySelector('.cvtuah');
-            if (!cv || !cvtuah) return;
-            cv.style.transform = 'translate(-50%, -50%)';
+            const bounce = document.getElementById("bounce");
+            const cvtuah = document.querySelector(".cvtuah");
+            if (!bounce || !cvtuah) return;
+            bounce.style.transform = "translate(-50%, -50%)";
 
-            let x = 0; let y = 0; let dx = 2; let dy = 2;
-            let isanimating = false; let animationid = null;
+            let x = 0, y = 0, dx = 2, dy = 2;
+            let animating = false;
 
-            function getdimensions(element) {
-                return {width: element.offsetWidth, height: element.offsetHeight};
+            function getdims(el) {
+                const r = el.getBoundingClientRect();
+                return {width: r.width, height: r.height};
             }
+
             function animate() {
-                const dims = getdimensions(cvtuah);
+                const bounds = cvtuah.getBoundingClientRect();
+                const dims = { width: bounds.width, height: bounds.height };
                 const maxx = window.innerWidth - dims.width;
                 const maxy = window.innerHeight - dims.height;
 
-                x += dx; y += dy;
-                if (x <= 0 || x >= maxx) {dx = -dx; x = Math.max(0, Math.min(x, maxx))}
-                if (y <= 0 || y >= maxy) {dy = -dy; y = Math.max(0, Math.min(y, maxy))}
+                let nx = x + dx; let ny = y + dy;
+                const nleft = bounds.left + dx;
+                const ntop = bounds.top + dy;
 
-                cvtuah.style.left = x + 'px';
-                cvtuah.style.top = y + 'px';
-                animationid = requestAnimationFrame(animate);
+                if (nleft <= 0 || nleft >= maxx) {
+                    dx = -dx; nx = x + dx;
+                }
+                if (ntop <= 0 || ntop >= maxy) {
+                    dy = -dy; ny = y + dy;
+                }
+                x = nx; y = ny;
+                cvtuah.style.left = x + "px";
+                cvtuah.style.top = y + "px";
+
+                requestAnimationFrame(animate);
             }
 
-            function startanimation() {
-                if (isanimating) return;
+            function initpos() {
+                bounce.classList.add("spin");
+                bounce.style.left = "50%";
+                bounce.style.top = "50%";
+                bounce.style.transform = "translate(-50%, -50%)";
+            }
+            if (bounce.complete) {initpos()}
+            else {bounce.addEventListener("load", initpos)}
 
-                cv.style.opacity = '0.5';
-                const rect = cv.getBoundingClientRect();
-                x = rect.left; y = rect.top;
+            bounce.addEventListener("click", function () {
+                if (animating) return;
+                bounce.style.opacity = "0.5";
+                const r = bounce.getBoundingClientRect();
+                x = r.left; y = r.top;
 
-                cvtuah.style.left = x + 'px'; cvtuah.style.top = y + 'px';
-                cvtuah.style.display = 'block';
-                
-                isanimating = true;
+                cvtuah.style.left = x + "px";
+                cvtuah.style.top = y + "px";
+                cvtuah.style.display = "block";
+
+                animating = true;
                 animate();
-            }
+            });
 
-            function initializeposition() {
-                cv.style.left = '50%';
-                cv.style.top = '50%';
-                cv.style.transform = 'translate(-50%, -50%)';
-            }
-            if (cv.complete) {initializeposition()}
-            else {cv.addEventListener('load', initializeposition)}
-            cv.addEventListener('click', startanimation);
-
-            let resizetimeout;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizetimeout);
-                resizetimeout = setTimeout(function() {
-                    // if you change page width it gets funky but idrc
-                    if (!isanimating) {
-                        initializeposition();
-                    } else {
-                        const dims = getdimensions(cvtuah);
+            let rtimeout;
+            window.addEventListener("resize", function () {
+                clearTimeout(rtimeout);
+                rtimeout = setTimeout(function () {
+                    if (!animating) {initpos()}
+                    else {
+                        const dims = getdims(cvtuah);
                         const maxx = window.innerWidth - dims.width;
                         const maxy = window.innerHeight - dims.height;
                         x = Math.max(0, Math.min(x, maxx));
                         y = Math.max(0, Math.min(y, maxy));
-                        cvtuah.style.left = x + 'px';
-                        cvtuah.style.top = y + 'px';
+                        cvtuah.style.left = x + "px";
+                        cvtuah.style.top = y + "px";
                     }
                 }, 50);
             });
         })();
+
     </script>
 </body>
 </html>
