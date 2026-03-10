@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Urinate AI - The All-in-one Ablablabla</title>
+        <style>
+            @font-face {
+                font-family: "icons";
+                src: url("/assets/fonts/iconfont.ttf");
+            }
+            @font-face {
+                font-family: "poppins";
+                src: url("/assets/fonts/poppins.woff2");
+            }
+            body {
+                margin: 0; padding: 0;
+                font-family: poppins, sans-serif;
+                width: 100%; min-height: 100%;
+                overflow: hidden !important;
+                background: white; display: flex;
+                align-items: center; justify-content: center;
+            }
+            body.withresults {
+                overflow-y: auto !important; overflow-x: hidden !important;
+                align-items: flex-start !important; padding: 40px 0 !important;
+                scrollbar-width: thin !important; scrollbar-width: 10px;
+                scrollbar-color: rgba(0,0,0,0.2) transparent !important;
+            }
+            body.withresults::-webkit-scrollbar { width: 6px !important; }
+            body.withresults::-webkit-scrollbar-track { background: transparent !important; }
+            body.withresults::-webkit-scrollbar-thumb {
+                background: rgba(0,0,0,0.2) !important;
+                border-radius: 3px !important;
+            }
+            body.withresults::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3) !important; }
+            body.withresults::-webkit-scrollbar-button:single-button {
+                display: none !important;
+                height: 0 !important;
+            }
+            .main {
+                width: 100%; min-height: 100vh;
+                display: flex; align-items: center; justify-content: center;
+            }
+
+            img {display: none}
+            b {color: #f73 !important}
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            .homewrap {
+                width: 80vw;
+                max-width: 500px; min-width: 200px;
+            }
+            .mainpagewrap {
+                display: flex; flex-direction: column;
+                align-items: center; gap: 1em;
+            }
+
+            .title {
+                font-size: 40px; font-weight: 600;
+                line-height: 1.2;
+                color: rgba(0, 0, 0, 0.88);
+                text-align: center; margin: 0;
+            }
+            .title span {
+                background: #f73;
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                position: relative;
+            }
+            /* the sparkle */
+            .title span::after {
+                content: "✦"; -webkit-text-fill-color: initial;
+                color: #f73; font-size: 0.35em; vertical-align: super;
+                position: relative; top: -5px; left: -2px;
+            }
+
+            .desc {
+                font-size: 16px;
+                line-height: 1.5;
+                color: #8e8e8e;
+                text-align: center;
+                margin: 0;
+            }
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            .inputsender {
+                width: 100%;
+                background: #fff;
+                border: 1px solid #e8e8e8;
+                border-radius: 16px; padding: 16px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+            .inputwrap textarea {
+                width: 90%; min-height: 96px;
+                max-height: 220px; padding: 0.25em;
+                font-family: Poppins, sans-serif; font-size: 1em;
+                color: rgba(0, 0, 0, 0.88);
+                background: #fff;
+                border: none; outline: none; resize: none;
+                overflow-y: auto !important;
+                transition: all 0.2s;
+            }
+            .inputwrap textarea::placeholder {color: rgba(0, 0, 0, 0.25)}
+
+            .actionwrap {
+                display: flex; align-items: center;
+                justify-content: flex-end;
+                margin-top: 12px;
+            }
+            .actionright {
+                display: flex; align-items: center;
+                gap: 12px;
+            }
+            .countwrap {
+                font-size: 12px;
+                color: rgba(0, 0, 0, 0.45);
+            }
+            .actionbutton {
+                display: flex; align-items: center; justify-content: center;
+                width: 40px; height: 40px; text-align: center;
+                background: #f73; font-size: 1.75em;
+                border: none; border-radius: 50%;
+                cursor: pointer; color: #fff;
+                flex-shrink: 0; font-family: icons, sans-serif;
+            }
+            .actionbutton.loading {
+                animation: loadingspeen 0.7s linear infinite;
+            }
+            @keyframes loadingspeen {
+                from {transform: rotate(0deg)}
+                to {transform: rotate(360deg)}
+            }
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            /* GOOGLE CSE OVERRIDES */
+            .search-results {
+                width: 100% !important;
+                max-width: 500px !important;
+                margin: 24px auto 0 !important;
+            }
+            .gsc-control-cse, .gsc-control-cse *,
+            .search-results .gsc-control-cse,
+            .search-results .gsc-control-cse * {
+                font-family: Poppins, sans-serif !important;
+                box-sizing: border-box !important;
+            }
+            .gsc-control-cse {
+                border: none !important;
+                padding: 0 !important;
+                background: transparent !important;
+                font-family: Poppins, sans-serif !important;
+                width: 100% !important;
+                max-width: 500px !important;
+            }
+            .gsc-results-wrapper, .gsc-resultsRoot {
+                border: none !important;
+                background: transparent !important;
+            }
+            .gsc-results-wrapper-overlay,
+            .gsc-results-wrapper-visible,
+            .gsc-resultsbox-visible {
+                position: static !important;
+                top: auto !important; left: auto !important;
+                right: auto !important; bottom: auto !important;
+                width: 100% !important; height: auto !important;
+                max-height: none !important; box-shadow: none !important;
+                background: transparent !important;
+            }
+            .gsc-modal-background-image,
+            .gsc-results-close-btn,
+            div.gcsc-find-more-on-google-branding,
+            div.gcsc-more-maybe-branding-root {
+                display: none !important;
+            }
+            .gsc-result, .gsc-webResult {
+                border: 1px solid #e8e8e8 !important;
+                border-radius: 12px !important;
+                padding: 12px 16px !important;
+                margin-bottom: 12px !important;
+                background: #fff !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            }
+            .gsc-result .gs-title a, .gsc-results .gsc-thumbnail-inside a {
+                font-weight: 500 !important;
+                color: #FF7733 !important;
+                font-size: 1em !important;
+            }
+            .gsc-result .gs-title a:hover {color: #f73 !important}
+            .gsc-result .gs-snippet, .gs-snippet {
+                font-size: 14px !important;
+                color: rgba(0, 0, 0, 0.75) !important;
+                line-height: 1.5 !important;
+            }
+            .gsc-cursor-page, .gsc-pagination * {
+                color: #8e8e8e !important;
+                font-family: Poppins, sans-serif !important;
+            }
+            .gsc-option-menu-item {padding: 0px 15px !important}
+
+        </style>
+    </head>
+    <body>
+        <div class="app">
+            <div class="flex appwrapper flex-layout-md">
+                <div class="grow overflow-hidden">
+                    <div class="main">
+                        <div class="homewrap">
+                            <div class="mainpagewrap">
+                                <div class="title">Hi, I am <span>Urinate</span>
+                                </div>
+                                <p class="desc">The AI that wants you to suffer.</p>
+                                <div class="inputsender">
+                                    <div class="inputwrap">
+                                        <textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="What can I ruin for you today?" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+                                    </div>
+                                    <div class="actionwrap">
+                                        <div class="actionright">
+                                            <div class="countwrap">
+                                                <span class="counttext">0</span>
+                                                <span class="counttext">/</span>
+                                                <span class="counttext">2048</span>
+                                            </div>
+                                            <div class="actionbutton"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="search-results">
+                                    <div class="gcse-searchresults-only" data-gname="thesearchthing"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script async src="cse.js?cx=a2def9c1947b64abc"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const textarea = document.querySelector(".inputwrap textarea");
+                const sendbtn = document.querySelector(".actionbutton");
+                const countspan = document.querySelectorAll(".counttext");
+
+                let maxchars = 2048;
+                if (countspan.length >= 3) {
+                    const n = parseInt(countspan[2].textContent, 10);
+                    if (!isNaN(n) && n > 0) maxchars = n;
+                }
+
+                function updatecount() {
+                    if (!textarea || countspan.length === 0) return;
+                    const len = textarea.value.length;
+                    countspan[0].textContent = Math.min(len, maxchars);
+                }
+                if (textarea) {
+                    textarea.addEventListener("input", updatecount);
+                    updatecount();
+                }
+
+                let issearching = false;
+                const idleicon = sendbtn ? sendbtn.textContent : "";
+                const loadingicon = "\uE9C9";
+
+                function setloading(loading) {
+                    if (!sendbtn) return;
+                    issearching = loading;
+                    sendbtn.textContent = loading ? loadingicon : idleicon;
+                    if (loading) {sendbtn.classList.add('loading')}
+                    else {sendbtn.classList.remove('loading')}
+                }
+
+                function runsearch() {
+                    if (!textarea) return;
+                    const q = textarea.value.trim();
+                    if (!q) return;
+                    setloading(true);
+
+                    if (window.google && window.google.search && window.google.search.cse && window.google.search.cse.element) {
+                        let el = window.google.search.cse.element.getElement("thesearchthing");
+                        if (!el) {
+                            setTimeout(runsearch, 100);
+                            return;
+                        }
+                        el.execute(q);
+                        const results = document.querySelector(".search-results");
+                        if (results) results.scrollIntoView({ behavior: "smooth" });
+                    } else {setTimeout(runsearch, 100)}
+                }
+
+                (function observe() {
+                    const container = document.querySelector(".search-results");
+                    if (!container || !("MutationObserver" in window)) return;
+
+                    function updatebodyscroll() {
+                        const hasresults = !!container.querySelector(".gsc-result");
+                        document.body.classList.toggle("withresults", hasresults);
+                        if (hasresults) setloading(false);
+                    }
+
+                    const observer = new MutationObserver(updatebodyscroll);
+                    observer.observe(container, { childList: true, subtree: true });
+                    updatebodyscroll();
+                })();
+
+                if (sendbtn) {sendbtn.addEventListener("click", runsearch)}
+            });
+        </script>
+    </body>
+</html>
