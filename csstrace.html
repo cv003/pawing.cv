@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2252%22%20fill%3D%22%23000000%22%20font-family%3D%22serif%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20dy%3D%220%22%20text-anchor%3D%22middle%22%3E%F0%9F%96%B1%EF%B8%8F%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <title>css tracer</title>
+    <style>
+
+        body {
+            margin: 0; padding: 0; 
+            font-family: sans-serif; height: 100vh; 
+            color: #000; background: #fff; 
+            display: flex; overflow: hidden;
+            justify-content: center; align-items: center;
+        }
+
+        .app, .appmain {
+            width: 800px; height: 800px; 
+            min-width: 0; min-height: 0;
+            margin: 0 auto; display: grid; 
+            grid-template-columns: 1fr; gap: 8px; 
+            padding: 8px; box-sizing: border-box; 
+            transform-origin: center center;
+        }
+        .panel, .panelmain {
+            padding: 18px 8px; background: #f9f9f9; 
+            overflow: hidden;  display: flex; 
+            flex-direction: column; border-radius: 10px;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .controlsrow {
+            display: flex; flex-wrap: wrap; 
+            gap: 8px; align-items: center;
+            margin-bottom: 8px; font-size: 12px;
+        }
+        .controlsrow label, .togglerow label {
+            display: flex; align-items: center; 
+            gap: 4px; white-space: nowrap;
+            cursor: pointer;
+        }
+
+        select, input[type="file"], input[type="number"], button {
+          font-size: 12px; max-width: 170px;
+        }
+        .stageouter { 
+            padding: 4px; margin-bottom: 8px; 
+            flex: 1; box-sizing: border-box; 
+        }
+        .stagescroll { 
+            position: relative;
+            width: 100%; height: 100%; 
+        }
+
+        .canvaswrapper { 
+            margin: 0 auto; position: relative;
+            width: 100%; height: 100%;
+        }
+        .canvasmain {
+            position: relative; display: flex;
+            width: 100%; height: 100%;
+            background: #eee; overflow: hidden; 
+            align-items: center; justify-content: center;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .aspectbox {
+            position: relative; 
+            width: 80%; height: 80%;
+            border: 1px dashed #000; 
+            box-sizing: border-box; background: #eee;
+        }
+
+        .canvasgrid {
+            position: absolute; inset: 0; pointer-events: none;
+        }
+        .canvasvideo {
+            position: absolute; inset: 0; 
+            width: 100%; height: 100%;
+            object-fit: contain; background: #fff;
+        }
+
+        .overelement {
+            position: absolute; left: 50%; top: 50%; 
+            width: 160px; height: 160px; 
+            border: 1px solid #000; background: rgba(255, 255, 255, 0.5); 
+            cursor: move; transform-origin: center center;
+        }
+        .overlabel {
+            position: absolute; inset: 4px; 
+            display: flex; align-items: center;
+            justify-content: center; font-size: 11px;
+        }
+        .overimg {
+            position: absolute; inset: 0; width: 100%; height: 100%; 
+            object-fit: contain; display: none;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .handle {
+            position: absolute; border-radius: 50%;
+            width: 14px; height: 14px; cursor: pointer;
+            background: #fff; border: 1px solid #000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .handle svg { 
+            width: 8px; height: 8px; 
+            fill: none; stroke: #000; 
+            stroke-width: 1.2; stroke-linecap: round
+            }
+        .handlexy {
+            right: -7px; bottom: -7px; 
+            cursor: nwse-resize
+        }
+        .handlex {
+            right: -7px; top: 50%; 
+            transform: translateY(-50%); cursor: ew-resize
+        }
+        .handley {
+            top: -7px; left: 50%; 
+            transform: translateX(-50%); cursor: ns-resize
+        }
+        .handlerotate {
+            top: -7px; right: -7px;
+            cursor: grab;
+        }
+        .canvasmetrics span {margin-right: 8px}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .transport, .transportleft, .transportright {
+            display: flex; align-items: center; gap: 8px;
+            margin: 4px 0 6px; font-size: 11px; 
+            justify-content: space-between;
+        }
+        .transportleft, .transportright {gap: 4px; flex-wrap: wrap}
+        .timelabel {font-variant-numeric: tabular-nums; padding: 1px 4px}
+        .trimcontainer {margin-top: 8px; padding-top: 6px}
+        .trimlabelrow {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 11px; margin-bottom: 4px;
+        }
+
+        .trimtrack {position: relative; height: 16px}
+        .trimbg {
+            position: absolute; 
+            left: 0; right: 0; top: 50%; 
+            transform: translateY(-50%); 
+            height: 6px; border-radius: 3px;
+            background: #e0e0e0;
+        }
+        .trimwindow {
+            position: absolute; top: 50%; 
+            transform: translateY(-50%);
+            height: 6px; background: #b0b0b0; 
+            border-radius: 3px; pointer-events: none;
+        }
+        .trimprogress {
+            position: absolute; top: 50%; 
+            transform: translateY(-50%);
+            height: 2px; background: #000;
+            border-radius: 1px; pointer-events: none;
+        }
+        .trimhandle {
+            position: absolute;
+            top: 50%; transform: translateY(-50%);
+            width: 6px; height: 16px; border-radius: 3px;
+            background: #fff; border: 1px solid #000; 
+            cursor: ew-resize;
+        }
+
+        .stack {
+            display: flex; 
+            flex-direction: column; gap: 10px;
+        }
+        .sectiontitle { 
+            font-size: 12px; font-weight: 600; 
+            margin-bottom: 4px; 
+        }
+
+        .togglerow {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 6px; font-size: 11px; margin-bottom: 4px;
+        }
+        .codeblock {
+            margin-top: 4px; padding: 8px;
+            border: 1px solid #ccc; 
+            font-family: monospace;
+            font-size: 11px; max-height: 320px; 
+            overflow: auto; position: relative; background: #fff;
+        }
+        .codelabel {
+            position: absolute; right: 8px; top: 6px; font-size: 10px; text-transform: uppercase;
+        }
+        pre {margin: 0; white-space: pre}
+        code {font-family: inherit; font-size: inherit}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .exportoverlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none; align-items: center;
+            justify-content: center;
+        }
+        .exportbox {
+            background: #fff; border: 1px solid #ccc;
+            padding: 12px; max-width: 80vw; max-height: 80vh;
+            box-sizing: border-box; display: flex;
+            flex-direction: column; gap: 8px;
+        }
+        .exporthead {
+            display: flex; justify-content: space-between;
+            align-items: center;
+        }
+        .exporttitle {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .codeblock {
+            flex: 1; min-width: 300px;
+            min-height: 200px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app appmain">
+        <div class="panel panelmain">
+          
+            <div class="controlsrow">
+                <label>video: <input type="file" class="videoinput" accept="video/*"></label>
+                <label>placeholder (decorative, optional): <input type="file" class="imageinput" accept="image/*"></label>
+                
+            </div>
+            <div class="controlsrow">
+              <label>aspect ratio:
+                <select class="aspectselect">
+                    <option value="16/9">16:9</option>
+                    <option value="1/1">1:1</option>
+                    <option value="9/16">9:16</option>
+                </select>
+            </label>
+            <label>fps:<input type="number" class="fpsinput" min="1" max="60" value="20"></label>
+            </div>
+
+            <div class="transport">
+                <div class="transportleft">
+                    <span>Time</span>
+                    <span class="timelabel timecurrent">00:00.000</span>
+                    <span>/</span>
+                    <span class="timelabel timeduration">00:00.000</span>
+                </div>
+                <div class="transportright">
+                    <button class="resetbtn">reset (hold)</button>
+                    <button class="exportbtn">export</button>
+                </div>
+            </div>
+            <div class="stageouter">
+                <div class="stagescroll">
+                    <div class="canvaswrapper">
+                        <div class="canvasmain">
+                            <div class="aspectbox">
+                                <div class="canvasgrid"></div>
+                                <video class="canvasvideo videomain"></video>
+                                <div class="overelement overselected">
+                                    <img class="overimg" alt="">
+                                    <div class="overlabel">element</div>
+                                    <div class="handle handlexy" data-handle="xy"><svg viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg"><path d="M2 6 L6 2" /></svg></div>
+                                    <div class="handle handlex" data-handle="x"><svg viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg"><line x1="1" y1="4" x2="7" y2="4" /></svg></div>
+                                    <div class="handle handley" data-handle="y"><svg viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg"><line x1="4" y1="1" x2="4" y2="7" /></svg></div>
+                                    <div class="handle handlerotate" data-handle="rot"><svg viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg"><path d="M6 2 A 2.5 2.5 0 0 1 2 6" /></svg></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="trimcontainer">
+                <div class="trimlabelrow">
+                    <div><span>trim video</span></div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span>start:</span>
+                        <span class="timelabel trimstartlabel">00:00.000</span>
+                        <span>end:</span>
+                        <span class="timelabel trimendlabel">00:00.000</span>
+                    </div>
+                </div>
+                <div class="trimtrack">
+                    <div class="trimbg"></div>
+                    <div class="trimwindow"></div>
+                    <div class="trimprogress"></div>
+                    <div class="trimhandle trimhandlestart"></div>
+                    <div class="trimhandle trimhandleend"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="exportoverlay">
+        <div class="exportbox">
+            <div class="exporthead">
+                <div class="exporttitle">exported code:</div>
+                <button class="exportclosebtn">close</button>
+            </div>
+            <div class="codeblock">
+                <pre><code class="codeoutput"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+
+            function clsall(q) {return Array.from(document.querySelectorAll(q))}
+
+            const videoinput = document.querySelector('.videoinput');
+            const video = document.querySelector('.videomain');
+            const imageinput = document.querySelector('.imageinput');
+            const fpsinput = document.querySelector('.fpsinput');
+            const aspectsel = document.querySelector('.aspectselect');
+            const canvas = document.querySelector('.canvasmain');
+            const aspectbox = document.querySelector('.aspectbox');
+            const overlay = document.querySelector('.overelement');
+            const overlayimg = document.querySelector('.overimg');
+            const exportbtn = document.querySelector('.exportbtn');
+            const resetbtn = document.querySelector('.resetbtn');
+            const exportoverlay = document.querySelector('.exportoverlay');
+            const exportclosebtn = document.querySelector('.exportclosebtn');
+            const codeoutput = document.querySelector('.codeoutput');
+            const trimstartlabel = document.querySelector('.trimstartlabel');
+            const trimendlabel = document.querySelector('.trimendlabel');
+            const timecurrentel = document.querySelector('.timecurrent');
+            const timedurationel = document.querySelector('.timeduration');
+            const trimtrack = document.querySelector('.trimtrack');
+            const trimwindow = document.querySelector('.trimwindow');
+            const trimprogress = document.querySelector('.trimprogress');
+            const trimhandlestart = document.querySelector('.trimhandlestart');
+            const trimhandleend = document.querySelector('.trimhandleend');
+
+            
+            const scalehandles = {
+                xy: overlay.querySelector('[data-handle="xy"]'),
+                x: overlay.querySelector('[data-handle="x"]'),
+                y: overlay.querySelector('[data-handle="y"]')
+            };
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            let state = {
+                duration: 0, trimstart: 0, trimend: 0, 
+                playing: false, keyframes: []
+            };
+
+            let est = {
+                x: 0, y: 0, width: 160,  height: 160, 
+                scalex: 1, scaley: 1, rot: 0, clip: null
+            };
+
+            const resetsound = new Audio('/assets/audio/robloxboom.ogg');
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            function fmt(time) {
+                if (!isFinite(time)) return '00:00.000';
+                let s = Math.max(0, time);
+                let m = Math.floor(s / 60);
+                let sec = s % 60;
+                return (
+                    String(m).padStart(2, '0') + ':' + 
+                    sec.toFixed(3).padStart(6, '0')
+                );
+            }
+            
+            function updatetimelabels() {
+                timecurrentel.textContent  = fmt(video.currentTime || 0);
+                timedurationel.textContent = fmt(state.duration || 0);
+                trimstartlabel.textContent = fmt(state.trimstart);
+                trimendlabel.textContent   = fmt(state.trimend);
+            }
+
+            function updatetrimui() {
+                let r = trimtrack.getBoundingClientRect();
+                let w = r.width || 1;
+                let d = state.duration || 1;
+
+                let s = (state.trimstart / d) * 100;
+                let e = (state.trimend / d) * 100;
+
+                let t = video.currentTime || 0;
+                let pct = d ? (t / d) * 100 : 0;
+
+                trimwindow.style.left   = s + '%';
+                trimwindow.style.width  = (e - s) + '%';
+                trimhandlestart.style.left = `calc(${s}% - 4.5px)`;
+                trimhandleend.style.left  = `calc(${e}% - 4.5px)`;
+                trimprogress.style.left   = '0%';
+                trimprogress.style.width  = Math.max(0, Math.min(100, pct)) + '%';
+            }
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            function applytransform() {
+                let r  = (aspectbox || canvas).getBoundingClientRect();
+                let cx = r.width / 2; let cy = r.height / 2;
+
+                overlay.style.width  = est.width + 'px';
+                overlay.style.height = est.height + 'px';
+
+                overlay.style.left = (cx + est.x - est.width / 2) + 'px';
+                overlay.style.top  = (cy + est.y - est.height / 2) + 'px';
+
+                let rot = est.rot != null ? est.rot : 0;
+                overlay.style.transform = `rotate(${rot}deg) scale(${est.scalex},${est.scaley})`;
+            }
+
+            function currentsnap() {
+                return {
+                    x: est.x, y: est.y,
+                    width: est.width, height: est.height,
+                    scalex: est.scalex, scaley: est.scaley,
+                    rot: est.rot != null ? est.rot : 0,
+                    clip: (state.freedistort && est.clip)
+                        ? JSON.parse(JSON.stringify(est.clip))
+                        : null
+                };
+            }
+
+            function recordkeyframe() {
+                let t = clamptime(video.currentTime || 0);
+                let snap = currentsnap();
+                let i = state.keyframes.findIndex(
+                    kf => Math.abs(kf.time - t) < 1e-4
+                );
+
+                if (i >= 0) {
+                    state.keyframes[i] = { time: t, ...snap };
+                } else {
+                    state.keyframes.push({time: t, ...snap});
+                }
+                updatecodeout();
+            }
+
+            // html export presets!!
+            function updatecodeout() {
+                const duration = state.duration || 0;
+                const ti = Math.max(0, Math.min(duration, state.trimstart));
+                const to = Math.max(ti, Math.min(duration, state.trimend));
+                const span = Math.max(0.001, to - ti);
+
+                const all = [...state.keyframes].sort((a, b) => a.time - b.time);
+                const sorted = all.filter(kf => kf.time >= ti - 1e-4 && kf.time <= to + 1e-4);
+
+                if (!sorted.length) {
+                    codeoutput.textContent = [
+                        '<!DOCTYPE html>',
+                        '<html lang="en">',
+                        '<head>',
+                        '  <meta charset="UTF-8" />',
+                        '  <style>',
+                        '    * {box-sizing: border-box}',
+                        '    body {',
+                        '      margin: 0;',
+                        '      min-height: 100vh;',
+                        '      display: flex;',
+                        '      align-items: center;',
+                        '      justify-content: center;',
+                        '      background: #f5f5f5;',
+                        '      font-family: system-ui, sans-serif;',
+                        '    }',
+                        '    .demo {',
+                        '      position: relative;',
+                        '      width: 95vw;',
+                        '      height: 95vw;',
+                        '      border: 1px solid #ccc;',
+                        '      background: #fff;',
+                        '      overflow: hidden;',
+                        '    }',
+                        '    .element {',
+                        '      position: absolute;',
+                        '      width: 80px;',
+                        '      height: 80px;',
+                        '      background: #000;',
+                        '      opacity: 0.2;',
+                        '      left: 50%; top: 50%;',
+                        '      transform: translate(-50%, -50%);',
+                        '      transform-origin: center center;',
+                        '    }',
+                        '  </style>',
+                        '</head>',
+                        '<body>',
+                        '  <div class="demo">',
+                        '    <div class="element"></div>',
+                        '  </div>',
+                        '</body>',
+                        '</html>'
+                    ].join('\n');
+                    return;
+                }
+
+                const l = [];
+                l.push('<!DOCTYPE html>');
+                l.push('<html lang="en">');
+                l.push('<head>');
+                l.push('  <meta charset="UTF-8" />');
+                l.push('  <style>');
+                l.push('    * {box-sizing: border-box}');
+                l.push('    body {');
+                l.push('      margin: 0;');
+                l.push('      min-height: 100vh;');
+                l.push('      display: flex;');
+                l.push('      align-items: center;');
+                l.push('      justify-content: center;');
+                l.push('      background: #f5f5f5;');
+                l.push('      font-family: system-ui, sans-serif;');
+                l.push('    }');
+                l.push('    .demo {');
+                l.push('      position: relative;');
+                l.push('      width: 95vw;');
+                l.push('      height: 95vw;');
+                l.push('      border: 1px solid #ccc;');
+                l.push('      background: #fff;');
+                l.push('      overflow: hidden;');
+                l.push('    }');
+                const t0 = sorted[0].time;
+                const tN = sorted[sorted.length - 1].time;
+                const keyframeSpan = Math.max(0.001, tN - t0);
+
+                l.push('    .element {');
+                l.push('      position: absolute;');
+                l.push('      left: 50%; top: 50%;');
+                l.push('      transform-origin: center center;');
+                l.push('      animation: tracedmotion ' + keyframeSpan.toFixed(3) + 's linear infinite;');
+                l.push('      background: #000;');
+                l.push('    }');
+                l.push('');
+                l.push('    @keyframes tracedmotion {');
+
+                const entries = sorted.map(kf => ({
+                    pct: ((kf.time - t0) / keyframeSpan) * 100, kf
+                }));
+                entries.sort((a, b) => a.pct - b.pct);
+
+                let prevPct = -1;
+                for (const { pct, kf } of entries) {
+                    const cl = Math.max(0, Math.min(100, pct));
+                    if (cl <= prevPct) continue;
+                    prevPct = cl;
+                    const x = kf.x.toFixed(2);
+                    const y = kf.y.toFixed(2);
+                    const w = kf.width.toFixed(2);
+                    const h = kf.height.toFixed(2);
+                    const sx = kf.scalex.toFixed(4);
+                    const sy = kf.scaley.toFixed(4);
+                    const rot = (kf.rot != null ? kf.rot : 0).toFixed(2);
+                    l.push('      ' + cl.toFixed(3) + '% {');
+                    l.push('        width: ' + w + 'px;');
+                    l.push('        height: ' + h + 'px;');
+                    l.push('        transform: translate(-50%, -50%) translate(' + x + 'px, ' + y + 'px) rotate(' + rot + 'deg) scale(' + sx + ',' + sy + ');');
+                    l.push('      }');
+                }
+
+                l.push('    }');
+                l.push('  </style>');
+                l.push('</head>');
+                l.push('<body>');
+                l.push('  <div class="demo">');
+                l.push('    <div class="element"></div>');
+                l.push('  </div>');
+                l.push('</body>');
+                l.push('</html>');
+
+                codeoutput.textContent = l.join('\n');
+            }
+            
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            function clamptime(t) {
+                if (!state.duration) return 0;
+                if (t < state.trimstart) return state.trimstart;
+                if (t > state.trimend) return state.trimend;
+                return t;
+            }
+
+            function ensurewithintrim() {
+                let t = video.currentTime || 0;
+                if (t < state.trimstart || t > state.trimend) {
+                    video.currentTime = clamptime(t);
+                }
+            }
+
+            function resetsizetocanvas() {
+                let cr = canvas.getBoundingClientRect();
+                let side = Math.min(cr.width, cr.height) * 0.8; // 80% of the smaller canvas dimensions
+                if (aspectbox) {
+                    let v = aspectsel.value || '9/16';
+                    let parts = v.split('/');
+                    let aw = parseFloat(parts[0]) || 9;
+                    let ah = parseFloat(parts[1]) || 16;
+                    let ratio = aw / ah;
+
+                    if (ratio >= 1) {
+                        aspectbox.style.width  = side + 'px';
+                        aspectbox.style.height = (side / ratio) + 'px';
+                    } else {
+                        aspectbox.style.height = side + 'px';
+                        aspectbox.style.width  = (side * ratio) + 'px';
+                    }
+                }
+                let r = (aspectbox || canvas).getBoundingClientRect();
+                let base = Math.min(r.width, r.height) * 0.25;
+                if (overlayimg && overlayimg.src) {
+                    let w = overlayimg.naturalWidth || 1;
+                    let h = overlayimg.naturalHeight || 1;
+                    let asp = w / h;
+                    est.height = base;
+                    est.width  = base * asp;
+                } else {
+                    est.width  = base;
+                    est.height = base;
+                }
+            }
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            videoinput.addEventListener('change', () => {
+                let file = videoinput.files && videoinput.files[0];
+                if (!file) return;
+                let url = URL.createObjectURL(file);
+                video.src = url;
+                video.load();
+
+                video.addEventListener(
+                    'loadedmetadata',
+                    () => {
+                        state.duration  = video.duration || 0;
+                        state.trimstart = 0;
+                        state.trimend   = state.duration || 0;
+                        updatetimelabels();
+                        updatetrimui();
+                    },
+                    {once: true}
+                );
+            });
+
+            if (imageinput && overlayimg) {
+                imageinput.addEventListener('change', () => {
+                    let file = imageinput.files && imageinput.files[0];
+                    if (!file) return;
+                    let url = URL.createObjectURL(file);
+                    overlayimg.onload = () => {
+                        overlayimg.style.display = 'block';
+                        let lbl = overlay.querySelector('.overlabel');
+                        if (lbl) lbl.style.display = 'none';
+                        resetsizetocanvas();
+                        applytransform();
+                        recordkeyframe();
+                    };
+                    overlayimg.src = url;
+                });
+            }
+
+            aspectsel.addEventListener('change', () => {
+                let v = aspectsel.value || '16/9';
+                resetsizetocanvas();
+                requestAnimationFrame(() => applytransform());
+            });
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            video.addEventListener('timeupdate', () => {
+                if (!state.duration) state.duration = video.duration || 0;
+                if (video.currentTime > state.trimend + 1e-3) {
+                    video.currentTime = state.trimend;
+                    video.pause();
+                }
+                if (video.currentTime < state.trimstart - 1e-3) {
+                    video.currentTime = state.trimstart;
+                }
+                updatetimelabels();
+                updatetrimui();
+            });
+
+            video.addEventListener('ended', () => video.pause());
+
+            function applysnapshot(snap) {
+                est.x = snap.x; est.y = snap.y;
+                est.width = snap.width; est.height = snap.height;
+                est.scalex = snap.scalex; est.scaley = snap.scaley;
+                est.rot = snap.rot != null ? snap.rot : 0;
+                applytransform();
+            }
+
+            function getsnapshotattime(t) {
+                if (!state.keyframes.length) return null;
+                let sorted = [...state.keyframes].sort((a, b) => a.time - b.time);
+                let prev = null;
+                for (const kf of sorted) {
+                    if (kf.time <= t + 1e-4) prev = kf;
+                    else break;
+                }
+                return prev || sorted[0] || null;
+            }
+
+            document.addEventListener('keydown', e => {
+                if (
+                    e.target && (
+                        e.target.tagName === 'INPUT' ||
+                        e.target.tagName === 'TEXTAREA'
+                    )
+                ) return;
+
+                let fps = parseFloat(fpsinput.value) || 30;
+                let frame = 1 / fps;
+                let t = video.currentTime || 0;
+
+                if (e.key === ',' || e.key === '.') {
+                    e.preventDefault();
+                    video.pause();
+                    t += (e.key === ',' ? -frame : frame);
+                    t = clamptime(t);
+                    video.currentTime = t;
+
+                    let existing = getsnapshotattime(t);
+                    if (existing) {
+                        let hasExact = state.keyframes.some(kf => Math.abs(kf.time - t) < 1e-4);
+                        if (!hasExact) {
+                            state.keyframes.push({
+                                time: t, x: existing.x, y: existing.y,
+                                width: existing.width, height: existing.height,
+                                scalex: existing.scalex, scaley: existing.scaley,
+                                rot: existing.rot != null ? existing.rot : 0,
+                                clip: existing.clip ? JSON.parse(JSON.stringify(existing.clip)) : null
+                            }); updatecodeout();
+                        }; applysnapshot(existing);
+                    } else {recordkeyframe()}
+                }
+            });
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            let trimdrag = {
+                active: false, which: null,
+                startx: 0, startval: 0
+            };
+
+            function trimdown(which, cx) {
+                if (!state.duration) return;
+                trimdrag.active = true;
+                trimdrag.which = which;
+                trimdrag.startx = cx;
+                trimdrag.startval = (which === 'start') 
+                    ? state.trimstart 
+                    : state.trimend;
+            }
+
+            trimhandlestart.addEventListener('mousedown', e => {
+                e.preventDefault();
+                trimdown('start', e.clientX);
+            });
+
+            trimhandleend.addEventListener('mousedown', e => {
+                e.preventDefault();
+                trimdown('end', e.clientX);
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!trimdrag.active || !state.duration) return;
+                let r  = trimtrack.getBoundingClientRect();
+                let dx = e.clientX - trimdrag.startx;
+                let pd = dx / (r.width || 1);
+                let td = pd * state.duration;
+
+                if (trimdrag.which === 'start') {
+                    let v = trimdrag.startval + td;
+                    v = Math.max(0, Math.min(v, state.trimend - 0.01));
+                    state.trimstart = v;
+                } else {
+                    let v = trimdrag.startval + td;
+                    v = Math.min(state.duration, Math.max(v, state.trimstart + 0.01));
+                    state.trimend = v;
+                }
+                ensurewithintrim(); updatetimelabels();
+                updatetrimui();
+            });
+            function stoptrimdrag() {
+                trimdrag.active = false;
+                trimdrag.which  = null;
+            }
+
+            document.addEventListener('mouseup', stoptrimdrag);
+            window.addEventListener('blur', stoptrimdrag);
+            document.addEventListener('mouseleave', e => {
+                if (!e.relatedTarget) stoptrimdrag();
+            });
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            let dragstate = null;
+
+            overlay.addEventListener('mousedown', e => {
+                const target = e.target;
+                const handleEl = target.closest ? target.closest('.handle') : null;
+                const handle = handleEl ? handleEl.dataset.handle : null;
+                const corner = target.dataset.corner;
+                const r = overlay.getBoundingClientRect();
+                const cav = canvas.getBoundingClientRect();
+                const cx = cav.width / 2; const cy = cav.height / 2;
+                const offsetx = e.clientX - r.left;
+                const offsety = e.clientY - r.top;
+
+                if (handle === 'rot') {
+                    e.preventDefault();
+                    let centerx = r.left + r.width / 2;
+                    let centery = r.top + r.height / 2;
+                    let baseang = Math.atan2(e.clientY - centery, e.clientX - centerx) * 180 / Math.PI;
+                    dragstate = {
+                        mode: 'rot',
+                        centerx, centery,
+                        baseang,
+                        baserot: est.rot != null ? est.rot : 0
+                    };
+                    return;
+                }
+
+                if (handle === 'xy' || handle === 'x' || handle === 'y') {
+                    e.preventDefault();
+                    let centerx   = r.left + r.width / 2;
+                    let centery   = r.top  + r.height / 2;
+                    let basedist  = Math.hypot(e.clientX - centerx, e.clientY - centery);
+                    let basedistx = Math.abs(e.clientX - centerx);
+                    let basedisty = Math.abs(e.clientY - centery);
+
+                    dragstate = {
+                        mode: handle,
+                        startscalex: est.scalex,
+                        startscaley: est.scaley,
+                        centerx, centery,
+                        basedist, basedistx, basedisty
+                    };
+                    return;
+                }
+
+                if (corner && state.freedistort) {
+                    e.preventDefault();
+                    dragstate = {
+                        mode: 'corner', corner,
+                        startx: e.clientX, starty: e.clientY,
+                        startclip: (
+                            est.clip ? 
+                            JSON.parse(JSON.stringify(est.clip)) : 
+                            {tl: {x: 0, y: 0}, tr: {x: 100, y: 0}, br: {x: 100, y: 100}, bl: {x: 0, y: 100}}
+                        ),
+                        overlayrect: r
+                    }; est.clip = dragstate.startclip;
+                    return;
+                }
+
+                e.preventDefault();
+                dragstate = {
+                    mode: 'move',
+                    startx: e.clientX,
+                    starty: e.clientY,
+                    basex: est.x,
+                    basey: est.y
+                };
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!dragstate) return;
+                const cav = canvas.getBoundingClientRect();
+
+                if (dragstate.mode === 'move') {
+                    let dx = e.clientX - dragstate.startx;
+                    let dy = e.clientY - dragstate.starty;
+                    est.x  = dragstate.basex + dx;
+                    est.y  = dragstate.basey + dy;
+                    applytransform();
+                    recordkeyframe();
+                    return;
+                }
+
+                if (dragstate.mode === 'rot') {
+                    let cx = dragstate.centerx;
+                    let cy = dragstate.centery;
+                    let ang = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
+                    let delta = ang - dragstate.baseang;
+                    est.rot = dragstate.baserot + delta;
+                    applytransform();
+                    recordkeyframe();
+                    return;
+                }
+
+                if (dragstate.mode === 'xy' || dragstate.mode === 'x' || dragstate.mode === 'y') {
+                    let cx = dragstate.centerx;
+                    let cy = dragstate.centery;
+
+                    if (dragstate.mode === 'xy') {
+                        let dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+                        if (dragstate.basedist < 8) dragstate.basedist = 8;
+                        let fac = dist / dragstate.basedist;
+                        fac = Math.max(0.1, Math.min(8, fac));
+                        est.scalex = dragstate.startscalex * fac;
+                        est.scaley = dragstate.startscaley * fac;
+                    }
+
+                    else if (dragstate.mode === 'x') {
+                        let dx = Math.abs(e.clientX - cx);
+                        if (dragstate.basedistx < 4) dragstate.basedistx = 4;
+                        let facx = dx / dragstate.basedistx;
+                        facx = Math.max(0.1, Math.min(8, facx));
+                        est.scalex = dragstate.startscalex * facx;
+                    }
+
+                    else if (dragstate.mode === 'y') {
+                        let dy = Math.abs(e.clientY - cy);
+                        if (dragstate.basedisty < 4) dragstate.basedisty = 4;
+                        let facy = dy / dragstate.basedisty;
+                        facy = Math.max(0.1, Math.min(8, facy));
+                        est.scaley = dragstate.startscaley * facy;
+                    }
+                    applytransform(); recordkeyframe();
+                    return;
+                }
+
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (dragstate) dragstate = null;
+            });
+
+            /*//////////////////////////////////////////////////////////////////////*/
+
+            if (exportbtn && exportoverlay && exportclosebtn) {
+                exportbtn.addEventListener('click', () => {
+                    exportoverlay.style.display = 'flex';
+                });
+
+                exportclosebtn.addEventListener('click', () => {
+                    exportoverlay.style.display = 'none';
+                });
+
+                exportoverlay.addEventListener('click', e => {
+                    if (e.target === exportoverlay)
+                        exportoverlay.style.display = 'none';
+                });
+            }
+
+            /*//////////////////////////////////////////////////////////////////////*/
+            
+            if (resetbtn) {
+                let holdtimer = null;
+                let holdstart = 0;
+                const ogresetbg = getComputedStyle(resetbtn).backgroundColor;
+
+                function setresetprogress(p) {
+                    if (p <= 0) {
+                        resetbtn.style.backgroundColor = ogresetbg;
+                        return;
+                    }
+                    let r = 255;
+                    let gb = Math.round(220 * (1 - p));
+                    resetbtn.style.backgroundColor = `rgb(${r},${gb},${gb})`;
+                }
+
+                function resetkeyframes() {
+                    state.keyframes = [];
+                    updatecodeout();
+                    resetsizetocanvas();
+                    applytransform();
+                    if (resetsound) {
+                        try {resetsound.currentTime = 0; resetsound.play()} catch {}
+                    }
+                    setresetprogress(0);
+                }
+
+                resetbtn.addEventListener('mousedown', () => {
+                    holdstart = performance.now();
+                    setresetprogress(0);
+                    holdtimer = requestAnimationFrame(function step(ts) {
+                        let elapsed = ts - holdstart;
+                        let p = Math.min(1, elapsed / 1000);
+                        setresetprogress(p);
+                        if (p >= 1) {
+                            resetkeyframes();
+                            holdtimer = null;
+                        } else if (holdtimer) {
+                            holdtimer = requestAnimationFrame(step);
+                        }
+                    });
+                });
+
+                function cancelreset() {
+                    if (holdtimer) {
+                        cancelAnimationFrame(holdtimer);
+                        holdtimer = null;
+                    }
+                    setresetprogress(0);
+                }
+
+                resetbtn.addEventListener('mouseup', cancelreset);
+                resetbtn.addEventListener('mouseleave', cancelreset);
+            }
+
+            /*//////////////////////////////////////////////////////////////////////*/
+            
+            function init() {
+                est.x = 0; est.y = 0;
+                resetsizetocanvas(); applytransform();
+                updatetimelabels(); updatetrimui();
+                updatecodeout();
+            }
+            window.addEventListener('resize', () => {
+                resetsizetocanvas();
+                applytransform();
+            }); init();
+
+        })();
+    </script>
+</body>
+</html>
