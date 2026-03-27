@@ -292,41 +292,41 @@
     </div>
 
     <script>
-        const tweetsRoot = document.getElementById("tweets");
-        const searchInput = document.querySelector(".searchbar");
-        let tweets = []; let filteredTweets = [];
-        let renderedCount = 0;
-        let loading = false;
+
+        const tweetsroot = document.getElementById("tweets");
+        const searchinput = document.querySelector(".searchbar");
+        let tweets = []; let filteredtweets = [];
+        let renderedcount = 0; let loading = false;
 
         init();
 
         async function init() {
             try {
-                const csvText = await fetch("assets/static/tweets.csv").then((res) => res.text());
-                const rows = parseCSV(csvText.trim());
-                const headers = rows.shift().map((header) => header.trim());
+                const csvtext = await fetch("assets/static/tweets.csv").then(res => res.text());
+                const rows = parsecsv(csvtext.trim());
+                const headers = rows.shift().map(header => header.trim());
                 tweets = rows
-                    .filter((row) => row.length && row.some((cell) => cell.trim() !== ""))
-                    .map((row) => headers.reduce((acc, key, idx) => {
+                    .filter(row => row.length && row.some(cell => cell.trim() !== ""))
+                    .map(row => headers.reduce((acc, key, idx) => {
                         acc[key] = row[idx] ?? "";
                         return acc;
                     }, {}));
-                filteredTweets = tweets.slice();
-                renderNextPage();
-                attachScrollListener();
-                searchInput?.addEventListener("input", handleSearch);
+                filteredtweets = tweets.slice();
+                rendernextpage();
+                attachscrolllistener();
+                searchinput?.addEventListener("input", handlesearch);
             } catch (error) {
-                tweetsRoot.textContent = "Unable to load tweets right now.";
+                tweetsroot.textContent = "Unable to load tweets right now.";
                 console.error(error);
             }
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        function parseCSV(text) {
+        function parsecsv(text) {
             const rows = [];
             let current = "";
-            let inQuotes = false;
+            let inquotes = false;
             let row = [];
 
             for (let i = 0; i < text.length; i++) {
@@ -334,16 +334,15 @@
                 const next = text[i + 1];
 
                 if (char === '"') {
-                    if (inQuotes && next === '"') {
-                        current += '"';
-                        i++;
+                    if (inquotes && next === '"') {
+                        current += '"'; i++;
                     } else {
-                        inQuotes = !inQuotes;
+                        inquotes = !inquotes;
                     }
-                } else if (char === "," && !inQuotes) {
+                } else if (char === "," && !inquotes) {
                     row.push(current);
                     current = "";
-                } else if ((char === "\n" || char === "\r") && !inQuotes) {
+                } else if ((char === "\n" || char === "\r") && !inquotes) {
                     if (char === "\r" && next === "\n") i++;
                     row.push(current);
                     rows.push(row);
@@ -362,36 +361,25 @@
             return rows;
         }
 
-        function handleSearch(event) {
+        function handlesearch(event) {
             const query = event.target.value || "";
-            const searchParams = parseSearchQuery(query);
-            filteredTweets = tweets.filter((tweet) => {
-                return matchesSearch(tweet, searchParams);
+            const searchparams = parsesearchquery(query);
+            filteredtweets = tweets.filter(tweet => {
+                return matchessarch(tweet, searchparams);
             });
-            renderedCount = 0;
-            tweetsRoot.innerHTML = "";
-            renderNextPage(true);
+            renderedcount = 0;
+            tweetsroot.innerHTML = "";
+            rendernextpage(true);
         }
 
-        function parseSearchQuery(query) {
+        function parsesearchquery(query) {
             const params = {
-                text: [],
-                lang: null,
-                url: null,
-                to: null,
-                mentions: [],
-                since: null,
-                until: null,
-                sinceTime: null,
-                untilTime: null,
-                sinceId: null,
-                maxId: null,
-                minRetweets: null,
-                minFaves: null,
-                minReplies: null,
-                maxRetweets: null,
-                maxFaves: null,
-                maxReplies: null
+                text: [], lang: null, url: null,
+                to: null, mentions: [], since: null,
+                until: null, sincetime: null, untiltime: null,
+                sinceid: null, maxid: null, minretweets: null,
+                minfaves: null, minreplies: null, maxretweets: null,
+                maxfaves: null, maxreplies: null
             };
 
             const quotedmatches = query.match(/"([^"]+)"/g);
@@ -404,159 +392,139 @@
 
             // operators
             const operators = [
-                { pattern: /lang:(\w+)/gi, key: "lang" },
-                { pattern: /url:([^\s]+)/gi, key: "url" },
-                { pattern: /to:([\w_]+)/gi, key: "to" },
-                { pattern: /@([\w_]+)/g, key: "mentions", isArray: true },
-                { pattern: /since:(\d{4}-\d{2}-\d{2}(?:_\d{2}:\d{2}:\d{2}_\w+)?)/gi, key: "since" },
-                { pattern: /until:(\d{4}-\d{2}-\d{2}(?:_\d{2}:\d{2}:\d{2}_\w+)?)/gi, key: "until" },
-                { pattern: /since_time:(\d+)/gi, key: "sinceTime" },
-                { pattern: /until_time:(\d+)/gi, key: "untilTime" },
-                { pattern: /since_id:(\d+)/gi, key: "sinceId" },
-                { pattern: /max_id:(\d+)/gi, key: "maxId" },
-                { pattern: /min_retweets:(\d+)/gi, key: "minRetweets" },
-                { pattern: /min_faves:(\d+)/gi, key: "minFaves" },
-                { pattern: /min_replies:(\d+)/gi, key: "minReplies" },
-                { pattern: /-min_retweets:(\d+)/gi, key: "maxRetweets" },
-                { pattern: /-min_faves:(\d+)/gi, key: "maxFaves" },
-                { pattern: /-min_replies:(\d+)/gi, key: "maxReplies" }
+                {pattern: /lang:(\w+)/gi, key: "lang"},
+                {pattern: /url:([^\s]+)/gi, key: "url"},
+                {pattern: /to:([\w_]+)/gi, key: "to"},
+                {pattern: /@([\w_]+)/g, key: "mentions", isarray: true},
+                {pattern: /since:(\d{4}-\d{2}-\d{2}(?:_\d{2}:\d{2}:\d{2}_\w+)?)/gi, key: "since"},
+                {pattern: /until:(\d{4}-\d{2}-\d{2}(?:_\d{2}:\d{2}:\d{2}_\w+)?)/gi, key: "until"},
+                {pattern: /since_time:(\d+)/gi, key: "sincetime"},
+                {pattern: /until_time:(\d+)/gi, key: "untiltime"},
+                {pattern: /since_id:(\d+)/gi, key: "sinceid"},
+                {pattern: /max_id:(\d+)/gi, key: "maxid"},
+                {pattern: /min_retweets:(\d+)/gi, key: "minretweets"},
+                {pattern: /min_faves:(\d+)/gi, key: "minfaves"},
+                {pattern: /min_replies:(\d+)/gi, key: "minreplies"},
+                {pattern: /-min_retweets:(\d+)/gi, key: "maxretweets"},
+                {pattern: /-min_faves:(\d+)/gi, key: "maxfaves"},
+                {pattern: /-min_replies:(\d+)/gi, key: "maxreplies"}
             ];
 
-            operators.forEach(({ pattern, key, isArray }) => {
+            operators.forEach(({ pattern, key, isarray }) => {
                 const matches = query.matchAll(pattern);
                 for (const match of matches) {
-                    if (isArray) {
+                    if (isarray) {
                         params[key].push(match[1]);
                     } else {
                         params[key] = match[1];
                     }
-                    query = query.replace(match[0], ""); // Remove from query
+                    query = query.replace(match[0], "");
                 }
             });
-
-            // Remaining text (after removing operators and quotes)
-            const remainingText = query.trim();
-            if (remainingText) {
-                params.text.push(remainingText);
-            }
-
+            const remainingtext = query.trim();
+            if (remainingtext) {params.text.push(remainingtext)}
             return params;
         }
 
-        function matchesSearch(tweet, params) {
-            // Text search (quoted phrases and remaining text)
+        function matchessarch(tweet, params) {
             if (params.text.length > 0) {
-                const fullText = (tweet.full_text || "").toLowerCase();
+                const fulltext = (tweet.full_text || "").toLowerCase();
                 for (const text of params.text) {
-                    const searchText = text.toLowerCase();
-                    // For phrases with spaces, check for exact match or hyphenated version
+                    const searchtext = text.toLowerCase();
                     if (text.includes(" ")) {
-                        const hyphenated = searchText.replace(/\s+/g, "-");
-                        if (!fullText.includes(searchText) && !fullText.includes(hyphenated)) {
+                        const hyphenated = searchtext.replace(/\s+/g, "-");
+                        if (!fulltext.includes(searchtext) && !fulltext.includes(hyphenated)) {
                             return false;
                         }
                     } else {
-                        if (!fullText.includes(searchText)) {
+                        if (!fulltext.includes(searchtext)) {
                             return false;
                         }
                     }
                 }
             }
 
-            // Language filter
             if (params.lang && (tweet.lang || "").toLowerCase() !== params.lang.toLowerCase()) {
                 return false;
             }
-
-            // URL filter
             if (params.url) {
-                const fullText = tweet.full_text || "";
-                if (!fullText.includes(params.url)) {
+                const fulltext = tweet.full_text || "";
+                if (!fulltext.includes(params.url)) {
                     return false;
                 }
             }
-
-            // Reply to filter
             if (params.to) {
-                const fullText = tweet.full_text || "";
-                if (!fullText.toLowerCase().startsWith(`@${params.to.toLowerCase()}`)) {
+                const fulltext = tweet.full_text || "";
+                if (!fulltext.toLowerCase().startsWith(`@${params.to.toLowerCase()}`)) {
                     return false;
                 }
             }
-
-            // mentions filter
             if (params.mentions.length > 0) {
                 const mentions = parsementions(tweet.user_mentions);
-                const mentionLower = mentions.map(m => m.toLowerCase());
+                const mentionlower = mentions.map(m => m.toLowerCase());
                 for (const mention of params.mentions) {
-                    if (!mentionLower.includes(mention.toLowerCase())) {
+                    if (!mentionlower.includes(mention.toLowerCase())) {
                         return false;
                     }
                 }
             }
 
-            // Date filters
-            if (params.since || params.until || params.sinceTime || params.untilTime) {
-                const tweetDate = new Date(tweet.created_at);
-                if (isNaN(tweetDate.getTime())) return false;
+            if (params.since || params.until || params.sincetime || params.untiltime) {
+                const tweetdate = new Date(tweet.created_at);
+                if (isNaN(tweetdate.getTime())) return false;
 
                 if (params.since) {
-                    const sinceDate = parseDateParam(params.since);
-                    if (tweetDate < sinceDate) return false;
+                    const sincedate = parsedateparam(params.since);
+                    if (tweetdate < sincedate) return false;
                 }
 
                 if (params.until) {
-                    const untilDate = parseDateParam(params.until);
-                    if (tweetDate >= untilDate) return false;
+                    const untildate = parsedateparam(params.until);
+                    if (tweetdate >= untildate) return false;
                 }
 
-                if (params.sinceTime) {
-                    const sinceTimestamp = parseInt(params.sinceTime) * 1000;
-                    if (tweetDate.getTime() < sinceTimestamp) return false;
+                if (params.sincetime) {
+                    const sincetimestamp = parseInt(params.sincetime) * 1000;
+                    if (tweetdate.getTime() < sincetimestamp) return false;
                 }
 
-                if (params.untilTime) {
-                    const untilTimestamp = parseInt(params.untilTime) * 1000;
-                    if (tweetDate.getTime() >= untilTimestamp) return false;
+                if (params.untiltime) {
+                    const untiltimestamp = parseInt(params.untiltime) * 1000;
+                    if (tweetdate.getTime() >= untiltimestamp) return false;
                 }
             }
 
-            // ID filters
-            if (params.sinceId) {
-                const tweetId = BigInt(tweet.tweet_id || 0);
-                const sinceId = BigInt(params.sinceId);
-                if (tweetId <= sinceId) return false;
+            if (params.sinceid) {
+                const tweetid = BigInt(tweet.tweet_id || 0);
+                const sinceid = BigInt(params.sinceid);
+                if (tweetid <= sinceid) return false;
             }
 
-            if (params.maxId) {
-                const tweetId = BigInt(tweet.tweet_id || 0);
-                const maxId = BigInt(params.maxId);
-                if (tweetId > maxId) return false;
+            if (params.maxid) {
+                const tweetid = BigInt(tweet.tweet_id || 0);
+                const maxid = BigInt(params.maxid);
+                if (tweetid > maxid) return false;
             }
 
-            // Count filters
             const retweets = parseInt(tweet.retweet_count || 0);
             const faves = parseInt(tweet.favorite_count || 0);
             const replies = parseInt(tweet.reply_count || 0);
 
-            if (params.minRetweets && retweets < parseInt(params.minRetweets)) return false;
-            if (params.minFaves && faves < parseInt(params.minFaves)) return false;
-            if (params.minReplies && replies < parseInt(params.minReplies)) return false;
-            if (params.maxRetweets && retweets > parseInt(params.maxRetweets)) return false;
-            if (params.maxFaves && faves > parseInt(params.maxFaves)) return false;
-            if (params.maxReplies && replies > parseInt(params.maxReplies)) return false;
+            if (params.minretweets && retweets < parseInt(params.minretweets)) return false;
+            if (params.minfaves && faves < parseInt(params.minfaves)) return false;
+            if (params.minreplies && replies < parseInt(params.minreplies)) return false;
+            if (params.maxretweets && retweets > parseInt(params.maxretweets)) return false;
+            if (params.maxfaves && faves > parseInt(params.maxfaves)) return false;
+            if (params.maxreplies && replies > parseInt(params.maxreplies)) return false;
 
             return true;
         }
 
-        function parseDateParam(dateStr) {
-            // Handle format: YYYY-MM-DD or YYYY-MM-DD_HH:MM:SS_TZ
-            if (dateStr.includes("_")) {
-                // Format: YYYY-MM-DD_HH:MM:SS_TZ
-                const [datePart, timePart, tz] = dateStr.split("_");
-                const [year, month, day] = datePart.split("-");
-                const [hour, minute, second] = timePart.split(":");
-                // Note: Timezone handling is simplified - UTC is assumed for most cases
+        function parsedateparam(datestr) {
+            if (datestr.includes("_")) {
+                const [datepart, timepart, tz] = datestr.split("_");
+                const [year, month, day] = datepart.split("-");
+                const [hour, minute, second] = timepart.split(":");
                 return new Date(Date.UTC(
                     parseInt(year),
                     parseInt(month) - 1,
@@ -566,40 +534,39 @@
                     parseInt(second)
                 ));
             } else {
-                // Format: YYYY-MM-DD - set to start of day (00:00:00)
-                const [year, month, day] = dateStr.split("-");
+                const [year, month, day] = datestr.split("-");
                 return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0);
             }
         }
 
-        function attachScrollListener() {
+        function attachscrolllistener() {
             window.addEventListener("scroll", () => {
                 if (loading) return;
                 const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
                 if (scrollTop + clientHeight >= scrollHeight - 200) {
-                    renderNextPage();
+                    rendernextpage();
                 }
             });
         }
 
-        function renderNextPage(force = false) {
+        function rendernextpage(force = false) {
             if (loading) return;
-            if (!force && renderedCount >= filteredTweets.length) return;
+            if (!force && renderedcount >= filteredtweets.length) return;
 
             loading = true;
             const fragment = document.createDocumentFragment();
-            const targetCount = Math.min(filteredTweets.length, renderedCount + 25);
+            const targetcount = Math.min(filteredtweets.length, renderedcount + 25);
 
-            for (let i = renderedCount; i < targetCount; i++) {
-                fragment.appendChild(createTweet(filteredTweets[i]));
+            for (let i = renderedcount; i < targetcount; i++) {
+                fragment.appendChild(createtweet(filteredtweets[i]));
             }
 
-            tweetsRoot.appendChild(fragment);
-            renderedCount = targetCount;
+            tweetsroot.appendChild(fragment);
+            renderedcount = targetcount;
             loading = false;
         }
 
-        function createTweet(tweet) {
+        function createtweet(tweet) {
             const article = document.createElement("article");
             article.className = "tweet";
 
@@ -608,15 +575,15 @@
             const isareply = mentions.length > 0;
             const lang = tweet.lang || "und";
             
-            let tweetText = tweet.full_text || "";
-            if (isareply) {tweetText = cleanmentions(tweetText, mentions)}
+            let tweettext = tweet.full_text || "";
+            if (isareply) {tweettext = cleanmentions(tweettext, mentions)}
 
             // tweet info
             const infoparts = [];
             if (mentions.length) {infoparts.push(formatmentions(mentions))}
             infoparts.push(`lang: <a>${lang}</a>`);
             infoparts.push(isareply ? "reply" : (isaquote ? "quote" : "tweet"));
-            const infoLine = infoparts.join(" // ");
+            const infoline = infoparts.join(" // ");
 
             article.innerHTML = `
                 <img src="assets/images/pfp.webp" class="avatar" draggable="false" alt="profile photo">
@@ -624,21 +591,21 @@
                     <div class="header">
                         <span class="name">Shayy</span>
                         <span class="handle">@Shayy_TV</span>
-                        <span class="date">· ${formatDate(tweet.created_at)}</span>
+                        <span class="date">· ${formatdate(tweet.created_at)}</span>
                     </div>
                     ${isareply ? `<div class="replying">Replying to ${formatmentions(mentions)}</div>` : ""}
-                    <div class="text">${formattxt(tweetText)}</div>
+                    <div class="text">${formattxt(tweettext)}</div>
                     <div class="actions">
-                        ${actionButton("reply", tweet.reply_count, replyicon(), false, tweet.tweet_id)}
-                        ${actionButton("retweet", tweet.retweet_count, retweeticon(), false, tweet.tweet_id)}
-                        ${actionButton("like", tweet.favorite_count, likeicon())}
-                        ${actionButton("views", tweet.view_count, viewsicon())}
-                        ${actionButton("bookmark", tweet.bookmark_count, bookmarkicon(), true)}
-                        ${actionButton("share", tweet.quote_count, shareicon(), true)}
+                        ${actionbutton("reply", tweet.reply_count, replyicon(), false, tweet.tweet_id)}
+                        ${actionbutton("retweet", tweet.retweet_count, retweeticon(), false, tweet.tweet_id)}
+                        ${actionbutton("like", tweet.favorite_count, likeicon())}
+                        ${actionbutton("views", tweet.view_count, viewsicon())}
+                        ${actionbutton("bookmark", tweet.bookmark_count, bookmarkicon(), true)}
+                        ${actionbutton("share", tweet.quote_count, shareicon(), true)}
                     </div>
                     <div class="info">
                         <span class="id">${tweet.tweet_id}</span>
-                        ${infoLine ? `<span>${infoLine}</span>` : ""}
+                        ${infoline ? `<span>${infoline}</span>` : ""}
                     </div>
                 </div>
             `;
@@ -675,14 +642,14 @@
             } return cleaned;
         }
 
-        function actionButton(type, count, icon, disabled = false, tweetId = null) {
-            const buttonAttrs = disabled ? " disabled" : "";
-            const countNum = parseInt(count) || 0;
-            const showCount = type !== "share" && countNum > 0;
+        function actionbutton(type, count, icon, disabled = false, tweetid = null) {
+            const buttonattrs = disabled ? " disabled" : "";
+            const countnum = parseInt(count) || 0;
+            const showcount = type !== "share" && countnum > 0;
             return `
-                <button class="action ${type}"${buttonAttrs}>
+                <button class="action ${type}"${buttonattrs}>
                     <span class="actionicon">${icon}</span>
-                    ${showCount ? `<span>${formatNumber(count)}</span>` : ""}
+                    ${showcount ? `<span>${formatnumber(count)}</span>` : ""}
                 </button>
             `;
         }
@@ -701,18 +668,18 @@
         function parsementions(value = "") {
             return value
                 .split(/;\s*/)
-                .map((mention) => mention.trim())
+                .map(mention => mention.trim())
                 .filter(Boolean);
         }
 
         function formatmentions(mentions) {
             return mentions
-                .map((mention) => `<a href="https://x.com/${mention}" target="_blank">@${mention}</a>`)
+                .map(mention => `<a href="https://x.com/${mention}" target="_blank">@${mention}</a>`)
                 .join(", ");
         }
 
         function formattxt(text) {
-            const sanitized = normalizeEmojiPlaceholders(text || "");
+            const sanitized = normalizeemojiplaceholders(text || "");
             const escaped = htmlfix(sanitized);
             const emojiplaceholder = escaped.replace(/\(emoji\)/g, '<span class="emoji" title="Twemojis could not be properly saved.">(emoji)</span>');
             const linkified = emojiplaceholder
@@ -729,27 +696,27 @@
                 '"': "&quot;",
                 "'": "&#39;"
             };
-            return string.replace(/[&<>"']/g, (char) => map[char]);
+            return string.replace(/[&<>"']/g, char => map[char]);
         }
 
-        function normalizeEmojiPlaceholders(text) {
-            return text.replace(/�+/g, (match) => {
+        function normalizeemojiplaceholders(text) {
+            return text.replace(/�+/g, match => {
                 const count = Math.max(1, Math.floor(match.length / 2));
                 return "(emoji)".repeat(count);
             });
         }
 
-        function formatNumber(value) {
+        function formatnumber(value) {
             const number = Number(value) || 0;
             return Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(number);
         }
 
-        function formatDate(dateString = "") {
-            const date = new Date(dateString);
-            if (Number.isNaN(date.getTime())) return dateString;
-            const datePart = date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-            const timePart = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-            return `${datePart}, ${timePart}`;
+        function formatdate(datestring = "") {
+            const date = new Date(datestring);
+            if (Number.isNaN(date.getTime())) return datestring;
+            const datepart = date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+            const timepart = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+            return `${datepart}, ${timepart}`;
         }
     </script>
 </body>
