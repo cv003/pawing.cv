@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <title>bookmark collection</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="googlebot" content="index,follow">
+    <meta name="google" content="notranslate">
+
+  <style>
+
+    html, body {
+        margin: 0; min-height: 100%;
+        background: #0f0f0f;
+        font-family: "Segoe UI", sans-serif;
+        color: #c7c7c7;
+        font-size: 0.875em;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .bookmarksheader {
+        background: #1f2020; display: flex;
+        align-items: stretch; flex-direction: row;
+        flex-wrap: wrap; overflow: hidden;
+        max-height: none; position: relative;
+        z-index: 10000;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .listing {
+        position: relative; display: inline-flex;
+        flex-direction: row; align-items: center;
+        gap: 6px; height: 34px; margin: auto 0;
+        padding: 0 7.5px; border: 0;
+        background: transparent; color: #c7c7c7;
+        font: inherit; cursor: pointer; 
+        text-decoration: none; white-space: nowrap;
+        border-radius: 5px; overflow: hidden; flex-shrink: 0;
+        -webkit-tap-highlight-color: transparent;
+        background: transparent;
+    }
+
+    .listing::before {
+        content: ""; position: absolute; inset: 4px;
+        border-radius: 5px; background: #363737;
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.25s ease-out; z-index: 0;
+    }
+
+    .listing:hover::before,
+    .listing:focus-visible::before {opacity: 1}
+    .listing:focus-visible {
+        outline: 2px solid #888;
+        outline-offset: 2px;
+    }
+    .listing .clickfill {
+        position: absolute; inset: 4px;
+        border-radius: 5px; background: #565757;
+        transform: scaleX(0); transform-origin: center center;
+        pointer-events: none; opacity: 1; z-index: 1;
+    }
+    .listing.clickpressing .clickfill {
+        transition: transform 0.25s ease-out;
+        transform: scaleX(1);
+    }
+    .listing.clickfading .clickfill {
+        transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+        transform: scaleX(1);
+        opacity: 0;
+    }
+    .listing.folderheld .clickfill {
+        transform: scaleX(1);
+        opacity: 1;
+        transition: none;
+    }
+    .listing.folderreleasing .clickfill {
+        transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+        transform: scaleX(1);
+        opacity: 0;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .iconwrap {
+        width: 16px; height: 16px;
+        flex: 0 0 16px; display: flex;
+        align-items: center; justify-content: center;
+        z-index: 2;
+    }
+
+    .iconwrap img {
+        width: 16px; height: 16px;
+        display: block; object-fit: contain;
+    }
+    .iconwrap.primaryfolder {
+        width: 20px; height: 20px;
+    }
+    .iconwrap.primaryfolder svg {
+        width: 20px; height: 20px;
+        display: block;
+    }
+
+    .titletext {
+        position: relative;
+        z-index: 2;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .folderpanel {
+        position: relative; padding: 0;
+        border-radius: 10px; opacity: 1;
+        transition: none; overflow: hidden;
+        will-change: opacity;
+    }
+    .folderpanel.fadingin {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .folderpanelscroll {
+        max-height: inherit;
+        overflow-x: hidden; overflow-y: auto;
+        scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .folderpanelscroll::-webkit-scrollbar {width: 0; height: 0}
+    .folderpanel.folderpanelshow {opacity: 1}
+
+    .folderpanel .listing {
+        color: #e3e3e3; height: 30px;
+        width: 100%; border-radius: 0; gap: 12px;
+        padding: 0 20px; transition: none;
+    }
+    .folderpanel .listing::before {
+        inset: 0; border-radius: 0;
+        background: #363635;
+        transition: none;
+    }
+    .folderpanel .listing:hover::before,
+    .folderpanel .listing:focus-visible::before {opacity: 1}
+
+    .folderportal {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 20000;
+    }
+
+    .folderstack {
+        position: absolute; display: flex;
+        left: 0; top: 0;
+        flex-direction: row;
+        align-items: flex-start;
+        pointer-events: none;
+    }
+
+    .folderpanel {
+        pointer-events: auto;
+        background: #1f2020; min-width: 160px;
+        max-width: min(420px, calc(100vw - 16px));
+        max-height: min(90vh, calc(100vh - 24px));
+        box-shadow: 4px 8px 24px rgba(0, 0, 0, 0.45);
+    }
+    .folderpanel + .folderpanel {margin-left: 0}
+
+    .folderpanelinner {
+        display: flex; flex-direction: column;
+        gap: 0; padding: 6px 0;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .scrolloverlay {
+        position: absolute; display: flex;
+        align-items: center; justify-content: center;
+        left: 0; right: 0; height: 28px;
+        background: #1f2020; color: #c7c7c7;
+        opacity: 0; pointer-events: none;
+        transition: none; z-index: 5;
+    }
+    .scrolloverlay.show {opacity: 1; pointer-events: auto}
+    .scrolloverlay.top {top: 0}
+    .scrolloverlay.bottom {bottom: 0}
+    .scrolloverlay svg path {fill: currentColor}
+    .errbanner {
+        padding: 12px 16px;
+        background: #4a2020;
+        color: #fcc;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .bottombar {
+      position: fixed; 
+      justify-content: center; align-items: center;
+      bottom: 2em; color: #e3e3e3;
+    }
+    .info {
+      position: fixed; display: flex;
+      bottom: 2em; left: 2em;
+      flex-direction: column; text-align: left;
+      justify-content: center;
+    }
+    .info a {padding-bottom: 5px}
+    h2 {margin: 0 0 5px 0}
+    sup a {
+        color: #e3e3e3; opacity: 0.5;
+        text-decoration: underline wavy #444;
+    }
+
+    .download {
+      position: fixed; display: flex;
+      flex-direction: column;
+      justify-content: center; align-items: center;
+      bottom: 2em; right: 2em;
+      padding: 5px 10px; outline: 1px #1f2020 solid;
+      user-select: none; cursor: pointer;
+    }
+    h3 {margin: 0}
+
+  </style>
+</head>
+<body>
+
+    <header class="bookmarksheader" aria-label="Bookmarks bar"></header>
+    <div class="folderportal"></div>
+
+    <div class="bottombar">
+      <div class="info">
+        <h2>bookmarks.html</h2>
+        <a>???? bookmarks, ??? folders</a>
+        <sup><a href="old">previous site here</a></sup>
+      </div>
+      <div class="download">
+        <h3>download</h3>
+        <sup>(?.?mb)</sup>
+      </div>
+    </div>
+
+    <script>
+
+        const bookmarksurl = "bookmarks.html";
+        const foldersvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#c7c7c7" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v10H3z"/></svg>';
+        const foldersvgprimary = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" fill="none" stroke="#c7c7c7" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" preserveAspectRatio="none"><path d="M3 6h7l2 2h9v10H3z"/></svg>';
+        const globesvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="#c7c7c7" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20M4 12h4.4q5.2 0 4.5 5.1H9.5v2.5a8 8 0 0 0 10.5-8Q19 13 17 13q-3.2 0-3.2-2.7H10q-.4-4.1 3-4.1 0-1.5.7-2A8 8 0 0 0 4 12"/></svg>';
+        const scrollupsvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"><path fill="currentColor" d="M5 9h6L8 6z"/></svg>';
+        const scrolldownsvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"><path fill="currentColor" d="M10 12 6 8h8z"/></svg>';
+        const vppad = 8;
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const dlbutton = document.querySelector(".download");
+            if (!dlbutton) return;
+            dlbutton.addEventListener("click", async () => {
+                try {
+                    const res = await fetch(bookmarksurl);
+                    if (!res.ok) throw new Error("Failed to fetch file");
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+
+                    const a = document.createElement("a");
+                    a.href = url; a.download = "bookmarks.html";
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                } catch (e) {}
+            });
+        });
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function parsedl(dl) {
+            const out = [];
+            if (!dl) return out;
+            for (const dt of dl.children) {
+                if (dt.tagName !== "DT") continue;
+                const h3 = dt.querySelector(":scope > h3");
+                const a = dt.querySelector(":scope > a");
+                const nested = dt.querySelector(":scope > dl");
+                if (h3) {
+                    out.push({type: "folder", title: h3.textContent.trim(), children: parsedl(nested)});
+                } else if (a) {
+                    const href = a.getAttribute("href") || "#";
+                    const icon = a.getAttribute("ICON") || a.getAttribute("icon");
+                    out.push({type: "bookmark", title: a.textContent.trim(), href, icon});
+                }
+            }
+            return out;
+        }
+
+        function gettoolbaritems(doc) {
+            const h3 = doc.querySelector('h3[personal_toolbar_folder="true"]') || doc.querySelector('h3[PERSONAL_TOOLBAR_FOLDER="true"]');
+            if (!h3) return [];
+            const dt = h3.parentElement;
+            if (!dt || dt.tagName !== "DT") return [];
+            const innerdl = dt.querySelector(":scope > dl");
+            return innerdl ? parsedl(innerdl) : [];
+        }
+
+        function elfromhtml(html) {
+            const t = document.createElement("template");
+            t.innerHTML = html.trim();
+            return t.content.firstElementChild;
+        }
+
+        function makeiconwrap(isfolder, icondata, opts) {
+            const w = document.createElement("span");
+            w.className = "iconwrap";
+            if (isfolder) {
+                w.innerHTML = opts && opts.primaryfoldericon ? foldersvgprimary : foldersvg;
+            } else if (icondata) {
+                const img = document.createElement("img");
+                img.src = icondata;
+                img.alt = "";
+                w.appendChild(img);
+            } else {
+                w.innerHTML = globesvg;
+            }
+            if (opts && opts.primaryfoldericon) w.classList.add("primaryfolder");
+            return w;
+        }
+
+        function makeclickfill() {
+            const s = document.createElement("span");
+            s.className = "clickfill";
+            return s;
+        }
+
+        class bookmarksui {
+            constructor() {
+                this.header = document.querySelector(".bookmarksheader");
+                this.portal = document.querySelector(".folderportal");
+                this.chain = [];
+                this.opentriggerel = null;
+                this.outsidehandler = this.docpointerdown.bind(this);
+                this.keyhandler = this.keydown.bind(this);
+                this.repositionscheduled = false;
+                this.overlayraf = new WeakMap();
+                this.subhoveropentimeouts = new Map();
+                this.subhoverclosetimeouts = new Map();
+                this.suppresshoveropenuntil = 0;
+            }
+
+            docpointerdown(ev) {
+                if (!this.chain.length) return;
+                const stack = this.portal.querySelector(".folderstack");
+                if (stack && stack.contains(ev.target)) return;
+                if (this.opentriggerel && this.opentriggerel.contains(ev.target)) return;
+                this.closeallfolders();
+            }
+
+            keydown(ev) {
+                if (ev.key === "Escape" && this.chain.length) {
+                    ev.preventDefault();
+                    this.closeallfolders();
+                }
+            }
+
+            closeallfolders() {
+                const held = this.opentriggerel;
+                this.chain = [];
+                this.portal.innerHTML = "";
+                this.clearsubhoveropentimeouts();
+                this.clearsubhoverclosetimeouts();
+                document.removeEventListener("pointerdown", this.outsidehandler, true);
+                document.removeEventListener("keydown", this.keyhandler);
+                window.removeEventListener("resize", this.boundreposition);
+                window.removeEventListener("scroll", this.boundreposition, true);
+                if (held && held.classList.contains("folderheld")) {
+                    held.classList.remove("folderheld");
+                    held.classList.add("folderreleasing");
+                    const clear = () => {
+                        held.classList.remove("folderreleasing");
+                        held.removeEventListener("transitionend", clear);
+                    };
+                    held.addEventListener("transitionend", clear);
+                    setTimeout(clear, 400);
+                }
+                this.opentriggerel = null;
+            }
+
+            clearsubhoverclosetimeouts() {
+                for (const id of this.subhoverclosetimeouts.values()) clearTimeout(id);
+                this.subhoverclosetimeouts.clear();
+            }
+            clearsubhoveropentimeouts() {
+                for (const id of this.subhoveropentimeouts.values()) clearTimeout(id);
+                this.subhoveropentimeouts.clear();
+            }
+            cancelsubhoverclosefrom(depth) {
+                for (const [d, id] of this.subhoverclosetimeouts.entries()) {
+                    if (d >= depth) {
+                        clearTimeout(id);
+                        this.subhoverclosetimeouts.delete(d);
+                    }
+                }
+            }
+
+            schedulesubhoverclosefrom(depth) {
+                this.cancelsubhoverclosefrom(depth);
+                const timeoutid = window.setTimeout(() => {
+                    this.subhoverclosetimeouts.delete(depth);
+                    if (!this.chain.length) return;
+                    if (this.chain.length <= depth) return;
+                    this.chain = this.chain.slice(0, depth);
+                    this.renderfolderstack();
+                }, 1000);
+                this.subhoverclosetimeouts.set(depth, timeoutid);
+            }
+            schedulereposition() {
+                if (this.repositionscheduled) return;
+                this.repositionscheduled = true;
+                requestAnimationFrame(() => {
+                    this.repositionscheduled = false;
+                    this.positionstack();
+                });
+            }
+
+            placefirstpanel(panel, anchorrect, barrect) {
+                panel.style.visibility = "hidden";
+                panel.style.position = "static";
+                const w = panel.offsetWidth;
+                const h = panel.offsetHeight;
+                const vw = window.innerWidth;
+                const spaceright = vw - vppad - anchorrect.left;
+                const spaceleft = anchorrect.right - vppad;
+                const opentoright = w <= spaceright || spaceright >= spaceleft;
+                let left = opentoright ? anchorrect.left : anchorrect.right - w;
+                left = Math.min(Math.max(left, vppad), vw - w - vppad);
+                const top = Math.min(anchorrect.bottom, window.innerHeight - h - vppad);
+                const topclamped = Math.max(vppad, top);
+                panel.style.position = "absolute";
+                panel.style.left = left + "px";
+                panel.style.top = topclamped + "px";
+                panel.style.visibility = "";
+                return {opentoright, left, top: topclamped, width: w};
+            }
+
+            positionstack() {
+                const stack = this.portal.querySelector(".folderstack");
+                if (!stack || !this.chain.length) return;
+                const bar = this.header.getBoundingClientRect();
+                const panels = [...stack.querySelectorAll(".folderpanel")];
+                if (!panels.length) return;
+                const anchor0 = this.chain[0].anchor.getBoundingClientRect();
+                const p0 = panels[0];
+                this.placefirstpanel(p0, anchor0, bar);
+                p0.style.zIndex = 30000;
+                let x = parseFloat(p0.style.left) + p0.offsetWidth;
+                for (let i = 1; i < panels.length; i++) {
+                    const p = panels[i];
+                    const anchorrect = this.chain[i].anchor.getBoundingClientRect();
+                    p.style.visibility = "hidden";
+                    p.style.position = "absolute";
+                    const pw = p.offsetWidth;
+                    const ph = p.offsetHeight;
+                    const vw = window.innerWidth;
+                    const canright = x + pw <= vw - vppad;
+                    const canleft = anchorrect.left - pw >= vppad;
+                    let left, top;
+                    if (canright) {
+                        left = x;
+                        top = anchorrect.bottom;
+                    } else if (canleft) {
+                        left = anchorrect.left - pw;
+                        top = anchorrect.bottom;
+                    } else {
+                        const fallbackleft = anchorrect.left;
+                        left = Math.min(Math.max(fallbackleft, vppad), vw - pw - vppad);
+                        top = anchorrect.bottom;
+                    }
+                    top = Math.min(Math.max(top, vppad), window.innerHeight - ph - vppad);
+                    p.style.left = left + "px";
+                    p.style.top = top + "px";
+                    p.style.visibility = "";
+                    p.style.zIndex = 30000 + i;
+                    x = left + pw;
+                }
+            }
+
+            renderlisting(node, opts) {
+                const infolderpanel = !!opts.infolderpanel;
+                const isfolder = node.type === "folder";
+                const row = document.createElement(infolderpanel && !isfolder ? "a" : "button");
+                row.className = "listing" + (infolderpanel ? " folderdimmer" : "");
+                if (row.tagName === "BUTTON") row.type = "button";
+                if (infolderpanel && !isfolder) {
+                    row.href = node.href;
+                    row.rel = "noopener noreferrer";
+                }
+                if (!infolderpanel) row.appendChild(makeclickfill());
+                row.appendChild(makeiconwrap(isfolder, isfolder ? null : node.icon, {
+                    primaryfoldericon: !infolderpanel && isfolder
+                }));
+                const t = document.createElement("span");
+                t.className = "titletext";
+                t.textContent = node.title;
+                row.appendChild(t);
+                if (!isfolder && !infolderpanel) {
+                    row.addEventListener("click", ev => {
+                        ev.preventDefault();
+                        row.classList.remove("clickfading", "clickpressing");
+                        row.offsetWidth;
+                        row.classList.add("clickpressing");
+                        const href = node.href;
+                        const endpress = () => {
+                            row.classList.remove("clickpressing");
+                            row.offsetWidth;
+                            row.classList.add("clickfading");
+                            const donefade = () => {
+                                row.classList.remove("clickfading");
+                                row.removeEventListener("transitionend", donefade);
+                            };
+                            row.addEventListener("transitionend", donefade);
+                            setTimeout(donefade, 350);
+                            setTimeout(() => {
+                                window.location.href = href;
+                            }, 500);
+                        };
+                        setTimeout(endpress, 250);
+                    });
+                }
+                return row;
+            }
+
+            openfolderfrom(anchorel, node, replacedepth, opts) {
+                const inbar = anchorel.closest(".bookmarksheader");
+                if (inbar) {
+                    const wasfocusmode = this.chain.length > 0;
+                    const instantprimaryfill = !!(opts && opts.primaryhover) && wasfocusmode;
+                    this.clearsubhoverclosetimeouts();
+                    if (this.opentriggerel && this.opentriggerel !== anchorel) {
+                        const prev = this.opentriggerel;
+                        if (instantprimaryfill) {
+                            prev.classList.remove("folderheld");
+                            prev.classList.add("folderreleasing");
+                            prev.classList.remove("clickpressing", "clickfading");
+                        } else {
+                            prev.classList.remove("folderheld", "folderreleasing", "clickpressing", "clickfading");
+                        }
+                        if (document.activeElement === prev) prev.blur();
+                    }
+                    this.opentriggerel = anchorel;
+                    anchorel.classList.remove("clickfading", "clickpressing");
+                    if (instantprimaryfill) {
+                        anchorel.classList.remove("folderreleasing");
+                        anchorel.classList.add("folderheld");
+                    } else {
+                        anchorel.classList.add("clickpressing");
+                        setTimeout(() => {
+                            if (this.opentriggerel !== anchorel) return;
+                            anchorel.classList.remove("clickpressing");
+                            anchorel.classList.add("folderheld");
+                        }, 250);
+                    }
+                    this.chain = [{
+                        node,
+                        anchor: anchorel,
+                        depth: 0
+                    }];
+                } else {
+                    if (opts && opts.cause === "click") {
+                        this.suppresshoveropenuntil = performance.now() + 1000;
+                    }
+                    const existingopen = this.subhoveropentimeouts.get(replacedepth);
+                    if (existingopen) {
+                        clearTimeout(existingopen);
+                        this.subhoveropentimeouts.delete(replacedepth);
+                    }
+                    this.cancelsubhoverclosefrom(replacedepth);
+                    this.chain = this.chain.slice(0, replacedepth);
+                    this.chain.push({node, anchor: anchorel, depth: replacedepth});
+                }
+                this.renderfolderstack();
+                document.addEventListener("pointerdown", this.outsidehandler, true);
+                document.addEventListener("keydown", this.keyhandler);
+                if (!this.boundreposition) {
+                    this.boundreposition = () => this.schedulereposition();
+                }
+                window.addEventListener("resize", this.boundreposition);
+                window.addEventListener("scroll", this.boundreposition, true);
+            }
+
+            renderfolderstack() {
+                this.portal.innerHTML = "";
+                const stack = document.createElement("div");
+                stack.className = "folderstack";
+                this.chain.forEach((entry, depth) => {
+                    const panel = document.createElement("div");
+                    panel.className = "folderpanel";
+                    if (depth === this.chain.length - 1)
+                        panel.classList.add("fadingin");
+                    else
+                        panel.classList.add("folderpanelshow");
+                    if (depth > 0) {
+                        panel.addEventListener("pointerenter", () => {
+                            this.cancelsubhoverclosefrom(depth);
+                        });
+                        panel.addEventListener("pointerleave", () => {
+                            this.schedulesubhoverclosefrom(depth);
+                        });
+                    }
+                    const scroller = document.createElement("div");
+                    scroller.className = "folderpanelscroll";
+                    const inner = document.createElement("div");
+                    inner.className = "folderpanelinner";
+                    const overlaytop = document.createElement("div");
+                    overlaytop.className = "scrolloverlay top";
+                    overlaytop.innerHTML = scrollupsvg;
+                    const overlaybottom = document.createElement("div");
+                    overlaybottom.className = "scrolloverlay bottom";
+                    overlaybottom.innerHTML = scrolldownsvg;
+
+                    const updatescrolloverlays = () => {
+                        const canup = scroller.scrollTop > 0.5;
+                        const remaining = scroller.scrollHeight - (scroller.scrollTop + scroller.clientHeight);
+                        const candown = remaining > 0.5;
+                        overlaytop.classList.toggle("show", canup);
+                        overlaybottom.classList.toggle("show", candown);
+                    };
+
+                    const startscroll = direction => {
+                        this.stopoverlay(panel);
+                        let frame = 0;
+                        const tick = () => {
+                            frame++;
+                            if (frame >= 10) {
+                                frame = 0;
+                                scroller.scrollBy({
+                                    top: direction * 28,
+                                    behavior: "auto"
+                                });
+                                updatescrolloverlays();
+                            }
+                            const id = requestAnimationFrame(tick);
+                            this.overlayraf.set(panel, id);
+                        };
+                        const id = requestAnimationFrame(tick);
+                        this.overlayraf.set(panel, id);
+                    };
+
+                    const stopscroll = () => this.stopoverlay(panel);
+
+                    overlaytop.addEventListener("pointerenter", () => startscroll(-1));
+                    overlaytop.addEventListener("pointerleave", stopscroll);
+                    overlaytop.addEventListener("pointerdown", () => startscroll(-1));
+                    overlaytop.addEventListener("pointerup", stopscroll);
+                    overlaytop.addEventListener("pointercancel", stopscroll);
+
+                    overlaybottom.addEventListener("pointerenter", () => startscroll(1));
+                    overlaybottom.addEventListener("pointerleave", stopscroll);
+                    overlaybottom.addEventListener("pointerdown", () => startscroll(1));
+                    overlaybottom.addEventListener("pointerup", stopscroll);
+                    overlaybottom.addEventListener("pointercancel", stopscroll);
+
+                    scroller.addEventListener("scroll", updatescrolloverlays, {passive: true});
+                    entry.node.children.forEach(child => {
+                        const row = this.renderlisting(child, {
+                            infolderpanel: true,
+                            depth: depth + 1
+                        });
+                        if (child.type === "folder") {
+                            row.addEventListener("click", ev => {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                                this.openfolderfrom(row, child, depth + 1, {cause: "click"});
+                            });
+                            row.addEventListener("pointerenter", () => {
+                                if (!this.chain.length) return;
+                                if (performance.now() < this.suppresshoveropenuntil) return;
+                                const nextdepth = depth + 1;
+                                this.cancelsubhoverclosefrom(nextdepth);
+                                const already = this.chain.length > nextdepth && this.chain[nextdepth].node === child;
+                                if (already) return;
+                                const existingopen = this.subhoveropentimeouts.get(nextdepth);
+                                if (existingopen) clearTimeout(existingopen);
+                                const timeoutid = window.setTimeout(() => {
+                                    this.subhoveropentimeouts.delete(nextdepth);
+                                    if (!row.isConnected) return;
+                                    const alreadynow = this.chain.length > nextdepth && this.chain[nextdepth].node === child;
+                                    if (alreadynow) return;
+                                    this.openfolderfrom(row, child, nextdepth);
+                                }, 500);
+                                this.subhoveropentimeouts.set(nextdepth, timeoutid);
+                            });
+                            row.addEventListener("pointerleave", () => {
+                                const id = this.subhoveropentimeouts.get(depth + 1);
+                                if (id) {
+                                    clearTimeout(id);
+                                    this.subhoveropentimeouts.delete(depth + 1);
+                                }
+                                this.schedulesubhoverclosefrom(depth + 1);
+                            });
+                        }
+                        inner.appendChild(row);
+                    });
+                    scroller.appendChild(inner);
+                    panel.appendChild(scroller);
+                    panel.appendChild(overlaytop);
+                    panel.appendChild(overlaybottom);
+                    stack.appendChild(panel);
+                    requestAnimationFrame(updatescrolloverlays);
+                });
+                this.portal.appendChild(stack);
+                requestAnimationFrame(() => {
+                    this.positionstack();
+                    const panels = [...stack.querySelectorAll(".folderpanel.fadingin")];
+                    panels.forEach(p => p.classList.add("folderpanelshow"));
+                });
+            }
+
+            stopoverlay(panel) {
+                const id = this.overlayraf.get(panel);
+                if (id) cancelAnimationFrame(id);
+                this.overlayraf.delete(panel);
+            }
+
+            renderbar(items) {
+                this.header.innerHTML = "";
+                items.forEach(node => {
+                    if (node.type === "folder") {
+                        const row = this.renderlisting(node, {
+                            infolderpanel: false,
+                            depth: 0
+                        });
+                        row.addEventListener("click", ev => {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            if (this.chain.length && this.chain[0].node === node && this.opentriggerel === row) {
+                                this.closeallfolders();
+                                return;
+                            }
+                            this.openfolderfrom(row, node, 0);
+                        });
+                        row.addEventListener("pointerenter", () => {
+                            if (!this.chain.length) return;
+                            if (this.chain[0].node === node && this.opentriggerel === row) return;
+                            this.openfolderfrom(row, node, 0, {primaryhover: true});
+                        });
+                        this.header.appendChild(row);
+                    } else {
+                        const row = this.renderlisting(node, {
+                            infolderpanel: false,
+                            depth: 0
+                        });
+                        this.header.appendChild(row);
+                    }
+                });
+            }
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const ui = new bookmarksui();
+
+        (async function init() {
+            try {
+                const res = await fetch(bookmarksurl);
+                if (!res.ok) throw new Error(res.statusText);
+                const text = await res.text();
+                const doc = new DOMParser().parseFromString(text, "text/html");
+                const items = gettoolbaritems(doc);
+
+                try {
+                    const infotitle = document.querySelector(".bottombar .info h2");
+                    const infocounts = document.querySelector(".bottombar .info a");
+                    const dlsize = document.querySelector(".bottombar .download sup");
+                    if (infotitle) infotitle.textContent = bookmarksurl;
+                    if (infocounts || dlsize) {
+                        let folders = 0;
+                        let bookmarks = 0;
+                        const walk = arr => {
+                            for (const n of arr) {
+                                if (!n) continue;
+                                if (n.type === "folder") {
+                                    folders++;
+                                    walk(n.children || []);
+                                } else if (n.type === "bookmark") {
+                                    bookmarks++;
+                                }
+                            }
+                        };
+                        walk(items);
+                        if (infocounts)
+                            infocounts.textContent = `${bookmarks} bookmarks, ${folders} folders`;
+                        if (dlsize) {
+                            const bytes = new Blob([text]).size;
+                            const mb = bytes / (1024 * 1024);
+                            dlsize.textContent = `(${mb.toFixed(1)}mb)`;
+                        }
+                    }
+                } catch (e) {}
+
+                if (!items.length) {
+                    ui.header.innerHTML = '<div class="errbanner">No personal toolbar folder found in bookmarks.html.</div>';
+                    return;
+                }
+                ui.renderbar(items);
+            } catch (e) {}
+        })();
+
+  </script>
+</body>
+</html>

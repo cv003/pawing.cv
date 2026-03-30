@@ -14,10 +14,7 @@
     <script>
         // redirect moved urls to the new ones
         var path = location.pathname.replace(/^\/+|\/+$/g, "");
-        if (path === "downloads" || path.startsWith("bookmark")) {
-            location.replace("https://coolsite.cv/dl");
-        }
-        else if (path.startsWith("kris")) {
+        if (path.startsWith("kris")) {
             location.replace("https://coolsite.cv/utdr/kris");
         }
         else if (path.startsWith("shayy") || path.startsWith("utdr/shayy")) {
@@ -31,6 +28,9 @@
         }
         else if (path.startsWith("gdaudio")) {
             location.replace("https://coolsite.cv/gd/audio");
+        }
+        else if (path.startsWith("dl")) {
+            location.replace("https://coolsite.cv/bookmarks");
         }
     </script>
 
