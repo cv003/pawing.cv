@@ -76,7 +76,7 @@
 
 <body>
     <div class="header">
-        <img src="assets/svgs/ia.svg">
+        <img src="/assets/svgs/ia.svg">
         <div><h1>cdx downloader</h1>
         a simple web archive link extractor</div>
     </div>
@@ -119,8 +119,8 @@
 
         const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'junkchk'];
 
-        function element(cls) {return document.querySelector('.' + cls)}
-        function allelements(cls) {return Array.from(document.getElementsByClassName(cls))}
+        function element(cls) { return document.querySelector('.' + cls) }
+        function allelements(cls) { return Array.from(document.getElementsByClassName(cls)) }
 
         function savesettings() {
             let o = {};
@@ -171,8 +171,8 @@
         }
 
         function encodedurl(input) {
-            try {return encodeURIComponent(input)}
-            catch {return input}
+            try { return encodeURIComponent(input) }
+            catch { return input }
         }
 
         function normalizededupe(url) {
@@ -183,7 +183,7 @@
                 let pathname = u.pathname.replace(/\/+$/, "");
                 return hostname.toLowerCase() + pathname;
             } catch {
-                return url.replace(/^https?:\/\//i,"").replace(/^www\d*\./i,"").replace(/\/+$/,"").toLowerCase();
+                return url.replace(/^https?:\/\//i, "").replace(/^www\d*\./i, "").replace(/\/+$/, "").toLowerCase();
             }
         }
         function ERADICATEGARBAGE(url) { // not sure what classifies under garbage though
@@ -310,7 +310,7 @@
                         let [timestamp, orig, mimetype, statuscode, length] = data[i];
                         let norm = normalizededupe(orig);
                         let prev = dedupemap.get(norm);
-                        if (!prev || prev[0] < timestamp) {dedupemap.set(norm, data[i])}
+                        if (!prev || prev[0] < timestamp) { dedupemap.set(norm, data[i]) }
                     }
                     data = Array.from(dedupemap.values());
                 }

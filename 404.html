@@ -142,9 +142,9 @@
             video.addEventListener("timeupdate", () => {
                 const cur = video.currentTime;
                 const subtext = getsub(cur);
-                document.title = subtext || "&#65279;";
+                document.title = subtext || "﻿";
             });
-            video.addEventListener("ended", () => {document.title = "&#65279;"});
+            video.addEventListener("ended", () => {document.title = "﻿"});
         }
 
     </script>
