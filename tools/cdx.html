@@ -148,7 +148,7 @@
 
         function autosaveresults(content, filename) {
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
+            a.href = URL.createObjectURL(new Blob([content], {type: 'text/plain'}));
             a.download = filename;
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -214,12 +214,12 @@
                 return await fetchsingle(baseurl, "download failed");
             }
 
-            progress.textContent = "fetching page count.. (with proxy)";
+            progress.textContent = "fetching page count..";
             try {
                 const pagecounttxt = await fetchsingle(baseurl + "&showNumPages=true&pageSize=1", "page count failed");
                 const pcount = parseInt((pagecounttxt || "").trim(), 10);
                 if (!Number.isFinite(pcount) || pcount <= 1) {
-                    progress.textContent = "fetching.. (with proxy)";
+                    progress.textContent = "fetching..";
                     return await fetchsingle(baseurl, "download failed");
                 }
                 let parts = [];
@@ -236,6 +236,8 @@
             }
         }
 
+        /*//////////////////////////////////////////////////////////////////////*/
+
         persistkeys.forEach(k => {
             allelements(k).forEach(el => {
                 el.addEventListener('change', savesettings);
@@ -250,11 +252,11 @@
             el.addEventListener('input', (e) => {
                 let v = e.target.value;
                 v = v.replace(/^\s*([a-z]+:)?\/\/+/i, '');
+                v = v.replace(/^([^\/]*)/, (m) => m.toLowerCase());
                 e.target.value = v;
             });
         });
-
-        /*//////////////////////////////////////////////////////////////////////*/
+   
 
         document.querySelector('.domaininputrow').addEventListener('submit', async (ev) => {
             ev.preventDefault();
