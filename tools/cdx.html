@@ -210,11 +210,9 @@
                 let target = u;
                 if (route === "proxy-main") {
                     target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(u);
-                } else if (route === "proxy-backup") {
-                    target = "https://corsproxy.io/?" + encodeURIComponent(u);
                 }
                 const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 120000);
+                const timer = setTimeout(() => controller.abort(), 180000);
                 try {
                     const resp = await fetch(target, {
                         method: "GET",
@@ -238,7 +236,7 @@
             }
 
             async function fetchsingle(u, failmsg) {
-                const attempts = ["direct", "proxy-main", "proxy-backup"];
+                const attempts = ["proxy-main", "direct"];
                 const errors = [];
                 for (let i = 0; i < attempts.length; i++) {
                     const route = attempts[i];
