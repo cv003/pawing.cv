@@ -201,6 +201,7 @@
         }
 
         async function fetchcdxtext(baseurl, progress) {
+
             function shouldretryhttp(status) {
                 return status === 403 || status === 408 || status === 425 || status === 429 || status >= 500;
             }
@@ -213,7 +214,7 @@
                     target = "https://corsproxy.io/?" + encodeURIComponent(u);
                 }
                 const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 18000);
+                const timer = setTimeout(() => controller.abort(), 120000);
                 try {
                     const resp = await fetch(target, {
                         method: "GET",
@@ -253,30 +254,66 @@
                 throw new Error(failmsg + ": " + errors.join(" | "));
             }
 
-            progress.textContent = "fetching page count..";
+            async function fetchwithresumekey() {
+                let allrows = []; let resumekey = ""; let page = 0;
+
+                while (true) {
+                    page += 1;
+                    let u = baseurl + "&limit=5000&showResumeKey=true";
+                    if (resumekey) u += "&resumeKey=" + encodedurl(resumekey);
+                    progress.textContent = "downloading chunk " + page + "..";
+                    const txt = await fetchsingle(u, "resume chunk failed");
+                    const lines = (txt || "").replace(/\r/g, "").split("\n");
+                    const trimmed = [];
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line.length > 0) trimmed.push(line);
+                    }
+                    if (trimmed.length === 0) break;
+                    let nextresumekey = "";
+                    const last = trimmed[trimmed.length - 1];
+                    if (!/^\d{14}\s+/.test(last)) {
+                        nextresumekey = last;
+                        trimmed.pop();
+                    }
+                    if (trimmed.length > 0) allrows.push(...trimmed);
+                    if (!nextresumekey) break;
+                    resumekey = nextresumekey;
+                }
+
+                return allrows.join("\n");
+            }
+
+            progress.textContent = "trying resumekey pagination..";
+            try {
+                const resumedtxt = await fetchwithresumekey();
+                if (resumedtxt.trim().length > 0) return resumedtxt;
+            } catch (err) {
+                progress.textContent = "resumekey failed :( trying page api..";
+            }
+
             try {
                 const pagecounttxt = await fetchsingle(baseurl + "&showNumPages=true&pageSize=1", "page count failed");
                 const pcount = parseInt((pagecounttxt || "").trim(), 10);
-                if (!Number.isFinite(pcount) || pcount <= 1) {
-                    progress.textContent = "fetching..";
-                    return await fetchsingle(baseurl, "download failed");
+                if (Number.isFinite(pcount) && pcount > 1) {
+                    let parts = [];
+                    for (let p = 0; p < pcount; p++) {
+                        progress.textContent = "downloading page " + (p + 1) + "/" + pcount + "..";
+                        const chunk = await fetchsingle(baseurl + "&page=" + p + "&pageSize=1", "page download failed");
+                        if (chunk && chunk.trim().length > 0) parts.push(chunk.trim());
+                    }
+                    if (parts.length > 0) return parts.join("\n");
                 }
-                let parts = [];
-                for (let p = 0; p < pcount; p++) {
-                    progress.textContent = "downloading page " + (p + 1) + "/" + pcount + "..";
-                    const chunk = await fetchsingle(baseurl + "&page=" + p + "&pageSize=1", "page download failed");
-                    if (chunk && chunk.trim().length > 0) parts.push(chunk.trim());
-                }
-                progress.textContent = "done!";
-                return parts.join("\n");
             } catch (err) {
-                progress.textContent = "pagination unavailable, retrying single fetch..";
-                try {
-                    return await fetchsingle(baseurl, "download failed");
-                } catch (err2) {
-                    progress.textContent = (err2 && err2.message) ? err2.message : "failed to fetch data.";
-                    return "";
-                }
+                progress.textContent = "page api failed :( trying something else..";
+            }
+
+            try {
+                progress.textContent = "downloading single response..";
+                return await fetchsingle(baseurl, "download failed");
+            } catch (err2) {
+                progress.textContent = (err2 && err2.message) ? err2.message : "failed to fetch data..";
+                return "";
             }
         }
    
