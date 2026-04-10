@@ -201,17 +201,27 @@
         }
 
         async function fetchcdxtext(baseurl, islocalhost, progress) {
-            function proxify(u) {
-                return islocalhost ? "https://corsproxy.io/?" + encodeURIComponent(u) : u;
+            async function tryfetch(u, useproxy) {
+                let target = useproxy 
+                    ? "https://cors.coolsite.cv/?url=" + encodeURIComponent(u)
+                    : u;
+                try {
+                    const resp = await fetch(target);
+                    if (!resp.ok) throw new Error("HTTP " + resp.status);
+                    return await resp.text();
+                } catch (e) {
+                    if (!useproxy) throw e;
+                    throw new Error('proxy fetch failed: ' + (e.message || e));
+                }
             }
+
             async function fetchsingle(u, failmsg) {
-                const resp = await fetch(proxify(u));
-                if (!resp.ok) throw new Error(failmsg + ": " + resp.status);
-                return await resp.text();
-            }
-            if (!islocalhost) {
-                progress.textContent = "fetching..";
-                return await fetchsingle(baseurl, "download failed");
+                try {
+                    return await tryfetch(u, false);
+                } catch (e) {
+                    try {return await tryfetch(u, true)}
+                    catch (e2) {throw new Error(failmsg + ": " + e2.message)}
+                }
             }
 
             progress.textContent = "fetching page count..";
@@ -230,11 +240,17 @@
                 }
                 progress.textContent = "done!";
                 return parts.join("\n");
-            } catch {
+            } catch (err) {
                 progress.textContent = "pagination unavailable, retrying single fetch..";
-                return await fetchsingle(baseurl, "download failed");
+                try {
+                    return await fetchsingle(baseurl, "download failed");
+                } catch (err2) {
+                    progress.textContent = (err2 && err2.message) ? err2.message : "failed to fetch data.";
+                    return "";
+                }
             }
         }
+   
 
         /*//////////////////////////////////////////////////////////////////////*/
 
