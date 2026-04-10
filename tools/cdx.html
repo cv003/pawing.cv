@@ -314,6 +314,342 @@
                 return "";
             }
         }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function buildcdxurl(domain) {
+            let url = "https://web.archive.org/cdx/search/cdx?url="
+                + encodedurl(domain)
+                + "&output=txt"
+                + "&matchType=" + encodedurl(element('matchtype').value)
+                + "&fl=timestamp,original,mimetype,statuscode,length";
+
+            let limittype = element('limittype').value;
+            let limit = parseInt(element('limitval').value) || 5000;
+            if (element('limitenabled').checked) {
+                if (limittype === "slow") {
+                    url += "&limit=" + limit;
+                } else if (limittype === "fast") {
+                    url += "&fastLatest=" + limit;
+                }
+            }
+            return url;
+        }
+
+        function parsedatarows(lines) {
+            const dedupeenabled = element('dedupechk').checked;
+            const junkenabled = element('junkchk').checked;
+            const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
+            let data = [];
+            let dedupemap = dedupeenabled ? new Map() : null;
+
+            for (let i = 0; i < lines.length; i++) {
+                let parts = lines[i].split(/\s+/);
+                if (parts.length < 5) continue;
+                let original = parts[1];
+                if (junkenabled && ERADICATEGARBAGE(original)) continue;
+
+                if (dedupeenabled) {
+                    let timestamp = parts[0];
+                    let norm = normalizededupe(original);
+                    let prev = dedupemap.get(norm);
+                    if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                } else {
+                    data.push(parts);
+                    if (data.length >= hardlimit) break;
+                }
+            }
+            if (dedupeenabled) {
+                data = Array.from(dedupemap.values());
+                if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
+            }
+            return data;
+        }
+
+        async function parsecdxfile(file, progress) {
+            const totalbytes = file.size || 0;
+            const dedupeenabled = element('dedupechk').checked;
+            const junkenabled = element('junkchk').checked;
+            const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
+            let processedbytes = 0; let carry = ""; let data = [];
+            let dedupemap = dedupeenabled ? new Map() : null;
+            let stop = false;
+            const reader = file.stream().getReader();
+            const decoder = new TextDecoder();
+
+            while (!stop) {
+                const {done, value} = await reader.read();
+                if (done) break;
+                processedbytes += value.byteLength;
+                carry += decoder.decode(value, {stream: true});
+                const lines = carry.split(/\r?\n/);
+                carry = lines.pop() || "";
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const parts = line.split(/\s+/);
+                    if (parts.length < 5) continue;
+                    const original = parts[1];
+                    if (junkenabled && ERADICATEGARBAGE(original)) continue;
+
+                    if (dedupeenabled) {
+                        const timestamp = parts[0];
+                        const norm = normalizededupe(original);
+                        const prev = dedupemap.get(norm);
+                        if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                    } else {
+                        data.push(parts);
+                        if (data.length >= hardlimit) {
+                            stop = true;
+                            break;
+                        }
+                    }
+                }
+                const mbdone = (processedbytes / (1024 * 1024)).toFixed(1);
+                const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
+                progress.textContent = `reading local file ${mbdone}/${mbtotal} MB..`;
+            }
+
+            if (carry && !stop) {
+                const line = carry.trim();
+                if (line) {
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 5) {
+                        const original = parts[1];
+                        if (!(junkenabled && ERADICATEGARBAGE(original))) {
+                            if (dedupeenabled) {
+                                const timestamp = parts[0];
+                                const norm = normalizededupe(original);
+                                const prev = dedupemap.get(norm);
+                                if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                            } else if (data.length < hardlimit) {
+                                data.push(parts);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (dedupeenabled) {
+                data = Array.from(dedupemap.values());
+                if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
+            }
+            return data;
+        }
+
+        async function fetchcdxrowsstream(baseurl, progress) {
+            function shouldretryhttp(status) {
+                return status === 403 || status === 408 || status === 425 || status === 429 || status >= 500;
+            }
+
+            const attempts = ["proxy-main", "direct"];
+            const dedupeenabled = element('dedupechk').checked;
+            const junkenabled = element('junkchk').checked;
+            const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
+
+            for (let a = 0; a < attempts.length; a++) {
+                const route = attempts[a];
+                let target = baseurl;
+                if (route === "proxy-main") target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(baseurl);
+
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 1200000);
+                try {
+                    progress.textContent = `starting streamed download (${route})..`;
+                    const resp = await fetch(target, {method: "GET", cache: "no-store", signal: controller.signal});
+                    if (!resp.ok) {
+                        const e = new Error(route + " HTTP " + resp.status);
+                        e.status = resp.status;
+                        throw e;
+                    }
+                    if (!resp.body) {
+                        const fallbacktxt = await resp.text();
+                        return parsedatarows((fallbacktxt || "").replace(/\r/g, "").split("\n"));
+                    }
+
+                    const totalbytes = parseInt(resp.headers.get("content-length") || "0", 10) || 0;
+                    const reader = resp.body.getReader();
+                    const decoder = new TextDecoder();
+                    let processedbytes = 0;
+                    let carry = "";
+                    let data = [];
+                    let dedupemap = dedupeenabled ? new Map() : null;
+                    let stop = false;
+
+                    while (!stop) {
+                        const {done, value} = await reader.read();
+                        if (done) break;
+                        processedbytes += value.byteLength;
+                        carry += decoder.decode(value, {stream: true});
+                        const lines = carry.split(/\r?\n/);
+                        carry = lines.pop() || "";
+
+                        for (let i = 0; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+                            const parts = line.split(/\s+/);
+                            if (parts.length < 5) continue;
+                            const original = parts[1];
+                            if (junkenabled && ERADICATEGARBAGE(original)) continue;
+
+                            if (dedupeenabled) {
+                                const timestamp = parts[0];
+                                const norm = normalizededupe(original);
+                                const prev = dedupemap.get(norm);
+                                if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                            } else {
+                                data.push(parts);
+                                if (data.length >= hardlimit) {
+                                    stop = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        const mbdone = (processedbytes / (1024 * 1024)).toFixed(1);
+                        const rowcount = dedupeenabled ? dedupemap.size : data.length;
+                        if (totalbytes > 0) {
+                            const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
+                            progress.textContent = `streaming ${mbdone}/${mbtotal} MB.. (${rowcount} rows)`;
+                        } else {
+                            progress.textContent = `streaming ${mbdone} MB.. (${rowcount} rows)`;
+                        }
+                    }
+
+                    if (carry && !stop) {
+                        const line = carry.trim();
+                        if (line) {
+                            const parts = line.split(/\s+/);
+                            if (parts.length >= 5) {
+                                const original = parts[1];
+                                if (!(junkenabled && ERADICATEGARBAGE(original))) {
+                                    if (dedupeenabled) {
+                                        const timestamp = parts[0];
+                                        const norm = normalizededupe(original);
+                                        const prev = dedupemap.get(norm);
+                                        if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                                    } else if (data.length < hardlimit) {
+                                        data.push(parts);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (dedupeenabled) {
+                        data = Array.from(dedupemap.values());
+                        if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
+                    }
+                    return data;
+                } catch (e) {
+                    const status = e && typeof e.status === "number" ? e.status : 0;
+                    if (status && !shouldretryhttp(status)) throw e;
+                    if (a === attempts.length - 1) throw e;
+                } finally {clearTimeout(timeout)}
+            }
+            return [];
+        }
+
+        function renderanddownload(data, domain, progress, output) {
+            if (!data || data.length === 0) {
+                output.innerHTML = '<div class="notable">no results.</div>';
+                progress.textContent = "done (0 results)";
+                return;
+            }
+
+            let fmt = element('format').value;
+            let baseurl = "https://web.archive.org/web/";
+            let downloadcontent = "";
+            let downloadfilename = "";
+
+            if (fmt === "archivesonly") {
+                let out = data.map(parts => {
+                    let date = parts[0], origurl = parts[1], mimetype = parts[2];
+                    let prefix = mimetype === "text/html" ? "if_" : "im_";
+                    let waurl = baseurl + date + prefix + "/" + origurl;
+                    return waurl;
+                }).filter(Boolean).join("\n");
+                downloadcontent = out;
+                downloadfilename = domain + '.txt';
+            }
+            else if (fmt === "archiveinfo") {
+                let out = ["date,url,mimetype,responsecode,size (kb)"];
+                for (let i = 0; i < data.length; i++) {
+                    let [date, urlx, mime, code, len] = data[i];
+                    let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+                        '$1/$2/$3 $4:$5:$6');
+                    let size = parseInt(len) || 0;
+                    let sizekb = size > 0 ? (size / 1024).toFixed(3) : "";
+                    out.push(`"${dstr}","${urlx}","${mime}",${code},"${sizekb}kb"`);
+                }
+                downloadcontent = out.join("\n");
+                downloadfilename = domain + '.csv';
+            }
+            else if (fmt === "linksonly") {
+                let out = data.map(parts => parts[1]).filter(Boolean).join("\n");
+                downloadcontent = out;
+                downloadfilename = domain + '.txt';
+            }
+            autosaveresults(downloadcontent, downloadfilename);
+
+            let tlines = data.slice(0, 1000);
+            let maxdate = 4, maxurl = 3, maxmime = 8, maxcode = 4, maxsize = 4;
+            for (let i = 0; i < tlines.length; i++) {
+                let parts = tlines[i];
+                if (parts.length < 5) continue;
+                let [date, link, mime, code, len] = parts;
+                let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+                    '$1/$2/$3 $4:$5:$6');
+                maxdate = Math.max(maxdate, dstr.length);
+                maxurl = Math.max(maxurl, link.length);
+                maxmime = Math.max(maxmime, mime.length);
+                maxcode = Math.max(maxcode, code.length);
+                maxsize = Math.max(maxsize, len.length);
+            }
+            const slack = 2;
+            const nonurlch = (maxdate + maxmime + maxcode + maxsize + (slack * 4));
+            const urlch = 100;
+            const esttablepx = (nonurlch + urlch + 22) * 7;
+            const availablepx = Math.max(320, output.clientWidth || (window.innerWidth - 40));
+            const partcount = Math.max(1, Math.floor(availablepx / esttablepx));
+            const rowsperpart = Math.max(1, Math.ceil(tlines.length / partcount));
+
+            function rendertable(rows) {
+                let tbl = `<table class="cdx-table">
+      <colgroup>
+        <col style="width:${maxdate + slack}ch">
+        <col style="width:${urlch}ch">
+        <col style="width:${maxmime + slack}ch">
+        <col style="width:${maxcode + slack}ch">
+        <col style="width:${maxsize + slack}ch">
+      </colgroup>
+      <tr><th>date</th><th class="url-col">url</th><th>mimetype</th><th>code</th><th>size</th></tr>
+    `;
+                for (let i = 0; i < rows.length; i++) {
+                    let parts = rows[i];
+                    if (parts.length < 5) continue;
+                    let [date, link, mime, code, len] = parts;
+                    let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
+                        '$1/$2/$3 $4:$5:$6');
+                    tbl += `<tr>
+          <td>${escapetext(dstr)}</td>
+          <td class="url-col"><a href="${escapetext(link)}" target="_blank">${escapetext(link)}</a></td>
+          <td>${escapetext(mime)}</td>
+          <td>${escapetext(code)}</td>
+          <td>${escapetext(len)}</td>
+        </tr>`;
+                }
+                tbl += "</table>";
+                return tbl;
+            }
+
+            let partshtml = "";
+            for (let i = 0; i < tlines.length; i += rowsperpart) {
+                partshtml += rendertable(tlines.slice(i, i + rowsperpart));
+            }
+            output.innerHTML = "<div class='preview-grid'>" + partshtml + "</div>";
+            progress.textContent = `done! (${data.length} results)`;
+        }
    
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -346,149 +682,11 @@
             output.innerHTML = "";
             let domain = (element('domainfield').value || "").trim();
             if (!domain) { progress.textContent = "paste the link above, dummy"; return; }
-
-            let url = "https://web.archive.org/cdx/search/cdx?url="
-                + encodedurl(domain)
-                + "&output=txt"
-                + "&matchType=" + encodedurl(element('matchtype').value)
-                + "&fl=timestamp,original,mimetype,statuscode,length";
-
-            let limittype = element('limittype').value;
-            let limit = parseInt(element('limitval').value) || 5000;
-            if (element('limitenabled').checked) {
-                if (limittype === "slow") {
-                    url += "&limit=" + limit;
-                } else if (limittype === "fast") {
-                    url += "&fastLatest=" + limit;
-                }
-            }
+            let url = buildcdxurl(domain);
 
             try {
-                let text = await fetchcdxtext(url, progress);
-
-                if (text.trim().length == 0) {
-                    output.innerHTML = '<div class="notable">no results.</div>';
-                    progress.textContent = "done (0 results)";
-                    return;
-                }
-                let lines = text.trim().split(/\r?\n/);
-
-                const dedupeenabled = element('dedupechk').checked;
-                const junkenabled = element('junkchk').checked;
-                let data = [];
-
-                for (let i = 0; i < lines.length; i++) {
-                    let parts = lines[i].split(/\s+/);
-                    if (parts.length < 5) continue;
-                    let original = parts[1];
-                    if (junkenabled && ERADICATEGARBAGE(original)) continue;
-                    data.push(parts);
-                }
-                if (dedupeenabled) {
-                    const dedupemap = new Map();
-                    for (let i = 0; i < data.length; i++) {
-                        let [timestamp, orig, mimetype, statuscode, length] = data[i];
-                        let norm = normalizededupe(orig);
-                        let prev = dedupemap.get(norm);
-                        if (!prev || prev[0] < timestamp) {dedupemap.set(norm, data[i])}
-                    }
-                    data = Array.from(dedupemap.values());
-                }
-
-                let fmt = element('format').value;
-                let baseurl = "https://web.archive.org/web/";
-                let downloadcontent = "";
-                let downloadfilename = "";
-
-                if (fmt === "archivesonly") {
-                    let out = data.map(parts => {
-                        let date = parts[0], origurl = parts[1], mimetype = parts[2];
-                        let prefix = mimetype === "text/html" ? "if_" : "im_";
-                        let waurl = baseurl + date + prefix + "/" + origurl;
-                        return waurl;
-                    }).filter(Boolean).join("\n");
-                    downloadcontent = out;
-                    downloadfilename = domain + '.txt';
-                }
-                else if (fmt === "archiveinfo") {
-                    let out = ["date,url,mimetype,responsecode,size (kb)"];
-                    for (let i = 0; i < data.length; i++) {
-                        let [date, urlx, mime, code, len] = data[i];
-                        let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
-                            '$1/$2/$3 $4:$5:$6');
-                        let size = parseInt(len) || 0;
-                        let sizekb = size > 0 ? (size / 1024).toFixed(3) : "";
-                        out.push(`"${dstr}","${urlx}","${mime}",${code},"${sizekb}kb"`);
-                    }
-                    downloadcontent = out.join("\n");
-                    downloadfilename = domain + '.csv';
-                }
-                else if (fmt === "linksonly") {
-                    let out = data.map(parts => {
-                        return parts[1];
-                    }).filter(Boolean).join("\n");
-                    downloadcontent = out;
-                    downloadfilename = domain + '.txt';
-                }
-                autosaveresults(downloadcontent, downloadfilename);
-
-                let tlines = data.slice(0, 1000);
-                let maxdate = 4, maxurl = 3, maxmime = 8, maxcode = 4, maxsize = 4;
-                for (let i = 0; i < tlines.length; i++) {
-                    let parts = tlines[i];
-                    if (parts.length < 5) continue;
-                    let [date, link, mime, code, len] = parts;
-                    let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
-                        '$1/$2/$3 $4:$5:$6');
-                    maxdate = Math.max(maxdate, dstr.length);
-                    maxurl = Math.max(maxurl, link.length);
-                    maxmime = Math.max(maxmime, mime.length);
-                    maxcode = Math.max(maxcode, code.length);
-                    maxsize = Math.max(maxsize, len.length);
-                }
-                const slack = 2;
-                const nonurlch = (maxdate + maxmime + maxcode + maxsize + (slack * 4));
-                const urlch = 100;
-                const esttablepx = (nonurlch + urlch + 22) * 7;
-                const availablepx = Math.max(320, output.clientWidth || (window.innerWidth - 40));
-                const partcount = Math.max(1, Math.floor(availablepx / esttablepx));
-                const rowsperpart = Math.max(1, Math.ceil(tlines.length / partcount));
-
-                function rendertable(rows) {
-                    let tbl = `<table class="cdx-table">
-          <colgroup>
-            <col style="width:${maxdate + slack}ch">
-            <col style="width:${urlch}ch">
-            <col style="width:${maxmime + slack}ch">
-            <col style="width:${maxcode + slack}ch">
-            <col style="width:${maxsize + slack}ch">
-          </colgroup>
-          <tr><th>date</th><th class="url-col">url</th><th>mimetype</th><th>code</th><th>size</th></tr>
-        `;
-                    for (let i = 0; i < rows.length; i++) {
-                        let parts = rows[i];
-                        if (parts.length < 5) continue;
-                        let [date, link, mime, code, len] = parts;
-                        let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
-                            '$1/$2/$3 $4:$5:$6');
-                        tbl += `<tr>
-              <td>${escapetext(dstr)}</td>
-              <td class="url-col"><a href="${escapetext(link)}" target="_blank">${escapetext(link)}</a></td>
-              <td>${escapetext(mime)}</td>
-              <td>${escapetext(code)}</td>
-              <td>${escapetext(len)}</td>
-            </tr>`;
-                    }
-                    tbl += "</table>";
-                    return tbl;
-                }
-
-                let partshtml = "";
-                for (let i = 0; i < tlines.length; i += rowsperpart) {
-                    partshtml += rendertable(tlines.slice(i, i + rowsperpart));
-                }
-                output.innerHTML = "<div class='preview-grid'>" + partshtml + "</div>";
-                progress.textContent = `done! (${data.length} results)`;
+                let data = await fetchcdxrowsstream(url, progress);
+                renderanddownload(data, domain, progress, output);
 
             } catch (e) {
                 const msg = (e && e.message) ? e.message : String(e);
@@ -499,6 +697,7 @@
                 }
             }
         });
+
         
     </script>
 </body>
