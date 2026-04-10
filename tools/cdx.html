@@ -200,28 +200,57 @@
             );
         }
 
-        async function fetchcdxtext(baseurl, islocalhost, progress) {
-            async function tryfetch(u, useproxy) {
-                let target = useproxy 
-                    ? "https://cors.coolsite.cv/?url=" + encodeURIComponent(u)
-                    : u;
+        async function fetchcdxtext(baseurl, progress) {
+            function shouldretryhttp(status) {
+                return status === 403 || status === 408 || status === 425 || status === 429 || status >= 500;
+            }
+
+            async function tryfetch(u, route) {
+                let target = u;
+                if (route === "proxy-main") {
+                    target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(u);
+                } else if (route === "proxy-backup") {
+                    target = "https://corsproxy.io/?" + encodeURIComponent(u);
+                }
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 18000);
                 try {
-                    const resp = await fetch(target);
-                    if (!resp.ok) throw new Error("HTTP " + resp.status);
+                    const resp = await fetch(target, {
+                        method: "GET",
+                        cache: "no-store",
+                        signal: controller.signal
+                    });
+                    if (!resp.ok) {
+                        const label = route === "direct" ? "direct" : "proxy";
+                        const e = new Error(label + " HTTP " + resp.status);
+                        e.status = resp.status;
+                        throw e;
+                    }
                     return await resp.text();
                 } catch (e) {
-                    if (!useproxy) throw e;
-                    throw new Error('proxy fetch failed: ' + (e.message || e));
+                    const name = e && e.name ? e.name : "";
+                    if (name === "AbortError") throw new Error(route + " timed out");
+                    throw e;
+                } finally {
+                    clearTimeout(timer);
                 }
             }
 
             async function fetchsingle(u, failmsg) {
-                try {
-                    return await tryfetch(u, false);
-                } catch (e) {
-                    try {return await tryfetch(u, true)}
-                    catch (e2) {throw new Error(failmsg + ": " + e2.message)}
+                const attempts = ["direct", "proxy-main", "proxy-backup"];
+                const errors = [];
+                for (let i = 0; i < attempts.length; i++) {
+                    const route = attempts[i];
+                    try {
+                        return await tryfetch(u, route);
+                    } catch (e) {
+                        const status = e && typeof e.status === "number" ? e.status : 0;
+                        const msg = (e && e.message) ? e.message : String(e);
+                        errors.push(route + ": " + msg);
+                        if (status && !shouldretryhttp(status)) break;
+                    }
                 }
+                throw new Error(failmsg + ": " + errors.join(" | "));
             }
 
             progress.textContent = "fetching page count..";
@@ -299,11 +328,8 @@
                 }
             }
 
-            // const islocalhost = location.hostname === "127.0.0.1" || location.hostname === "localhost";
-            const islocalhost = true; // fuck you
-
             try {
-                let text = await fetchcdxtext(url, islocalhost, progress);
+                let text = await fetchcdxtext(url, progress);
 
                 if (text.trim().length == 0) {
                     output.innerHTML = '<div class="notable">no results.</div>';
@@ -430,9 +456,12 @@
                 progress.textContent = `done! (${data.length} results)`;
 
             } catch (e) {
-                if (e instanceof TypeError && islocalhost) {
-                    progress.textContent = "cors error when contacting web archive :(";
-                } else {progress.textContent = "error: " + e}
+                const msg = (e && e.message) ? e.message : String(e);
+                if (/failed to fetch|cors|networkerror/i.test(msg)) {
+                    progress.textContent = "all routes failed :(";
+                } else {
+                    progress.textContent = "error: " + msg;
+                }
             }
         });
         
