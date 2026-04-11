@@ -99,9 +99,10 @@
         </label>
         <label> and match
             <select class="matchtype">
-                <option value="prefix">the url and anything after it</option>
-                <option value="host">this (sub)domain</option>
-                <option value="domain" selected>everything on this site</option>
+                <option value="prefix">all urls that start with this exact path</option>
+                <option value="host">all urls on this (sub)domain</option>
+                <option value="domain" selected>all urls on this (sub)domain and its subdomains</option>
+        
             </select>
         </label>
         <label><input type="checkbox" class="dedupechk"> and dedupe</label>
@@ -456,7 +457,7 @@
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 1200000);
                 try {
-                    progress.textContent = `beginning to stream data, one sec.. (this might take a while on mobile!)`;
+                    progress.textContent = `beginning to stream data, this might take a while..`;
                     const resp = await fetch(target, {method: "GET", cache: "no-store", signal: controller.signal});
                     if (!resp.ok) {
                         const e = new Error(route + " HTTP " + resp.status);
