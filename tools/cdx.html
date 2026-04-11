@@ -13,8 +13,10 @@
             font-family: system-ui, sans-serif;
             color: black; background: white; 
             font-size: 13px; padding: 1em; margin: 0;
-            height: 100vh; width: 100vw; overflow-x: hidden;
+            height: 100vh; width: 100vw;
         }
+        *::-webkit-scrollbar {display: none}
+        * {overflow-x: hidden; scrollbar-width: none}
 
         .header {
             display: flex;
@@ -32,7 +34,15 @@
             margin-right: 16px;
             user-select: none;
         }
-        input {margin-top: 10px}
+        input, textarea {margin-top: 10px}
+        textarea.domainfield {
+            width: 200px; max-width: 70vw; min-height: 4.5em;
+            resize: vertical; font-family: inherit;
+            font-size: inherit;
+        }
+        .progress {white-space: pre-wrap}
+        .progressline {margin: 4px 0}
+        .progressline button {margin-left: 8px}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -45,26 +55,26 @@
         }
         .notable {
             padding: 8px; font-style: italic;
-            color: #999;
+            color: #777;
         }
 
-        table.cdx-table {
+        table.cdxtable {
             width: auto; border-collapse: collapse;
             font-size: 9px;
             table-layout: auto;
         }
-        table.cdx-table th, table.cdx-table td {
+        table.cdxtable th, table.cdxtable td {
             border: 1px solid #e2e2e2; padding: 2px 4px;
             overflow: hidden; white-space: nowrap;
         }
-        table.cdx-table th {background: #ccc}
-        table.cdx-table th:not(.url-col), table.cdx-table td:not(.url-col) {text-align: center}
-        table.cdx-table th.url-col, table.cdx-table td.url-col {text-align: left}
-        table.cdx-table td.url-col a {
+        table.cdxtable th {background: #ccc}
+        table.cdxtable th:not(.url-col), table.cdxtable td:not(.url-col) {text-align: center}
+        table.cdxtable th.url-col, table.cdxtable td.url-col {text-align: left}
+        table.cdxtable td.url-col a {
             display: block; overflow: hidden;
             text-overflow: ellipsis; white-space: nowrap;
         }
-        table.cdx-table th.url-col, table.cdx-table td.url-col {max-width: 100ch}
+        table.cdxtable th.url-col, table.cdxtable td.url-col {max-width: 100ch}
         .preview-grid {
             margin-top: 8px; display: flex;
             flex-wrap: wrap; gap: 8px;
@@ -82,7 +92,7 @@
     </div>
     <div class="persistbox">
         <label>
-            and format as
+            format output file as
             <select class="format">
                 <option value="linksonly">links only (.txt)</option>
                 <option value="archivesonly">archives only (.txt)</option>
@@ -107,18 +117,18 @@
         </label>
         <label><input type="checkbox" class="dedupechk"> and dedupe</label>
         <label><input type="checkbox" class="junkchk"> and exclude junk</label>
+        <label><input type="checkbox" class="skip404chk"> and skip 404/410s</label>
     </div>
     <form class="domaininputrow" autocomplete="off">
-        <input type="text" class="domainfield" placeholder="a.e.x.com/file.html" spellcheck="false"
-            autocomplete="off">
+        <textarea class="domainfield" placeholder="example.com&#10;a.e.x.com/file.html" spellcheck="false"
+            autocomplete="off" rows="4"></textarea>
         <button type="submit" class="runbtn">run</button>
     </form>
     <div class="progress"></div>
     <div class="outputrow"></div>
-    <input class="dlfile" type="hidden">
     <script>
 
-        const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'junkchk'];
+        const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'junkchk', 'skip404chk'];
 
         function element(cls) {return document.querySelector('.' + cls)}
         function allelements(cls) {return Array.from(document.getElementsByClassName(cls))}
@@ -127,7 +137,7 @@
             let o = {};
             persistkeys.forEach(k => {
                 let val;
-                if (k === "limitenabled" || k === "dedupechk" || k === "junkchk") val = element(k).checked;
+                if (k === "limitenabled" || k === "dedupechk" || k === "junkchk" || k === "skip404chk") val = element(k).checked;
                 else val = element(k).value;
                 o[k] = val;
             });
@@ -140,19 +150,59 @@
             persistkeys.forEach(k => {
                 let val = o[k];
                 if (val != null) {
-                    if (k === "limitenabled" || k === "dedupechk" || k === "junkchk")
+                    if (k === "limitenabled" || k === "dedupechk" || k === "junkchk" || k === "skip404chk")
                         element(k).checked = !!val;
                     else element(k).value = val;
                 }
             });
         }
 
-        function autosaveresults(content, filename) {
+        function downloadBlob(content, filename, mimetype) {
+            const type = mimetype || "text/plain";
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([content], {type: 'text/plain'}));
+            a.href = URL.createObjectURL(new Blob([content], {type}));
             a.download = filename;
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+
+        function setprogress(progress, msg) {
+            if (typeof progress === "function") progress(msg);
+            else progress.textContent = msg;
+        }
+
+        function gottaskipbadpages(code) {
+            if (!element('skip404chk').checked) return false;
+            const n = parseInt(String(code), 10);
+            if (!Number.isFinite(n)) return false;
+            return n === 404 || n === 410;
+        }
+
+        const defaulttitle = document.title;
+        function alldone() {
+            new Audio("/assets/audio/nekoarc.mp3").play().catch(() => {});
+            const prev = document.title;
+            document.title = "finished!!";
+            setTimeout(() => {document.title = prev || defaulttitle}, 2000);
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function normalizeurlline(raw) {
+            let v = String(raw || "").trim();
+            if (!v) return "";
+            v = v.replace(/^\s*([a-z]+:)?\/\/+/i, "");
+            v = v.replace(/^([^\/]*)/, (m) => m.toLowerCase());
+            return v;
+        }
+        function parseurllist(text) {
+            const lines = String(text || "").split(/\r?\n/);
+            const out = [];
+            for (let i = 0; i < lines.length; i++) {
+                const n = normalizeurlline(lines[i]);
+                if (n) out.push(n);
+            }
+            return out;
         }
 
         function updatelimitcontrols() {
@@ -260,7 +310,7 @@
                     page += 1;
                     let u = baseurl + "&limit=5000&showResumeKey=true";
                     if (resumekey) u += "&resumeKey=" + encodedurl(resumekey);
-                    progress.textContent = "downloading chunk " + page + "..";
+                    setprogress(progress, "downloading chunk " + page + "..");
                     const txt = await fetchsingle(u, "resume chunk failed");
                     const lines = (txt || "").replace(/\r/g, "").split("\n");
                     const trimmed = [];
@@ -283,12 +333,12 @@
                 return allrows.join("\n");
             }
 
-            progress.textContent = "trying pagination..";
+            setprogress(progress, "trying pagination..");
             try {
                 const resumedtxt = await fetchwithresumekey();
                 if (resumedtxt.trim().length > 0) return resumedtxt;
             } catch (err) {
-                progress.textContent = "pagination failed :( trying page api..";
+                setprogress(progress, "pagination failed :( trying page api..");
             }
 
             try {
@@ -297,21 +347,21 @@
                 if (Number.isFinite(pcount) && pcount > 1) {
                     let parts = [];
                     for (let p = 0; p < pcount; p++) {
-                        progress.textContent = "downloading page " + (p + 1) + "/" + pcount + "..";
+                        setprogress(progress, "downloading page " + (p + 1) + "/" + pcount + "..");
                         const chunk = await fetchsingle(baseurl + "&page=" + p + "&pageSize=1", "page download failed");
                         if (chunk && chunk.trim().length > 0) parts.push(chunk.trim());
                     }
                     if (parts.length > 0) return parts.join("\n");
                 }
             } catch (err) {
-                progress.textContent = "page api failed :( trying something else..";
+                setprogress(progress, "page api failed :( trying something else..");
             }
 
             try {
-                progress.textContent = "downloading single response..";
+                setprogress(progress, "downloading single response..");
                 return await fetchsingle(baseurl, "download failed");
             } catch (err2) {
-                progress.textContent = (err2 && err2.message) ? err2.message : "failed to fetch data :(";
+                setprogress(progress, (err2 && err2.message) ? err2.message : "failed to fetch data :(");
                 return "";
             }
         }
@@ -349,6 +399,7 @@
                 if (parts.length < 5) continue;
                 let original = parts[1];
                 if (junkenabled && ERADICATEGARBAGE(original)) continue;
+                if (gottaskipbadpages(parts[3])) continue;
 
                 if (dedupeenabled) {
                     let timestamp = parts[0];
@@ -393,6 +444,7 @@
                     if (parts.length < 5) continue;
                     const original = parts[1];
                     if (junkenabled && ERADICATEGARBAGE(original)) continue;
+                    if (gottaskipbadpages(parts[3])) continue;
 
                     if (dedupeenabled) {
                         const timestamp = parts[0];
@@ -409,7 +461,7 @@
                 }
                 const mbdone = (processedbytes / (1024 * 1024)).toFixed(1);
                 const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
-                progress.textContent = `reading local file ${mbdone}/${mbtotal} MB..`;
+                setprogress(progress, `reading local file ${mbdone}/${mbtotal}mb..`);
             }
 
             if (carry && !stop) {
@@ -418,7 +470,7 @@
                     const parts = line.split(/\s+/);
                     if (parts.length >= 5) {
                         const original = parts[1];
-                        if (!(junkenabled && ERADICATEGARBAGE(original))) {
+                        if (!((junkenabled && ERADICATEGARBAGE(original)) || gottaskipbadpages(parts[3]))) {
                             if (dedupeenabled) {
                                 const timestamp = parts[0];
                                 const norm = normalizededupe(original);
@@ -457,7 +509,7 @@
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 1200000);
                 try {
-                    progress.textContent = `beginning to stream data, this might take a while..`;
+                    setprogress(progress, "beginning to stream data, this might take a while..");
                     const resp = await fetch(target, {method: "GET", cache: "no-store", signal: controller.signal});
                     if (!resp.ok) {
                         const e = new Error(route + " HTTP " + resp.status);
@@ -493,6 +545,7 @@
                             if (parts.length < 5) continue;
                             const original = parts[1];
                             if (junkenabled && ERADICATEGARBAGE(original)) continue;
+                            if (gottaskipbadpages(parts[3])) continue;
 
                             if (dedupeenabled) {
                                 const timestamp = parts[0];
@@ -512,9 +565,9 @@
                         const rowcount = dedupeenabled ? dedupemap.size : data.length;
                         if (totalbytes > 0) {
                             const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
-                            progress.textContent = `streaming ${mbdone}/${mbtotal} MB.. (${rowcount} rows)`;
+                            setprogress(progress, `streaming ${mbdone}/${mbtotal} MB.. (${rowcount} rows)`);
                         } else {
-                            progress.textContent = `streaming ${mbdone} MB.. (${rowcount} rows)`;
+                            setprogress(progress, `streaming ${mbdone} MB.. (${rowcount} rows)`);
                         }
                     }
 
@@ -524,7 +577,7 @@
                             const parts = line.split(/\s+/);
                             if (parts.length >= 5) {
                                 const original = parts[1];
-                                if (!(junkenabled && ERADICATEGARBAGE(original))) {
+                                if (!((junkenabled && ERADICATEGARBAGE(original)) || gottaskipbadpages(parts[3]))) {
                                     if (dedupeenabled) {
                                         const timestamp = parts[0];
                                         const norm = normalizededupe(original);
@@ -551,17 +604,12 @@
             return [];
         }
 
-        function renderanddownload(data, domain, progress, output) {
-            if (!data || data.length === 0) {
-                output.innerHTML = '<div class="notable">no results.</div>';
-                progress.textContent = "done (0 results)";
-                return;
-            }
-
+        function exportbuilder(data, domain) {
             let fmt = element('format').value;
             let baseurl = "https://web.archive.org/web/";
             let downloadcontent = "";
             let downloadfilename = "";
+            let mime = "text/plain;charset=utf-8";
 
             if (fmt === "archivesonly") {
                 let out = data.map(parts => {
@@ -571,27 +619,51 @@
                     return waurl;
                 }).filter(Boolean).join("\n");
                 downloadcontent = out;
-                downloadfilename = domain + '.txt';
+                downloadfilename = "archive of " + domain + ".txt";
             }
             else if (fmt === "archiveinfo") {
-                let out = ["date,url,mimetype,responsecode,size (kb)"];
+                let out = ["date,url,mimetype,responsecode,size"];
                 for (let i = 0; i < data.length; i++) {
-                    let [date, urlx, mime, code, len] = data[i];
+                    let [date, urlx, rowmime, code, len] = data[i];
                     let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
                         '$1/$2/$3 $4:$5:$6');
                     let size = parseInt(len) || 0;
                     let sizekb = size > 0 ? (size / 1024).toFixed(3) : "";
-                    out.push(`"${dstr}","${urlx}","${mime}",${code},"${sizekb}kb"`);
+                    out.push(`"${dstr}","${urlx}","${rowmime}",${code},"${sizekb}kb"`);
                 }
                 downloadcontent = out.join("\n");
-                downloadfilename = domain + '.csv';
+                downloadfilename = domain + ".csv";
+                mime = "text/csv;charset=utf-8";
             }
             else if (fmt === "linksonly") {
                 let out = data.map(parts => parts[1]).filter(Boolean).join("\n");
                 downloadcontent = out;
-                downloadfilename = domain + '.txt';
+                downloadfilename = domain + ".txt";
             }
-            autosaveresults(downloadcontent, downloadfilename);
+            return { content: downloadcontent, filename: downloadfilename, mime };
+        }
+
+        function filldonerow(rowEl, domain, data, withUrlPrefix) {
+            rowEl.textContent = "";
+            const n = data && data.length ? data.length : 0;
+            const label = withUrlPrefix ? `(${domain}) done! (${n} results)` : `done! (${n} results)`;
+            rowEl.appendChild(document.createTextNode(label));
+            if (n > 0) {
+                const exp = exportbuilder(data, domain);
+                rowEl.appendChild(document.createTextNode(" "));
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = "download";
+                btn.addEventListener("click", () => downloadBlob(exp.content, exp.filename, exp.mime));
+                rowEl.appendChild(btn);
+            }
+        }
+
+        function showpreviewtable(data, output) {
+            if (!data || data.length === 0) {
+                output.innerHTML = '<div class="notable">no results :(</div>';
+                return;
+            }
 
             let tlines = data.slice(0, 1000);
             let maxdate = 4, maxurl = 3, maxmime = 8, maxcode = 4, maxsize = 4;
@@ -616,7 +688,7 @@
             const rowsperpart = Math.max(1, Math.ceil(tlines.length / partcount));
 
             function rendertable(rows) {
-                let tbl = `<table class="cdx-table">
+                let tbl = `<table class="cdxtable">
       <colgroup>
         <col style="width:${maxdate + slack}ch">
         <col style="width:${urlch}ch">
@@ -624,7 +696,7 @@
         <col style="width:${maxcode + slack}ch">
         <col style="width:${maxsize + slack}ch">
       </colgroup>
-      <tr><th>date</th><th class="url-col">url</th><th>mimetype</th><th>code</th><th>size</th></tr>
+      <tr><th>latest archive date</th><th class="url-col">full url</th><th>mimetype</th><th>response code</th><th>size in bytes</th></tr>
     `;
                 for (let i = 0; i < rows.length; i++) {
                     let parts = rows[i];
@@ -649,9 +721,7 @@
                 partshtml += rendertable(tlines.slice(i, i + rowsperpart));
             }
             output.innerHTML = "<div class='preview-grid'>" + partshtml + "</div>";
-            progress.textContent = `done! (${data.length} results)`;
         }
-   
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -665,42 +735,72 @@
         updatelimitcontrols();
         element('limitenabled').addEventListener('change', updatelimitcontrols);
 
-        allelements('domainfield').forEach(el => {
-            el.addEventListener('input', (e) => {
-                let v = e.target.value;
-                v = v.replace(/^\s*([a-z]+:)?\/\/+/i, '');
-                v = v.replace(/^([^\/]*)/, (m) => m.toLowerCase());
-                e.target.value = v;
-            });
+        element('domainfield').addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            if (!e.ctrlKey && !e.metaKey) return;
+            e.preventDefault();
+            e.target.form.requestSubmit();
         });
-   
+
+        function bettererrorformat(msg) {
+            if (/failed to fetch|cors|networkerror/i.test(msg)) return "all routes failed :(";
+            return "error: " + msg;
+        }
 
         document.querySelector('.domaininputrow').addEventListener('submit', async (ev) => {
             ev.preventDefault();
-            const progress = element('progress');
+            const progressRoot = element('progress');
             const output = element('outputrow');
-            progress.textContent = "";
+            progressRoot.replaceChildren();
             output.innerHTML = "";
-            let domain = (element('domainfield').value || "").trim();
-            if (!domain) { progress.textContent = "paste the link above, dummy"; return; }
-            let url = buildcdxurl(domain);
 
-            try {
-                let data = await fetchcdxrowsstream(url, progress);
-                renderanddownload(data, domain, progress, output);
+            const urls = parseurllist(element('domainfield').value);
+            if (urls.length === 0) {
+                progressRoot.textContent = "paste the links above, dummy";
+                return;
+            }
 
-            } catch (e) {
-                const msg = (e && e.message) ? e.message : String(e);
-                if (/failed to fetch|cors|networkerror/i.test(msg)) {
-                    progress.textContent = "all routes failed :(";
-                } else {
-                    progress.textContent = "error: " + msg;
+            let merged = [];
+
+            if (urls.length === 1) {
+                const domain = urls[0];
+                const cdxUrl = buildcdxurl(domain);
+                try {
+                    const data = await fetchcdxrowsstream(cdxUrl, progressRoot);
+                    merged = data;
+                    progressRoot.replaceChildren();
+                    const row = document.createElement('div');
+                    row.className = 'progressline';
+                    filldonerow(row, domain, data, false);
+                    progressRoot.appendChild(row);
+                } catch (e) {
+                    const msg = (e && e.message) ? e.message : String(e);
+                    progressRoot.textContent = bettererrorformat(msg);
+                }
+            } else {
+                for (let i = 0; i < urls.length; i++) {
+                    const domain = urls[i];
+                    const line = document.createElement('div');
+                    line.className = 'progressline';
+                    progressRoot.appendChild(line);
+                    const cdxUrl = buildcdxurl(domain);
+                    try {
+                        const data = await fetchcdxrowsstream(cdxUrl, (m) => {
+                            line.textContent = '(' + domain + ') ' + m;
+                        });
+                        merged.push(...data);
+                        filldonerow(line, domain, data, true);
+                    } catch (e) {
+                        const msg = (e && e.message) ? e.message : String(e);
+                        line.textContent = '(' + domain + ') ' + bettererrorformat(msg);
+                    }
                 }
             }
+            showpreviewtable(merged, output);
+            alldone();
         });
 
         
     </script>
 </body>
-
 </html>
