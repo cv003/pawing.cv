@@ -208,7 +208,7 @@
 
             async function tryfetch(u, route) {
                 let target = u;
-                if (route === "proxy-main") {
+                if (route === "proxymain") {
                     target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(u);
                 }
                 const controller = new AbortController();
@@ -236,7 +236,7 @@
             }
 
             async function fetchsingle(u, failmsg) {
-                const attempts = ["proxy-main", "direct"];
+                const attempts = ["proxymain", "direct"];
                 const errors = [];
                 for (let i = 0; i < attempts.length; i++) {
                     const route = attempts[i];
@@ -282,12 +282,12 @@
                 return allrows.join("\n");
             }
 
-            progress.textContent = "trying resumekey pagination..";
+            progress.textContent = "trying pagination..";
             try {
                 const resumedtxt = await fetchwithresumekey();
                 if (resumedtxt.trim().length > 0) return resumedtxt;
             } catch (err) {
-                progress.textContent = "resumekey failed :( trying page api..";
+                progress.textContent = "pagination failed :( trying page api..";
             }
 
             try {
@@ -310,7 +310,7 @@
                 progress.textContent = "downloading single response..";
                 return await fetchsingle(baseurl, "download failed");
             } catch (err2) {
-                progress.textContent = (err2 && err2.message) ? err2.message : "failed to fetch data..";
+                progress.textContent = (err2 && err2.message) ? err2.message : "failed to fetch data :(";
                 return "";
             }
         }
@@ -443,7 +443,7 @@
                 return status === 403 || status === 408 || status === 425 || status === 429 || status >= 500;
             }
 
-            const attempts = ["proxy-main", "direct"];
+            const attempts = ["proxymain", "direct"];
             const dedupeenabled = element('dedupechk').checked;
             const junkenabled = element('junkchk').checked;
             const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
@@ -451,12 +451,12 @@
             for (let a = 0; a < attempts.length; a++) {
                 const route = attempts[a];
                 let target = baseurl;
-                if (route === "proxy-main") target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(baseurl);
+                if (route === "proxymain") target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(baseurl);
 
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 1200000);
                 try {
-                    progress.textContent = `starting streamed download (${route})..`;
+                    progress.textContent = `beginning to stream data, one sec.. (this might take a while on mobile!)`;
                     const resp = await fetch(target, {method: "GET", cache: "no-store", signal: controller.signal});
                     if (!resp.ok) {
                         const e = new Error(route + " HTTP " + resp.status);
