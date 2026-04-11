@@ -251,123 +251,6 @@
             );
         }
 
-        async function fetchcdxtext(baseurl, progress) {
-
-            function shouldretryhttp(status) {
-                return status === 403 || status === 408 || status === 425 || status === 429 || status >= 500;
-            }
-
-            async function tryfetch(u, route) {
-                let target = u;
-                if (route === "proxymain") {
-                    target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(u);
-                }
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 180000);
-                try {
-                    const resp = await fetch(target, {
-                        method: "GET",
-                        cache: "no-store",
-                        signal: controller.signal
-                    });
-                    if (!resp.ok) {
-                        const label = route === "direct" ? "direct" : "proxy";
-                        const e = new Error(label + " HTTP " + resp.status);
-                        e.status = resp.status;
-                        throw e;
-                    }
-                    return await resp.text();
-                } catch (e) {
-                    const name = e && e.name ? e.name : "";
-                    if (name === "AbortError") throw new Error(route + " timed out");
-                    throw e;
-                } finally {
-                    clearTimeout(timer);
-                }
-            }
-
-            async function fetchsingle(u, failmsg) {
-                const attempts = ["proxymain", "direct"];
-                const errors = [];
-                for (let i = 0; i < attempts.length; i++) {
-                    const route = attempts[i];
-                    try {
-                        return await tryfetch(u, route);
-                    } catch (e) {
-                        const status = e && typeof e.status === "number" ? e.status : 0;
-                        const msg = (e && e.message) ? e.message : String(e);
-                        errors.push(route + ": " + msg);
-                        if (status && !shouldretryhttp(status)) break;
-                    }
-                }
-                throw new Error(failmsg + ": " + errors.join(" | "));
-            }
-
-            async function fetchwithresumekey() {
-                let allrows = []; let resumekey = ""; let page = 0;
-
-                while (true) {
-                    page += 1;
-                    let u = baseurl + "&limit=5000&showResumeKey=true";
-                    if (resumekey) u += "&resumeKey=" + encodedurl(resumekey);
-                    setprogress(progress, "downloading chunk " + page + "..");
-                    const txt = await fetchsingle(u, "resume chunk failed");
-                    const lines = (txt || "").replace(/\r/g, "").split("\n");
-                    const trimmed = [];
-                    for (let i = 0; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (line.length > 0) trimmed.push(line);
-                    }
-                    if (trimmed.length === 0) break;
-                    let nextresumekey = "";
-                    const last = trimmed[trimmed.length - 1];
-                    if (!/^\d{14}\s+/.test(last)) {
-                        nextresumekey = last;
-                        trimmed.pop();
-                    }
-                    if (trimmed.length > 0) allrows.push(...trimmed);
-                    if (!nextresumekey) break;
-                    resumekey = nextresumekey;
-                }
-
-                return allrows.join("\n");
-            }
-
-            setprogress(progress, "trying pagination..");
-            try {
-                const resumedtxt = await fetchwithresumekey();
-                if (resumedtxt.trim().length > 0) return resumedtxt;
-            } catch (err) {
-                setprogress(progress, "pagination failed :( trying page api..");
-            }
-
-            try {
-                const pagecounttxt = await fetchsingle(baseurl + "&showNumPages=true&pageSize=1", "page count failed");
-                const pcount = parseInt((pagecounttxt || "").trim(), 10);
-                if (Number.isFinite(pcount) && pcount > 1) {
-                    let parts = [];
-                    for (let p = 0; p < pcount; p++) {
-                        setprogress(progress, "downloading page " + (p + 1) + "/" + pcount + "..");
-                        const chunk = await fetchsingle(baseurl + "&page=" + p + "&pageSize=1", "page download failed");
-                        if (chunk && chunk.trim().length > 0) parts.push(chunk.trim());
-                    }
-                    if (parts.length > 0) return parts.join("\n");
-                }
-            } catch (err) {
-                setprogress(progress, "page api failed :( trying something else..");
-            }
-
-            try {
-                setprogress(progress, "downloading single response..");
-                return await fetchsingle(baseurl, "download failed");
-            } catch (err2) {
-                setprogress(progress, (err2 && err2.message) ? err2.message : "failed to fetch data :(");
-                return "";
-            }
-        }
-
-        /*//////////////////////////////////////////////////////////////////////*/
-
         function buildcdxurl(domain) {
             let url = "https://web.archive.org/cdx/search/cdx?url="
                 + encodedurl(domain)
@@ -411,79 +294,6 @@
                     if (data.length >= hardlimit) break;
                 }
             }
-            if (dedupeenabled) {
-                data = Array.from(dedupemap.values());
-                if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
-            }
-            return data;
-        }
-
-        async function parsecdxfile(file, progress) {
-            const totalbytes = file.size || 0;
-            const dedupeenabled = element('dedupechk').checked;
-            const junkenabled = element('junkchk').checked;
-            const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
-            let processedbytes = 0; let carry = ""; let data = [];
-            let dedupemap = dedupeenabled ? new Map() : null;
-            let stop = false;
-            const reader = file.stream().getReader();
-            const decoder = new TextDecoder();
-
-            while (!stop) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                processedbytes += value.byteLength;
-                carry += decoder.decode(value, {stream: true});
-                const lines = carry.split(/\r?\n/);
-                carry = lines.pop() || "";
-
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const parts = line.split(/\s+/);
-                    if (parts.length < 5) continue;
-                    const original = parts[1];
-                    if (junkenabled && ERADICATEGARBAGE(original)) continue;
-                    if (gottaskipbadpages(parts[3])) continue;
-
-                    if (dedupeenabled) {
-                        const timestamp = parts[0];
-                        const norm = normalizededupe(original);
-                        const prev = dedupemap.get(norm);
-                        if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
-                    } else {
-                        data.push(parts);
-                        if (data.length >= hardlimit) {
-                            stop = true;
-                            break;
-                        }
-                    }
-                }
-                const mbdone = (processedbytes / (1024 * 1024)).toFixed(1);
-                const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
-                setprogress(progress, `reading local file ${mbdone}/${mbtotal}mb..`);
-            }
-
-            if (carry && !stop) {
-                const line = carry.trim();
-                if (line) {
-                    const parts = line.split(/\s+/);
-                    if (parts.length >= 5) {
-                        const original = parts[1];
-                        if (!((junkenabled && ERADICATEGARBAGE(original)) || gottaskipbadpages(parts[3]))) {
-                            if (dedupeenabled) {
-                                const timestamp = parts[0];
-                                const norm = normalizededupe(original);
-                                const prev = dedupemap.get(norm);
-                                if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
-                            } else if (data.length < hardlimit) {
-                                data.push(parts);
-                            }
-                        }
-                    }
-                }
-            }
-
             if (dedupeenabled) {
                 data = Array.from(dedupemap.values());
                 if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
@@ -760,22 +570,21 @@
                 return;
             }
 
-            let merged = [];
-
             if (urls.length === 1) {
                 const domain = urls[0];
                 const cdxUrl = buildcdxurl(domain);
                 try {
                     const data = await fetchcdxrowsstream(cdxUrl, progressRoot);
-                    merged = data;
                     progressRoot.replaceChildren();
                     const row = document.createElement('div');
                     row.className = 'progressline';
                     filldonerow(row, domain, data, false);
                     progressRoot.appendChild(row);
+                    showpreviewtable(data, output);
                 } catch (e) {
                     const msg = (e && e.message) ? e.message : String(e);
                     progressRoot.textContent = bettererrorformat(msg);
+                    showpreviewtable([], output);
                 }
             } else {
                 for (let i = 0; i < urls.length; i++) {
@@ -788,7 +597,6 @@
                         const data = await fetchcdxrowsstream(cdxUrl, (m) => {
                             line.textContent = '(' + domain + ') ' + m;
                         });
-                        merged.push(...data);
                         filldonerow(line, domain, data, true);
                     } catch (e) {
                         const msg = (e && e.message) ? e.message : String(e);
@@ -796,7 +604,6 @@
                     }
                 }
             }
-            showpreviewtable(merged, output);
             alldone();
         });
 
