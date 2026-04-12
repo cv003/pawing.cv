@@ -54,7 +54,7 @@
             gap: 4px; font-size: 0.75em;
             color: white;
         }
-        .checkbox-svg {
+        .wemmbox {
             width: 16px;
             height: 16px;
             cursor: pointer;
@@ -73,11 +73,12 @@
         </svg>
         <svg class="organs part1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
             <path class="smile" fill="#10003B" d="M59.9025 95.019C63.2534 94.7004 64.8318 96.1389 65.9485 99.1609C65.4339 102.198 65.1418 105.269 65.0745 108.349C72.3237 109.022 79.5963 109.416 86.8759 109.528C86.4844 105.498 83.0076 98.6203 90.1527 97.2828C95.5408 96.2742 96.5861 106.311 97.1455 110.187C97.2788 111.428 96.9868 112.937 96.5889 114.116C96.0084 115.834 94.8053 117.443 93.1453 118.241C88.4165 120.514 66.7095 119.147 61.7056 117.382C59.1535 116.482 57.1924 114.923 56.0253 112.433C54.3344 108.826 54.7386 102.432 56.1198 98.7371C56.8543 96.7719 58.0395 95.8659 59.9025 95.019Z"/>
+            <path class="smiletongue" fill="#8d0000" d="" style="display: none"/>
         </svg>
     </div>
     <div class="controls">
         <svg width="0" height="0" style="position: absolute;">
-            <filter id="text-outline-black" x="-30%" y="-30%" width="160%" height="160%">
+            <filter id="blackout" x="-30%" y="-30%" width="160%" height="160%">
                 <feFlood flood-color="black" result="flood"/>
                 <feComposite in="flood" in2="SourceAlpha" operator="in" result="mask"/>
                 <feMorphology in="mask" operator="dilate" radius="2" result="dilated"/>
@@ -88,34 +89,46 @@
             </filter>
         </svg>
         <label class="checks">
-            <svg class="checkbox-svg oldposoverlay" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="true">
+            <svg class="wemmbox oldposoverlay" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="true">
                 <path fill="#fff" d="M5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Z"/>
                 <path d="M5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Z"/>
                 <path d="M3 6h2v1h1v1h4V6h2v4H4V8H3Zm11-6h2v2h-2ZM0 0h2v2H0Z"/>
             </svg>
-            <span style="filter: url(#text-outline-black);">show original position</span>
+            <span style="filter: url(#blackout);">show original position</span>
         </label>
         <label class="checks">
-            <svg class="checkbox-svg wemmbutwo" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="false">
+            <svg class="wemmbox wemmbutwo" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="false">
                 <path fill="#fff" d="M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm9 0h2v2h-2Z"/>
                 <path d="M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Zm8-1h2v2h-2Z"/>
                 <path fill="#020202" d="M5 14h1v1H5Zm9-9h1v1h-1Zm-4-4h1v1h-1ZM5 1h1v1H5Z"/>
             </svg>
-            <span style="filter: url(#text-outline-black);">wemmbu 2</span>
+            <span style="filter: url(#blackout);">wemmbu 2</span>
+        </label>
+        <label class="checks">
+            <svg class="wemmbox sequel" xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 16 16" checked="false">
+                <path fill="#fff" d="M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm9 0h2v2h-2Z"/>
+                <path d="M0 0h2v2H0Zm5 0h6v1h2v1h1v1h1v2h1v6h-1v2h-1v1h-1v1h-2v1H5v-1H3v-1H2v-1H1v-2H0V5h1V3h1V2h1V1h2Zm1 1v1H4v1H3v1H2v2H1v4h1v2h1v1h1v1h2v1h4v-1h2v-1h1v-1h1v-2h1V6h-1V4h-1V3h-1V2h-2V1Zm8-1h2v2h-2Z"/>
+                <path fill="#020202" d="M5 14h1v1H5Zm9-9h1v1h-1Zm-4-4h1v1h-1ZM5 1h1v1H5Z"/>
+            </svg>
+            <span style="filter: url(#blackout);">the sequel</span>
         </label>
     </div>
     <script>
 
         const classicwemmbu = "M59.9025 95.019C63.2534 94.7004 64.8318 96.1389 65.9485 99.1609C65.4339 102.198 65.1418 105.269 65.0745 108.349C72.3237 109.022 79.5963 109.416 86.8759 109.528C86.4844 105.498 83.0076 98.6203 90.1527 97.2828C95.5408 96.2742 96.5861 106.311 97.1455 110.187C97.2788 111.428 96.9868 112.937 96.5889 114.116C96.0084 115.834 94.8053 117.443 93.1453 118.241C88.4165 120.514 66.7095 119.147 61.7056 117.382C59.1535 116.482 57.1924 114.923 56.0253 112.433C54.3344 108.826 54.7386 102.432 56.1198 98.7371C56.8543 96.7719 58.0395 95.8659 59.9025 95.019Z";
         const theforbiddenone = "M 91.394531 92.46875 C 94.289062 92.191406 95.738281 94.34375 96.574219 96.734375 C 100.71875 108.589844 90.296875 115.285156 79.671875 111.171875 C 78 110.523438 76.460938 109.597656 74.890625 108.875 C 73.777344 109.375 72.5625 109.738281 71.421875 110.171875 C 65.410156 112.457031 54.578125 112.335938 54.226562 103.679688 C 54.378906 100.125 56.324219 94.457031 60.320312 93.96875 C 64.949219 93.402344 66.71875 98.394531 63.421875 101.320312 C 63.121094 101.582031 62.492188 102.417969 62.210938 102.765625 C 69.230469 104.382812 71.480469 99.875 76.628906 99.464844 C 82.191406 99.023438 78.695312 105.253906 88.992188 103.886719 C 89.078125 101.617188 88.53125 99.628906 88.257812 97.394531 C 87.875 94.292969 88.550781 93.261719 91.394531 92.46875 Z M 91.394531 92.46875 ";
+        const thesequelp1 = "M44.256 95.729c.665-.1 2.062-.038 2.768-.017q2.184.063 4.368.165 5.937.294 11.88.452c13.934.332 27.874.382 41.81.151l10.202-.181c.908-.019 4.186-.152 4.921-.049a3.3 3.3 0 0 1 1.543.636 3.54 3.54 0 0 1 1.382 2.46 3.56 3.56 0 0 1-.831 2.699c-1.499 1.736-3.791 1.068-5.914 1.272l-.112.011c.092.748.389 1.456.47 2.211.287 2.652-1.909 7.606-3.607 9.565-.983 1.813-3.405 4.015-5.103 5.181-7.171 4.929-18.564 4.594-26.839 3.037-10.485-1.973-23.688-6.351-31.115-14.378a21.5 21.5 0 0 1-2.701-3.618c-.473-.802-.9-1.904-1.419-2.61-1.037.022-1.788.069-2.735-.462a3.48 3.48 0 0 1-1.665-2.101 3.53 3.53 0 0 1 .338-2.689c.561-.98 1.323-1.43 2.359-1.735";
+        const thesequelp2 = "M54.391 102.972c1.416.151 3.354.152 4.83.215q6.916.244 13.836.298 9.657.153 19.314.127l16.955-.218c-.008.302-.027.67.009.964.051.416.371 1.421.348 1.791-.118 1.941-2.19 5.209-3.492 6.555-2.722 2.906-6.563 4.064-10.421 4.469-11.241 1.178-29.359-3.543-38.195-10.745-.676-.551-3.1-2.614-3.185-3.457";
 
         const part1 = document.querySelector(".part1");
         const part2 = document.querySelector(".part2");
         const part3 = document.querySelector(".part3");
         const facepath = document.querySelector(".smile");
+        const facepathInner = document.querySelector(".smiletongue");
         const ghostcontainer = document.querySelector(".oldpos");
         const oldposoverlaycheckbox = document.querySelector(".oldposoverlay");
         const wemmbutwocheckbox = document.querySelector(".wemmbutwo");
+        const sequelcheckbox = document.querySelector(".sequel");
         
         // awful stretching noise
         const audio = new Audio("/assets/audio/ow.ogg");
@@ -131,6 +144,28 @@
         function ischeckboxchecked(checkbox) {
             return checkbox.getAttribute("checked") === "true";
         }
+
+        function normalmouth() {
+            facepath.setAttribute("d", classicwemmbu);
+            facepath.setAttribute("fill", "#10003B");
+            facepathInner.setAttribute("d", "");
+            facepathInner.style.display = "none";
+        }
+        function thehorror() {
+            facepath.setAttribute("d", theforbiddenone);
+            facepath.setAttribute("fill", "#10003B");
+            facepathInner.setAttribute("d", "");
+            facepathInner.style.display = "none";
+        }
+        function thesequelmouth() {
+            facepath.setAttribute("d", thesequelp1);
+            facepath.setAttribute("fill", "#10003B");
+            facepathInner.setAttribute("d", thesequelp2);
+            facepathInner.setAttribute("fill", "#8d0000");
+            facepathInner.style.display = "";
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
 
         function calculatesize() {
             const vw = window.innerWidth, vh = window.innerHeight, size = 160,
@@ -278,13 +313,12 @@
             return "";
         }
         
-        // attach to paths
+        // drag fix
         [part1, part2, part3].forEach(p => {
-            const path = p.querySelector("path");
-            if (path) {
+            p.querySelectorAll("path").forEach(path => {
                 path.addEventListener("mousedown", startdrag);
                 path.addEventListener("touchstart", startdrag);
-            }
+            });
         });
         document.addEventListener("mousemove", drag);
         document.addEventListener("touchmove", drag);
@@ -301,17 +335,32 @@
         wemmbutwocheckbox.addEventListener("click", e => {
             e.preventDefault();
             const ischecked = ischeckboxchecked(wemmbutwocheckbox);
-            updatecheckbox(wemmbutwocheckbox, !ischecked);
-            if (!ischecked) {
-                facepath.setAttribute("d", theforbiddenone);
-                const ouchAudio = new Audio("/assets/audio/ouch.ogg");
-                ouchAudio.play();
-            } else {facepath.setAttribute("d", classicwemmbu)}
+            const turningon = !ischecked;
+            updatecheckbox(wemmbutwocheckbox, turningon);
+            if (turningon) {
+                updatecheckbox(sequelcheckbox, false);
+                thehorror();
+                const owww = new Audio("/assets/audio/ouch.ogg");
+                owww.play();
+            } else {
+                normalmouth();
+            }
+            ghostmaker();
+        });
+        sequelcheckbox.addEventListener("click", e => {
+            e.preventDefault();
+            const ischecked = ischeckboxchecked(sequelcheckbox);
+            const turningon = !ischecked;
+            updatecheckbox(sequelcheckbox, turningon);
+            if (turningon) {
+                updatecheckbox(wemmbutwocheckbox, false);
+                thesequelmouth();
+            } else {normalmouth()}
+            ghostmaker();
         });
 
         window.addEventListener("resize", () => {
             svgsize = calculatesize();
-
             [part1, part2, part3].forEach(p => {
                 p.style.width = svgsize + "px";
                 p.style.height = svgsize + "px";

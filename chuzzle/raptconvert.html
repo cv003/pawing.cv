@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>RaptConvert</title>
+        <style>
+            p {font-size: 0.75em; opacity: 0.5}
+        </style>
+    </head>
+    <body>
+        <h1>RaptConvert</h1>
+
+        <ul>
+            <li>query string / checksum blob is converted to utf-8, or base 64-decoded if already encoded</li>
+            <li>checksum uses a simple XOR cipher - each byte is XORd with "youcanonlytrustalibertarian", and if any data byte matches the key byte it's left unchanged</li>
+            <li>result is base64-encoded</li>
+        </ul>
+
+        <form class="mainform" autocomplete="off">
+            <label for="input">input:</label><br>
+            <textarea class="input" rows="8" cols="60" placeholder="command=gettags&gameid=1&guid=…&checksum=R92653…"></textarea>
+            <br>
+            <button type="button" class="btndecode">decode</button>
+            <button type="button" class="btnencode">encode</button>
+            <button type="button" class="btnclear">clear</button>
+
+            <br><br>
+            <label for="output">output:</label><br>
+            <textarea class="output" rows="8" cols="60" readonly></textarea>
+            <br>
+            <span class="status"></span>
+        </form>
+
+        <p>these could have url encoding - %2B for "+" and %3D for "=". if a copy gives %%2B / %%3D, then that's wrong and the tool will normalize that. raw base 64 only is also fine
+        XOR is from String::Encrypt in the lib sibling (skip XOR when data byte equals key byte)</p>
+
+        <p>the blob in
+        &checksum=R92653HBh28UlM4J4qDcCbWmzD10KG1R isn't meant to be human text - before encrypting the game runs String::Replace on that template (gRCMakermallChecksumFix) so there might be ! instead of U, it's intentional on the wire and isn't faulty decoding</p>
+
+        <script>
+            (function () {
+                function getkeybytes() {
+                    return new TextEncoder().encode("youcanonlytrustalibertarian");
+                }
+
+                function raptisoftstringcrypt(data, keybytes) {
+                    const buf = new Uint8Array(data);
+                    const l = keybytes.length;
+                    let kp = 0;
+                    for (let i = 0; i < buf.length; i++) {
+                        let kidx;
+                        if (kp === l) {kidx = 0; kp = 1}
+                        else {kidx = kp; kp = kidx + 1}
+                        const kb = keybytes[kidx];
+                        if (buf[i] !== kb) buf[i] ^= kb;
+                    }
+                    return buf;
+                }
+
+                function bytestobase64(bytes) {
+                    let s = "";
+                    const chunk = 0x8000;
+                    for (let i = 0; i < bytes.length; i += chunk) {
+                        const sub = bytes.subarray(i, i + chunk);
+                        s += String.fromCharCode.apply(null, sub);
+                    }
+                    return btoa(s);
+                }
+
+                function base64tobytes(b64) {
+                    const clean = b64.replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
+                    const bin = atob(clean);
+                    const out = new Uint8Array(bin.length);
+                    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+                    return out;
+                }
+
+                function decodeexequeryvalue(v) {
+                    v = v.trim().replace(/\s/g, "");
+                    while (v.indexOf("%%") !== -1) v = v.replace(/%%/g, "%");
+                    
+                    let last;
+                    let guard = 0;
+                    do {
+                        last = v;
+                        try {v = decodeURIComponent(last)}
+                        catch (e) {throw e}
+                        guard++;
+                        if (guard > 12) break;
+                    } while (v !== last && /%[0-9A-Fa-f]{2}/i.test(v));
+                    return v;
+                }
+
+                const defaultbase = "https://www.raptisoft.net/go.php";
+
+                function extracturlprefix(raw) {
+                    const line = raw.trim().split(/\r?\n/)[0].trim();
+                    if (!/^https?:\/\//i.test(line)) return null;
+                    try {
+                        const u = new URL(line);
+                        return u.origin + u.pathname;
+                    } catch (e) {return null}
+                }
+
+                function extractexeblob(raw) {
+                    let s = raw.trim();
+                    if (!s) return {err: "empty input.."};
+                    const baseurl = extracturlprefix(s);
+                    const lower = s.toLowerCase();
+                    const exeidx = lower.indexOf("exe=");
+                    if (exeidx !== -1) {
+                        let v = s.slice(exeidx + 4);
+                        const amp = v.indexOf("&");
+                        if (amp !== -1) 
+                            v = v.slice(0, amp);
+                        v = v.trim();
+                        try {v = decodeexequeryvalue(v)}
+                        catch (e) {return {err: "bad encoding in value: " + e.message}}
+                        return {b64: v.replace(/\s/g, ""), baseurl};
+                    }
+                    if (/^[A-Za-z0-9+/=\s]+$/.test(s) && s.length > 8) {
+                        return {
+                            b64: s.replace(/\s/g, ""),
+                            baseurl: null
+                        };
+                    }
+                    return {err: "error, try pasting the full url"};
+                }
+
+                // Modified: decodepipeline always returns the urlbase for this row (if any) with the result
+                function decodepipeline(text) {
+                    const key = getkeybytes();
+                    const {b64, baseurl, err} = extractexeblob(text);
+                    if (err) return {err};
+                    let raw;
+                    try {raw = base64tobytes(b64)}
+                    catch (e) {
+                        return {err: "Invalid Base64: " + e.message};
+                    }
+                    const plain = raptisoftstringcrypt(raw, key);
+                    let out;
+                    try {
+                        out = new TextDecoder("utf-8", {fatal: false}).decode(plain);
+                    } catch (e) {
+                        out = new TextDecoder("latin1").decode(plain);
+                    }
+                    // Carry baseurl in result
+                    return {ok: {decoded: sanitizeplaintext(out), baseurl}};
+                }
+
+                function sanitizeplaintext(str) {
+                    return str.replace(/\0+$/g, "").replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]+$/g, "").replace(/\s+$/g, "");
+                }
+
+                // Modified: pipelineencode now accepts explicit urlbase, doesn't rely on global
+                function pipelineencode(text, urlbase) {
+                    const key = getkeybytes();
+                    const plain = text.trim();
+                    if (!plain) 
+                        return {err: "empty plaintext.."};
+                    const bytes = new TextEncoder().encode(plain);
+                    const xored = raptisoftstringcrypt(bytes, key);
+                    const b64 = bytestobase64(xored);
+                    const encoded = encodeURIComponent(b64);
+                    const base = (urlbase || defaultbase).replace(/[?&]$/, "");
+                    const join = base.includes("?") ? "&" : "?";
+                    const full = base + join + "exe=" + encoded;
+                    return {ok: {full}};
+                }
+
+                const input = document.querySelector(".input");
+                const output = document.querySelector(".output");
+                const status = document.querySelector(".status");
+
+                function setstatus(message, ok) {
+                    status.textContent = message || "";
+                    status.style.color = ok ? "green" : "red";
+                }
+
+                function decodepipelinemulti(inputtext) {
+                    const lines = inputtext.split(/\r?\n/).map(x=>x.trim()).filter(line=>line.length>0);
+                    if (!lines.length) return {err: "no lines in input.."};
+                    let results = [];
+                    let haserror = false, errormessage = '';
+                    for (let i = 0; i < lines.length; ++i) {
+                        const r = decodepipeline(lines[i]);
+                        if (r.err) {
+                            haserror = true;
+                            errormessage = "line " + (i+1) + ": " + r.err; break;
+                        }
+                        if (r.ok.baseurl) {
+                            results.push(r.ok.baseurl + "?exe=" + r.ok.decoded);
+                        } else {results.push(r.ok.decoded)}
+                    }
+                    if (haserror) return {err: errormessage};
+                    return {ok: results.join('\n')};
+                }
+
+                function pipelineencodemulti(inputtext) {
+                    const lines = inputtext.split(/\r?\n/).map(x=>x.trim()).filter(line=>line.length>0);
+                    if (!lines.length) return {err: "no lines in input.."};
+                    let results = [];
+                    let haserror = false, errormessage = '';
+                    for (let i = 0; i < lines.length; ++i) {
+                        let line = lines[i];
+                        let urlbase = null; let text = line;
+                        const urlmatch = line.match(/^\[url:\s*(https?:\/\/[^\]]+)\]\s*(.*)$/i);
+                        if (urlmatch) {
+                            urlbase = urlmatch[1].trim();
+                            text = urlmatch[2].trim();
+                        }
+                        const r = pipelineencode(text, urlbase);
+                        if (r.err) {
+                            haserror = true;
+                            errormessage = "line " + (i+1) + ": " + r.err; break;
+                        }
+                        results.push(r.ok.full);
+                    }
+                    if (haserror) return {err: errormessage};
+                    return {ok: results.join('\n\n')};
+                }
+
+                /*//////////////////////////////////////////////////////////////////////*/
+
+                document.querySelector(".btndecode").addEventListener("click", function () {
+                    const r = decodepipelinemulti(input.value);
+                    if (r.err) {
+                        output.value = "";
+                        setstatus(r.err, false); return;
+                    }
+                    output.value = r.ok;
+                    setstatus("decoded!", true);
+                });
+                document.querySelector(".btnencode").addEventListener("click", function () {
+                    const r = pipelineencodemulti(input.value);
+                    if (r.err) {
+                        output.value = "";
+                        setstatus(r.err, false); return;
+                    }
+                    output.value = r.ok;
+                    setstatus("encoded!", true);
+                });
+                document.querySelector(".btnclear").addEventListener("click", function () {
+                    input.value = ""; output.value = "";
+                    setstatus("", true);
+                });
+
+            })();
+        </script>
+    </body>
+</html>
