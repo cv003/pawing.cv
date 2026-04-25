@@ -1,6 +1,6 @@
         const images = [];
         const frontImages = [];
-        const sources = ['../assets/images/sillysog.webp', '../assets/images/sillysog2.webp'];
+        const sources = ['assets/images/sillysog.webp', 'assets/images/sillysog2.webp'];
         const numImages = 20;
         const radius = 200;
         const fov = 250;
