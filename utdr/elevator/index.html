@@ -15,7 +15,7 @@
     <style>
         @font-face {
             font-family: "8bitoperator"; font-weight: 400;
-            src: url("../assets/fonts/8bitoperator.woff2") format("woff2");
+            src: url("/assets/fonts/8bitoperator.woff2") format("woff2");
         }
 
         body {
@@ -67,7 +67,7 @@
             position: absolute;
             left: 0; bottom: 0; top: 0; z-index: 1;
             width: 100%; height: 100vh;
-            background-image: url("../assets/images/elevator.png");
+            background-image: url("/assets/images/elevator.png");
             background-size: 100%;
             background-repeat: no-repeat;
         }
@@ -122,7 +122,7 @@
     </style>
 <body>
     <div class="waiting">
-        <img class="paw" width="50px" draggable="false" src="../assets/images/paw.png">
+        <img class="paw" width="50px" draggable="false" src="/assets/images/paw.png">
         <a class="atext">click to play</a>
     </div>
 
@@ -216,10 +216,10 @@
 
             document.addEventListener("DOMContentLoaded", function () {
                 document.querySelector(".page").style.opacity = "1";
-                loadsubtitles("../assets/static/elevator.vtt");
+                loadsubtitles("/assets/static/elevator.vtt");
 
                 // song
-                request.open("GET", "../assets/audio/elevator.ogg", true);
+                request.open("GET", "/assets/audio/elevator.ogg", true);
                 request.responseType = "arraybuffer";
                 request.onload = function () {
                     context.decodeAudioData(request.response, function (decodedBuffer) {
