@@ -123,13 +123,19 @@
         }
         .more {display: none}
 
-        .button {padding: 2px; image-rendering: pixelated; background-repeat: no-repeat}
+        .button {
+            padding: 2px; transition: filter 0.15s ease;
+            image-rendering: pixelated; background-repeat: no-repeat
+        }
         .button iframe {padding: 2px}
         .smooth {
             image-rendering: smooth !important;
             image-rendering: auto !important;
         }
-        .section {display: flex; flex-direction: column; align-items: center}
+        .section {
+            display: flex; flex-direction: column; 
+            align-items: center
+        }
 
         .status {
             display: flex; position: fixed; white-space: pre-line !important;
@@ -146,6 +152,87 @@
         .bigtext:any-link, .morebutton {text-decoration: underline wavy rgba(255,255,255,0.2) 0.5px}
 
         /*//////////////////////////////////////////////////////////////////////*/
+
+        /* they're too joyous looking i must not ever add them */
+        /* .projflyers {
+            position: fixed; inset: 0; overflow: hidden;
+            z-index: 200;
+        }
+        .projflyer {
+            position: absolute; opacity: 0.25;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+            will-change: transform;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+        .projflyer img {width: 20vw}
+
+        .projflyer.cdm {
+            top: 10vh; left: -130px;
+            animation-name: upperfly;
+            animation-duration: 42s;
+        }
+        .projflyer.ssoggycat {
+            bottom: 10vh; right: -130px;
+            animation-name: lowerfly;
+            animation-duration: 48s;
+        }
+
+        @keyframes upperfly {
+            0% {transform: translateX(0) translateY(0)}
+            50% {transform: translateX(calc(100vw + 180px)) translateY(5vh)}
+            100% {transform: translateX(calc(200vw + 360px)) translateY(0)}
+        }
+        @keyframes lowerfly {
+            0% {transform: translateX(0) translateY(0)}
+            50% {transform: translateX(calc(-100vw - 180px)) translateY(-5vh)}
+            100% {transform: translateX(calc(-200vw - 360px)) translateY(0)}
+        } */
+
+        .projcorner {
+            position: fixed; display: flex;
+            flex-direction: column;
+            right: 10px; bottom: 10px;
+            z-index: 9999; gap: 6px; opacity: 0.85;
+        }
+        .projcorner a {
+            display: inline-flex;
+            transition: filter 0.15s ease;
+        }
+        .projcorner img {
+            width: 100px;
+            height: auto;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .otherstuff {
+            position: fixed; display: flex;
+            gap: 6px; padding: 6px;
+            z-index: 999; border-radius: 999px;
+            background: rgba(0, 0, 0, 0.28);
+            left: 50%; transform: translateX(-50%);
+            top: calc(50% + 36px + 0.5em + 50px);
+        }
+        .otherstuff a {
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            width: 16px; height: 16px;
+            border-radius: 50%; overflow: hidden;
+            transition: filter 0.15s ease;
+        }
+        .otherstuff img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        img[src="/utdr/icon.png"] {filter: invert(1) brightness(2)}
+
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .otherstuff a:hover, a[href] .button:hover {filter: brightness(1.15)}
+        .projcorner a:hover {filter: brightness(1.2)}
 
         .copied {
             position: absolute;
@@ -170,8 +257,7 @@
             image-rendering: pixelated;
             height: 72px; margin: 3em; opacity: 1;
             animation: spinno 3s linear infinite;
-            display: none; position: fixed;
-            z-index: 999
+            display: none; position: fixed; z-index: 999
         }
 
         @keyframes spin {
@@ -196,15 +282,17 @@
         <div class="bggradient"></div>
         <div class="bgclouds"></div>
         <div class="bglevels">
-            <img src="/assets/images/bg/levelp1.webp">
-            <img src="/assets/images/bg/levelp2.webp">
-            <img src="/assets/images/bg/levelp3.webp">
-            <img src="/assets/images/bg/levelp4.webp">
+            <img src="/assets/images/bg/levelp1.webp"><img src="/assets/images/bg/levelp2.webp">
+            <img src="/assets/images/bg/levelp3.webp"><img src="/assets/images/bg/levelp4.webp">
         </div>
         <div class="bgfade"></div>
     </div>
     
     <div class="copied"><a>copied!</a></div>
+    <!-- <div class="projflyers">
+        <a class="projflyer cdm" href="//candies.monster"><img draggable="false" src="/assets/images/projects/cdm.webp"></a>
+        <a class="projflyer ssoggycat" href="//discord.gg/soggycat"><img draggable="false" src="/assets/images/projects/ssoggycat.webp"></a>
+    </div> -->
 
     <!-- this is a horrifying approach. since you peeked into the code you'll have to endure it now. no, i won't be fixing it -->
     <center class="main">
@@ -212,6 +300,16 @@
         <img draggable="false" class="cv" id="bounce" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
         <span><a href=//x.com/cvsilly_>twitter</a> // <a href=//discord.com/users/763502120333869116>discord</a></span>
     </center>
+    <div class="otherstuff">
+        <a href="/utdr/" title="undertale/deltarune pages"><img draggable="false" src="/utdr/icon.png"></a>
+        <a href="/gd/" title="geometry dash pages"><img draggable="false" src="/gd/icon.png"></a>
+        <a href="/chuzzle/" title="chuzzle pages"><img draggable="false" src="/chuzzle/icon.png"></a>
+    </div>
+
+    <div class="projcorner">
+        <a href="//discord.gg/soggycat" title="ssoggycat"><img draggable="false" src="/assets/images/projects/ssoggycat.webp"></a>
+        <a href="//candies.monster" title="cdm"><img draggable="false" src="/assets/images/projects/cdm.webp"></a>
+    </div>
 
     <div class="bottom">
         <span class="bigtext">middle click to copy!</span>
@@ -272,7 +370,7 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
                     <div style="display:inline;font-size:0.5em">
                         <span class="midtext">${data.timeAgo}</span>
                         &nbsp;·&nbsp;
-                        <a class="bigtext" href="//status.cafe" target="_blank">status.cafe</a>
+                        <a class="bigtext" href="//status.cafe/meow" target="_blank">status.cafe</a>
                     </div>
                 `;
             }).catch(function(error) {

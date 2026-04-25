@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cv003/coolsite.cv/refs/heads/main/assets/images/harvestingworms.gif" width="200px">
+  <img src="/assets/images/harvestingworms.gif" width="200px">
 </p>
 
 ### coolsite.cv
