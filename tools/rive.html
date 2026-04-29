@@ -51,7 +51,33 @@
             .toString().replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
             .replace(/\s+/g, " ").trim();
 
-        const withriveinstance = async ({filename, buffer, onready}) => {
+        const drawanimationframe = (inst, animationname, timeSeconds) => {
+            try {inst.reset({animations: animationname, autoplay: false})} catch {}
+            try {inst.scrub(animationname, Math.max(0, Number(timeSeconds) || 0))} catch {}
+            try {inst.advance(0)} catch {}
+            inst.drawFrame();
+        };
+
+        const canvasislikelyblankorblack = canvas => {
+            const ctx = canvas.getContext("2d", {willReadFrequently: true});
+            if (!ctx) return false;
+            const {width, height} = canvas;
+            if (!width || !height) return true;
+            const data = ctx.getImageData(0, 0, width, height).data;
+            let nonTransparentPixels = 0;
+            let brightPixels = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const a = data[i + 3];
+                if (a === 0) continue;
+                nonTransparentPixels++;
+                const r = data[i], g = data[i + 1], b = data[i + 2];
+                if (r > 16 || g > 16 || b > 16) brightPixels++;
+            }
+            if (nonTransparentPixels === 0) return true;
+            return brightPixels === 0;
+        };
+
+        const withriveinstance = async ({filename, buffer, artboard, onready}) => {
             const canvas = document.createElement("CANVAS");
             canvas.width = 1; canvas.height = 1;
 
@@ -59,15 +85,13 @@
             await new Promise((res, rej) => {
                 try {
                     inst = new rive.Rive({
-                        canvas,
-                        buffer,
+                        canvas, buffer,
+                        artboard,
                         autoplay: false,
                         onLoad: () => res(),
                         onLoadError: e => rej(new Error((e && e.message) || `failed to load ${filename}`)),
                     });
-                } catch (err) {
-                    rej(err);
-                }
+                } catch (err) {rej(err)}
             });
 
             try {
@@ -170,6 +194,8 @@
 
             const exportmode = getselectedexportmode(); // png / gif
             const zip = new JSZip();
+            const singlefilemode = files.length === 1;
+            const directdownloads = [];
 
             let donefiles = 0;
             document.getElementById("status").textContent = `converting... (0/${files.length})`;
@@ -184,56 +210,96 @@
                     const basename = safefilepart(filename.replace(/\.riv$/i, ""));
                     const folder = zip.folder(basename) || zip;
 
+                    let artboardnames = [null];
                     await withriveinstance({
                         filename,
                         buffer,
                         onready: async (inst, canvas) => {
-                            const animationnames = Array.isArray(inst.animationNames) ? inst.animationNames : [];
-                            if (!animationnames.length) {
-                                setstatus(filename, "converting... (0/0)");
-                                return;
-                            }
-
-                            let idx = 0;
-                            for (const animationnameraw of animationnames) {
-                                idx++;
-                                setstatus(filename, `converting... (${idx}/${animationnames.length})`);
-
-                                const animationname = safefilepart(animationnameraw);
-
-                                if (exportmode === "png") {
-                                    try {inst.reset({animations: animationnameraw, autoplay: false})} catch {}
-                                    try {inst.scrub(animationnameraw, 0)} catch {}
-                                    inst.drawFrame();
-
-                                    const pngblob = await canvastoblob(canvas, "image/png");
-                                    folder.file(`${animationname}__frame0.png`, await pngblob.arrayBuffer());
-                                } else {
-                                    const animindex = animationnames.indexOf(animationnameraw);
-                                    const durationseconds = (Array.isArray(inst.durations) && typeof inst.durations[animindex] === "number")
-                                        ? inst.durations[animindex]
-                                        : 2;
-                                    const fps = 24;
-                                    const totalframes = Math.max(2, Math.min(240, Math.ceil(durationseconds * fps)));
-
-                                    try {inst.reset({animations: animationnameraw, autoplay: false})} catch {}
-
-                                    const frames = [];
-                                    for (let f = 0; f < totalframes; f++) {
-                                        const t = totalframes === 1 ? 0 : (f / (totalframes - 1));
-                                        try {inst.scrub(animationnameraw, t)} catch {}
-                                        inst.drawFrame();
-                                        const pngblob = await canvastoblob(canvas, "image/png");
-                                        frames.push(await howmanytimeshaveiusedthisfunctionalready(pngblob));
-                                    }
-
-                                    const gifbytes = await makegiffromframes({framespngbytes: frames, fps});
-                                    folder.file(`${animationname}.gif`, gifbytes);
-                                }
-                                await sleep(0);
+                            if (Array.isArray(inst.artboardNames) && inst.artboardNames.length) {
+                                artboardnames = inst.artboardNames.slice();
                             }
                         },
                     });
+
+                    let produced = 0;
+                    for (const artboardnameraw of artboardnames) {
+                        const artboardname = safefilepart(artboardnameraw || "default-artboard");
+                        await withriveinstance({
+                            filename,
+                            buffer,
+                            artboard: artboardnameraw || undefined,
+                            onready: async (inst, canvas) => {
+                                const animationnames = Array.isArray(inst.animationNames) ? inst.animationNames : [];
+                                if (!animationnames.length) {
+                                    if (exportmode === "png") {
+                                        try {inst.advance(0)} catch {}
+                                        inst.drawFrame();
+                                        if (!canvasislikelyblankorblack(canvas)) {
+                                            const pngblob = await canvastoblob(canvas, "image/png");
+                                            const outname = `${artboardname}__static.png`;
+                                            if (singlefilemode) {
+                                                directdownloads.push({name: outname, blob: pngblob});
+                                            } else {
+                                                folder.file(outname, await pngblob.arrayBuffer());
+                                            }
+                                            produced++;
+                                        }
+                                    }
+                                    return;
+                                }
+
+                                for (let idx = 0; idx < animationnames.length; idx++) {
+                                    const animationnameraw = animationnames[idx];
+                                    const animationname = safefilepart(animationnameraw);
+                                    setstatus(filename, `converting... (${produced + 1} output(s) so far)`);
+
+                                    if (exportmode === "png") {
+                                        const durationseconds = (Array.isArray(inst.durations) && typeof inst.durations[idx] === "number")
+                                            ? inst.durations[idx]
+                                            : 0;
+                                        drawanimationframe(inst, animationnameraw, 0);
+                                        if (durationseconds > 0 && canvasislikelyblankorblack(canvas)) {
+                                            drawanimationframe(inst, animationnameraw, durationseconds * 0.5);
+                                        }
+                                        if (canvasislikelyblankorblack(canvas)) {
+                                            continue;
+                                        }
+
+                                        const pngblob = await canvastoblob(canvas, "image/png");
+                                        const outname = `${artboardname}__${animationname}__frame0.png`;
+                                        if (singlefilemode) {
+                                            directdownloads.push({name: outname, blob: pngblob});
+                                        } else {
+                                            folder.file(outname, await pngblob.arrayBuffer());
+                                        }
+                                    } else {
+                                        const durationseconds = (Array.isArray(inst.durations) && typeof inst.durations[idx] === "number")
+                                            ? inst.durations[idx]
+                                            : 2;
+                                        const fps = 24;
+                                        const totalframes = Math.max(2, Math.min(240, Math.ceil(durationseconds * fps)));
+                                        const frames = [];
+                                        for (let f = 0; f < totalframes; f++) {
+                                            const tseconds = totalframes === 1 ? 0 : ((f / (totalframes - 1)) * durationseconds);
+                                            drawanimationframe(inst, animationnameraw, tseconds);
+                                            const pngblob = await canvastoblob(canvas, "image/png");
+                                            frames.push(await howmanytimeshaveiusedthisfunctionalready(pngblob));
+                                        }
+                                        const gifbytes = await makegiffromframes({framespngbytes: frames, fps});
+                                        const gifblob = new Blob([gifbytes], {type: "image/gif"});
+                                        const outname = `${artboardname}__${animationname}.gif`;
+                                        if (singlefilemode) {
+                                            directdownloads.push({name: outname, blob: gifblob});
+                                        } else {
+                                            folder.file(outname, gifbytes);
+                                        }
+                                    }
+                                    produced++;
+                                    await sleep(0);
+                                }
+                            },
+                        });
+                    }
                     setstatus(filename, "done!");
                 } catch (err) {
                     setstatus(filename, `error?! ${err && err.message ? err.message : err}`);
@@ -242,6 +308,24 @@
                 document.getElementById("status").textContent = `converting... (${donefiles}/${files.length})`;
             }
 
+            if (singlefilemode) {
+                if (!directdownloads.length) {
+                    document.getElementById("status").textContent = "no outputs generated..";
+                    return;
+                }
+                document.getElementById("status").textContent = `saving ${directdownloads.length} file(s)...`;
+                for (const out of directdownloads) {
+                    saveAs(out.blob, out.name);
+                }
+                document.getElementById("status").textContent = "done!";
+                return;
+            }
+
+            const zippedsources = Object.keys(zip.files || {}).length;
+            if (!zippedsources) {
+                document.getElementById("status").textContent = "no outputs generated..";
+                return;
+            }
             document.getElementById("status").textContent = "zipping...";
             const zipblob = await zip.generateAsync({type: "blob"});
             saveAs(zipblob, `rive${exportmode}.zip`);
