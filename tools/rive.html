@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rive (.riv) extractor!</title>
+</head>
+<body>
+    <h1>riv extractor</h1>
+    <form>
+      <input type="file" id="rivfile" accept=".riv" onchange="selectfiles(this.files)" multiple><br /><br />
+      <div>
+        export mode:<br />
+        <label><input type="radio" name="exportMode" value="png" checked>static png (first frame)</label><br />
+        <label><input type="radio" name="exportMode" value="gif">animated gif</label>
+      </div>
+      <br>
+    </form>
+    <div id="status"></div>
+
+    <script src="https://unpkg.com/@rive-app/canvas@2.35.4/rive.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/ffmpeg.min.js"></script>
+    <script src="/assets/static/jszip.js"></script>
+    <script src="/assets/static/filesaver.js"></script>
+    <script>
+
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+        const getselectedexportmode = () => {
+            const nodes = document.getElementsByName("exportMode");
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].checked) return nodes[i].value;
+            }
+            return "png";
+        };
+
+        const canvastoblob = (canvas, type) =>
+            new Promise((res, rej) => {
+                canvas.toBlob(blob => {
+                    if (!blob) {
+                        rej(new Error(`failed to create ${type} blob`));
+                        return;
+                    }
+                    res(blob);
+                }, type);
+            });
+
+        const howmanytimeshaveiusedthisfunctionalready = async blob => new Uint8Array(await blob.arrayBuffer());
+
+        const safefilepart = s => (s || "untitled")
+            .toString().replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+            .replace(/\s+/g, " ").trim();
+
+        const withriveinstance = async ({filename, buffer, onready}) => {
+            const canvas = document.createElement("CANVAS");
+            canvas.width = 1; canvas.height = 1;
+
+            let inst = null;
+            await new Promise((res, rej) => {
+                try {
+                    inst = new rive.Rive({
+                        canvas,
+                        buffer,
+                        autoplay: false,
+                        onLoad: () => res(),
+                        onLoadError: e => rej(new Error((e && e.message) || `failed to load ${filename}`)),
+                    });
+                } catch (err) {
+                    rej(err);
+                }
+            });
+
+            try {
+                const w = Math.max(1, Math.ceil(inst.artboardWidth || 1));
+                const h = Math.max(1, Math.ceil(inst.artboardHeight || 1));
+                canvas.width = w;
+                canvas.height = h;
+                inst.resizeToCanvas();
+
+                await onready(inst, canvas);
+            } finally {
+                try {inst.cleanup()} catch {}
+                try {canvas.remove()} catch {}
+            }
+        };
+
+        const filetoarraybuffer = file =>
+            new Promise((res, rej) => {
+                const reader = new FileReader();
+                reader.onerror = () => rej(reader.error || new Error("failed to read file"));
+                reader.onloadend = evt => {
+                    if (evt.target && evt.target.readyState === FileReader.DONE) {
+                        res(evt.target.result);
+                    } else {
+                        rej(new Error("failed to read file.."));
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+        const filestatuses = new Map();
+
+
+        const setstatus = (filename, text) => {
+            const el = filestatuses.get(filename) || document.getElementById("status_" + filename);
+            if (el) el.textContent = text;
+        };
+
+        let ffmpegsingleton = null;
+        let ffmpegloaded = false;
+        const getffmpeg = () => {
+            if (!ffmpegsingleton) {
+                const {createFFmpeg} = FFmpeg;
+                ffmpegsingleton = createFFmpeg({log: false});
+            }
+            return ffmpegsingleton;
+        };
+
+        const ensureffmpegloaded = async () => {
+            const ffmpeg = getffmpeg();
+            if (!ffmpegloaded) {
+                await ffmpeg.load();
+                ffmpegloaded = true;
+            }
+            return ffmpeg;
+        };
+
+        const makegiffromframes = async ({framespngbytes, fps}) => {
+            const ffmpeg = await ensureffmpegloaded();
+
+            try {ffmpeg.FS("unlink", "out.gif")} catch {}
+            try {ffmpeg.FS("unlink", "palette.png")} catch {}
+
+            const digit = Math.max(2, String(framespngbytes.length - 1).length);
+            const nameforindex = i => String(i).padStart(digit, "0") + ".png";
+            for (let i = 0; i < framespngbytes.length; i++) {
+                ffmpeg.FS("writeFile", nameforindex(i), framespngbytes[i]);
+            }
+
+            await ffmpeg.run(
+                "-framerate", String(fps),
+                "-i", `%0${digit}d.png`,
+                "-vf", "palettegen",
+                "palette.png"
+            );
+
+            await ffmpeg.run(
+                "-framerate", String(fps),
+                "-i", `%0${digit}d.png`,
+                "-i", "palette.png",
+                "-lavfi", "paletteuse",
+                "-loop", "0",
+                "out.gif"
+            );
+
+            const out = ffmpeg.FS("readFile", "out.gif");
+
+            for (let i = 0; i < framespngbytes.length; i++) {
+                try {ffmpeg.FS("unlink", nameforindex(i))} catch {}
+            }
+            try {ffmpeg.FS("unlink", "out.gif")} catch {}
+            try {ffmpeg.FS("unlink", "palette.png")} catch {}
+
+            return out;
+        };
+
+        const selectfiles = async (filelist) => {
+            const files = Array.from(filelist || []);
+            if (!files.length) return;
+
+            const exportmode = getselectedexportmode(); // png / gif
+            const zip = new JSZip();
+
+            let donefiles = 0;
+            document.getElementById("status").textContent = `converting... (0/${files.length})`;
+
+            for (const fileobj of files) {
+                const filename = fileobj.name || "Untitled.riv";
+
+                try {
+                    setstatus(filename, "converting... (0/0)");
+                    const buffer = await filetoarraybuffer(fileobj);
+
+                    const basename = safefilepart(filename.replace(/\.riv$/i, ""));
+                    const folder = zip.folder(basename) || zip;
+
+                    await withriveinstance({
+                        filename,
+                        buffer,
+                        onready: async (inst, canvas) => {
+                            const animationnames = Array.isArray(inst.animationNames) ? inst.animationNames : [];
+                            if (!animationnames.length) {
+                                setstatus(filename, "converting... (0/0)");
+                                return;
+                            }
+
+                            let idx = 0;
+                            for (const animationnameraw of animationnames) {
+                                idx++;
+                                setstatus(filename, `converting... (${idx}/${animationnames.length})`);
+
+                                const animationname = safefilepart(animationnameraw);
+
+                                if (exportmode === "png") {
+                                    try {inst.reset({animations: animationnameraw, autoplay: false})} catch {}
+                                    try {inst.scrub(animationnameraw, 0)} catch {}
+                                    inst.drawFrame();
+
+                                    const pngblob = await canvastoblob(canvas, "image/png");
+                                    folder.file(`${animationname}__frame0.png`, await pngblob.arrayBuffer());
+                                } else {
+                                    const animindex = animationnames.indexOf(animationnameraw);
+                                    const durationseconds = (Array.isArray(inst.durations) && typeof inst.durations[animindex] === "number")
+                                        ? inst.durations[animindex]
+                                        : 2;
+                                    const fps = 24;
+                                    const totalframes = Math.max(2, Math.min(240, Math.ceil(durationseconds * fps)));
+
+                                    try {inst.reset({animations: animationnameraw, autoplay: false})} catch {}
+
+                                    const frames = [];
+                                    for (let f = 0; f < totalframes; f++) {
+                                        const t = totalframes === 1 ? 0 : (f / (totalframes - 1));
+                                        try {inst.scrub(animationnameraw, t)} catch {}
+                                        inst.drawFrame();
+                                        const pngblob = await canvastoblob(canvas, "image/png");
+                                        frames.push(await howmanytimeshaveiusedthisfunctionalready(pngblob));
+                                    }
+
+                                    const gifbytes = await makegiffromframes({framespngbytes: frames, fps});
+                                    folder.file(`${animationname}.gif`, gifbytes);
+                                }
+                                await sleep(0);
+                            }
+                        },
+                    });
+                    setstatus(filename, "done!");
+                } catch (err) {
+                    setstatus(filename, `error?! ${err && err.message ? err.message : err}`);
+                }
+                donefiles++;
+                document.getElementById("status").textContent = `converting... (${donefiles}/${files.length})`;
+            }
+
+            document.getElementById("status").textContent = "zipping...";
+            const zipblob = await zip.generateAsync({type: "blob"});
+            saveAs(zipblob, `rive${exportmode}.zip`);
+            document.getElementById("status").textContent = "done!";
+        };
+
+        window.selectfiles = selectfiles;
+
+    </script>
+</body>
+</html>
