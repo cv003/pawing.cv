@@ -17,10 +17,11 @@
     const sogimg = "/assets/images/soggyexe/sog.webp";
     const logoimg = "/assets/images/soggyexe/logo.webp";
     const scarygif = "/assets/images/soggyexe/scary.gif";
-    const laughmp3 = "/assets/audio/laugh.mp3";
     const csshref = "/assets/static/soggy.exe.css";
     const scaryfadeduration = 300;
-    const popupnameprefix = "soggy_popup_";
+    const popupsizefactor = 1.5;
+    const popuprretrymaxattempts = 6;
+    const popupretrydelayms = 600;
 
     function randomuni(a, b) {return a + (b - a) * Math.random()}
     function currentseconds() {return performance.now() / 1000}
@@ -91,6 +92,7 @@
             this.popuppermissionchecked = false;
             this.usepopupmode = false;
             this.sogpopups = [];
+            this.popupretrytimer = null;
             this.el = document.createElement('div');
             this.el.className = "soggyoverlay"; this.el.tabIndex = -1;
             this.scaryel = document.createElement("img");
@@ -109,7 +111,7 @@
             this.scaryendtime = 0; this.scarynaturalduration = 0;
             this.scaryfadestarted = false;
 
-            this.laughaudio = new window.Audio(laughmp3);
+            this.laughaudio = new window.Audio("/assets/audio/laugh.mp3");
             this.laughaudio.preload = "auto";
             this.laughaudio.playbackRate = 0.7;
 
@@ -149,6 +151,8 @@
             for (let i = 0; i < sogcount; ++i) {
                 const s = new sog(this.sogpixmap, w, h);
                 s.popupwindow = null;
+                s.popupfailures = 0;
+                s.popupnextretryat = 0;
                 s.nextjumptime = now + randomuni(minjumpinterval, maxjumpinterval);
                 this.sogs.push(s);
             }
@@ -243,25 +247,34 @@
         getpopuppositionforsog(s) {
             const chromeleft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
             const chrometop = Math.max(0, window.outerHeight - window.innerHeight - chromeleft);
+            const popupwidth = Math.max(1, Math.round(s.sizew * popupsizefactor));
+            const popupheight = Math.max(1, Math.round(s.sizeh * popupsizefactor));
+            const offsetx = Math.round((popupwidth - s.sizew) / 2);
+            const offsety = Math.round((popupheight - s.sizeh) / 2);
             return {
-                x: Math.round(window.screenX + chromeleft + s.posx),
-                y: Math.round(window.screenY + chrometop + s.posy)
+                x: Math.round(window.screenX + chromeleft + s.posx - offsetx),
+                y: Math.round(window.screenY + chrometop + s.posy - offsety)
             };
         }
 
         createsogpopup(s, index) {
+            const popupwidth = Math.max(1, Math.round(s.sizew * popupsizefactor));
+            const popupheight = Math.max(1, Math.round(s.sizeh * popupsizefactor));
             const popup = window.open(
-                "", `${popupnameprefix}${index}_${Date.now()}`,
-                `popup=yes,width=${Math.max(1, Math.round(s.sizew))},height=${Math.max(1, Math.round(s.sizeh))},left=0,top=0,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
+                "", `soggypopup${index}_${Date.now()}`,
+                `popup=yes,width=${popupwidth},height=${popupheight},left=0,top=0,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
             );
-            if (!popup) {
+            if (!popup || popup === window) {
                 return null;
             }
 
             popup.document.title = "sog";
+            popup.document.documentElement.style.background = "#3e3e3e";
             popup.document.body.style.margin = "0";
             popup.document.body.style.overflow = "hidden";
-            popup.document.body.style.background = "transparent";
+            popup.document.body.style.width = "100vw";
+            popup.document.body.style.height = "100vh";
+            popup.document.body.style.background = "#3e3e3e";
             const img = popup.document.createElement("img");
             img.src = this.sogpixmap.src;
             img.draggable = false;
@@ -270,10 +283,15 @@
             img.style.height = "100vh";
             img.style.objectFit = "contain";
             popup.document.body.appendChild(img);
+            try {popup.focus()} catch (_) {}
             return popup;
         }
 
         closepopupwindows() {
+            if (this.popupretrytimer) {
+                clearTimeout(this.popupretrytimer);
+                this.popupretrytimer = null;
+            }
             if (!this.sogpopups) {return}
             for (let popup of this.sogpopups) {
                 try {
@@ -293,25 +311,79 @@
             if (!this.sogs || !this.sogs.length) {
                 return false;
             }
+            this.usepopupmode = true;
+            this.ensurepopupwindows();
+            this.syncpopupwindows(true);
+            return !!this.sogpopups.length;
+        }
+
+        schedulepopupretry(delayms = popupretrydelayms) {
+            if (this.popupretrytimer || !this.usepopupmode) {
+                return;
+            }
+            this.popupretrytimer = setTimeout(() => {
+                this.popupretrytimer = null;
+                this.ensurepopupwindows();
+            }, Math.max(100, delayms));
+        }
+
+        markpopupfailed(s) {
+            if (!s) {
+                return;
+            }
+            s.popupwindow = null;
+            s.popupfailures = (s.popupfailures || 0) + 1;
+            if (s.popupfailures >= popuprretrymaxattempts) {
+                s.popupnextretryat = Number.POSITIVE_INFINITY;
+                return;
+            }
+            const backoff = popupretrydelayms * Math.pow(1.5, Math.max(0, s.popupfailures - 1));
+            s.popupnextretryat = Date.now() + backoff;
+        }
+
+        ensurepopupwindows() {
+            if (!this.usepopupmode || !this.sogs) {
+                return;
+            }
             const popups = [];
+            const now = Date.now();
+            let shouldretry = false;
+            let nextretryin = Number.POSITIVE_INFINITY;
             for (let i = 0; i < this.sogs.length; ++i) {
                 const s = this.sogs[i];
-                const popup = this.createsogpopup(s, i);
-                if (!popup) {
-                    for (let opened of popups) {
-                        try {if (opened && !opened.closed) opened.close()} 
-                        catch (_) {}
+                let popup = s.popupwindow;
+                if (!popup || popup.closed) {
+                    const nextretryat = s.popupnextretryat || 0;
+                    if (nextretryat === Number.POSITIVE_INFINITY) {
+                        popup = null;
+                    } else if (nextretryat > now) {
+                        shouldretry = true;
+                        nextretryin = Math.min(nextretryin, nextretryat - now);
+                        popup = null;
+                    } else {
+                        popup = this.createsogpopup(s, i);
+                        if (!popup) {
+                            this.markpopupfailed(s);
+                            const retryat = s.popupnextretryat || 0;
+                            if (retryat !== Number.POSITIVE_INFINITY) {
+                                shouldretry = true;
+                                nextretryin = Math.min(nextretryin, Math.max(100, retryat - now));
+                            }
+                        } else {
+                            s.popupwindow = popup;
+                            s.popupfailures = 0;
+                            s.popupnextretryat = 0;
+                        }
                     }
-                    this.usepopupmode = false;
-                    return false;
                 }
-                s.popupwindow = popup;
-                popups.push(popup);
+                if (popup && !popup.closed) {
+                    popups.push(popup);
+                }
             }
             this.sogpopups = popups;
-            this.usepopupmode = true;
-            this.syncpopupwindows(true);
-            return true;
+            if (shouldretry) {
+                this.schedulepopupretry(nextretryin);
+            }
         }
 
         syncpopupwindows(forceResize) {
@@ -322,42 +394,61 @@
                 const s = this.sogs[i];
                 const popup = s.popupwindow;
                 if (!popup || popup.closed) {
-                    this.usepopupmode = false;
-                    this.closepopupwindows(); return;
+                    if ((s.popupnextretryat || 0) !== Number.POSITIVE_INFINITY) {
+                        this.schedulepopupretry();
+                    }
+                    continue;
                 }
                 const pos = this.getpopuppositionforsog(s);
-                const width = Math.max(1, Math.round(s.sizew));
-                const height = Math.max(1, Math.round(s.sizeh));
+                const width = Math.max(1, Math.round(s.sizew * popupsizefactor));
+                const height = Math.max(1, Math.round(s.sizeh * popupsizefactor));
                 try {
                     if (forceResize) {
                         popup.resizeTo(width, height);
                     }
                     popup.moveTo(pos.x, pos.y);
+                    const unexpectedlylarge = popup.outerWidth > (screen.availWidth * 0.7) &&
+                        popup.outerHeight > (screen.availHeight * 0.7);
+                    if (unexpectedlylarge) {
+                        popup.close();
+                        this.markpopupfailed(s);
+                        if ((s.popupnextretryat || 0) !== Number.POSITIVE_INFINITY) {
+                            this.schedulepopupretry();
+                        }
+                        continue;
+                    }
                 } catch (_) {
-                    this.usepopupmode = false;
-                    this.closepopupwindows();
-                    return;
+                    try {popup.close()} catch (_) {}
+                    this.markpopupfailed(s);
+                    if ((s.popupnextretryat || 0) !== Number.POSITIVE_INFINITY) {
+                        this.schedulepopupretry();
+                    }
+                    continue;
                 }
             }
         }
 
         requestpopupmode() {
-            if (this.popuppermissionchecked || !isdesktopdevice()) {return this.usepopupmode}
-            this.popuppermissionchecked = true;
-            const probe = window.open(
-                "", `${popupnameprefix}probe`,
-                "popup=yes,width=120,height=80,left=0,top=0,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no"
-            );
-            if (!probe) {
-                this.usepopupmode = false;
+            if (!isdesktopdevice()) {
                 return false;
             }
-            try {
-                probe.document.title = "soggy popup probe";
-                probe.document.body.innerHTML = "";
-                probe.close();
-            } catch (_) {}
-            this.usepopupmode = true;
+            if (!this.popuppermissionchecked) {
+                this.popuppermissionchecked = true;
+                const probe = window.open(
+                    "", `soggypopupprobe`,
+                    "popup=yes,width=120,height=80,left=0,top=0,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no"
+                );
+                if (!probe || probe === window) {
+                    this.usepopupmode = false;
+                    return false;
+                }
+                try {
+                    probe.document.title = "sog";
+                    probe.document.body.innerHTML = "";
+                    probe.focus();
+                    probe.close();
+                } catch (_) {}
+            }
             return this.initpopupwindows();
         }
 
@@ -401,6 +492,18 @@
             };
             menuchoice("scale up", () => this.scaleup());
             menuchoice("scale down", () => this.scaledown());
+            if (isdesktopdevice()) {
+                if (this.usepopupmode) {
+                    menuchoice("disable popups", () => {
+                        this.usepopupmode = false;
+                        this.closepopupwindows();
+                    });
+                } else {
+                    menuchoice("turn them into popups (buggy)", () => {
+                        this.requestpopupmode();
+                    });
+                }
+            }
 
             menu.appendChild(document.createElement('hr'));
 
@@ -449,13 +552,13 @@
         }
         updatescarystate() {
             if (!this.scaryactive) return;
-            const fadestarttime = this.scaryendtime - (scaryfadeduration / 1000);
+            const fadestarttime = this.scaryendtime - (scaryfadeduration / 750);
             if (this.time < fadestarttime) {
                 this.scaryopacity = 1.0;
                 this.scaryel.style.opacity = "1";
                 return;
             }
-            const progress = (this.time - fadestarttime) / (scaryfadeduration / 1000);
+            const progress = (this.time - fadestarttime) / (scaryfadeduration / 750);
             this.scaryopacity = Math.max(0.0, 1.0 - progress);
             this.scaryel.style.opacity = String(this.scaryopacity);
             if (this.scaryopacity <= 0.0) {
@@ -465,7 +568,6 @@
             }
         }
         beginrun() {
-            if (!this.isrunning) {this.requestpopupmode()}
             this.isrunning = true;
             this.startintro();
         }
