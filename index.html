@@ -115,11 +115,11 @@
             display: flex; position: fixed; flex-direction: column;
             justify-content: center; align-items: center; flex-wrap: wrap;
             bottom: 0; left: 50%; transform: translateX(-50%);
-            width: min(400px, calc(100vw - 300px)); max-width: 90vw; height: auto;
+            min-width: 200px; width: min(400px, calc(100vw - 300px)); max-width: 90vw; height: auto;
             padding: 6px 8px; border-radius: 16px 16px 0 0;
-            background: rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.1); z-index: 1000;
+            backdrop-filter: grayscale(100%) blur(10px);
             /* backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); */
-            z-index: 1000;
         }
         .bottom span {line-height: 1.5}
         .buttons, .more {
@@ -144,10 +144,11 @@
 
         .status {
             display: flex; position: fixed; white-space: pre-line !important;
-            flex-direction: column; top: 10px; right: 10px;
-            row-gap: 5px; text-align: right;
+            flex-direction: column; right: 0; top: 0;
+            z-index: 9999; padding: 6px; border-radius: 0 0 0 16px;
             background: rgba(0,0,0,0.1);
-            padding: 10px; border-radius: 15px;
+            backdrop-filter: grayscale(100%) blur(10px);
+            row-gap: 5px; text-align: right;
             max-width: 400px; max-width: 50%; height: auto;
         }
         .s1 {line-height: 1; font-size: 14px}
@@ -200,6 +201,7 @@
             z-index: 9999; gap: 6px; opacity: 0.85;
             padding: 6px; border-radius: 16px 0 0 0;
             background: rgba(0,0,0,0.1);
+            backdrop-filter: grayscale(100%) blur(10px);
         }
         .projcorner a {
             display: inline-flex;
@@ -209,6 +211,9 @@
             width: 100px;
             height: auto;
         }
+        @media (max-width: 430px) {
+            .projcorner img {width: 70px}
+        }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -217,6 +222,7 @@
             gap: 6px; padding: 6px;
             z-index: 999; border-radius: 0 16px 0 0;
             background: rgba(0,0,0,0.1);
+            backdrop-filter: grayscale(100%) blur(10px);
             left: 0; bottom: 0;
         }
         .otherstuff a {
@@ -350,6 +356,7 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
                     <a href="//wavesmiley.com"><img class="button smooth" data-src="/assets/images/88x31/hq/wavesmiley.gif"></a>
                     <a href="//tracker.archiveteam.org"><img class="button smooth" data-src="/assets/images/88x31/archiveteam.gif"></a>
                     <a href="//ezgif.com"><img class="button" data-src="/assets/images/88x31/hq/ezgif.gif"></a>
+                    <a href="//lambyland.net/play"><img class="button" data-src="/assets/images/88x31/hq/lambyland.png"></a>
                     <a><img title="from germanpit.de" class="button" data-src="/assets/images/88x31/w3c.webp"></a>
                     
                     <!-- FML -->

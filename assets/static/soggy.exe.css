@@ -2,8 +2,7 @@
     position: fixed;
     left: 0; top: 0;
     width: 100vw; height: 100vh;
-    pointer-events: none;
-    user-select: none;
+    pointer-events: none; user-select: none;
     z-index: 2147483646;
     background: transparent;
 }
@@ -28,6 +27,12 @@
     z-index: 2147483647;
     pointer-events: auto;
     cursor: pointer;
+
+    display: flex; padding: 6px;
+    z-index: 999; border-radius: 0 0 16px 0;
+    background: rgba(0,0,0,0.1);
+    backdrop-filter: grayscale(100%) blur(10px);
+    left: 0; top: 0;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
