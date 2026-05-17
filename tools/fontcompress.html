@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>font compressor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2238%22%20fill%3D%22%23000000%22%20font-family%3D%22Times%20New%20Roman%2Cserif%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20dy%3D%220%22%20text-anchor%3D%22middle%22%3E%F0%9F%97%9C%EF%B8%8F%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+
+    <style>
+
+        body {
+            padding-left: 0.25em;
+            background: #f7f7f8;
+            color: #222;
+            font-family: sans-serif;
+        }
+        h1, h2 {margin: 0}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        input {margin: 0; padding: 0}
+        textarea {
+            width: 32em; max-width: 90vw;
+            font-family: inherit; font-size: inherit;
+            resize: vertical;
+        }
+
+        .row {margin: 0.3em 0}
+        .opts label {
+            display: inline-flex; align-items: center;
+            gap: 0.25em; margin-right: 0.9em;
+            user-select: none; white-space: nowrap;
+        }
+        .output {
+            margin-top: 1em; font-family: monospace;
+            font-size: 0.85em; padding: 0.5em; border-radius: 10px;
+            white-space: pre-wrap; word-break: break-all;
+            background: #f0f0f0;
+        }
+        .preview {
+            margin-top: 0.6em; padding: 0.6em;
+            background: #fff; border-radius: 10px;
+            border: 1px solid #e2e2e2;
+            display: flex; flex-wrap: wrap;
+            gap: 0.3em;
+        }
+        .glyph {
+            display: inline-flex; flex-direction: column;
+            align-items: center; padding: 0.2em 0.3em;
+            border: 1px solid #eee; border-radius: 6px;
+            background: #fafafa; min-width: 2em;
+        }
+        .glyph .ch {
+            font-family: "PreviewFont", sans-serif;
+            font-size: 28px; line-height: 1;
+        }
+        .glyph .cep {
+            font-size: 9px; color: #999;
+            font-family: monospace; margin-top: 2px;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        button.runbtn:hover {background: #eee}
+        button.runbtn:disabled {opacity: 0.5; cursor: wait}
+        .hint {font-size: 0.75em; color: rgba(0,0,0,0.4)}
+        .err {color: #c33; margin-top: 0.4em}
+        sup {opacity: 0.5}
+
+    </style>
+
+</head>
+<body>
+    <h2>font compressor</h2>
+
+    <form class="compressform" autocomplete="off">
+        <div class="row">
+            <input type="file" class="fontfile" accept=".ttf,.woff,.woff2,font/*">
+            <span class="origsize hint"></span>
+        </div>
+
+        <div class="row">
+            <span class="hint" for="glyphtext">glyphs to keep</span><br>
+            <textarea class="glyphtext" name="glyphtext" rows="3" placeholder="paste any text; every unique character will be kept">ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789 ~!@#$%^&*()_+|<>?-=\</textarea>
+        </div>
+
+        <div class="row presets">
+            <span class="hint">presets</span><br>
+            <button type="button" data-preset="basiclatin">basic latin</button>
+            <button type="button" data-preset="latin1">latin-1 supplement</button>
+            <button type="button" data-preset="latinext">latin extended a/b</button>
+            <button type="button" data-preset="cyrillic">cyrillic</button>
+            <button type="button" data-preset="greek">greek</button>
+            <button type="button" data-preset="hebrew">hebrew</button>
+            <button type="button" data-preset="arabic">arabic</button>
+            <button type="button" data-preset="hiragana">hiragana</button>
+            <button type="button" data-preset="katakana">katakana</button> 
+            <br>
+            <button type="button" data-preset="digits">digits</button>
+            <button type="button" data-preset="punct">punctuation</button>
+            <button type="button" data-preset="symbols">extended symbols</button>
+            <button type="button" data-preset="currency">currency</button>
+            <button type="button" data-preset="arrows">arrows</button>
+            <button type="button" data-preset="math">math</button>
+            <button type="button" data-preset="box">box drawings</button>
+            <button type="button" data-preset="clear" style="background:#fff0f0">clear text</button>
+        </div>
+
+        <div class="row opts">
+            <label>format:
+                <select class="format">
+                    <option value="woff2" selected>woff2</option>
+                    <option value="woff">woff</option>
+                    <option value="ttf">ttf</option>
+                </select>
+            </label>
+            <label>simplify:
+                <select class="simplify">
+                    <option value="1" selected>off</option>
+                    <option value="2">x2 (half precision)</option>
+                    <option value="3">x3</option>
+                    <option value="4">x4 (lossy)</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="row opts">
+            <label><input type="checkbox" class="opt-hinting" checked>strip hint tables</label>
+            <label><input type="checkbox" class="opt-kerning">strip kerning</label>
+            <label><input type="checkbox" class="opt-layout">strip layout/ligatures</label>
+            <label><input type="checkbox" class="opt-names" checked>strip extra name records</label>
+            <label><input type="checkbox" class="opt-meta" checked>strip metadata<sup>(probably violates licenses! be careful)</sup></label>
+        </div>
+
+        <div class="row">
+            <button type="submit" class="runbtn">compress</button>
+            <span class="status hint"></span>
+        </div>
+    </form>
+
+    <div class="err"></div>
+    <div class="output"></div>
+    <div class="preview"></div>
+
+    <script type="module">
+        
+        import {Font, woff2} from "/assets/static/fonteditor.min.js";
+
+        const statuselement = document.querySelector(".status");
+        const errorelement = document.querySelector(".err");
+        const outelement = document.querySelector(".output");
+        const fontpreview = document.querySelector(".preview");
+        const sizeelement = document.querySelector(".origsize");
+
+        let woff2ready = null;
+        function ensurewoff2() {
+            if (!woff2ready) {
+                woff2ready = woff2.init("/assets/static/woff2.wasm");
+            }
+            return woff2ready;
+        }
+
+        // unicode ranges!
+        const presets = {
+            basiclatin: rangechars(0x0020, 0x007E),
+            latin1: rangechars(0x00A0, 0x00FF),
+            latinext: rangechars(0x0100, 0x024F),
+            cyrillic: rangechars(0x0400, 0x04FF),
+            greek: rangechars(0x0370, 0x03FF),
+            hebrew: rangechars(0x0590, 0x05FF),
+            arabic: rangechars(0x0600, 0x06FF),
+            hiragana: rangechars(0x3040, 0x309F),
+            katakana: rangechars(0x30A0, 0x30FF),
+            digits: "0123456789",
+            punct: rangechars(0x2000, 0x206F),
+            symbols: rangechars(0x2100, 0x214F),
+            currency: rangechars(0x20A0, 0x20CF),
+            arrows: rangechars(0x2190, 0x21FF),
+            math: rangechars(0x2200, 0x22FF),
+            box: rangechars(0x2500, 0x257F),
+        };
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function rangechars(a, b) {
+            let s = "";
+            for (let i = a; i <= b; i++) s += String.fromCodePoint(i);
+            return s;
+        }
+        function uniquecodepoints(text) {
+            const set = new Set();
+            for (const ch of text) {
+                const cep = ch.codePointAt(0);
+                if (cep != null) set.add(cep);
+            }
+            return Array.from(set).sort((a, b) => a - b);
+        }
+        function detecttype(name) {
+            const ext = (name || "").toLowerCase().split(".").pop();
+            if (ext === "woff2") return "woff2";
+            if (ext === "woff") return "woff";
+            return "ttf";
+        }
+        function humanbytes(n) {
+            if (n < 1024) return n + " B";
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+            return (n / (1024 * 1024)).toFixed(2) + " MB";
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        document.querySelector(".presets").addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-preset]");
+            const key = btn.dataset.preset;
+            const ta = document.querySelector(".glyphtext");
+            if (key === "clear") {ta.value = ""; return}
+
+            const add = presets[key];
+            const existing = new Set(ta.value);
+            let extra = "";
+
+            for (const ch of add) if (!existing.has(ch)) extra += ch;
+            ta.value = (ta.value + extra);
+        });
+
+        let fontbuffer = null;
+        let fontname = "";
+        document.querySelector(".fontfile").addEventListener("change", async (e) => {
+            const f = e.target.files[0];
+            if (!f) {fontbuffer = null; sizeelement.textContent = ""; return}
+            fontname = f.name;
+            fontbuffer = await f.arrayBuffer();
+            sizeelement.textContent = `(${humanbytes(fontbuffer.byteLength)} original)`;
+        });
+
+        function quantizecontours(font, factor) {
+            if (factor <= 1) return;
+            const head = font.data.head;
+            if (head && head.unitsPerEm) {
+                head.unitsPerEm = Math.max(16, Math.round(head.unitsPerEm / factor));
+            }
+            const scale = (v) => Math.round(v / factor);
+            const glyf = font.data.glyf;
+            if (glyf && Array.isArray(glyf)) {
+                for (const g of glyf) {
+                    if (g.contours) {
+                        for (const contour of g.contours) {
+                            for (const pt of contour) {
+                                if (typeof pt.x === "number") pt.x = scale(pt.x);
+                                if (typeof pt.y === "number") pt.y = scale(pt.y);
+                            }
+                        }
+                    }
+                    if (typeof g.xMin === "number") g.xMin = scale(g.xMin);
+                    if (typeof g.xMax === "number") g.xMax = scale(g.xMax);
+                    if (typeof g.yMin === "number") g.yMin = scale(g.yMin);
+                    if (typeof g.yMax === "number") g.yMax = scale(g.yMax);
+                    if (typeof g.advanceWidth === "number") g.advanceWidth = scale(g.advanceWidth);
+                    if (typeof g.leftSideBearing === "number") g.leftSideBearing = scale(g.leftSideBearing);
+                }
+            }
+            for (const k of ["xMin","xMax","yMin","yMax"]) {
+                if (head && typeof head[k] === "number") head[k] = scale(head[k]);
+            }
+            const hhea = font.data.hhea;
+            if (hhea) {
+                for (const k of ["ascent","descent","lineGap","advanceWidthMax","minLeftSideBearing","minRightSideBearing","xMaxExtent"]) {
+                    if (typeof hhea[k] === "number") hhea[k] = scale(hhea[k]);
+                }
+            }
+            const os2 = font.data["OS/2"];
+            if (os2) {
+                for (const k of ["sTypoAscender","sTypoDescender","sTypoLineGap","usWinAscent","usWinDescent","sxHeight","sCapHeight"]) {
+                    if (typeof os2[k] === "number") os2[k] = scale(os2[k]);
+                }
+            }
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function strip(font, opts) {
+            const data = font.data;
+            if (opts.kerning) {delete data.kern}
+            if (opts.layout) {delete data.GSUB; delete data.GPOS; delete data.GDEF}
+            if (opts.meta) {delete data.DSIG; delete data.meta; delete data.LTSH; delete data.VDMX; delete data.hdmx; delete data.PCLT}
+            if (opts.hinting) {
+                delete data.fpgm; delete data.prep; delete data.cvt; delete data.gasp;
+                if (data.glyf && Array.isArray(data.glyf)) {
+                    for (const g of data.glyf) {if (g.instructions) g.instructions = []}
+                }
+            }
+            if (opts.names && data.name) {
+                const keep = ["fontFamily","fontSubFamily","fullName","postScriptName","version","uniqueSubFamily"];
+                const filtered = {};
+                for (const k of keep) if (data.name[k]) filtered[k] = data.name[k];
+                data.name = filtered;
+            }
+        }
+
+        document.querySelector(".compressform").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorelement.textContent = "";
+            outelement.textContent = "";
+            fontpreview.innerHTML = "";
+            const runbtn = document.querySelector(".runbtn");
+
+            if (!fontbuffer) {errorelement.textContent = "pick a font file first"; return}
+            const text = document.querySelector(".glyphtext").value;
+            const codepoints = uniquecodepoints(text);
+            if (codepoints.length === 0) {errorelement.textContent = "no glyphs specified - paste some text"; return}
+
+            const intype = detecttype(fontname);
+            const outtype = document.querySelector(".format").value;
+            const simplify = parseInt(document.querySelector(".simplify").value) || 1;
+            const opts = {
+                hinting: document.querySelector(".opt-hinting").checked,
+                kerning: document.querySelector(".opt-kerning").checked,
+                layout: document.querySelector(".opt-layout").checked,
+                names: document.querySelector(".opt-names").checked,
+                meta: document.querySelector(".opt-meta").checked,
+            };
+
+            runbtn.disabled = true;
+            statuselement.textContent = "loading..";
+            try {
+                if (intype === "woff2" || outtype === "woff2") await ensurewoff2();
+                statuselement.textContent = "parsing..";
+                const font = Font.create(fontbuffer, {
+                    type: intype, subset: codepoints,
+                    hinting: !opts.hinting,
+                    compound2simple: false,
+                });
+
+                statuselement.textContent = "stripping..";
+                strip(font, opts); quantizecontours(font, simplify);
+
+                statuselement.textContent = "writing..";
+                const outbuf = font.write({type: outtype, hinting: !opts.hinting, deflate: null});
+
+                const u8 = outbuf instanceof ArrayBuffer ? new Uint8Array(outbuf) : new Uint8Array(outbuf.buffer || outbuf);
+                const blob = new Blob([u8], {type: "font/" + outtype});
+                const url = URL.createObjectURL(blob);
+
+                const ratio = ((u8.byteLength / fontbuffer.byteLength) * 100).toFixed(1);
+                outelement.innerHTML = "";
+                const sizeline = document.createElement("div");
+                sizeline.textContent = `${humanbytes(fontbuffer.byteLength)} -> ${humanbytes(u8.byteLength)}  (${ratio}% of original, ${codepoints.length} glyphs kept)`;
+                outelement.appendChild(sizeline);
+                const dl = document.createElement("a");
+                const basename = (fontname.replace(/\.[^.]+$/, "") || "subset") + ".min." + outtype;
+                dl.href = url; dl.download = basename;
+                dl.textContent = "download " + basename;
+                dl.style.display = "inline-block"; dl.style.marginTop = "0.4em";
+                outelement.appendChild(dl);
+
+                statuselement.textContent = "rendering preview..";
+                await renderpreview(blob, codepoints, outtype);
+                statuselement.textContent = "done!";
+            } catch (err) {
+                console.error(err);
+                errorelement.textContent = "error: " + (err && err.message ? err.message : String(err));
+                statuselement.textContent = "";
+            } finally {runbtn.disabled = false}
+        });
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        let lastfontface = null;
+        async function renderpreview(blob, codepoints, outtype) {
+            if (lastfontface) {
+                try {document.fonts.delete(lastfontface)} catch {}
+                lastfontface = null;
+            }
+            const url = URL.createObjectURL(blob);
+            const fmt = outtype === "woff2" ? "woff2" : outtype === "woff" ? "woff" : outtype === "otf" ? "opentype" : "truetype";
+            const face = new FontFace("PreviewFont", `url(${url}) format("${fmt}")`);
+            try {
+                await face.load();
+                document.fonts.add(face);
+                lastfontface = face;
+            } catch (e) {
+                fontpreview.innerHTML = `<div class="hint">preview unavailable (browser couldn't load the output): ${e.message}</div>`;
+                return;
+            }
+            fontpreview.innerHTML = "";
+            const cap = 800;
+            const shown = codepoints.slice(0, cap);
+            for (const cep of shown) {
+                const div = document.createElement("div");
+                div.className = "glyph";
+
+                const ch = document.createElement("span");
+                ch.className = "ch";
+
+                ch.textContent = String.fromCodePoint(cep);
+                const lbl = document.createElement("span");
+                lbl.className = "cep";
+
+                lbl.textContent = "U+" + cep.toString(16).toUpperCase().padStart(4, "0");
+                div.appendChild(ch); div.appendChild(lbl);
+                fontpreview.appendChild(div);
+            }
+            if (codepoints.length > cap) {
+                const more = document.createElement("div");
+                more.className = "hint";
+                more.textContent = `+ ${codepoints.length - cap} more glyphs not shown`;
+                fontpreview.appendChild(more);
+            }
+        }
+    </script>
+
+</body>
+</html>
