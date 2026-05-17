@@ -38,13 +38,16 @@
             white-space: pre-wrap; word-break: break-all;
             background: #f0f0f0;
         }
+        .output:empty {display: none}
         .preview {
             margin-top: 0.6em; padding: 0.6em;
             background: #fff; border-radius: 10px;
             border: 1px solid #e2e2e2;
-            display: flex; flex-wrap: wrap;
-            gap: 0.3em;
+            flex-wrap: wrap; gap: 0.3em;
         }
+        .preview {display: none}
+        .preview:not(:empty) {display: flex}
+        .err:empty {display: none}
         .glyph {
             display: inline-flex; flex-direction: column;
             align-items: center; padding: 0.2em 0.3em;
