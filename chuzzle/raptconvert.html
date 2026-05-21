@@ -4,41 +4,202 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>RaptConvert</title>
+        <link rel="icon" type="image/png" href="assets/images/icons/convert.webp">
+
         <style>
-            p {font-size: 0.75em; opacity: 0.5}
+
+        @font-face {
+            font-family: "blippo";
+            src: url("assets/fonts/blippo.woff2") format("woff2");
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "nimbus sans becker";
+            src: url("assets/fonts/nimbussansbeckerpbold.woff2") format("woff2");
+            font-display: swap; font-weight: 300;
+        }
+        @font-face {
+            font-family: "nimbus sans becker";
+            src: url("assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
+            font-display: swap; font-weight: 600;
+        }
+        @font-face {
+            font-family: "harlow solid";
+            src: url("assets/fonts/harlowsolidlet.woff2") format("woff2");
+            font-display: swap;
+        }
+
+        body {
+            background-color: black; padding: 1em;
+            color: white; height: 100vh; margin: 0;
+            display: flex; flex-direction: column;
+            overflow: hidden
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0; width: 100vw; height: 100vh;
+            opacity: 0.35; z-index: -1; pointer-events: none;
+            left: -8vw; top: -8vh; width: 116vw; height: 116vh;
+            background-image: url("assets/images/bg.webp");
+            background-repeat: repeat; background-size: 600px 600px;
+            background-position: 0 0;
+            transform: rotate(-5deg); animation: bgscroll 60s linear infinite;
+        }
+        @keyframes bgscroll {
+            from {background-position: 0 0}
+            to {background-position: 600px 600px}
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        textarea {max-width: 90vw}
+
+        canvas, img, p, a {user-select: none}
+        a {
+            position: relative;
+            display: inline-block;
+            font-size: 50px;
+            text-shadow: 0 0.175em 0 black; paint-order: stroke fill;
+        }
+        p {font-size: 0.75em; opacity: 0.5; max-width: 600px}
+
+        a, p, span, li, ul, label, button {
+            font-family: "nimbus sans becker", system-ui, sans-serif; font-weight: 600; color: #babfd8;;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ul {padding-top: 1em; list-style: none; padding-left: 0}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* yo, this is the page on which i got the logo working, 
+        just wanted to tell that the inner rgba(255,255,255,1) -> 
+        rgba(255,255,255,0) gradient seen in most harlow text is 
+        borderline IMPOSSIBLE to recreate with css/svg filters reliably, 
+        save yourself 3 hours please */
+
+        /* ^- this BUM really thought i'd give up. nuh uh */
+
+        .logo {
+            display: block; width: 600px; max-width: 90vw;
+            margin: 0; overflow: visible; user-select: none;
+        }
+        .logo text {
+            font-family: "harlow solid", system-ui, sans-serif;
+            font-size: 120px; font-weight: 400; paint-order: stroke fill;
+            dominant-baseline: alphabetic;
+        }
+        .logo .lgouter, .lgmid, .logo .lgblack {
+            fill: none; stroke-linejoin: round;
+            stroke-linecap: round; stroke-miterlimit: 1;
+        }
+        .logo .lgouter {stroke: #feff48; stroke-width: 30}
+        .logo .lgmid {stroke: #60204a; stroke-width: 17}
+        .logo .lgblack {stroke: rgba(0,0,0,0.5); stroke-width: 54}
+        .logo .inner {fill: url(#lgrgb); stroke: none} .logo .lglight {fill: url(#lgfade); stroke: none}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        form {
+            width: 400px;
+            box-shadow:
+            inset 0 0 0 8px #9705a4, inset 0 0 0 10px #8a0f9b, 
+            inset 0 0 0 12px #8a0820, inset 0 0 0 15px #ff2500, inset 0 0 0 17px #ffeb00, inset 0 0 0 19px #ffa900, inset 0 0 0 21px #c67228;
+            border-radius: 0.5em; padding: 2em;
+            background-image: linear-gradient(#8b53a2 0%, rgb(89, 12, 116) 15%, rgb(89, 12, 116) 85%, #8b53a2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        label {
+            z-index: 999; color: white;
+            padding-left: 25px; margin-bottom: -10px;
+            display: inline-block;
+        }
+
+        textarea {
+            background-color: #2e0029; color: white;
+            outline: none; border: none; resize: none;
+            width: calc(100% - 15px); height: 100px; border-radius: 1em;
+            padding: 0.5em;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        textarea::-webkit-scrollbar {display: none}
+
+        hr {
+            width: calc(100% - 39px); height: 3px;
+            position: absolute; 
+            background-color: #c67228; border: none;
+            left: 50%; transform: translateX(-50%);
+        }
+
+        button {
+            color: white; font-size: 1em;
+            margin-top: 1.25em; text-transform: uppercase;
+            outline: none; border: none; background: none;
+        }
+        
         </style>
     </head>
     <body>
-        <h1>RaptConvert</h1>
+
+        <div class="bg"></div>
+
+        <svg class="logo" viewBox="0 0 900 170">
+            <defs>
+                <linearGradient id="lgrgb" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f98"/><stop offset="27%" stop-color="#ffa"/>
+                    <stop offset="37%" stop-color="#afa"/><stop offset="44%" stop-color="#aff"/>
+                    <stop offset="56%" stop-color="#9bf"/><stop offset="70%" stop-color="#c9f"/>
+                    <stop offset="80%" stop-color="#f9f"/><stop offset="100%" stop-color="#f9f"/>
+                </linearGradient>
+                <linearGradient id="lgfade" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                    <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="erode">
+                    <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
+                    <feComposite in2="eroded" operator="in"/>
+                </filter>
+            </defs>
+            <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">RaptConvert</text></mask>
+            <g><text x="30" y="130" class="lgblack">RaptConvert</text>
+                <text x="30" y="130" class="lgouter">RaptConvert</text>
+                <text x="30" y="130" class="lgmid">RaptConvert</text>
+                <text x="30" y="130" class="inner">RaptConvert</text>
+                <text x="30" y="130" class="lglight" mask="url(#lgcrop)">RaptConvert</text></g>
+        </svg>
 
         <ul>
-            <li>query string / checksum blob is converted to utf-8, or base 64-decoded if already encoded</li>
-            <li>checksum uses a simple XOR cipher - each byte is XORd with "youcanonlytrustalibertarian", and if any data byte matches the key byte it's left unchanged</li>
-            <li>result is base64-encoded</li>
+            <li><span style="font-size:0.85em">★</span> query string / checksum blob is converted to utf-8, or base 64 decoded if already encoded</li>
+            <li><span style="font-size:0.85em">★</span> each byte is XORd with.. uh.. <span style="color:#ffbfbf">"youcanonlytrustalibertarian"</span>, and if any data byte matches the key byte it's left unchanged</li>
+            <li>result is base64 encoded</li>
         </ul>
 
+        <label for="main">url(s) / params</label>
         <form class="mainform" autocomplete="off">
-            <label for="input">input:</label><br>
-            <textarea class="input" rows="8" cols="60" placeholder="command=gettags&gameid=1&guid=…&checksum=R92653…"></textarea>
-            <br>
+            
+            <textarea class="main"></textarea>
+            <hr><br>
             <button type="button" class="btndecode">decode</button>
             <button type="button" class="btnencode">encode</button>
             <button type="button" class="btnclear">clear</button>
 
-            <br><br>
-            <label for="output">output:</label><br>
-            <textarea class="output" rows="8" cols="60" readonly></textarea>
             <br>
             <span class="status"></span>
         </form>
 
-        <p>these could have url encoding - %2B for "+" and %3D for "=". if a copy gives %%2B / %%3D, then that's wrong and the tool will normalize that. raw base 64 only is also fine
-        XOR is from String::Encrypt in the lib sibling (skip XOR when data byte equals key byte)</p>
+        <p>these tend to have url encoding at the end - %2B for "+" and %3D for "=". if a copy gives %%2B / %%3D, then something likely went wrong and the tool will attempt to normalize that. raw base 64 only is also fine <br>
+        XOR is from String::Encrypt (skips XOR when data byte equals key byte)</p>
 
-        <p>the blob in
-        &checksum=R92653HBh28UlM4J4qDcCbWmzD10KG1R isn't meant to be human text - before encrypting the game runs String::Replace on that template (gRCMakermallChecksumFix) so there might be ! instead of U, it's intentional on the wire and isn't faulty decoding</p>
+        <p>
+            before encrypting the game runs String::Replace on that template (gRCMakermallChecksumFix) so there might be ! instead of U, it's apparently intentional and isn't faulty decoding. if it is then my bad 
+            <img src="assets/images/evil.png" width="20" style="vertical-align:middle;">
+        </p>
 
         <script>
+
             (function () {
                 function getkeybytes() {
                     return new TextEncoder().encode("youcanonlytrustalibertarian");
@@ -103,6 +264,31 @@
                     } catch (e) {return null}
                 }
 
+                function normalizequerystring(qs) {
+                    let s = (qs || "").trim();
+                    if (!s) return s;
+                    while (s.indexOf("%%") !== -1) s = s.replace(/%%/g, "%");
+                    let last;
+                    let guard = 0;
+                    do {
+                        last = s;
+                        try {s = decodeURIComponent(last)}
+                        catch (e) {break}
+                        guard++;
+                        if (guard > 12) break;
+                    } while (s !== last && /%[0-9A-Fa-f]{2}/i.test(s));
+                    return s;
+                }
+
+                function lookslikebase64blob(v) {
+                    const s = (v || "").trim().replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
+                    if (s.length < 16) return false;
+                    if (s.indexOf("&") !== -1) return false;
+                    if (/[=%]/.test(s) && s.indexOf("=") !== -1 && s.indexOf("=") < s.length - 3) return false;
+                    if (/^command=/i.test(s)) return false;
+                    return /^[A-Za-z0-9+/=]+$/.test(s);
+                }
+
                 function extractexeblob(raw) {
                     let s = raw.trim();
                     if (!s) return {err: "empty input.."};
@@ -117,6 +303,9 @@
                         v = v.trim();
                         try {v = decodeexequeryvalue(v)}
                         catch (e) {return {err: "bad encoding in value: " + e.message}}
+                        if (!lookslikebase64blob(v)) {
+                            return {err: "exe= is plaintext (eg. exe=command=...). use encode to convert it to a blob."};
+                        }
                         return {b64: v.replace(/\s/g, ""), baseurl};
                     }
                     if (/^[A-Za-z0-9+/=\s]+$/.test(s) && s.length > 8) {
@@ -128,7 +317,6 @@
                     return {err: "error, try pasting the full url"};
                 }
 
-                // Modified: decodepipeline always returns the urlbase for this row (if any) with the result
                 function decodepipeline(text) {
                     const key = getkeybytes();
                     const {b64, baseurl, err} = extractexeblob(text);
@@ -140,20 +328,14 @@
                     }
                     const plain = raptisoftstringcrypt(raw, key);
                     let out;
-                    try {
-                        out = new TextDecoder("utf-8", {fatal: false}).decode(plain);
-                    } catch (e) {
-                        out = new TextDecoder("latin1").decode(plain);
-                    }
-                    // Carry baseurl in result
+                    try {out = new TextDecoder("utf-8", {fatal: false}).decode(plain)}
+                    catch (e) {out = new TextDecoder("latin1").decode(plain)}
                     return {ok: {decoded: sanitizeplaintext(out), baseurl}};
                 }
-
                 function sanitizeplaintext(str) {
                     return str.replace(/\0+$/g, "").replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]+$/g, "").replace(/\s+$/g, "");
                 }
 
-                // Modified: pipelineencode now accepts explicit urlbase, doesn't rely on global
                 function pipelineencode(text, urlbase) {
                     const key = getkeybytes();
                     const plain = text.trim();
@@ -169,13 +351,12 @@
                     return {ok: {full}};
                 }
 
-                const input = document.querySelector(".input");
-                const output = document.querySelector(".output");
+                const main = document.querySelector(".main");
                 const status = document.querySelector(".status");
 
                 function setstatus(message, ok) {
                     status.textContent = message || "";
-                    status.style.color = ok ? "green" : "red";
+                    status.style.color = ok ? "#00ff00" : "red";
                 }
 
                 function decodepipelinemulti(inputtext) {
@@ -184,14 +365,42 @@
                     let results = [];
                     let haserror = false, errormessage = '';
                     for (let i = 0; i < lines.length; ++i) {
-                        const r = decodepipeline(lines[i]);
+                        const line = lines[i];
+                        if (/^https?:\/\//i.test(line)) {
+                            try {
+                                const u = new URL(line);
+                                const baseurl = u.origin + u.pathname;
+                                const qs = u.search ? u.search.slice(1) : "";
+                                if (!u.searchParams.has("exe") && u.search && u.search.length > 1) {
+                                    const normalizedqs = normalizequerystring(qs);
+                                    if (lookslikebase64blob(normalizedqs)) {
+                                        const rblob = decodepipeline(baseurl + "?exe=" + normalizedqs);
+                                        if (rblob.err) {
+                                            haserror = true;
+                                            errormessage = "line " + (i+1) + ": " + rblob.err; break;
+                                        }
+                                        results.push(baseurl + "?" + rblob.ok.decoded);
+                                    } else {results.push(line)}
+                                    continue;
+                                }
+                                if (u.searchParams.has("exe")) {
+                                    const exev = normalizequerystring(u.searchParams.get("exe") || "");
+                                    if (!lookslikebase64blob(exev) && qs) {
+                                        const normalized = normalizequerystring(qs).replace(/^exe=/i, "");
+                                        results.push(baseurl + "?" + normalized);
+                                        continue;
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+
+                        const r = decodepipeline(line);
                         if (r.err) {
                             haserror = true;
                             errormessage = "line " + (i+1) + ": " + r.err; break;
                         }
-                        if (r.ok.baseurl) {
-                            results.push(r.ok.baseurl + "?exe=" + r.ok.decoded);
-                        } else {results.push(r.ok.decoded)}
+                        if (r.ok.baseurl) {results.push(r.ok.baseurl + "?" + r.ok.decoded)}
+                        else {results.push(r.ok.decoded)}
                     }
                     if (haserror) return {err: errormessage};
                     return {ok: results.join('\n')};
@@ -204,12 +413,23 @@
                     let haserror = false, errormessage = '';
                     for (let i = 0; i < lines.length; ++i) {
                         let line = lines[i];
-                        let urlbase = null; let text = line;
-                        const urlmatch = line.match(/^\[url:\s*(https?:\/\/[^\]]+)\]\s*(.*)$/i);
-                        if (urlmatch) {
-                            urlbase = urlmatch[1].trim();
-                            text = urlmatch[2].trim();
+                        let urlbase = null;
+                        let text = line;
+
+                        if (/^https?:\/\//i.test(line)) {
+                            try {
+                                const u = new URL(line);
+                                urlbase = u.origin + u.pathname;
+                                const qs = u.search ? u.search.slice(1) : "";
+
+                                if (u.searchParams.has("exe")) {
+                                    const exev = normalizequerystring(u.searchParams.get("exe") || "");
+                                    if (lookslikebase64blob(exev)) {results.push(line); continue}
+                                    text = normalizequerystring(qs).replace(/^exe=/i, "");
+                                } else {text = normalizequerystring(qs)}
+                            } catch (e) {urlbase = null; text = line;}
                         }
+
                         const r = pipelineencode(text, urlbase);
                         if (r.err) {
                             haserror = true;
@@ -224,25 +444,19 @@
                 /*//////////////////////////////////////////////////////////////////////*/
 
                 document.querySelector(".btndecode").addEventListener("click", function () {
-                    const r = decodepipelinemulti(input.value);
-                    if (r.err) {
-                        output.value = "";
-                        setstatus(r.err, false); return;
-                    }
-                    output.value = r.ok;
-                    setstatus("decoded!", true);
+                    const r = decodepipelinemulti(main.value);
+                    if (r.err) {setstatus(r.err, false); return}
+                    main.value = r.ok;
+                    // setstatus("decoded!", true);
                 });
                 document.querySelector(".btnencode").addEventListener("click", function () {
-                    const r = pipelineencodemulti(input.value);
-                    if (r.err) {
-                        output.value = "";
-                        setstatus(r.err, false); return;
-                    }
-                    output.value = r.ok;
-                    setstatus("encoded!", true);
+                    const r = pipelineencodemulti(main.value);
+                    if (r.err) {setstatus(r.err, false); return}
+                    main.value = r.ok;
+                    // setstatus("encoded!", true);
                 });
                 document.querySelector(".btnclear").addEventListener("click", function () {
-                    input.value = ""; output.value = "";
+                    main.value = "";
                     setstatus("", true);
                 });
 
