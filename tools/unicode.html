@@ -496,9 +496,9 @@
                             for (let i = 0; i < dim; i++) dot += v[i] * feat[base + i];
                             if (dot > best) best = dot;
                         }
-                        if (top.length < 50) {
+                        if (top.length < 100) {
                             top.push({idx: g, score: best});
-                            if (top.length === 50) {
+                            if (top.length === 100) {
                                 top.sort(function (a, b) { return a.score - b.score; });
                                 worst = top[0].score;
                             }
