@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>fake synthid generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2244%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20text-anchor%3D%22middle%22%3E%F0%9F%92%A7%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+
+    <style>
+
+        body {
+            padding-left: 0.25em;
+            padding-bottom: 3em;
+            background: #f7f7f8;
+            color: #222;
+            font-family: sans-serif;
+            max-width: 56em;
+        }
+        h1, h2 {margin: 0}
+        .hint {font-size: 0.78em; color: rgba(0,0,0,0.45); line-height: 1.4}
+        a {color: #3a6ea5}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .drop {
+            margin: 0.8em 0; padding: 1.5em 1em;
+            border: 2px dashed #c5c5ca; border-radius: 12px;
+            background: #fff; text-align: center; cursor: pointer;
+            font-size: 0.9em; color: #666; display: block;
+        }
+        .drop.over {border-color: #3a6ea5; background: #eef3f9}
+        .drop input {display: none}
+
+        .panels {display: flex; flex-wrap: wrap; gap: 1.1em; margin-top: 0.6em}
+        .panel {display: flex; flex-direction: column; gap: 0.3em}
+        .panel .cap {font-size: 0.72em; color: #888}
+        canvas.view {
+            display: block; max-width: 300px; max-height: 300px;
+            width: auto; height: auto;
+            border: 1px solid #d8d8da; border-radius: 8px; background: #fff;
+            image-rendering: auto;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        button {
+            margin-top: 0.9em; font: inherit; font-size: 0.9em;
+            padding: 0.45em 1.3em; border-radius: 8px;
+            border: 1px solid #222; background: #222; color: #fff; cursor: pointer;
+        }
+        button:hover {background: #000}
+        button:disabled {opacity: 0.4; cursor: default}
+
+        .readout {
+            margin-top: 0.8em; font-family: monospace; font-size: 0.8em;
+            background: #f0f0f0; border-radius: 8px; padding: 0.5em 0.7em;
+            white-space: pre-wrap; word-break: break-word; max-width: 36em;
+        }
+        .bar {
+            display: inline-block; width: 10em; height: 0.55em; vertical-align: middle;
+            margin-left: 0.6em; background: #e2e2e2; border-radius: 4px; overflow: hidden;
+        }
+        .bar > i {display: block; height: 100%; background: #3a9d6a}
+
+        sup {font-size: 0.65em !important}
+
+    </style>
+
+</head>
+<body>
+
+    <h2>fake synthid generator</h2>
+    <div class="hint">or "slander" tool..? use it nicely</div>
+    <br>
+    <div class="hint">will basically NEVER trip verify ai tool in gemini, as that would require a private key</div><sup class="hint">(and where would anyone get that?)</sup>
+    <div class="hint">BUT it will trip most other ai detectors.. they're a little bit gullible..</div>
+    <div class="hint">so, yeah, permanent work in progress, if you somehow have any ideas <a href="/contact">here's a contact link</a></div>
+
+    <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*">
+        drop an image here, click to pick a file, or paste from clipboard
+    </label>
+
+    <div class="panels" id="panels" hidden>
+        <div class="panel">
+            <canvas class="view" id="origcv"></canvas>
+            <span class="cap">input</span>
+        </div>
+        <div class="panel">
+            <canvas class="view" id="outcv"></canvas>
+            <span class="cap">output</span>
+        </div>
+        <div class="panel">
+            <canvas class="view" id="patcv"></canvas>
+            <span class="cap">watermark</span>
+        </div>
+    </div>
+
+    <div class="readout" id="readout" hidden></div>
+
+    <button id="download" hidden>download image</button>
+    <script>
+
+        const N = 512;
+        // frankly, this does not help at ALL
+        const CARRIERS = [
+            {fy:  14, fx:  14, phase: -1.4409167766571045, mag: 16806.97},
+            {fy:  14, fx:   0, phase: -0.6794754862785339, mag: 14508.11},
+            {fy: 126, fx:  14, phase: -2.3735604286193848, mag:  8046.27},
+            {fy: 128, fx: 128, phase: -2.2917797565460205, mag:  6908.44},
+            {fy:  98, fx: -14, phase:  0.6109000444412231, mag:  6283.39},
+            {fy: 210, fx: -14, phase:  1.1314835548400880, mag:  6031.75},
+            {fy: 126, fx:   0, phase: -1.5455632209777832, mag:  5842.33},
+            {fy:  98, fx:   0, phase:  0.2079253494739532, mag:  5135.91},
+            {fy: 238, fx:  14, phase: -1.6099290847778320, mag:  4189.85},
+            {fy: 210, fx:   0, phase:  0.4252164363861084, mag:  3670.40},
+        ];
+        const MAXMAG = 16806.97;
+        const CHAN_W = [0.65, 1.0, 0.5];
+        const AMP = 2.0;
+        const NOISE_AMP = 0.8;
+
+        // content-mask tuning
+        const MASK_R = 2, MASK_LO = 2, 
+              MASK_HI = 14, MASK_FLOOR = 0.12;
+
+        const commonres = [
+            [1024, 1024], [1248, 832], [832, 1248], [1184, 864], [864, 1184],
+            [1344, 768], [768, 1344], [1152, 896], [896, 1152],
+        ];
+
+        const $ = s => document.querySelector(s);
+        const drop = $("#drop"), panels = $("#panels"), readout = $("#readout");
+        const origCv = $("#origcv"), outcv = $("#outcv"), patCv = $("#patcv");
+        const downloadBtn = $("#download");
+
+        let sourcedata = null, residual = null, outName = "image.png";
+        let origW = 0, origH = 0;
+
+        const C_WEIGHT = CARRIERS.map(c => {
+            const f = Math.hypot(c.fy, c.fx) / N;
+            let t = (f - 0.03) / 0.09; t = t < 0 ? 0 : t > 1 ? 1 : t;
+            return (c.mag / MAXMAG) * (0.35 + 0.65 * (t * t * (3 - 2 * t)));
+        });
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function loadFile(f) {
+            if (!f || !f.type.startsWith("image/")) return;
+            const img = new Image();
+            img.onload = () => { URL.revokeObjectURL(img.src); useImage(img); };
+            img.onerror = () => alert("could not read that image");
+            img.src = URL.createObjectURL(f);
+        }
+
+        function randId(n) {
+            const c = "abcdefghijklmnopqrstuvwxyz0123456789";
+            let s = "";
+            for (let i = 0; i < n; i++) s += c[Math.floor(Math.random() * c.length)];
+            return s;
+        }
+
+        function snapSize(w, h) {
+            const ar = Math.log(w / h);
+            let best = commonres[0], bd = Infinity;
+            for (const s of commonres) {
+                const d = Math.abs(ar - Math.log(s[0] / s[1]));
+                if (d < bd) { bd = d; best = s; }
+            }
+            return best;
+        }
+
+        function useImage(img) {
+            origW = img.naturalWidth; origH = img.naturalHeight;
+            const [tw, th] = snapSize(origW, origH);
+
+            origCv.width = origW; origCv.height = origH;
+            origCv.getContext("2d").drawImage(img, 0, 0);
+
+            const tmp = document.createElement("canvas");
+            tmp.width = tw; tmp.height = th;
+            const tctx = tmp.getContext("2d");
+            tctx.imageSmoothingEnabled = true;
+            tctx.imageSmoothingQuality = "high";
+            tctx.drawImage(img, 0, 0, tw, th);
+            sourcedata = tctx.getImageData(0, 0, tw, th);
+
+            outcv.width = tw; outcv.height = th;
+            outName = "Gemini_Generated_Image_" + randId(16) + ".png";
+
+            panels.hidden = false;
+            readout.hidden = false;
+            downloadBtn.hidden = false;
+            process();
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function buildPattern(w, h) {
+            const pat = new Float32Array(w * h);
+            for (let ci = 0; ci < CARRIERS.length; ci++) {
+                const c = CARRIERS[ci], weight = C_WEIGHT[ci];
+                const ay = 2 * Math.PI * c.fy / N, bx = 2 * Math.PI * c.fx / N;
+                const cy = new Float32Array(h), sy = new Float32Array(h);
+                for (let y = 0; y < h; y++) { cy[y] = Math.cos(ay * y); sy[y] = Math.sin(ay * y); }
+                const cx = new Float32Array(w), sx = new Float32Array(w);
+                for (let x = 0; x < w; x++) { cx[x] = Math.cos(bx * x); sx[x] = Math.sin(bx * x); }
+                const cph = Math.cos(c.phase), sph = Math.sin(c.phase);
+                for (let y = 0; y < h; y++) {
+                    const cyy = cy[y], syy = sy[y], row = y * w;
+                    for (let x = 0; x < w; x++) {
+                        const cosAB = cyy * cx[x] - syy * sx[x];
+                        const sinAB = syy * cx[x] + cyy * sx[x];
+                        pat[row + x] += weight * (cosAB * cph - sinAB * sph);
+                    }
+                }
+            }
+            return pat;
+        }
+
+        function boxBlur(src, w, h, r) {
+            const tmp = new Float64Array(w * h), out = new Float64Array(w * h);
+            for (let y = 0; y < h; y++) {
+                const row = y * w;
+                let sum = 0;
+                for (let x = 0; x <= r && x < w; x++) sum += src[row + x];
+                for (let x = 0; x < w; x++) {
+                    const cnt = Math.min(x + r, w - 1) - Math.max(x - r, 0) + 1;
+                    tmp[row + x] = sum / cnt;
+                    if (x + r + 1 < w) sum += src[row + x + r + 1];
+                    if (x - r >= 0) sum -= src[row + x - r];
+                }
+            }
+            for (let x = 0; x < w; x++) {
+                let sum = 0;
+                for (let y = 0; y <= r && y < h; y++) sum += tmp[y * w + x];
+                for (let y = 0; y < h; y++) {
+                    const cnt = Math.min(y + r, h - 1) - Math.max(y - r, 0) + 1;
+                    out[y * w + x] = sum / cnt;
+                    if (y + r + 1 < h) sum += tmp[(y + r + 1) * w + x];
+                    if (y - r >= 0) sum -= tmp[(y - r) * w + x];
+                }
+            }
+            return out;
+        }
+
+        function activityMask(data, w, h) {
+            const lum = new Float64Array(w * h), lum2 = new Float64Array(w * h);
+            for (let i = 0; i < w * h; i++) {
+                const j = i * 4;
+                const L = 0.299 * data[j] + 0.587 * data[j + 1] + 0.114 * data[j + 2];
+                lum[i] = L; lum2[i] = L * L;
+            }
+            const mean = boxBlur(lum, w, h, MASK_R);
+            const meanSq = boxBlur(lum2, w, h, MASK_R);
+            const mask = new Float32Array(w * h);
+            for (let i = 0; i < w * h; i++) {
+                const std = Math.sqrt(Math.max(0, meanSq[i] - mean[i] * mean[i]));
+                const m = (std - MASK_LO) / (MASK_HI - MASK_LO);
+                mask[i] = m < MASK_FLOOR ? MASK_FLOOR : m > 1 ? 1 : m;
+            }
+            return mask;
+        }
+
+        function smoothEnvelope(w, h) {
+            const CELL = 96;
+            const gw = Math.ceil(w / CELL) + 2, gh = Math.ceil(h / CELL) + 2;
+            const grid = new Float32Array(gw * gh);
+            for (let i = 0; i < grid.length; i++) grid[i] = Math.random();
+            const env = new Float32Array(w * h);
+            for (let y = 0; y < h; y++) {
+                const gy = y / CELL, y0 = gy | 0, fy = gy - y0;
+                for (let x = 0; x < w; x++) {
+                    const gx = x / CELL, x0 = gx | 0, fx = gx - x0;
+                    const a = grid[y0 * gw + x0], b = grid[y0 * gw + x0 + 1];
+                    const c = grid[(y0 + 1) * gw + x0], d = grid[(y0 + 1) * gw + x0 + 1];
+                    const top = a + (b - a) * fx, bot = c + (d - c) * fx;
+                    env[y * w + x] = 0.55 + 0.45 * (top + (bot - top) * fy);
+                }
+            }
+            return env;
+        }
+
+        function analyze(data, w, h) {
+            let total = 0;
+            for (const c of CARRIERS) {
+                const ay = 2 * Math.PI * c.fy / N, bx = 2 * Math.PI * c.fx / N;
+                const cx = new Float32Array(w), sx = new Float32Array(w);
+                for (let x = 0; x < w; x++) { cx[x] = Math.cos(bx * x); sx[x] = Math.sin(bx * x); }
+                let sumR = 0, sumI = 0;
+                for (let y = 0; y < h; y++) {
+                    let rR = 0, rI = 0;
+                    const row = y * w * 4;
+                    for (let x = 0; x < w; x++) {
+                        const g = data[row + x * 4 + 1];
+                        rR += g * cx[x];
+                        rI -= g * sx[x];
+                    }
+                    const cyy = Math.cos(ay * y), syy = Math.sin(ay * y);
+                    sumR += rR * cyy + rI * syy;
+                    sumI += rI * cyy - rR * syy;
+                }
+                total += Math.cos(Math.atan2(sumI, sumR) - c.phase);
+            }
+            return Math.max(0, total / CARRIERS.length);
+        }
+
+        function addsparkle(ctx, w, h) {
+            const diag = Math.hypot(w, h);
+            const size = 0.0331 * diag, m = 0.0221 * diag;
+            ctx.save(); ctx.translate(w - m - size, h - m - size);
+            ctx.scale(size / 28, size / 28);
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
+            ctx.fill(new Path2D("M14 28c0-1.9367-.3733-3.7567-1.12-5.46-.7233-1.7033-1.715-3.185-2.975-4.445-1.26-1.26-2.7417-2.2517-4.445-2.975C3.7567 14.3733 1.9367 14 0 14c1.9367 0 3.7567-.3617 5.46-1.085 1.7033-.7467 3.185-1.75 4.445-3.01S12.1567 7.1633 12.88 5.46C13.6267 3.7567 14 1.9367 14 0c0 1.9367.3617 3.7567 1.085 5.46.7467 1.7033 1.75 3.185 3.01 4.445 1.26 1.26 2.7417 2.2633 4.445 3.01C24.2433 13.6383 26.0633 14 28 14c-1.9367 0-3.7567.3733-5.46 1.12-1.7033.7233-3.185 1.715-4.445 2.975-1.26 1.26-2.2633 2.7417-3.01 4.445C14.3617 24.2433 14 26.0633 14 28Z"));
+            ctx.restore();
+        }
+
+        function process() {
+            const w = sourcedata.width, h = sourcedata.height;
+            const pattern = buildPattern(w, h);
+            const mask = activityMask(sourcedata.data, w, h);
+            const env = smoothEnvelope(w, h);
+
+            const out = new ImageData(new Uint8ClampedArray(sourcedata.data), w, h);
+            const d = out.data;
+            residual = new Float32Array(w * h);
+            for (let i = 0; i < w * h; i++) {
+                const m = mask[i], j = i * 4;
+                const wm = AMP * pattern[i] * m * env[i];
+                for (let ch = 0; ch < 3; ch++) {
+                    const noise = (Math.random() * 2 - 1) * NOISE_AMP * m;
+                    const delta = (wm + noise) * CHAN_W[ch];
+                    if (ch === 1) residual[i] = delta;
+                    const v = d[j + ch] + delta;
+                    d[j + ch] = v < 0 ? 0 : v > 255 ? 255 : v;
+                }
+            }
+            const matchbefore = analyze(sourcedata.data, w, h);
+            const matchafter = analyze(d, w, h);
+
+            const octx = outcv.getContext("2d");
+            octx.putImageData(out, 0, 0);
+            addsparkle(octx, w, h);
+
+            drawResidual(w, h);
+            updateReadout(w, h, matchbefore, matchafter);
+            downloadBtn.disabled = false;
+        }
+
+        function drawResidual(w, h) {
+            let max = 1e-6;
+            for (let i = 0; i < residual.length; i++) {
+                const a = Math.abs(residual[i]); if (a > max) max = a;
+            }
+            patCv.width = w; patCv.height = h;
+            const id = new ImageData(w, h), d = id.data, scale = 110 / max;
+            for (let i = 0; i < w * h; i++) {
+                const v = 128 + residual[i] * scale, j = i * 4;
+                d[j] = d[j + 1] = d[j + 2] = v < 0 ? 0 : v > 255 ? 255 : v;
+                d[j + 3] = 255;
+            }
+            patCv.getContext("2d").putImageData(id, 0, 0);
+        }
+
+        function pct(x) { return (x * 100).toFixed(1) + "%"; }
+        function bar(x) {
+            return '<span class="bar"><i style="width:' +
+                   Math.round(Math.min(1, x) * 100) + '%"></i></span>';
+        }
+        function updateReadout(w, h, before, after) {
+            const resized = (w !== origW || h !== origH);
+            readout.innerHTML =
+                "input         " + origW + " x " + origH + "\n" +
+                "normalized    " + w + " x " + h +
+                    (resized ? "  (snapped to standard Gemini size)" : "  (already standard)") + "\n" +
+                "output file   " + outName + "\n" +
+                "watermark     " + CARRIERS.length + " carriers, perceptual content-masked\n" +
+                "metadata      EXIF + XMP/IPTC + PNG text (DigitalSourceType = AI)\n\n" +
+                "SynthID phase match (green channel, detector metric)\n" +
+                "  before  " + pct(before) + bar(before) + "\n" +
+                "  after   " + pct(after) + bar(after);
+        }
+
+        function isoLocal(d) {
+            const p = n => String(n).padStart(2, "0");
+            const off = -d.getTimezoneOffset(), a = Math.abs(off);
+            return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
+                   "T" + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()) +
+                   (off >= 0 ? "+" : "-") + p((a / 60) | 0) + ":" + p(a % 60);
+        }
+        function exifDate(d) {
+            const p = n => String(n).padStart(2, "0");
+            return d.getFullYear() + ":" + p(d.getMonth() + 1) + ":" + p(d.getDate()) + " " +
+                   p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+        }
+        function uuid() {
+            if (crypto.randomUUID) return crypto.randomUUID();
+            return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+
+        function buildExif(d) {
+            const asc = s => {
+                const b = new TextEncoder().encode(s);
+                const o = new Uint8Array(b.length + 1); o.set(b); return o;
+            };
+            const entries = [
+                [0x010E, asc("Created by Google Generative AI.")],
+                [0x0131, asc("Gemini")],
+                [0x0132, asc(exifDate(d))],
+                [0x013B, asc("Google AI")],
+                [0x8298, asc("Made with Google AI")],
+            ];
+            const n = entries.length, ifdSize = 2 + 12 * n + 4;
+            let dataLen = 0;
+            for (const [, v] of entries) if (v.length > 4) dataLen += v.length + (v.length & 1);
+            const buf = new Uint8Array(8 + ifdSize + dataLen);
+            const dv = new DataView(buf.buffer);
+            buf[0] = 0x49; buf[1] = 0x49;
+            dv.setUint16(2, 42, true);
+            dv.setUint32(4, 8, true);
+            dv.setUint16(8, n, true);
+            let e = 10, dOff = 8 + ifdSize;
+            for (const [tag, v] of entries) {
+                dv.setUint16(e, tag, true);
+                dv.setUint16(e + 2, 2, true);
+                dv.setUint32(e + 4, v.length, true);
+                if (v.length <= 4) { buf.set(v, e + 8); }
+                else { dv.setUint32(e + 8, dOff, true); buf.set(v, dOff); dOff += v.length + (v.length & 1); }
+                e += 12;
+            }
+            dv.setUint32(e, 0, true);
+            return buf;
+        }
+
+        function buildXMP(d) {
+            const iso = isoLocal(d);
+            const evt = (act, agent) =>
+                '     <rdf:li rdf:parseType="Resource">\n' +
+                '      <stEvt:action>' + act + '</stEvt:action>\n' +
+                '      <stEvt:softwareAgent>' + agent + '</stEvt:softwareAgent>\n' +
+                '      <stEvt:when>' + iso + '</stEvt:when>\n' +
+                '     </rdf:li>\n';
+            return '<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>\n' +
+                '<x:xmpmeta xmlns:x="adobe:ns:meta/">\n' +
+                ' <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+                '  <rdf:Description rdf:about=""\n' +
+                '    xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/"\n' +
+                '    xmlns:xmp="http://ns.adobe.com/xap/1.0/"\n' +
+                '    xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"\n' +
+                '    xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/"\n' +
+                '    xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#"\n' +
+                '    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"\n' +
+                '    xmlns:dc="http://purl.org/dc/elements/1.1/">\n' +
+                '   <Iptc4xmpExt:DigitalSourceType>http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia</Iptc4xmpExt:DigitalSourceType>\n' +
+                '   <xmp:CreatorTool>Gemini</xmp:CreatorTool>\n' +
+                '   <xmp:CreateDate>' + iso + '</xmp:CreateDate>\n' +
+                '   <xmp:ModifyDate>' + iso + '</xmp:ModifyDate>\n' +
+                '   <xmp:MetadataDate>' + iso + '</xmp:MetadataDate>\n' +
+                '   <dc:format>image/png</dc:format>\n' +
+                '   <dc:creator><rdf:Seq><rdf:li>Google AI</rdf:li></rdf:Seq></dc:creator>\n' +
+                '   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Created by Google Generative AI.</rdf:li></rdf:Alt></dc:description>\n' +
+                '   <dc:rights><rdf:Alt><rdf:li xml:lang="x-default">Made with Google AI</rdf:li></rdf:Alt></dc:rights>\n' +
+                '   <photoshop:Credit>Made with Google AI</photoshop:Credit>\n' +
+                '   <photoshop:Source>Gemini</photoshop:Source>\n' +
+                '   <xmpRights:Marked>True</xmpRights:Marked>\n' +
+                '   <xmpMM:DocumentID>xmp.did:' + uuid() + '</xmpMM:DocumentID>\n' +
+                '   <xmpMM:InstanceID>xmp.iid:' + uuid() + '</xmpMM:InstanceID>\n' +
+                '   <xmpMM:History>\n    <rdf:Seq>\n' +
+                evt("created", "Gemini") +
+                evt("saved", "reverse-synthid tool") +
+                '    </rdf:Seq>\n   </xmpMM:History>\n' +
+                '  </rdf:Description>\n' +
+                ' </rdf:RDF>\n' +
+                '</x:xmpmeta>\n' +
+                '<?xpacket end="w"?>';
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        let crctable = null;
+        function crc32(bytes) {
+            if (!crctable) {
+                crctable = new Uint32Array(256);
+                for (let n = 0; n < 256; n++) {
+                    let c = n;
+                    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+                    crctable[n] = c >>> 0;
+                }
+            }
+            let c = 0xFFFFFFFF;
+            for (let i = 0; i < bytes.length; i++)
+                c = crctable[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+            return (c ^ 0xFFFFFFFF) >>> 0;
+        }
+        function latin1(s) {
+            const a = new Uint8Array(s.length);
+            for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 0xFF;
+            return a;
+        }
+        function concat(parts) {
+            let len = 0;
+            for (const p of parts) len += p.length;
+            const out = new Uint8Array(len);
+            let off = 0;
+            for (const p of parts) { out.set(p, off); off += p.length; }
+            return out;
+        }
+        function makechunks(type, data) {
+            const body = concat([latin1(type), data]);
+            const out = new Uint8Array(8 + data.length + 4);
+            const dv = new DataView(out.buffer);
+            dv.setUint32(0, data.length);
+            out.set(body, 4);
+            dv.setUint32(8 + data.length, crc32(body));
+            return out;
+        }
+        function tEXt(keyword, text) {
+            return makechunks("tEXt", concat([latin1(keyword), Uint8Array.of(0), latin1(text)]));
+        }
+        function iTXt(keyword, text) {
+            return makechunks("iTXt", concat([
+                latin1(keyword), Uint8Array.of(0, 0, 0, 0, 0),
+                new TextEncoder().encode(text),
+            ]));
+        }
+        function injectchunks(png, chunks) {
+            const dv = new DataView(png.buffer, png.byteOffset, png.byteLength);
+            const at = 8 + 12 + dv.getUint32(8);
+            const extra = concat(chunks);
+            const out = new Uint8Array(png.length + extra.length);
+            out.set(png.subarray(0, at), 0);
+            out.set(extra, at);
+            out.set(png.subarray(at), at + extra.length);
+            return out;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        downloadBtn.addEventListener("click", () => {
+            outcv.toBlob(async blob => {
+                let bytes = new Uint8Array(await blob.arrayBuffer());
+                const now = new Date();
+                bytes = injectchunks(bytes, [
+                    makechunks("eXIf", buildExif(now)),
+                    iTXt("XML:com.adobe.xmp", buildXMP(now)),
+                    tEXt("Software", "Gemini"),
+                    tEXt("Source", "Made with Google AI"),
+                    tEXt("Author", "Google AI"),
+                    tEXt("Description", "Created by Google Generative AI."),
+                    tEXt("Copyright", "Made with Google AI"),
+                    tEXt("Creation Time", now.toUTCString())
+                ]);
+                const url = URL.createObjectURL(new Blob([bytes], {type: "image/png"}));
+                const a = document.createElement("a");
+                a.href = url; a.download = outName;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }, "image/png");
+        });
+
+        $("#file").addEventListener("change", e => loadFile(e.target.files[0]));
+        drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+        drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+        drop.addEventListener("drop", e => {
+            e.preventDefault(); drop.classList.remove("over");
+            if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+        });
+        window.addEventListener("paste", e => {
+            for (const item of e.clipboardData.items)
+                if (item.type.startsWith("image/")) loadFile(item.getAsFile());
+        });
+
+    </script>
+
+</body>
+</html>

@@ -483,14 +483,14 @@
             let feat = null, dim = 0, n = 0;
             onmessage = function (e) {
                 const m = e.data;
-                if (m.type === "index") { feat = m.feat; dim = m.dim; n = m.n; return; }
+                if (m.type === "index") {feat = m.feat; dim = m.dim; n = m.n; return}
                 if (m.type === "match") {
                     const vecs = m.vecs, nv = vecs.length, top = [];
                     let worst = -1e9;
                     for (let g = 0; g < n; g++) {
                         const base = g * dim;
                         let best = -1e9;
-                        for (let k = 0; k < nv; k++) {       // best over all variants
+                        for (let k = 0; k < nv; k++) {
                             const v = vecs[k];
                             let dot = 0;
                             for (let i = 0; i < dim; i++) dot += v[i] * feat[base + i];
@@ -499,16 +499,16 @@
                         if (top.length < 100) {
                             top.push({idx: g, score: best});
                             if (top.length === 100) {
-                                top.sort(function (a, b) { return a.score - b.score; });
+                                top.sort(function (a, b) {return a.score - b.score});
                                 worst = top[0].score;
                             }
                         } else if (best > worst) {
                             top[0] = {idx: g, score: best};
-                            top.sort(function (a, b) { return a.score - b.score; });
+                            top.sort(function (a, b) {return a.score - b.score});
                             worst = top[0].score;
                         }
                     }
-                    top.sort(function (a, b) { return b.score - a.score; });
+                    top.sort(function (a, b) {return b.score - a.score});
                     postMessage({type: "result", items: top});
                 }
             };`;
