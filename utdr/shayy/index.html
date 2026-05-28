@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>shayy archive</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="googlebot" content="index,follow">
+    <meta name="google" content="notranslate">
+
+    <!-- the css import is too slow so this will almost always load faster -->
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/dotumche.woff2" crossorigin>
+
+    <style>
+
+        @font-face {
+            font-family: "dotumche";
+            src: url("assets/fonts/dotumche.woff2") format("woff2");
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "roboto";
+            src: url("assets/fonts/roboto.ttf") format("ttf");
+            font-display: swap;
+        }
+
+        body {
+            background-color: black;
+            background-size: cover;
+            color: white; height: 100vh; width: 100vw;
+            margin: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .bg {
+            position: fixed; display: flex;
+            align-items: center; justify-content: center;
+            inset: 0; width: 100vw; height: 100vh;
+            opacity: 0.35; z-index: -10; pointer-events: none;
+            width: 100vw; height: 100vh;
+            background-image: url("assets/images/ruins.png");
+            background-repeat: no-repeat;
+            background-size: 100vw auto, auto 100vh;
+            background-position: center center;
+            image-rendering: pixelated;
+        }
+
+        canvas, img, p, a {user-select: none}
+        a, span, p, h1 {
+            font-family: "dotumche", system-ui, sans-serif; text-align: center;
+            font-size: 0.75em; max-width: 75vw;
+            -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        h1 {font-size: 2em; font-weight: 100}
+        :any-link {color: rgb(205, 255, 255); font-size: 1em; text-decoration: none}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .idkwhatthisis {
+            position: fixed; overflow: hidden;
+            left: -5vw; width: 110vw; height: 80px;
+            opacity: 0.25; z-index: -5;
+            pointer-events: none; transform-origin: center;
+            background-image: url("assets/images/pfps/stripe.webp");
+            background-repeat: repeat-x, repeat-x, repeat-x, repeat-x;
+            background-size: auto 50px; background-position: 0 0;
+        }
+        .idkwhatthisis.top {top: -20px; transform: rotate(2deg)}
+        .idkwhatthisis.bottom {bottom: -20px; transform: rotate(-2deg)}
+
+        .text {
+            margin-top: 0; max-width: 90%;
+            width: auto; object-fit: contain;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .socials {
+            position: fixed; display: flex;
+            flex-direction: row;
+            bottom: 3em; justify-content: center; align-items: center;
+        }
+        .button {
+            display: flex;
+            width: 0.75em; height: 0.75em;
+            justify-content: center; align-items: center;
+            overflow: hidden; user-select: none;
+            padding: 0 0.1em;
+        }
+        .button img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+        .wip {filter: grayscale(1); opacity: 0.5}
+
+        .analytics {
+            position: fixed; left: 50%; bottom: 3.25rem;
+            transform: translateX(-50%);
+            width: min(92vw, 320px);
+            font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+            font-size: 7px;
+            text-align: left;
+            z-index: 5;
+            opacity: 0.92;
+        }
+        .analytics * {box-sizing: border-box}
+        .analytics .yt-row {display: flex; gap: 4px; margin-bottom: 4px}
+        .analytics .yt-row.yt-rev {margin-bottom: 4px}
+        .analytics .yt-card {
+            flex: 1;
+            background: #1a1a1a;
+            border-radius: 6px;
+            padding: 5px 6px;
+            border: 1px solid #2a2a2a;
+        }
+        .analytics .yt-card.yt-wide {flex: none; width: 100%}
+        .analytics .yt-label {
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #b0b0b0;
+            font-size: 6px;
+            margin-bottom: 2px;
+        }
+        .analytics .yt-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div class="bg"></div>
+
+    <div class="idkwhatthisis top"></div>
+    <div class="idkwhatthisis bottom"></div>
+
+    <h1>shayy archive</h1>
+    <span>mix of web archives and rescue efforts, includes some deleted and privated videos/posts. <br>
+       not complete, but <a href="//coolsite.cv/contact">feel free to help</a></span>
+
+    <div class="socials">
+        <a class="button" href="audio">
+            <img src="audio/icon.png">
+        </a>
+        <a class="button" href="audio">
+            <img src="audio/icon.png">
+        </a>
+    </div>
+
+    <aside class="analytics" aria-hidden="true">
+        <div class="yt-row">
+            <div class="yt-card">
+                <div class="yt-label">Views</div>
+                <div class="yt-value">−1.32M</div>
+            </div>
+            <div class="yt-card">
+                <div class="yt-label">Subs</div>
+                <div class="yt-value">−141K</div>
+            </div>
+        </div>
+        <div class="yt-row yt-rev">
+            <div class="yt-card yt-wide">
+                <div class="yt-label">Est rev</div>
+                <div class="yt-value">$−2.6K–$−4.1K</div>
+            </div>
+        </div>
+    </aside>
+
+</body>

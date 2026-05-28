@@ -13,12 +13,11 @@
 
     <script>
 
-        // if you poke fun at my regex i will cry
+        // if you poke fun at my approach i will cry
         var path = location.pathname.replace(/^\/+|\/+$/g, "");
         var redirectto = null;
 
         if (path.startsWith("kris")) {redirectto = "https://coolsite.cv/utdr/kris"}
-        else if (path.startsWith("utdr/shayy")) {redirectto = "https://coolsite.cv/utdr/shayy/youtube"}
         else if (path.startsWith("elevator")) {redirectto = "https://coolsite.cv/utdr/elevator"}
         else if (path.startsWith("swatchling")) {redirectto = "https://coolsite.cv/utdr/swatchlings"}
         else if (path.startsWith("gdaudio")) {redirectto = "https://coolsite.cv/gd/audio"}
@@ -27,6 +26,10 @@
         else if (path.startsWith("csstrace") || path.startsWith("svgfavicon") || path.startsWith("testfile")) {
             var toolname = path.split("/")[0];
             redirectto = `https://coolsite.cv/tools/${toolname}`;
+        }
+        else if (path.startsWith("archive")) {
+            var archivepath = path.split("archive/")[0];
+            redirectto = `https://archive.coolsite.cv/${archivepath}`;
         }
         else if (path.startsWith("contact")) {redirectto = "https://x.com/messages/compose?recipient_id=1565678264265457664&hellobro"}
         window.__redirectto = redirectto;

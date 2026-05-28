@@ -1,6 +1,5 @@
 <p align="center">
-  <img src="/assets/images/harvestingworms.gif" width="200px">
+  <img src="assets/images/harvestingworms.gif" width="100px">
 </p>
-
-### coolsite.cv
-i don't want to terrorize other domains like candies.monster or soggy.cat, so this is a separate one for any other projects i decide to make.
+<h3 align="center">coolsite.cv</h3>
+<p align="center">personal domain for any other projects i decide to make.</p>
