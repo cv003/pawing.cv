@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>multistream</title>
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="52" x="0">📺</text></svg>'>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <button class="burger" title="channels">☰</button>
+    <div class="count">loading...</div>
+
+    <div class="side">
+      <div class="head">
+        <input class="search" placeholder="search channels...">
+        <div class="row">
+          <button class="btn small f-refresh">refresh</button>
+          <button class="btn small f-online">online only</button>
+        </div>
+      </div>
+      <div class="list"></div>
+    </div>
+
+    <div class="canvas">
+      <div class="empty">
+        <div>open ☰ and click a channel to add a stream</div>
+        <div style="font-size:12px">drag windows by their title bar · push to an edge to snap · click one for audio</div>
+      </div>
+    </div>
+
+    <div class="ghost"></div>
+    <div class="dragmask"></div>
+
+  </div>
+
+  <script src="mc.js"></script>
+</body>
+</html>

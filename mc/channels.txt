@@ -1,0 +1,107 @@
+# twitch - default
+# "yt:" - youtube
+# [rare] - barely streamed 
+# "== name ==" - category
+# the first account is the one shown first
+
+== ls world ==
+purpled
+aimsey
+branzylive
+fitmc
+yt:OnlyASquid
+feinberg not_feinberg_kappa
+toan
+sneegsnag
+withmayx
+yt:ish yt:ish2
+tubbo yt:TubboLIVE
+spongs_ yt:spongs
+fruitberries fruitberriesalt
+katiegobrr
+wyll_live yt:wyll_
+evbo
+nominalgravy
+flowtives yt:flowtives
+loppezz
+saps yt:saparata
+couriway
+sword4000
+themewdew yt:MewDewShorts
+cookie yt:acookiegod
+Shadoune666 yt:Shadoune666
+yt:wifies [rare]
+fymada yt:fymada
+leekleeklive
+mogswamp yt:mogswamp
+yt:JackSucksAtLife [rare]
+foolish
+epaxial [rare]
+speedsilver
+twirps yt:twirps
+taejonmc
+cambam010
+Smallishbeans yt:Smallishbeans
+LettuceK yt:LettuceK
+lukey
+CaptainSparklez
+TinaKitten
+ghostiefruit
+solidaritygaming yt:solidaritygaming
+jadenman_live yt:JadenMAN
+infume
+shandrea
+mugmv2 yt:mugmv2
+theorionsound
+smileyyyylive yt:SmileyyMC [rare]
+falsesymmetry
+kyleeff
+theobaldthebird yt:theobaldthebird
+LexieMariex
+MiniMuka
+shubble
+ferremclive
+yt:CookieBunsquat
+Wolfeei
+LilKae
+yt:Matter_Melon [rare]
+yt:SilverIsMe [rare]
+
+== lifesteal ==
+4cvit
+baconnwaffles0
+ashswag
+chiefxd
+clownpierce
+Derapchu derpachu317
+ecorridor yt:ECorridor
+flamefragger yt:flamefragsmc [rare]
+hannahxxrose hannahxxalt
+jepexislive yt:JepexOfficial
+jojosolos yt:jojosolos
+jumperwho
+dtowncat
+leow0ok
+ManePear [rare]
+mapicc
+minute
+mrcube6
+pangi
+peentar
+planetlord_ [rare]
+Poafa yt:Poafa
+princezam yt:PrinceZam
+reddoons yt:reddoons
+rekrap2 rekrap1
+roshambogames [rare]
+sb737
+spepticle yt:SpepticIe
+spokeishere [rare]
+therealsquiddo yt:Squiddo
+theterrainmc [rare]
+vitalasy
+vort3xdragonlive [rare]
+wemmbumc [rare]
+woogie
+yeahjaron yt:Yeah_Jaron [rare]
+yungy yt:yungymc
