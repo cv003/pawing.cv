@@ -9,6 +9,7 @@
 
   <style>
 
+    /* NOT nabbed from twitch! yes! */
     :root {
       --bg: #0e0e10; --list: #26262c; --bg3: #1f1f23;
       --border: #2f2f35; --border2: #3a3a3d;
@@ -16,7 +17,7 @@
       --purple: #9147ff; --live: #eb0400; --flash: #ffe14d;
     }
 
-    /* do alt fonts also load? if so i'm was*/
+    /* can alt fonts load if the original one is supported? if so then this is a bit resource wasting */
     @font-face {
       font-family: "Inter"; font-weight: 400; font-display: swap;
       src: url("/assets/fonts/inter.woff2") format("woff2"), 
@@ -48,16 +49,17 @@
     /*//////////////////////////////////////////////////////////////////////*/
 
     .burger {
-      position: fixed; top: 8px; left: 8px; z-index: 30;
+      position: fixed; display: flex; 
+      top: 8px; left: 8px; z-index: 30;
       width: 28px; height: 28px; cursor: pointer;
       background: #18181b; color: var(--text);
       border: none; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
+      align-items: center; justify-content: center;
     }
     .burger:hover {background: #232328}
     .burger svg {width: 16px; height: 16px; fill: currentColor; display: block}
 
-    .ic svg {width: 15px; height: 15px; fill: currentColor; display: block}
+    .iconbtn svg {width: 15px; height: 15px; fill: currentColor; display: block}
     @keyframes spin {to {transform: rotate(360deg)}}
     .f-refresh.spin svg {animation: spin .8s linear infinite}
 
@@ -95,7 +97,8 @@
 
     .btn {
       background: var(--bg3); border: 1px solid var(--border2);
-      border-radius: 6px; padding: 6px 10px; cursor: pointer; white-space: nowrap;
+      border-radius: 6px; padding: 6px 10px; 
+      cursor: pointer; white-space: nowrap;
     }
     .btn:hover {background: #2f2f37}
     .btn.on {background: var(--purple); border-color: var(--purple); color: #fff}
@@ -108,7 +111,7 @@
     }
     .side .row .btn.on {background: var(--purple)}
     .side .row .btn:hover {background: #3a3a40}
-    .side .row .btn.on:hover {background: #9d5cff}
+    .side .row .btn.on:hover {background: var(--purple)}
     .side .row .btn svg {
       width: 16px; height: 16px;
       fill: currentColor; display: block
@@ -143,24 +146,24 @@
       padding: 6px 8px; border-radius: 6px; cursor: pointer;
       border-left: 3px solid transparent;
     }
-    .item:hover {background: #32323a}
-    .item.active {background: #28304a; border-left-color: var(--purple)}
+    .item:hover {background: #2e212e}
+    .item.active {background: #3c284a}
     .item.offline {opacity: .55}
-    .item.rare {opacity: .3}
+    .item.rare {opacity: 0.2}
     .item.offline:hover, .item.rare:hover {opacity: .9}
 
-    .item .av {
+    .item .avatar {
       width: 28px; height: 28px; border-radius: 50%;
       background: var(--bg3); object-fit: cover; flex: none;
     }
     .item .meta {flex: 1; min-width: 0}
-    .item .nm {
+    .item .name {
       display: flex; align-items: center; 
       gap: 5px; font-weight: 500;
       white-space: nowrap; overflow: hidden; 
       text-overflow: ellipsis;
     }
-    .item .nm .picon {width: 13px; height: 13px; flex: none}
+    .item .name .picon {width: 13px; height: 13px; flex: none}
     .item .sub {
       font-size: 11px; color: var(--text2); margin-top: 1px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -175,7 +178,7 @@
       border-bottom: 1px solid var(--border2);
       border-bottom-left-radius: 4px;
     }
-    .item.subitem .nm {font-weight: 500; font-size: 12px}
+    .item.subitem .name {font-weight: 500; font-size: 12px}
 
     /*//////////////////////////////////////////////////////////////////////*/
 
@@ -199,9 +202,9 @@
       border: 1px solid var(--border);
       border-radius: 7px; overflow: hidden; 
       display: flex; flex-direction: column;
-      box-shadow: 0 6px 20px #00000066;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
-    .win.dragging {opacity: 0.9; box-shadow: 0 10px 40px #000000aa}
+    .win.dragging {opacity: 0.9; box-shadow: 0 10px 40px rgba(0,0,0,0.6)}
 
     .win .bar {
       height: 28px; flex: none; 
@@ -210,16 +213,17 @@
       cursor: move; border-bottom: 1px solid var(--border);
     }
     .win .bar .picon {width: 14px; height: 14px; flex: none}
-    .win .bar .nm {
+    .win .bar .name {
       flex: 1; font-size: 12px; font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .win .bar .ic {
+    .win .bar .iconbtn {
       cursor: pointer; flex: none; border-radius: 4px;
       width: 20px; height: 20px; 
       display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text2);
     }
-    .win .bar .ic:hover {background: rgba(255, 255, 255, 0.102); color: var(--text)}
+    .win .bar .iconbtn:hover {background: rgba(255,255,255,0.1); color: var(--text)}
+    .win .bar .iconbtn.disabled {opacity: 0.35; pointer-events: none}
 
     .win .body {
       flex: 1; min-height: 0; 
@@ -235,16 +239,16 @@
       z-index: 5; pointer-events: none; opacity: 0
     }
     .win.flash .flashfx {
-      border: 3px solid var(--flash); 
-      border-radius: 7px; box-shadow: 0 0 14px var(--flash);
+      border: 2px solid var(--flash);
+      border-radius: 7px; box-shadow: 0 0 12px var(--flash);
       animation: flashfade 1s ease forwards;
     }
     @keyframes flashfade {from {opacity: 1} to {opacity: 0}}
 
-    .win .rs {position: absolute; z-index: 6}
-    .win .rs.e {top: 0; right: 0; width: 7px; height: 100%; cursor: ew-resize}
-    .win .rs.s {left: 0; bottom: 0; height: 7px; width: 100%; cursor: ns-resize}
-    .win .rs.se {right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize}
+    .win .resize {position: absolute; z-index: 6}
+    .win .resize.e {top: 0; right: 0; width: 7px; height: 100%; cursor: ew-resize}
+    .win .resize.s {left: 0; bottom: 0; height: 7px; width: 100%; cursor: ns-resize}
+    .win .resize.se {right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize}
 
     .dragmask {
       position: fixed; inset: 0; 
@@ -255,9 +259,8 @@
     .ghost {
       position: absolute; z-index: 90; 
       pointer-events: none; display: none;
-      background: #9147ff33; 
-      border: 2px solid var(--purple); border-radius: 7px;
-      transition: all .08s ease;
+      background: rgba(145,71,255,0.2);
+      border: 1px solid var(--purple); border-radius: 7px;
     }
     .ghost.on {display: block}
 
@@ -289,7 +292,7 @@
 
     <div class="side">
       <div class="head">
-        <input class="search" placeholder="search channels...">
+        <input class="search" placeholder="Search">
         <div class="row">
           <button class="btn small f-refresh">refresh</button>
           <button class="btn small f-online">online only</button>

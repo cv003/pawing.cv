@@ -6,14 +6,11 @@ const icons = {
   refresh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 0 14.4 4.8L20 18a9.985 9.985 0 0 1-8 4C6.477 22 2 17.523 2 12S6.477 2 12 2a9.968 9.968 0 0 1 7 2.859V2h2v6h-6V6h2.292A8 8 0 0 0 4 12Z"/></svg>`,
   online: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 15v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3l4-2v10l-4-2ZM4 6h12v12H4V6Z" fill-rule="evenodd" clip-rule="evenodd"/></svg>`
 };
-
-function ic(svg, title, fn){
-  const d = el("div", "ic");
-  d.innerHTML = svg; d.title = title; d.onclick = fn;
-  return d;
+function iconbtn(svg, title, fn){
+  const node = elem("div", "iconbtn");
+  node.innerHTML = svg; node.title = title; node.onclick = fn;
+  return node;
 }
-
-/*//////////////////////////////////////////////////////////////////////*/
 
 const defaultworker = "https://mc.coolsite.cv";
 const store = window.localStorage;
@@ -28,8 +25,8 @@ const state = {
   sideopen: false
 };
 
-const el = (t, c) => {const e = document.createElement(t); if (c) e.className = c; return e};
-const mkey = m => m.display.toLowerCase();
+const elem = (tag, cls) => {const e = document.createElement(tag); if (cls) e.className = cls; return e};
+const memberkey = m => m.display.toLowerCase();
 
 let lastfetch = +(store.getItem("mclivetime") || 0);
 let lastres = (() => {try {return JSON.parse(store.getItem("mclive") || "null")} catch (e){return null}})();
@@ -72,14 +69,25 @@ function parseroster(text){
 /*//////////////////////////////////////////////////////////////////////*/
 
 function platicon(p){
-  const i = el("img", "picon");
+  const i = elem("img", "picon");
   i.src = "/assets/svgs/" + (p === "yt" ? "youtube" : "twitch") + ".svg";
   return i;
 }
+function smallavatar(url){
+  if (!url || url.startsWith("/assets")) return url;
+  return url.replace(/=s\d+-/, "=s50-").replace(/-profile_image-\d+x\d+\.png/, "-profile_image-50x50.png");
+}
+function avatarurl(m){return smallavatar(m.avatar || state.avcache[memberkey(m)] || "/assets/svgs/blank.svg")}
 
-function avatarurl(m){return m.avatar || state.avcache[mkey(m)] || "/assets/svgs/blank.svg"}
+function findstreamwin(m, alt){return state.wins.find(w => w.type === "stream" && w.member === m && w.alt === alt)}
+function findchatwin(m, alt){return state.wins.find(w => w.type === "chat" && w.member === m && w.alt === alt)}
 
-function winfor(m, alt){return state.wins.find(w => w.type === "stream" && w.member === m && w.alt === alt)}
+function syncchatbtns(){
+  for (const w of state.wins){
+    if (w.type !== "stream" || !w.chatbtn) continue;
+    w.chatbtn.classList.toggle("disabled", !!findchatwin(w.member, w.alt));
+  }
+}
 
 function renderlist(){
   const q = document.querySelector(".search").value.trim().toLowerCase();
@@ -96,9 +104,9 @@ function renderlist(){
   let col = null, lastgroup = -1;
   for (const m of rows){
     if (m.group !== lastgroup){
-      col = el("div", "column");
-      const g = el("div", "group");
-      const gi = el("img");
+      col = elem("div", "column");
+      const g = elem("div", "group");
+      const gi = elem("img");
       gi.src = "assets/images/" + m.label + ".png";
       gi.alt = m.label;
       gi.onerror = () => {gi.remove(); g.textContent = m.label};
@@ -113,28 +121,28 @@ function renderlist(){
 }
 
 function buildrow(m, alt, sub){
-  const item = el("div", sub ? "item subitem" : "item");
-  if (winfor(m, alt)) item.classList.add("active");
+  const item = elem("div", sub ? "item subitem" : "item");
+  if (findstreamwin(m, alt)) item.classList.add("active");
   if (!alt.live) item.classList.add(m.notlive ? "rare" : "offline");
 
   if (!sub){
-    const av = el("img", "av");
-    av.loading = "lazy"; av.src = avatarurl(m);
-    av.onerror = () => {av.onerror = null; av.src = "/assets/svgs/blank.svg"};
-    item.appendChild(av);
+    const avatarel = elem("img", "avatar");
+    avatarel.loading = "lazy"; avatarel.src = avatarurl(m);
+    avatarel.onerror = () => {avatarel.onerror = null; avatarel.src = "/assets/svgs/blank.svg"};
+    item.appendChild(avatarel);
   }
 
-  const meta = el("div", "meta");
-  const nm = el("div", "nm");
-  nm.appendChild(platicon(alt.platform));
-  nm.appendChild(document.createTextNode(alt.name));
-  meta.appendChild(nm);
+  const meta = elem("div", "meta");
+  const nameel = elem("div", "name");
+  nameel.appendChild(platicon(alt.platform));
+  nameel.appendChild(document.createTextNode(alt.name));
+  meta.appendChild(nameel);
 
   if (alt.live){
     const parts = [];
-    if (alt.platform === "tw" && alt.viewers) parts.push(fmt(alt.viewers));
+    if (alt.platform === "tw" && alt.viewers) parts.push(viewertext(alt.viewers));
     if (alt.title) parts.push(alt.title);
-    if (parts.length){const s = el("div", "sub"); s.textContent = parts.join(" · "); meta.appendChild(s)}
+    if (parts.length){const s = elem("div", "sub"); s.textContent = parts.join(" · "); meta.appendChild(s)}
   }
   item.appendChild(meta);
 
@@ -142,7 +150,7 @@ function buildrow(m, alt, sub){
   return item;
 }
 
-function fmt(n){
+function viewertext(n){
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k watching";
   return (n || 0) + " watching";
 }
@@ -168,7 +176,7 @@ async function refresh(force){
   try {
     const results = await Promise.all([
       tw.size ? callworker({twitch: [...tw]}) : Promise.resolve({}),
-      ...chunk([...yt], 15).map(c => callworker({youtube: c}))
+      ...chunk([...yt], 10).map(c => callworker({youtube: c}))
     ]);
     const twres = {}, ytres = {};
     for (const r of results){Object.assign(twres, r.twitch || {}); Object.assign(ytres, r.youtube || {})}
@@ -214,7 +222,7 @@ function applyresults(twres, ytres){
         m.viewers = Math.max(m.viewers, a.viewers);
       }
     }
-    if (best){m.avatar = best; av[mkey(m)] = best}
+    if (best){m.avatar = best; av[memberkey(m)] = best}
   }
   store.setItem("mcav", JSON.stringify(av));
 }
@@ -224,7 +232,7 @@ function chunk(arr, n){const out = []; for (let i = 0; i < arr.length; i += n) o
 /*//////////////////////////////////////////////////////////////////////*/
 
 function togglealt(m, alt){
-  const w = winfor(m, alt);
+  const w = findstreamwin(m, alt);
   if (w){closewin(w.id); return}
   if (state.wins.filter(x => x.type === "stream").length >= 10){banner("10 streams max for performance."); return}
   addwin("stream", m, {alt, videoId: alt.videoId});
@@ -245,20 +253,23 @@ function addwin(type, m, opts){
   const id = state.nextid++;
   const w = {id, type, member: m, alt, platform: alt.platform, videoId, inst: null, rect: opts.rect || nextrect()};
 
-  const node = el("div", "win");
-  const bar = el("div", "bar");
+  const node = elem("div", "win");
+  const bar = elem("div", "bar");
   bar.appendChild(platicon(alt.platform));
-  const nm = el("div", "nm");
-  nm.textContent = m.display + (type === "chat" ? " chat" : "");
-  bar.appendChild(nm);
-  if (type === "stream") bar.appendChild(ic(icons.chat, "add chat", e => {e.stopPropagation(); addwin("chat", m, {alt, videoId})}));
-  bar.appendChild(ic(icons.close, "close", e => {e.stopPropagation(); closewin(id)}));
+  const nameel = elem("div", "name");
+  nameel.textContent = m.display + (type === "chat" ? " chat" : "");
+  bar.appendChild(nameel);
+  if (type === "stream"){
+    w.chatbtn = iconbtn(icons.chat, "add chat", e => {e.stopPropagation(); addwin("chat", m, {alt, videoId})});
+    bar.appendChild(w.chatbtn);
+  }
+  bar.appendChild(iconbtn(icons.close, "close", e => {e.stopPropagation(); closewin(id)}));
   node.appendChild(bar);
 
-  const body = el("div", "body");
+  const body = elem("div", "body");
   node.appendChild(body);
-  node.appendChild(el("div", "flashfx"));
-  for (const h of ["e", "s", "se"]){const r = el("div", "rs " + h); r.dataset.dir = h; node.appendChild(r)}
+  node.appendChild(elem("div", "flashfx"));
+  for (const dir of ["e", "s", "se"]){const handle = elem("div", "resize " + dir); handle.dataset.dir = dir; node.appendChild(handle)}
 
   w.node = node; w.body = body; w.bar = bar;
   state.wins.push(w);
@@ -277,6 +288,7 @@ function addwin(type, m, opts){
   }
   renderlist();
   savesession();
+  syncchatbtns();
 }
 
 function closewin(id){
@@ -292,10 +304,10 @@ function closewin(id){
   if (!state.focused && firststream) focuswin(firststream.id);
   renderlist();
   savesession();
+  syncchatbtns();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* focus (audio + flash) */
 
 function focuswin(id){
   state.focused = id;
@@ -311,7 +323,7 @@ function focuswin(id){
 
 function flash(w){
   w.node.classList.remove("flash");
-  void w.node.offsetWidth;            // reflow so the animation re-fires
+  void w.node.offsetWidth;
   w.node.classList.add("flash");
 }
 
@@ -334,9 +346,11 @@ function setquality(w, high){
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* window geometry: rects as fractions of the canvas */
 
-function csize(){const r = document.querySelector(".canvas").getBoundingClientRect(); return {w: r.width, h: r.height}}
+function canvassize(){
+  const r = document.querySelector(".canvas").getBoundingClientRect(); 
+  return {w: r.width, h: r.height}
+}
 
 function nextrect(){
   const off = (state.wins.length % 6) * 0.04;
@@ -344,16 +358,15 @@ function nextrect(){
 }
 
 function applyrect(w){
-  const c = csize(), r = w.rect;
+  const c = canvassize(), r = w.rect;
   w.node.style.left = (r.x * c.w) + "px"; w.node.style.top = (r.y * c.h) + "px";
   w.node.style.width = (r.w * c.w) + "px"; w.node.style.height = (r.h * c.h) + "px";
 }
 
 function relayout(){for (const w of state.wins) applyrect(w)}
 
-// windows-style snap zone for a pointer position inside the canvas
 function snapzone(px, py){
-  const c = csize(), e = 44;
+  const c = canvassize(), e = 44;
   const L = px < e, R = px > c.w - e, T = py < e, B = py > c.h - e;
   if (T && L) return {x: 0, y: 0, w: .5, h: .5};
   if (T && R) return {x: .5, y: 0, w: .5, h: .5};
@@ -369,30 +382,28 @@ function snapzone(px, py){
 function showghost(zone){
   const g = document.querySelector(".ghost");
   if (!zone){g.classList.remove("on"); return}
-  const c = csize();
+  const c = canvassize();
   g.style.left = (zone.x * c.w) + "px"; g.style.top = (zone.y * c.h) + "px";
   g.style.width = (zone.w * c.w) + "px"; g.style.height = (zone.h * c.h) + "px";
   g.classList.add("on");
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* drag + resize */
 
 function dragwire(w){
   w.bar.addEventListener("pointerdown", e => {
-    if (e.target.closest(".ic")) return;       // let the chat/close buttons handle their click
+    if (e.target.closest(".iconbtn")) return;
     if (w.type === "stream") focuswin(w.id);
     startdrag(w, e);
   });
-  for (const h of w.node.querySelectorAll(".rs")){
-    h.addEventListener("pointerdown", e => {e.stopPropagation(); startresize(w, e, h.dataset.dir)});
+  for (const handle of w.node.querySelectorAll(".resize")){
+    handle.addEventListener("pointerdown", e => {e.stopPropagation(); startresize(w, e, handle.dataset.dir)});
   }
 }
 
 function startdrag(w, e){
-  e.preventDefault();
-  raise(w);
-  const c = csize();
+  e.preventDefault(); raise(w);
+  const c = canvassize();
   const sx = e.clientX, sy = e.clientY;
   const ox = w.rect.x * c.w, oy = w.rect.y * c.h;
   let zone = null;
@@ -421,7 +432,7 @@ function startdrag(w, e){
 function startresize(w, e, dir){
   e.preventDefault();
   raise(w);
-  const c = csize();
+  const c = canvassize();
   const sx = e.clientX, sy = e.clientY;
   const ow = w.rect.w * c.w, oh = w.rect.h * c.h;
   mask(true);
@@ -452,7 +463,6 @@ function raise(w){
 function mask(on){document.querySelector(".dragmask").classList.toggle("on", on)}
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* embeds: twitch + youtube apis */
 
 let twitchready = loadscript("https://embed.twitch.tv/embed/v1.js", () => window.Twitch && window.Twitch.Player);
 let ytready = new Promise(res => {window.onYouTubeIframeAPIReady = res});
@@ -471,7 +481,7 @@ function makewitch(w){
 }
 
 function makeyt(w){
-  const div = el("div");
+  const div = elem("div");
   w.body.appendChild(div);
   ytready.then(() => {
     w.inst = new window.YT.Player(div, {
@@ -486,7 +496,7 @@ function makeyt(w){
 }
 
 function makechat(w){
-  const fr = el("iframe");
+  const fr = elem("iframe");
   fr.allow = "autoplay";
   if (w.platform === "tw"){
     fr.src = "https://www.twitch.tv/embed/" + encodeURIComponent(w.alt.name) + "/chat?darkpopout&" + parents.map(p => "parent=" + p).join("&");
@@ -507,14 +517,13 @@ function loadscript(src, test){
 function wait(test){return new Promise(res => {const t = setInterval(() => {if (test()){clearInterval(t); res(true)}}, 50)})}
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* session persistence */
 
-function savesession(){
+function savesession() {
   const wins = state.wins.map(w => ({type: w.type, platform: w.platform, name: w.alt.name, videoId: w.videoId || null, rect: w.rect}));
   store.setItem("mcsession", JSON.stringify({wins, focused: state.wins.findIndex(w => w.id === state.focused), sideopen: state.sideopen}));
 }
 
-function restoresession(){
+function restoresession() {
   let s; try {s = JSON.parse(store.getItem("mcsession") || "{}")} catch (e){return}
   if (s.sideopen) setside(true);
   if (!s.wins) return;
@@ -527,24 +536,23 @@ function restoresession(){
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* ui wiring */
 
-function setside(on){
+function setside(on) {
   state.sideopen = on; document.querySelector(".app").classList.toggle("sideopen", on);
   updateburger(); savesession();
-  if (on) refresh();                  // only hit the worker when the list is opened (throttled)
+  if (on) refresh();
 }
 
-function updateburger(){document.querySelector(".burger").innerHTML = state.sideopen ? icons.collapse : icons.expand}
+function updateburger() {document.querySelector(".burger").innerHTML = state.sideopen ? icons.collapse : icons.expand}
 
-function banner(msg){
+function banner(msg) {
   let b = document.querySelector(".banner");
-  if (!b){b = el("div", "banner"); document.body.appendChild(b)}
+  if (!b){b = elem("div", "banner"); document.body.appendChild(b)}
   b.textContent = msg;
   clearTimeout(b._t); b._t = setTimeout(() => b.remove(), 6000);
 }
 
-function wire(){
+function wire() {
   updateburger();
   document.querySelector(".burger").onclick = () => setside(!state.sideopen);
   document.querySelector(".search").addEventListener("input", renderlist);
@@ -558,16 +566,15 @@ function wire(){
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* boot */
 
 async function boot(){
   wire();
   try {state.members = parseroster(await fetch("channels.txt").then(r => r.text()))}
   catch (e){banner("could not load channels.txt: " + e); state.members = []}
-  renderlist();
-  restoresession();
-  // show last-known status from cache without firing a request; refresh happens on open
-  if (lastres){applyresults(lastres.tw || {}, lastres.yt || {}); updatecount(); renderlist()}
+  renderlist(); restoresession();
+  if (lastres){
+    applyresults(lastres.tw || {}, lastres.yt || {}); 
+    updatecount(); renderlist()
+  }
 }
-
 boot();
