@@ -1,11 +1,240 @@
 <!doctype html>
 <html lang="en">
 <head>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>multistream</title>
-  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="52" x="0">📺</text></svg>'>
-  <link rel="stylesheet" href="style.css">
+  <title>mcyt multiview :p</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <style>
+
+    :root {
+      --bg: #0e0e10; --list: #26262c; --bg3: #1f1f23;
+      --border: #2f2f35; --border2: #3a3a3d;
+      --text: #efeff1; --text2: #adadb8;
+      --purple: #9147ff; --live: #eb0400; --flash: #ffe14d;
+    }
+
+    * {box-sizing: border-box; -webkit-user-select: none; user-select: none}
+    html, body {margin: 0; height: 100%; overflow: hidden}
+    body {
+      background: var(--bg); color: var(--text);
+      font: 13px/1.4 "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+    }
+    :any-link {color: #bf94ff; text-decoration: none}
+    button, input {font: inherit; color: inherit}
+    img {-webkit-user-drag: none}
+
+    .app {position: fixed; inset: 0}
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .burger {
+      position: fixed; top: 8px; left: 8px; z-index: 30;
+      width: 28px; height: 28px; border: 0; cursor: pointer;
+      background: #00000055; color: var(--text); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .burger:hover {background: #000000aa}
+    .burger svg {width: 16px; height: 16px; fill: currentColor; display: block}
+
+    /* inline icon svgs inherit text color via currentColor */
+    .ic svg {width: 15px; height: 15px; fill: currentColor; display: block}
+    @keyframes spin {to {transform: rotate(360deg)}}
+    .f-refresh.spin svg {animation: spin .8s linear infinite}
+
+    .count {
+      position: fixed; top: 42px; left: 10px; z-index: 30; width: 38px;
+      font-size: 11px; line-height: 1.1; color: var(--text2);
+      text-shadow: 0 1px 3px #000; pointer-events: none;
+    }
+    .count b {color: #00d066}
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .side {
+      position: fixed; top: 0; bottom: 0; left: 0; width: min(640px, 100vw); z-index: 25;
+      background: var(--list); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transform: translateX(-100%); transition: transform .16s ease;
+    }
+    .app.sideopen .side {transform: translateX(0)}
+
+    .side .head {
+      padding: 8px; display: flex; flex-direction: column; gap: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .side .search {
+      margin-left: 38px; width: calc(100% - 38px);
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 6px; padding: 7px 10px; color: var(--text);
+    }
+    .side .search:focus {outline: none; border-color: var(--purple)}
+    .side .row {display: flex; gap: 6px; margin-left: 46px}
+
+    .btn {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 6px; padding: 6px 10px; cursor: pointer; white-space: nowrap;
+    }
+    .btn:hover {background: #2f2f37}
+    .btn.on {background: var(--purple); border-color: var(--purple); color: #fff}
+    .btn.small {padding: 3px 9px; font-size: 12px}
+    /* refresh + online are icon buttons */
+    .side .row .btn {display: flex; align-items: center; justify-content: center; padding: 5px 9px}
+    .side .row .btn svg {width: 16px; height: 16px; fill: currentColor; display: block}
+
+    /* categories laid out as columns; each column scrolls on its own */
+    .list {flex: 1; display: flex; overflow-x: auto; overflow-y: hidden; padding: 4px}
+    .column {
+      flex: 1 0 270px; min-width: 270px; height: 100%; padding: 0 4px; overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+    .column:last-child {border-right: 0}
+    .column::-webkit-scrollbar, .list::-webkit-scrollbar {width: 8px; height: 8px}
+    .column::-webkit-scrollbar-thumb, .list::-webkit-scrollbar-thumb {background: #3a3a3d; border-radius: 8px}
+
+    .group {
+      font-size: 11px; color: #8a8a95; text-transform: uppercase;
+      letter-spacing: .6px; padding: 10px 8px 4px; font-weight: 700;
+      position: sticky; top: 0; background: var(--list); z-index: 1;
+    }
+
+    .item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 8px; border-radius: 6px; cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+    .item:hover {background: #32323a}
+    .item.active {background: #34304a; border-left-color: var(--purple)}
+    .item.offline {opacity: .55}
+    .item.rare {opacity: .3}
+    .item.offline:hover, .item.rare:hover {opacity: .9}
+
+    .item .av {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--bg3); object-fit: cover; flex: none;
+    }
+    .item .meta {flex: 1; min-width: 0}
+    .item .nm {
+      display: flex; align-items: center; gap: 5px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .item .nm .picon {width: 13px; height: 13px; flex: none}
+    .item .sub {
+      font-size: 11px; color: var(--text2); margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* secondary accounts as indented sub-rows */
+    .item.subitem {padding: 4px 8px 4px 30px; position: relative}
+    .item.subitem::before {
+      content: ""; position: absolute; left: 16px; top: -2px; bottom: 50%;
+      width: 9px; border-left: 1px solid var(--border2); border-bottom: 1px solid var(--border2);
+      border-bottom-left-radius: 4px;
+    }
+    .item.subitem .nm {font-weight: 500; font-size: 12px}
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .canvas {
+      position: absolute; inset: 0; 
+      overflow: hidden; background: var(--bg)
+    }
+    .empty {
+      position: absolute; display: flex;
+      flex-direction: column; inset: 0; 
+      align-items: center; justify-content: center; 
+      color: #757580; text-align: center; gap: 8px;
+    }
+
+    .win {
+      position: absolute; background: #000; 
+      border: 1px solid var(--border);
+      border-radius: 7px; overflow: hidden; 
+      display: flex; flex-direction: column;
+      box-shadow: 0 6px 20px #00000066;
+    }
+    .win.dragging {opacity: 0.9; box-shadow: 0 10px 40px #000000aa}
+
+    .win .bar {
+      height: 28px; flex: none; 
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 6px; background: #18181b;
+      cursor: move; border-bottom: 1px solid var(--border);
+    }
+    .win .bar .picon {width: 14px; height: 14px; flex: none}
+    .win .bar .nm {
+      flex: 1; font-size: 12px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .win .bar .ic {
+      cursor: pointer; width: 20px; height: 20px; flex: none; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text2);
+    }
+    .win .bar .ic:hover {background: #ffffff1a; color: var(--text)}
+
+    .win .body {
+      flex: 1; min-height: 0; 
+      position: relative; background: #000
+    }
+    .win .body iframe, .win .body > div {
+      width: 100%; height: 100%; 
+      border: 0; display: block
+    }
+
+    .win .flashfx {
+      position: absolute; inset: 0; 
+      z-index: 5; pointer-events: none; opacity: 0
+    }
+    .win.flash .flashfx {
+      border: 3px solid var(--flash); 
+      border-radius: 7px; box-shadow: 0 0 14px var(--flash);
+      animation: flashfade 1s ease forwards;
+    }
+    @keyframes flashfade {from {opacity: 1} to {opacity: 0}}
+
+    .win .rs {position: absolute; z-index: 6}
+    .win .rs.e {top: 0; right: 0; width: 7px; height: 100%; cursor: ew-resize}
+    .win .rs.s {left: 0; bottom: 0; height: 7px; width: 100%; cursor: ns-resize}
+    .win .rs.se {right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize}
+
+    .dragmask {
+      position: fixed; inset: 0; 
+      z-index: 100; cursor: inherit; display: none
+    }
+    .dragmask.on {display: block}
+
+    .ghost {
+      position: absolute; z-index: 90; 
+      pointer-events: none; display: none;
+      background: #9147ff33; 
+      border: 2px solid var(--purple); border-radius: 7px;
+      transition: all .08s ease;
+    }
+    .ghost.on {display: block}
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    .banner {
+      position: fixed; 
+      bottom: 12px; left: 50%; 
+      transform: translateX(-50%);
+      background: #18181b; 
+      border: 1px solid var(--purple); color: var(--text);
+      padding: 9px 15px; border-radius: 8px; 
+      z-index: 110; font-size: 13px; max-width: 90vw;
+    }
+
+    /* mobile */
+    @media (max-width: 680px) {
+      .side {width: 100vw}
+      .list {flex-direction: column; overflow-x: hidden; overflow-y: auto}
+      .column {flex: none; width: 100%; min-width: 0; height: auto; overflow: visible; border-right: 0}
+    }
+
+  </style>
 </head>
 <body>
   <div class="app">
@@ -26,8 +255,7 @@
 
     <div class="canvas">
       <div class="empty">
-        <div>open ☰ and click a channel to add a stream</div>
-        <div style="font-size:12px">drag windows by their title bar · push to an edge to snap · click one for audio</div>
+        <div>open ☰ and click a channel to add a stream!</div>
       </div>
     </div>
 
@@ -35,7 +263,7 @@
     <div class="dragmask"></div>
 
   </div>
+  <script src="index.js"></script>
 
-  <script src="mc.js"></script>
 </body>
 </html>

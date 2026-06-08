@@ -1,5 +1,20 @@
+const icons = {
+  chat: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m4 15 3 3 3-3h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"/><path d="m20 19-3 3-3-3H9l2-2h4l2 2 2-2h1V6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z"/></svg>`,
+  close: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.414 5 5 6.414l5.588 5.588L5 17.59l1.414 1.414 5.588-5.588 5.588 5.588 1.414-1.414-5.588-5.588 5.588-5.588L17.59 5l-5.588 5.588L6.414 5Z"/></svg>`,
+  expand: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h2v14H3V5Zm19.414 7-6.707-6.707-1.414 1.414L18.586 11H7v2h11.586l-4.293 4.293 1.414 1.414L22.414 12Z"/></svg>`,
+  collapse: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.414 5h-2v14h2V5Z"/><path d="M8.707 5.293 2 12l6.707 6.707 1.414-1.414L5.828 13h11.586v-2H5.828l4.293-4.293-1.414-1.414Z" fill-rule="evenodd" clip-rule="evenodd"/></svg>`,
+  refresh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 0 14.4 4.8L20 18a9.985 9.985 0 0 1-8 4C6.477 22 2 17.523 2 12S6.477 2 12 2a9.968 9.968 0 0 1 7 2.859V2h2v6h-6V6h2.292A8 8 0 0 0 4 12Z"/></svg>`,
+  online: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 15v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3l4-2v10l-4-2ZM4 6h12v12H4V6Z" fill-rule="evenodd" clip-rule="evenodd"/></svg>`
+};
+
+// build a clickable .ic element holding one of the inline svgs
+function ic(svg, title, fn){
+  const d = el("div", "ic");
+  d.innerHTML = svg; d.title = title; d.onclick = fn;
+  return d;
+}
+
 /*//////////////////////////////////////////////////////////////////////*/
-/* config + state */
 
 const defaultworker = "https://mc.coolsite.cv";
 const store = window.localStorage;
@@ -24,10 +39,7 @@ const el = (t, c) => {const e = document.createElement(t); if (c) e.className = 
 const mkey = m => m.display.toLowerCase();
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* roster parsing (channels.txt) */
 
-// line: "tubbo yt:TubboLIVE [rare]". space-separated accounts, "yt:" = youtube,
-// "[rare]" fades harder, "== name ==" starts a category, "#" is a comment.
 function parseroster(text){
   const members = [];
   let group = -1, label = "";
@@ -128,11 +140,6 @@ function buildrow(m, alt, sub){
   }
   item.appendChild(meta);
 
-  const cb = el("div", "chatbtn");
-  cb.textContent = "chat"; cb.title = "add chat only";
-  cb.onclick = e => {e.stopPropagation(); addwin("chat", m, {alt, videoId: alt.videoId})};
-  item.appendChild(cb);
-
   item.onclick = () => togglealt(m, alt);
   return item;
 }
@@ -148,7 +155,7 @@ function fmt(n){
 async function refresh(){
   if (!cfg.worker){banner("no worker set, live status + youtube are disabled."); return}
   const btn = $(".f-refresh");
-  btn.textContent = "checking...";
+  btn.classList.add("spin");
 
   const tw = new Set(), yt = new Set();
   for (const m of state.members) for (const a of m.alts){(a.platform === "tw" ? tw : yt).add(a.name)}
@@ -169,7 +176,7 @@ async function refresh(){
   } catch (e){
     banner("worker request failed: " + e);
   }
-  btn.textContent = "refresh";
+  btn.classList.remove("spin");
   renderlist();
 }
 
@@ -236,9 +243,8 @@ function addwin(type, m, opts){
   const nm = el("div", "nm");
   nm.textContent = m.display + (type === "chat" ? " chat" : "");
   bar.appendChild(nm);
-  const cl = el("div", "ic"); cl.textContent = "✕"; cl.title = "close";
-  cl.onclick = e => {e.stopPropagation(); closewin(id)};
-  bar.appendChild(cl);
+  if (type === "stream") bar.appendChild(ic(icons.chat, "add chat", e => {e.stopPropagation(); addwin("chat", m, {alt, videoId})}));
+  bar.appendChild(ic(icons.close, "close", e => {e.stopPropagation(); closewin(id)}));
   node.appendChild(bar);
 
   const body = el("div", "body");
@@ -515,7 +521,9 @@ function restoresession(){
 /*//////////////////////////////////////////////////////////////////////*/
 /* ui wiring */
 
-function setside(on){state.sideopen = on; $(".app").classList.toggle("sideopen", on); savesession()}
+function setside(on){state.sideopen = on; $(".app").classList.toggle("sideopen", on); updateburger(); savesession()}
+
+function updateburger(){$(".burger").innerHTML = state.sideopen ? icons.collapse : icons.expand}
 
 function banner(msg){
   let b = $(".banner");
@@ -525,10 +533,14 @@ function banner(msg){
 }
 
 function wire(){
+  updateburger();
   $(".burger").onclick = () => setside(!state.sideopen);
   $(".search").addEventListener("input", renderlist);
-  $(".f-online").onclick = e => {e.currentTarget.classList.toggle("on"); renderlist()};
-  $(".f-refresh").onclick = refresh;
+
+  const fr = $(".f-refresh"); fr.innerHTML = icons.refresh; fr.title = "refresh"; fr.onclick = refresh;
+  const fo = $(".f-online"); fo.innerHTML = icons.online; fo.title = "online only";
+  fo.onclick = e => {e.currentTarget.classList.toggle("on"); renderlist()};
+
   let rt;
   window.addEventListener("resize", () => {clearTimeout(rt); rt = setTimeout(relayout, 120)});
 }
