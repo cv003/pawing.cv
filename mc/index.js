@@ -12,9 +12,12 @@ function iconbtn(svg, title, fn){
   return node;
 }
 
-const defaultworker = "https://mc.coolsite.cv";
+// also valid:
+// mc.coolsite.cv
+// streamers.coolsite.cv
+// channels.coolsite.cv
 const store = window.localStorage;
-const cfg = {worker: store.getItem("mcworker") || defaultworker, lowall: true};
+const cfg = {worker: "https://streams.coolsite.cv", lowall: true};
 // WHY DO TWITCH EMBEDS NEED THIS
 const parents = Array.from(new Set([location.hostname, "coolsite.cv", "cv003.github.io", "localhost"].filter(Boolean)));
 
@@ -158,7 +161,7 @@ function viewertext(n){
 /*//////////////////////////////////////////////////////////////////////*/
 
 async function refresh(force){
-  if (!cfg.worker){banner("no worker set, live status + youtube are disabled."); return}
+  if (!cfg.worker){banner("worker isn\'t set for some reason?! ( ⊙⊙)"); return}
 
   // intentional throttle :           3
   if (!force && lastres && Date.now() - lastfetch < 60000){
@@ -187,7 +190,7 @@ async function refresh(force){
     store.setItem("mclivetime", String(lastfetch));
     updatecount();
   } catch (e){
-    banner("worker request failed: " + e);
+    banner("worker request failed?! " + e);
   }
   btn.classList.remove("spin");
   renderlist();
@@ -234,7 +237,7 @@ function chunk(arr, n){const out = []; for (let i = 0; i < arr.length; i += n) o
 function togglealt(m, alt){
   const w = findstreamwin(m, alt);
   if (w){closewin(w.id); return}
-  if (state.wins.filter(x => x.type === "stream").length >= 10){banner("10 streams max for performance."); return}
+  if (state.wins.filter(x => x.type === "stream").length >= 15){banner("too many streams!!"); return}
   addwin("stream", m, {alt, videoId: alt.videoId});
 }
 
@@ -244,7 +247,7 @@ function addwin(type, m, opts){
   let videoId = opts.videoId || alt.videoId;
 
   if (alt.platform === "yt" && !videoId){
-    banner(m.display + " has no known live youtube video. refresh, or they may be offline.");
+    banner(m.display + " is likely not live.. if they are then this might be a youtube ratelimit, try refreshing!");
     const tw = m.alts.find(a => a.platform === "tw");
     if (!tw) return;
     alt = tw; videoId = null;
@@ -570,7 +573,7 @@ function wire() {
 async function boot(){
   wire();
   try {state.members = parseroster(await fetch("channels.txt").then(r => r.text()))}
-  catch (e){banner("could not load channels.txt: " + e); state.members = []}
+  catch (e){banner("loading channels failed for some reason?! ( ⊙⊙) the error: " + e); state.members = []}
   renderlist(); restoresession();
   if (lastres){
     applyresults(lastres.tw || {}, lastres.yt || {}); 
