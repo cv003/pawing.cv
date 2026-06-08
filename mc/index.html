@@ -40,13 +40,13 @@
     .burger:hover {background: #000000aa}
     .burger svg {width: 16px; height: 16px; fill: currentColor; display: block}
 
-    /* inline icon svgs inherit text color via currentColor */
     .ic svg {width: 15px; height: 15px; fill: currentColor; display: block}
     @keyframes spin {to {transform: rotate(360deg)}}
     .f-refresh.spin svg {animation: spin .8s linear infinite}
 
     .count {
-      position: fixed; top: 42px; left: 10px; z-index: 30; width: 38px;
+      position: fixed; top: 42px; left: 22px; transform: translateX(-50%);
+      z-index: 30; white-space: nowrap; text-align: center;
       font-size: 11px; line-height: 1.1; color: var(--text2);
       text-shadow: 0 1px 3px #000; pointer-events: none;
     }
@@ -55,7 +55,9 @@
     /*//////////////////////////////////////////////////////////////////////*/
 
     .side {
-      position: fixed; top: 0; bottom: 0; left: 0; width: min(640px, 100vw); z-index: 25;
+      position: fixed; 
+      top: 0; bottom: 0; left: 0; 
+      width: min(640px, 100vw); z-index: 25;
       background: var(--list); border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
       transform: translateX(-100%); transition: transform .16s ease;
@@ -72,7 +74,7 @@
       border-radius: 6px; padding: 7px 10px; color: var(--text);
     }
     .side .search:focus {outline: none; border-color: var(--purple)}
-    .side .row {display: flex; gap: 6px; margin-left: 46px}
+    .side .row {display: flex; gap: 6px; margin-left: 38px}
 
     .btn {
       background: var(--bg3); border: 1px solid var(--border2);
@@ -81,14 +83,23 @@
     .btn:hover {background: #2f2f37}
     .btn.on {background: var(--purple); border-color: var(--purple); color: #fff}
     .btn.small {padding: 3px 9px; font-size: 12px}
-    /* refresh + online are icon buttons */
-    .side .row .btn {display: flex; align-items: center; justify-content: center; padding: 5px 9px}
-    .side .row .btn svg {width: 16px; height: 16px; fill: currentColor; display: block}
 
-    /* categories laid out as columns; each column scrolls on its own */
-    .list {flex: 1; display: flex; overflow-x: auto; overflow-y: hidden; padding: 4px}
+    .side .row .btn {
+      display: flex; align-items: center; 
+      justify-content: center; padding: 5px 9px
+    }
+    .side .row .btn svg {
+      width: 16px; height: 16px; 
+      fill: currentColor; display: block
+    }
+
+    .list {
+      flex: 1; display: flex; overflow-x: auto; 
+      overflow-y: hidden; padding: 4px
+    }
     .column {
-      flex: 1 0 270px; min-width: 270px; height: 100%; padding: 0 4px; overflow-y: auto;
+      flex: 1 0 270px; min-width: 270px; 
+      height: 100%; padding: 0 4px; overflow-y: auto;
       border-right: 1px solid var(--border);
     }
     .column:last-child {border-right: 0}
@@ -127,7 +138,6 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* secondary accounts as indented sub-rows */
     .item.subitem {padding: 4px 8px 4px 30px; position: relative}
     .item.subitem::before {
       content: ""; position: absolute; left: 16px; top: -2px; bottom: 50%;
@@ -240,7 +250,7 @@
   <div class="app">
 
     <button class="burger" title="channels">☰</button>
-    <div class="count">loading...</div>
+    <div class="count"></div>
 
     <div class="side">
       <div class="head">
