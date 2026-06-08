@@ -16,6 +16,23 @@
       --purple: #9147ff; --live: #eb0400; --flash: #ffe14d;
     }
 
+    /* do alt fonts also load? if so i'm was*/
+    @font-face {
+      font-family: "Inter"; font-weight: 400; font-display: swap;
+      src: url("/assets/fonts/inter.woff2") format("woff2"), 
+           url("/assets/fonts/inter.ttf") format("truetype");
+    }
+    @font-face {
+      font-family: "Inter"; font-weight: 500; font-display: swap;
+      src: url("/assets/fonts/intermedium.woff2") format("woff2"), 
+           url("/assets/fonts/intermedium.ttf") format("truetype");
+    }
+    @font-face {
+      font-family: "Inter"; font-weight: 700; font-display: swap;
+      src: url("/assets/fonts/interbold.woff2") format("woff2"), 
+           url("/assets/fonts/interbold.ttf") format("truetype");
+    }
+
     * {box-sizing: border-box; -webkit-user-select: none; user-select: none}
     html, body {margin: 0; height: 100%; overflow: hidden}
     body {
@@ -33,11 +50,11 @@
     .burger {
       position: fixed; top: 8px; left: 8px; z-index: 30;
       width: 28px; height: 28px; border: 0; cursor: pointer;
-      background: #00000055; color: var(--text); border-radius: 6px;
+      background: rgba(0,0,0,0.333); color: var(--text); border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       backdrop-filter: blur(4px);
     }
-    .burger:hover {background: #000000aa}
+    .burger:hover {background: rgba(0,0,0,0.6)}
     .burger svg {width: 16px; height: 16px; fill: currentColor; display: block}
 
     .ic svg {width: 15px; height: 15px; fill: currentColor; display: block}
@@ -71,7 +88,7 @@
     .side .search {
       margin-left: 38px; width: calc(100% - 38px);
       background: var(--bg3); border: 1px solid var(--border2);
-      border-radius: 6px; padding: 7px 10px; color: var(--text);
+      border-radius: 6px; height: 28px; padding: 0 10px; color: var(--text);
     }
     .side .search:focus {outline: none; border-color: var(--purple)}
     .side .row {display: flex; gap: 6px; margin-left: 38px}
@@ -98,19 +115,23 @@
       overflow-y: hidden; padding: 4px
     }
     .column {
-      flex: 1 0 270px; min-width: 270px; 
+      flex: 1 0 270px; min-width: 270px;
       height: 100%; padding: 0 4px; overflow-y: auto;
       border-right: 1px solid var(--border);
+      scrollbar-width: thin; scrollbar-color: #3a3a3d transparent;
     }
     .column:last-child {border-right: 0}
-    .column::-webkit-scrollbar, .list::-webkit-scrollbar {width: 8px; height: 8px}
+    .column::-webkit-scrollbar {width: 6px}
+    .list::-webkit-scrollbar {height: 8px}
     .column::-webkit-scrollbar-thumb, .list::-webkit-scrollbar-thumb {background: #3a3a3d; border-radius: 8px}
 
     .group {
+      padding: 8px 8px 6px; position: sticky; top: 0;
+      background: var(--list); z-index: 1;
       font-size: 11px; color: #8a8a95; text-transform: uppercase;
-      letter-spacing: .6px; padding: 10px 8px 4px; font-weight: 700;
-      position: sticky; top: 0; background: var(--list); z-index: 1;
+      letter-spacing: .6px; font-weight: 700;
     }
+    .group img {height: 26px; width: auto; max-width: 92%; display: block}
 
     .item {
       display: flex; align-items: center; gap: 9px;
@@ -118,18 +139,18 @@
       border-left: 3px solid transparent;
     }
     .item:hover {background: #32323a}
-    .item.active {background: #34304a; border-left-color: var(--purple)}
+    .item.active {background: #28304a; border-left-color: var(--purple)}
     .item.offline {opacity: .55}
     .item.rare {opacity: .3}
     .item.offline:hover, .item.rare:hover {opacity: .9}
 
     .item .av {
-      width: 34px; height: 34px; border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       background: var(--bg3); object-fit: cover; flex: none;
     }
     .item .meta {flex: 1; min-width: 0}
     .item .nm {
-      display: flex; align-items: center; gap: 5px; font-weight: 600;
+      display: flex; align-items: center; gap: 5px; font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .item .nm .picon {width: 13px; height: 13px; flex: none}
@@ -138,10 +159,13 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .item.subitem {padding: 4px 8px 4px 30px; position: relative}
+    /* tried to guess the indent */
+    .item.subitem {padding: 0 0 0 48px; position: relative}
     .item.subitem::before {
-      content: ""; position: absolute; left: 16px; top: -2px; bottom: 50%;
-      width: 9px; border-left: 1px solid var(--border2); border-bottom: 1px solid var(--border2);
+      content: ""; position: absolute; 
+      left: 22px; top: -2px; bottom: 50%;
+      width: 22px; border-left: 1px solid var(--border2); 
+      border-bottom: 1px solid var(--border2);
       border-bottom-left-radius: 4px;
     }
     .item.subitem .nm {font-weight: 500; font-size: 12px}
@@ -176,7 +200,7 @@
     }
     .win .bar .picon {width: 14px; height: 14px; flex: none}
     .win .bar .nm {
-      flex: 1; font-size: 12px; font-weight: 600;
+      flex: 1; font-size: 12px; font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .win .bar .ic {

@@ -7,7 +7,6 @@ const icons = {
   online: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 15v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3l4-2v10l-4-2ZM4 6h12v12H4V6Z" fill-rule="evenodd" clip-rule="evenodd"/></svg>`
 };
 
-// build a clickable .ic element holding one of the inline svgs
 function ic(svg, title, fn){
   const d = el("div", "ic");
   d.innerHTML = svg; d.title = title; d.onclick = fn;
@@ -19,24 +18,21 @@ function ic(svg, title, fn){
 const defaultworker = "https://mc.coolsite.cv";
 const store = window.localStorage;
 const cfg = {worker: store.getItem("mcworker") || defaultworker, lowall: true};
-
-// twitch embeds require the host domain as a parent. include the live host
-// plus the known prod domains so it works locally, on pages and the custom domain.
+// WHY DO TWITCH EMBEDS NEED THIS
 const parents = Array.from(new Set([location.hostname, "coolsite.cv", "cv003.github.io", "localhost"].filter(Boolean)));
 
 const state = {
-  members: [],          // parsed roster
-  altmap: {},           // "tw:name" -> {member, alt}
-  wins: [],             // floating windows (streams + chats)
-  focused: null,        // focused window id (audio)
-  nextid: 1,
+  members: [], altmap: {}, wins: [],
+  focused: null, nextid: 1,
   avcache: JSON.parse(store.getItem("mcav") || "{}"),
   sideopen: false
 };
 
-const $ = s => document.querySelector(s);
 const el = (t, c) => {const e = document.createElement(t); if (c) e.className = c; return e};
 const mkey = m => m.display.toLowerCase();
+
+let lastfetch = +(store.getItem("mclivetime") || 0);
+let lastres = (() => {try {return JSON.parse(store.getItem("mclive") || "null")} catch (e){return null}})();
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -74,7 +70,6 @@ function parseroster(text){
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* sidebar render */
 
 function platicon(p){
   const i = el("img", "picon");
@@ -87,12 +82,12 @@ function avatarurl(m){return m.avatar || state.avcache[mkey(m)] || "/assets/svgs
 function winfor(m, alt){return state.wins.find(w => w.type === "stream" && w.member === m && w.alt === alt)}
 
 function renderlist(){
-  const q = $(".search").value.trim().toLowerCase();
-  const onlineonly = $(".f-online").classList.contains("on");
-  const list = $(".list");
+  const q = document.querySelector(".search").value.trim().toLowerCase();
+  const onlineonly = document.querySelector(".f-online").classList.contains("on");
+  const list = document.querySelector(".list");
   list.innerHTML = "";
 
-  // group order preserved, then live first, then viewers desc, then a-z
+  // group order, then live first, then by viewer amount, then a-z
   const rows = state.members
     .filter(m => !(q && !m.display.toLowerCase().includes(q) && !m.alts.some(a => a.name.toLowerCase().includes(q))))
     .filter(m => !(onlineonly && !m.live))
@@ -103,7 +98,11 @@ function renderlist(){
     if (m.group !== lastgroup){
       col = el("div", "column");
       const g = el("div", "group");
-      g.textContent = m.label;
+      const gi = el("img");
+      gi.src = "assets/images/" + m.label + ".png";
+      gi.alt = m.label;
+      gi.onerror = () => {gi.remove(); g.textContent = m.label};
+      g.appendChild(gi);
       col.appendChild(g);
       list.appendChild(col);
       lastgroup = m.group;
@@ -132,7 +131,6 @@ function buildrow(m, alt, sub){
   meta.appendChild(nm);
 
   if (alt.live){
-    // youtube viewer counts are not available via the basic queries, so title only
     const parts = [];
     if (alt.platform === "tw" && alt.viewers) parts.push(fmt(alt.viewers));
     if (alt.title) parts.push(alt.title);
@@ -145,24 +143,29 @@ function buildrow(m, alt, sub){
 }
 
 function fmt(n){
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k watching";
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0document.querySelector/, "") + "k watching";
   return (n || 0) + " watching";
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* live check via worker */
 
-async function refresh(){
+async function refresh(force){
   if (!cfg.worker){banner("no worker set, live status + youtube are disabled."); return}
-  const btn = $(".f-refresh");
+
+  // intentional throttle :           3
+  if (!force && lastres && Date.now() - lastfetch < 60000){
+    applyresults(lastres.tw || {}, lastres.yt || {});
+    updatecount(); renderlist();
+    return;
+  }
+
+  const btn = document.querySelector(".f-refresh");
   btn.classList.add("spin");
 
   const tw = new Set(), yt = new Set();
   for (const m of state.members) for (const a of m.alts){(a.platform === "tw" ? tw : yt).add(a.name)}
 
   try {
-    // youtube /live redirects (2 subrequests each), so keep chunks well under the
-    // free-tier 50-subrequest-per-invocation cap. twitch is one batched call.
     const results = await Promise.all([
       tw.size ? callworker({twitch: [...tw]}) : Promise.resolve({}),
       ...chunk([...yt], 15).map(c => callworker({youtube: c}))
@@ -171,13 +174,20 @@ async function refresh(){
     for (const r of results){Object.assign(twres, r.twitch || {}); Object.assign(ytres, r.youtube || {})}
     applyresults(twres, ytres);
 
-    const online = state.members.filter(m => m.live).length;
-    $(".count").innerHTML = "<b>" + online + "</b>/" + state.members.length;
+    lastres = {tw: twres, yt: ytres}; lastfetch = Date.now();
+    store.setItem("mclive", JSON.stringify(lastres));
+    store.setItem("mclivetime", String(lastfetch));
+    updatecount();
   } catch (e){
     banner("worker request failed: " + e);
   }
   btn.classList.remove("spin");
   renderlist();
+}
+
+function updatecount(){
+  const online = state.members.filter(m => m.live).length;
+  document.querySelector(".count").innerHTML = "<b>" + online + "</b>/" + state.members.length;
 }
 
 function callworker(params){
@@ -212,7 +222,6 @@ function applyresults(twres, ytres){
 function chunk(arr, n){const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out}
 
 /*//////////////////////////////////////////////////////////////////////*/
-/* windows: create / close */
 
 function togglealt(m, alt){
   const w = winfor(m, alt);
@@ -221,7 +230,6 @@ function togglealt(m, alt){
   addwin("stream", m, {alt, videoId: alt.videoId});
 }
 
-// type: "stream" | "chat". opts holds alt/videoId/rect on restore.
 function addwin(type, m, opts){
   opts = opts || {};
   let alt = opts.alt || m.livealt || m.primary;
@@ -254,9 +262,9 @@ function addwin(type, m, opts){
 
   w.node = node; w.body = body; w.bar = bar;
   state.wins.push(w);
-  $(".canvas").appendChild(node);
+  document.querySelector(".canvas").appendChild(node);
   applyrect(w);
-  $(".empty").style.display = "none";
+  document.querySelector(".empty").style.display = "none";
 
   dragwire(w);
 
@@ -279,7 +287,7 @@ function closewin(id){
   w.node.remove();
   state.wins.splice(i, 1);
   if (state.focused === id) state.focused = null;
-  if (!state.wins.some(x => x.type === "stream")) $(".empty").style.display = "flex";
+  if (!state.wins.some(x => x.type === "stream")) document.querySelector(".empty").style.display = "flex";
   const firststream = state.wins.find(x => x.type === "stream");
   if (!state.focused && firststream) focuswin(firststream.id);
   renderlist();
@@ -328,7 +336,7 @@ function setquality(w, high){
 /*//////////////////////////////////////////////////////////////////////*/
 /* window geometry: rects as fractions of the canvas */
 
-function csize(){const r = $(".canvas").getBoundingClientRect(); return {w: r.width, h: r.height}}
+function csize(){const r = document.querySelector(".canvas").getBoundingClientRect(); return {w: r.width, h: r.height}}
 
 function nextrect(){
   const off = (state.wins.length % 6) * 0.04;
@@ -359,7 +367,7 @@ function snapzone(px, py){
 }
 
 function showghost(zone){
-  const g = $(".ghost");
+  const g = document.querySelector(".ghost");
   if (!zone){g.classList.remove("on"); return}
   const c = csize();
   g.style.left = (zone.x * c.w) + "px"; g.style.top = (zone.y * c.h) + "px";
@@ -372,7 +380,7 @@ function showghost(zone){
 
 function dragwire(w){
   w.bar.addEventListener("pointerdown", e => {
-    if (e.target.classList.contains("ic")) return;
+    if (e.target.closest(".ic")) return;       // let the chat/close buttons handle their click
     if (w.type === "stream") focuswin(w.id);
     startdrag(w, e);
   });
@@ -394,7 +402,7 @@ function startdrag(w, e){
     let nx = ox + (ev.clientX - sx), ny = oy + (ev.clientY - sy);
     nx = Math.max(0, Math.min(nx, c.w - 60)); ny = Math.max(0, Math.min(ny, c.h - 28));
     w.node.style.left = nx + "px"; w.node.style.top = ny + "px";
-    const rc = $(".canvas").getBoundingClientRect();
+    const rc = document.querySelector(".canvas").getBoundingClientRect();
     zone = snapzone(ev.clientX - rc.left, ev.clientY - rc.top);
     showghost(zone);
   }
@@ -441,7 +449,7 @@ function raise(w){
   w.node.style.zIndex = z + 1;
 }
 
-function mask(on){$(".dragmask").classList.toggle("on", on)}
+function mask(on){document.querySelector(".dragmask").classList.toggle("on", on)}
 
 /*//////////////////////////////////////////////////////////////////////*/
 /* embeds: twitch + youtube apis */
@@ -521,12 +529,16 @@ function restoresession(){
 /*//////////////////////////////////////////////////////////////////////*/
 /* ui wiring */
 
-function setside(on){state.sideopen = on; $(".app").classList.toggle("sideopen", on); updateburger(); savesession()}
+function setside(on){
+  state.sideopen = on; document.querySelector(".app").classList.toggle("sideopen", on);
+  updateburger(); savesession();
+  if (on) refresh();                  // only hit the worker when the list is opened (throttled)
+}
 
-function updateburger(){$(".burger").innerHTML = state.sideopen ? icons.collapse : icons.expand}
+function updateburger(){document.querySelector(".burger").innerHTML = state.sideopen ? icons.collapse : icons.expand}
 
 function banner(msg){
-  let b = $(".banner");
+  let b = document.querySelector(".banner");
   if (!b){b = el("div", "banner"); document.body.appendChild(b)}
   b.textContent = msg;
   clearTimeout(b._t); b._t = setTimeout(() => b.remove(), 6000);
@@ -534,11 +546,11 @@ function banner(msg){
 
 function wire(){
   updateburger();
-  $(".burger").onclick = () => setside(!state.sideopen);
-  $(".search").addEventListener("input", renderlist);
+  document.querySelector(".burger").onclick = () => setside(!state.sideopen);
+  document.querySelector(".search").addEventListener("input", renderlist);
 
-  const fr = $(".f-refresh"); fr.innerHTML = icons.refresh; fr.title = "refresh"; fr.onclick = refresh;
-  const fo = $(".f-online"); fo.innerHTML = icons.online; fo.title = "online only";
+  const fr = document.querySelector(".f-refresh"); fr.innerHTML = icons.refresh; fr.title = "refresh"; fr.onclick = () => refresh(true);
+  const fo = document.querySelector(".f-online"); fo.innerHTML = icons.online; fo.title = "online only";
   fo.onclick = e => {e.currentTarget.classList.toggle("on"); renderlist()};
 
   let rt;
@@ -554,7 +566,8 @@ async function boot(){
   catch (e){banner("could not load channels.txt: " + e); state.members = []}
   renderlist();
   restoresession();
-  refresh();
+  // show last-known status from cache without firing a request; refresh happens on open
+  if (lastres){applyresults(lastres.tw || {}, lastres.yt || {}); updatecount(); renderlist()}
 }
 
 boot();

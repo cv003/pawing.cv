@@ -2,9 +2,9 @@
 # "yt:" - youtube
 # [rare] - barely streamed 
 # "== name ==" - category
-# the first account is the one shown first
+# twitch account is always shown first (order on the line doesn't really matter)
 
-== ls world ==
+== lsworld ==
 purpled
 aimsey
 branzylive
