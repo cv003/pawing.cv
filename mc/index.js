@@ -145,7 +145,7 @@ function buildrow(m, alt, sub){
     const parts = [];
     if (alt.platform === "tw" && alt.viewers) parts.push(viewertext(alt.viewers));
     if (alt.title) parts.push(alt.title);
-    if (parts.length){const s = elem("div", "sub"); s.textContent = parts.join(" · "); meta.appendChild(s)}
+    if (parts.length){const s = elem("div", "sub"); decorate(s, parts.join(" · ")); meta.appendChild(s)}
   }
   item.appendChild(meta);
 
@@ -156,6 +156,13 @@ function buildrow(m, alt, sub){
 function viewertext(n){
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k watching";
   return (n || 0) + " watching";
+}
+
+function escapehtml(s){return s.replace(/[&<>"]/g, c => "&#" + c.charCodeAt(0) + ";")}
+function decorate(el, text){
+  // they're for other streamers only, no? they're still there but dimmed
+  el.innerHTML = escapehtml(text).replace(/\*+/g, m => "<span class=\"dim\">" + m + "</span>");
+  if (window.twemoji) twemoji.parse(el, {base: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/", folder: "svg", ext: ".svg"});
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -249,7 +256,7 @@ function addwin(type, m, opts){
 
   if (alt.platform === "yt" && !videoId){
     banner(m.display + " is likely not live.. if they are then this might be a youtube ratelimit, try refreshing!");
-    const tw = m.alts.find(a => a.platform === "tw");
+    const tw = m.alts.find(a => a.platform === "tw"); // resort to twitch
     if (!tw) return;
     alt = tw; videoId = null;
   }

@@ -183,6 +183,11 @@
       font-size: 11px; color: var(--text2); margin-top: 1px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    .item .sub .dim {opacity: .4}
+    .item .sub img.emoji {
+      height: 1em; width: 1em;
+      vertical-align: -.12em; margin: 0 .02em;
+    }
 
     /* tried to guess the indent */
     .item.subitem {padding: 0 0 0 46px; position: relative}
@@ -332,6 +337,7 @@
     <div class="dragmask"></div>
 
   </div>
+  <script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
   <script src="index.js"></script>
 
 </body>
