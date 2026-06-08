@@ -143,7 +143,7 @@ function buildrow(m, alt, sub){
 }
 
 function fmt(n){
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0document.querySelector/, "") + "k watching";
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k watching";
   return (n || 0) + " watching";
 }
 
@@ -187,7 +187,7 @@ async function refresh(force){
 
 function updatecount(){
   const online = state.members.filter(m => m.live).length;
-  document.querySelector(".count").innerHTML = "<b>" + online + "</b>/" + state.members.length;
+  document.querySelector(".count").innerHTML = "<p>" + online + "</p>/" + state.members.length;
 }
 
 function callworker(params){
