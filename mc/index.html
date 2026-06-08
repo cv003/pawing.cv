@@ -49,8 +49,8 @@
     /*//////////////////////////////////////////////////////////////////////*/
 
     .burger {
-      position: fixed; display: flex; 
-      top: 8px; left: 8px; z-index: 30;
+      position: fixed; display: flex;
+      top: 8px; left: 8px; z-index: 60;
       width: 28px; height: 28px; cursor: pointer;
       background: #18181b; color: var(--text);
       border: none; border-radius: 6px;
@@ -63,6 +63,21 @@
     @keyframes spin {to {transform: rotate(360deg)}}
     .f-refresh.spin svg {animation: spin .8s linear infinite}
 
+    .layouts {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      z-index: 60; display: none; gap: 0;
+      border-radius: 6px 6px 0 0; overflow: hidden;
+    }
+    .layouts.show {display: flex}
+    .lay {
+      display: flex; align-items: center; justify-content: center;
+      background: #2f2f35; border: 0; cursor: pointer;
+      color: var(--text2); padding: 2px 4px;
+    }
+    .lay + .lay {border-left: 1px solid rgba(0,0,0,0.25)}
+    .lay:hover {background: #3a3a40; color: var(--text)}
+    .lay svg {width: 14px; height: 14px; fill: currentColor; display: block}
+
     .count {
       position: absolute; top: 42px; left: 22px; transform: translateX(-50%);
       height: 15px; display: flex; align-items: center; justify-content: center;
@@ -74,8 +89,8 @@
 
     .side {
       position: fixed; 
-      top: 0; bottom: 0; left: 0; 
-      width: min(640px, 100vw); z-index: 25;
+      top: 0; bottom: 0; left: 0;
+      width: min(640px, 100vw); z-index: 50;
       background: var(--list); border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
       transform: translateX(-100%); transition: transform .16s ease;
@@ -288,6 +303,12 @@
   <div class="app">
 
     <button class="burger" title="channels"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h2v14H3V5Zm19.414 7-6.707-6.707-1.414 1.414L18.586 11H7v2h11.586l-4.293 4.293 1.414 1.414L22.414 12Z"/></svg></button>
+
+    <div class="layouts">
+      <button class="lay" data-mode="grid" title="grid"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 6h4v4H2V6Zm0 8h4v4H2v-4Zm8 0h4v4h-4v-4Zm8-8h4v4h-4V6Zm0 8h4v4h-4v-4Zm-4-8h-4v4h4V6Z"/></svg></button>
+      <button class="lay" data-mode="split" title="stream column & chat column"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 4H4v5H2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5h-2V4ZM2 15h2v5h16v-5h2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5Zm0-4h11v2H2v-2Zm14 0h6v2h-6v-2Z"/></svg></button>
+      <button class="lay" data-mode="focus" title="enlarge focused window"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5Zm14 0h4v14h-4V5Zm-2 0H4v14h10V5Z" fill-rule="evenodd" clip-rule="evenodd"/></svg></button>
+    </div>
 
     <div class="side">
       <div class="head">

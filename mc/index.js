@@ -237,12 +237,13 @@ function chunk(arr, n){const out = []; for (let i = 0; i < arr.length; i += n) o
 function togglealt(m, alt){
   const w = findstreamwin(m, alt);
   if (w){closewin(w.id); return}
-  if (state.wins.filter(x => x.type === "stream").length >= 15){banner("too many streams!!"); return}
+  if (state.wins.filter(x => x.type === "stream").length >= 12){banner("too many streams!!"); return}
   addwin("stream", m, {alt, videoId: alt.videoId});
 }
 
 function addwin(type, m, opts){
   opts = opts || {};
+  if (type === "chat" && state.wins.filter(x => x.type === "chat").length >= 12){banner("too many chats!!"); return}
   let alt = opts.alt || m.livealt || m.primary;
   let videoId = opts.videoId || alt.videoId;
 
@@ -260,7 +261,7 @@ function addwin(type, m, opts){
   const bar = elem("div", "bar");
   bar.appendChild(platicon(alt.platform));
   const nameel = elem("div", "name");
-  nameel.textContent = m.display + (type === "chat" ? " chat" : "");
+  nameel.textContent = m.display + (type === "chat" ? "\'s chat" : "");
   bar.appendChild(nameel);
   if (type === "stream"){
     w.chatbtn = iconbtn(icons.chat, "add chat", e => {e.stopPropagation(); addwin("chat", m, {alt, videoId})});
@@ -285,13 +286,13 @@ function addwin(type, m, opts){
   if (type === "stream"){
     if (alt.platform === "tw") makewitch(w);
     else makeyt(w);
-    if (!state.focused) focuswin(id);
   } else {
     makechat(w);
   }
-  renderlist();
-  savesession();
-  syncchatbtns();
+  if (opts.quiet){raise(w); state.focused = id}
+  else focuswin(id);
+  renderlist(); savesession();
+  syncchatbtns(); updatelayouts();
 }
 
 function closewin(id){
@@ -305,22 +306,18 @@ function closewin(id){
   if (!state.wins.some(x => x.type === "stream")) document.querySelector(".empty").style.display = "flex";
   const firststream = state.wins.find(x => x.type === "stream");
   if (!state.focused && firststream) focuswin(firststream.id);
-  renderlist();
-  savesession();
-  syncchatbtns();
+  renderlist(); savesession();
+  syncchatbtns(); updatelayouts();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
 
 function focuswin(id){
+  const w = state.wins.find(x => x.id === id);
+  if (!w) return;
+  raise(w);
+  if (state.focused !== id) flash(w);
   state.focused = id;
-  for (const w of state.wins){
-    if (w.type !== "stream") continue;
-    const on = w.id === id;
-    setmuted(w, !on);
-    setquality(w, on && !cfg.lowall);
-    if (on) flash(w);
-  }
   savesession();
 }
 
@@ -330,19 +327,12 @@ function flash(w){
   w.node.classList.add("flash");
 }
 
-function setmuted(w, muted){
-  try {
-    if (w.platform === "tw" && w.inst) w.inst.setMuted(muted);
-    if (w.platform === "yt" && w.inst){muted ? w.inst.mute() : w.inst.unMute()}
-  } catch (e){}
-}
-
 function setquality(w, high){
   try {
     if (w.platform === "tw" && w.inst){
       const qs = w.inst.getQualities ? w.inst.getQualities() : [];
-      const low = qs.find(q => /160p|low/i.test(q.group || q.name || ""));
-      w.inst.setQuality(high ? "auto" : (low ? low.group : "160p"));
+      const low = qs.find(q => /360p|low/i.test(q.group || q.name || ""));
+      w.inst.setQuality(high ? "auto" : (low ? low.group : "360p"));
     }
     if (w.platform === "yt" && w.inst && w.inst.setPlaybackQuality) w.inst.setPlaybackQuality(high ? "hd720" : "small");
   } catch (e){}
@@ -368,6 +358,54 @@ function applyrect(w){
 
 function relayout(){for (const w of state.wins) applyrect(w)}
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+function updatelayouts(){
+  document.querySelector(".layouts").classList.toggle("show", state.wins.length > 0);
+}
+
+function placegrid(wins, area){
+  const n = wins.length;
+  if (!n) return;
+  const cols = Math.ceil(Math.sqrt(n)), rows = Math.ceil(n / cols);
+  wins.forEach((w, i) => {
+    const c = i % cols, r = Math.floor(i / cols);
+    w.rect = {x: area.x + (c / cols) * area.w, y: area.y + (r / rows) * area.h, w: area.w / cols, h: area.h / rows};
+    applyrect(w);
+  });
+}
+
+function placecol(wins, area){
+  const n = wins.length;
+  if (!n) return;
+  wins.forEach((w, i) => {
+    w.rect = {x: area.x, y: area.y + (i / n) * area.h, w: area.w, h: area.h / n};
+    applyrect(w);
+  });
+}
+
+function applylayout(mode){
+  const all = state.wins.slice();
+  if (!all.length) return;
+  const streams = all.filter(w => w.type === "stream");
+  const chats = all.filter(w => w.type === "chat");
+
+  if (mode === "split" && streams.length && chats.length){
+    placegrid(streams, {x: 0, y: 0, w: 0.74, h: 1});
+    placecol(chats, {x: 0.74, y: 0, w: 0.26, h: 1});
+  } else if (mode === "focus"){
+    const top = state.wins.find(w => w.id === state.focused) || all[all.length - 1];
+    const rest = all.filter(w => w !== top);
+    top.rect = {x: 0, y: 0, w: rest.length ? 0.76 : 1, h: 1};
+    applyrect(top);
+    if (rest.length) placecol(rest, {x: 0.76, y: 0, w: 0.24, h: 1});
+  } else {
+    placegrid(all, {x: 0, y: 0, w: 1, h: 1});
+  }
+  savesession();
+}
+
+// holy slop
 function snapzone(px, py){
   const c = canvassize(), e = 44;
   const L = px < e, R = px > c.w - e, T = py < e, B = py > c.h - e;
@@ -394,9 +432,10 @@ function showghost(zone){
 /*//////////////////////////////////////////////////////////////////////*/
 
 function dragwire(w){
+  // any click on the window focuses it!
+  w.node.addEventListener("pointerdown", () => focuswin(w.id), true);
   w.bar.addEventListener("pointerdown", e => {
     if (e.target.closest(".iconbtn")) return;
-    if (w.type === "stream") focuswin(w.id);
     startdrag(w, e);
   });
   for (const handle of w.node.querySelectorAll(".resize")){
@@ -458,9 +497,9 @@ function startresize(w, e, dir){
 }
 
 function raise(w){
-  let z = 10;
-  for (const x of state.wins) z = Math.max(z, parseInt(x.node.style.zIndex) || 10);
-  w.node.style.zIndex = z + 1;
+  state.zorder = (state.zorder || []).filter(x => x !== w && state.wins.includes(x));
+  state.zorder.push(w);
+  state.zorder.forEach((win, i) => {win.node.style.zIndex = 11 + i});
 }
 
 function mask(on){document.querySelector(".dragmask").classList.toggle("on", on)}
@@ -474,11 +513,10 @@ loadscript("https://www.youtube.com/iframe_api");
 function makewitch(w){
   twitchready.then(() => {
     w.inst = new window.Twitch.Player(w.body, {
-      channel: w.alt.name, parent: parents, muted: true, autoplay: true, width: "100%", height: "100%"
+      channel: w.alt.name, parent: parents, muted: false, autoplay: true, width: "100%", height: "100%"
     });
     w.inst.addEventListener(window.Twitch.Player.READY, () => {
-      setmuted(w, w.id !== state.focused);
-      setquality(w, w.id === state.focused && !cfg.lowall);
+      setquality(w, !cfg.lowall);
     });
   });
 }
@@ -490,10 +528,7 @@ function makeyt(w){
     w.inst = new window.YT.Player(div, {
       videoId: w.videoId,
       playerVars: {autoplay: 1, mute: 1, playsinline: 1, modestbranding: 1, rel: 0},
-      events: {onReady: () => {
-        setmuted(w, w.id !== state.focused);
-        setquality(w, w.id === state.focused && !cfg.lowall);
-      }}
+      events: {onReady: () => {setquality(w, !cfg.lowall)}}
     });
   });
 }
@@ -533,7 +568,7 @@ function restoresession() {
   for (const sw of s.wins){
     const ref = state.altmap[sw.platform + ":" + sw.name.toLowerCase()];
     if (!ref) continue;
-    addwin(sw.type, ref.member, {alt: ref.alt, videoId: sw.videoId, rect: sw.rect});
+    addwin(sw.type, ref.member, {alt: ref.alt, videoId: sw.videoId, rect: sw.rect, quiet: true});
   }
   if (typeof s.focused === "number" && state.wins[s.focused]) focuswin(state.wins[s.focused].id);
 }
@@ -564,6 +599,15 @@ function wire() {
   const fo = document.querySelector(".f-online"); fo.innerHTML = icons.online; fo.title = "online only";
   fo.onclick = e => {e.currentTarget.classList.toggle("on"); renderlist()};
 
+  for (const b of document.querySelectorAll(".lay")) b.onclick = () => applylayout(b.dataset.mode);
+
+  window.addEventListener("blur", () => setTimeout(() => {
+    const active = document.activeElement;
+    if (!active || active.tagName !== "IFRAME") return;
+    const w = state.wins.find(x => x.node.contains(active));
+    if (w) focuswin(w.id);
+  }, 0));
+
   let rt;
   window.addEventListener("resize", () => {clearTimeout(rt); rt = setTimeout(relayout, 120)});
 }
@@ -576,8 +620,9 @@ async function boot(){
   catch (e){banner("loading channels failed for some reason?! ( ⊙⊙) the error: " + e); state.members = []}
   renderlist(); restoresession();
   if (lastres){
-    applyresults(lastres.tw || {}, lastres.yt || {}); 
+    applyresults(lastres.tw || {}, lastres.yt || {});
     updatecount(); renderlist()
   }
+  updatelayouts();
 }
 boot();
