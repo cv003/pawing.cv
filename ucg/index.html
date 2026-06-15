@@ -13,7 +13,7 @@
 
     <div class="bg"></div>
 
-    <iframe src="/.proxy/game/"></iframe>
+    <iframe src=".proxy/game/"></iframe>
         
     <div class="warn">
         <a>click to enable audio</a>
@@ -54,7 +54,17 @@
             z-index: 9999;
         }
     </style>
-
-    <script>document.querySelector('.warn').addEventListener('click', function() {this.style.display = 'none'})</script>
-
+    <script>
+        const iframe = document.querySelector('iframe');
+        async function checkiframe() {
+            const proxey = '.proxy/game/';
+            try {
+                const resp = await fetch(proxey, {method: 'HEAD'});
+                iframe.src = resp.status === 404 ? 'game/' : proxey;
+            } catch (error) {iframe.src = 'game/'}
+        }
+        checkiframe();
+        document.querySelector('.warn').addEventListener('click', function() {this.style.display = 'none'});
+    </script>
+    
 </body>

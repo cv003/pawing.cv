@@ -68,20 +68,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             const lovewon = document.querySelector('.lovewon');
             let timeout;
-            let isShowing = false;
-            function showLoveWon() {
-                if (!lovewon || isShowing) return;
-                isShowing = true;
+            let loveshowing = false;
+            function showlovewon() {
+                if (!lovewon || loveshowing) return;
+                loveshowing = true;
                 lovewon.classList.add('show');
                 document.querySelector('audio').play();
                 clearTimeout(timeout);
                 timeout = setTimeout(() => {
                     lovewon.classList.remove('show');
-                    isShowing = false;
+                    loveshowing = false;
                 }, 2000);
             }
             document.querySelectorAll('img').forEach(img => {
-                img.addEventListener('click', showLoveWon);
+                img.addEventListener('click', showlovewon);
             });
         });
     </script>
