@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <title>ascii art maker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2240%22%20font-size%3D%2240%22%20fill%3D%22%23000000%22%20font-family%3D%22monospace%22%20text-anchor%3D%22middle%22%3E%40%3C%2Ftext%3E%3C%2Fsvg%3E">
+
+    <style>
+
+        html, body {height: 100%}
+        body {
+            margin: 0; padding: 0.35em 0.6em; box-sizing: border-box;
+            background: #f7f7f8; color: #222;
+            font-family: sans-serif;
+            display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden;
+        }
+        h1, h2 {margin: 0}
+        .topbar {flex: none; margin-bottom: 0.3em; display: flex; align-items: baseline; gap: 0.6em}
+        .topbar .credit {font-size: 0.72em; color: rgba(0,0,0,0.45)}
+        .topbar .credit a {color: inherit}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .stage {display: flex; gap: 0.6em; flex: 1; min-height: 0}
+        .mainwrap {
+            flex: 1 1 0; min-width: 0; min-height: 0;
+            display: flex; flex-direction: column; gap: 0.4em;
+        }
+        .side {
+            flex: 0 0 21em; min-height: 0; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 0.5em;
+            padding-right: 0.2em;
+        }
+
+        textarea.out {
+            flex: 1 1 0; min-height: 0; width: 100%; box-sizing: border-box;
+            font-family: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+            font-size: 12px; line-height: 12px; letter-spacing: 0;
+            white-space: pre; overflow: auto; word-break: keep-all;
+            border: 1px solid #d8d8da; border-radius: 5px;
+            background: #fff; color: #111; padding: 0.5em; resize: none;
+            tab-size: 1;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .toolbar {
+            flex: none; display: flex; align-items: center;
+            gap: 0.45em; flex-wrap: wrap;
+        }
+        .toolbar .grp {display: flex; align-items: center; gap: 0.3em}
+        .progwrap {
+            height: 0.5em; background: #ececef; border-radius: 4px;
+            overflow: hidden; flex: 1 1 6em; min-width: 5em;
+        }
+        .progbar {
+            height: 100%; width: 0; background: blue; 
+            transition: width 0.05s linear
+        }
+        .stat {
+            font-size: 0.72em; color: #777; font-variant-numeric: tabular-nums; min-width: 9em}
+        .count {color: #999; font-size: 0.72em}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .card {
+            background: #fff; border: 1px solid #e2e2e2;
+            border-radius: 10px; padding: 0.45em 0.6em; flex: none;
+        }
+        .card h2 {font-size: 0.82em; margin-bottom: 0.3em; color: #444}
+        .row {
+            margin: 0.25em 0; display: flex; 
+            align-items: center; gap: 0.4em; 
+            flex-wrap: wrap
+        }
+        .hint {font-size: 0.72em; color: rgba(0,0,0,0.42)}
+        label {
+            font-size: 0.85em; display: inline-flex; 
+            align-items: center; gap: 0.35em
+        }
+
+        .minibtn, button {
+            font: inherit; font-size: 0.85em;
+            padding: 0.22em 0.7em; border-radius: 7px;
+            border: 1px solid #cfcfd2; background: #fff; cursor: pointer;
+        }
+        .minibtn:hover, button:hover {background: #efefef}
+        .minibtn:disabled {opacity: 0.4; cursor: default}
+        .preset.active {background: #222; color: #fff; border-color: #222}
+
+        input[type="number"] {
+            width: 4em; font: inherit; font-size: 0.85em;
+            padding: 0.1em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+        }
+        select {
+            font: inherit; font-size: 0.85em;
+            padding: 0.12em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+            background: #fff;
+        }
+        input[type="text"] {
+            font: inherit; font-size: 0.85em; width: 7em;
+            padding: 0.1em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+        }
+        input[type="range"] {vertical-align: middle; width: 8em}
+        .seg {display: inline-block; min-width: 2.4em; color: #666; font-size: 0.78em}
+        .copied {background: #eafaf0; border-color: #9dd8b6}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        body.dark {background: #121214; color: #ddd}
+        .dark .hint {color: rgba(255,255,255,0.4)}
+        .dark .card {background: #1f1f22; border-color: #3a3a40}
+        .dark .card h2 {color: #bbb}
+        .dark .minibtn, .dark button {
+            background: #2a2a2e; color: #ddd; 
+            border-color: #46464c
+        }
+        .dark .minibtn:hover, .dark button:hover {background: #34343a}
+        .dark .preset.active {
+            background: #eee; color: #111; 
+            border-color: #eee
+        }
+        .dark input[type="number"], .dark input[type="text"], .dark select {
+            background: #2a2a2e; color: #ddd; 
+            border-color: #46464c;
+        }
+        .dark textarea.out {
+            background: #161618; color: #eee; 
+            border-color: #46464c
+        }
+        .dark .progwrap {background: #2a2a2e}
+
+    </style>
+
+</head>
+<body>
+
+    <div class="topbar">
+        <h2>ascii art maker</h2>
+        <span class="credit">based on
+            <a href="https://github.com/stong/gradscii-art" target="_blank" rel="noopener">@stong/gradscii-art</a>! might be a bit slow within a browser..</span>
+    </div>
+
+    <div class="stage">
+
+        <div class="mainwrap">
+
+            <textarea class="out" spellcheck="false" wrap="off"></textarea>
+
+            <div class="toolbar">
+                <div class="grp">
+                    <button type="button" class="minibtn preset" data-preset="superfast">superfast</button>
+                    <button type="button" class="minibtn preset active" data-preset="fast">fast</button>
+                    <button type="button" class="minibtn preset" data-preset="slow">slow</button>
+                </div>
+                <div class="grp">
+                    <button type="button" class="minibtn runbtn" disabled>rerun</button>
+                    <button type="button" class="minibtn stopbtn" disabled>stop</button>
+                </div>
+                <div class="progwrap"><div class="progbar"></div></div>
+                <span class="stat statseg"></span>
+                <div class="grp">
+                    <button type="button" class="minibtn copybtn">copy</button>
+                    <button type="button" class="minibtn dlbtn">download</button>
+                    <span class="count countseg"></span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="side">
+
+            <div class="card">
+                <h2>image</h2>
+                <div class="row"><input type="file" class="imgfile" accept="image/*"></div>
+                <div class="row">
+                    <label>fit
+                        <select class="fit">
+                            <option value="contain" selected>contain</option>
+                            <option value="cover">cover</option>
+                            <option value="stretch">stretch</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" class="invert"> invert</label>
+                </div>
+                <div class="row"><label>bright <input type="range" class="bri" min="-100" max="100" value="0"><span class="seg briseg">0</span></label></div>
+                <div class="row"><label>contrast <input type="range" class="con" min="-100" max="100" value="0"><span class="seg conseg">0</span></label></div>
+                <div class="row"><label>gamma <input type="range" class="gam" min="30" max="300" value="100"><span class="seg gamseg">1.00</span></label></div>
+            </div>
+
+            <div class="card">
+                <h2>grid &amp; charset</h2>
+                <div class="row">
+                    <label>cols <input type="number" class="cols" min="8" max="220" value="30"></label>
+                    <label>detail
+                        <select class="detail">
+                            <option value="10">low</option>
+                            <option value="12" selected>med</option>
+                            <option value="16">high</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="row">
+                    <label>set
+                        <select class="charset">
+                            <option value="unicode" selected>bunch of other unicode</option>
+                            <option value="ramp">"classic"</option>
+                            <option value="alnum">letters + digits</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="row">
+                    <label>exclude <input type="text" class="ban" value="`\" spellcheck="false"></label>
+                </div>
+                <div class="hint sizehint"></div>
+            </div>
+
+            <div class="card">
+                <h2>tuning</h2>
+                <div class="row">
+                    <label>rate <input type="range" class="lr" min="2" max="30" value="12"><span class="seg lrseg">0.12</span></label>
+                </div>
+                <div class="row">
+                    <label>diversity <input type="range" class="div" min="0" max="10" value="2"><span class="seg divseg">0.02</span></label>
+                </div>
+                <div class="row">
+                    <label>multiscale <input type="range" class="ms" min="0" max="20" value="0"><span class="seg msseg">0.0</span></label>
+                </div>
+                <div class="row">
+                    <label><input type="checkbox" class="gumbel"> gumbel noise</label>
+                    <label><input type="checkbox" class="dark"> invert</label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+        const workersrc = `
+        let B, target, mask, logits, m, v, weights, rendered, gradw, usage, divg, gradtmp, lastargmax;
+        let K, P, N, space;
+        let stop = false;
+
+        self.onmessage = function(e) {
+            const d = e.data;
+            if (d.type === "stop") {stop = true; return}
+            run(d);
+        };
+
+        function run(d) {
+            stop = false;
+            B = d.bitmaps; target = d.target; mask = d.mask;
+            K = d.numchars; P = d.p; N = d.gridw * d.rows;
+            space = d.space;
+            const iters = d.iters, lr = d.lr, warmup = d.warmup;
+            const divw = d.divweight, msw = d.msweight;
+            const tstart = d.tempstart, tend = d.tempend, gumbel = d.gumbel;
+
+            logits = new Float32Array(N * K);
+            for (let i = 0; i < logits.length; i++) logits[i] = (Math.random() - 0.5) * 0.02;
+            m = new Float32Array(N * K);
+            v = new Float32Array(N * K);
+            weights = new Float32Array(N * K);
+            rendered = new Float32Array(N * P);
+            gradw = new Float32Array(K);
+            usage = new Float32Array(K);
+            divg = new Float32Array(K);
+            gradtmp = new Float32Array(P);
+            lastargmax = new Int32Array(N);
+
+            const b1 = 0.9, b2 = 0.999, eps = 1e-8;
+            const rf = 2 / (N * P);
+
+            for (let it = 0; it < iters; it++) {
+                if (stop) break;
+                const frac = iters > 1 ? it / (iters - 1) : 1;
+                const temp = tstart * Math.pow(tend / tstart, frac);
+                let lrmult;
+                if (it < warmup) lrmult = (it + 1) / warmup;
+                else {
+                    const prog = (it - warmup) / Math.max(1, iters - warmup);
+                    lrmult = 0.5 * (1 + Math.cos(Math.PI * prog));
+                }
+                const curlr = lr * lrmult;
+                const t1 = 1 - Math.pow(b1, it + 1);
+                const t2 = 1 - Math.pow(b2, it + 1);
+
+                usage.fill(0);
+
+                for (let c = 0; c < N; c++) {
+                    if (mask[c]) continue;
+                    const lb = c * K;
+                    let mx = -1e30;
+                    for (let k = 0; k < K; k++) {
+                        let z = logits[lb + k] / temp;
+                        if (gumbel) {
+                            const u = Math.random() * (1 - 1e-9) + 1e-12;
+                            z += (-Math.log(-Math.log(u)));
+                        }
+                        weights[lb + k] = z;
+                        if (z > mx) mx = z;
+                    }
+                    let sum = 0;
+                    for (let k = 0; k < K; k++) {
+                        const ex = Math.exp(weights[lb + k] - mx);
+                        weights[lb + k] = ex; sum += ex;
+                    }
+                    const rb = c * P;
+                    for (let p = 0; p < P; p++) rendered[rb + p] = 0;
+                    for (let k = 0; k < K; k++) {
+                        const wv = weights[lb + k] / sum;
+                        weights[lb + k] = wv;
+                        usage[k] += wv;
+                        const kp = k * P;
+                        for (let p = 0; p < P; p++) rendered[rb + p] += wv * B[kp + p];
+                    }
+                }
+
+                for (let k = 0; k < K; k++) {
+                    const u = usage[k] / N;
+                    divg[k] = divw > 0 ? divw * (Math.log(u + 1e-10) + 1) / N : 0;
+                }
+                if (space >= 0) divg[space] = 0;
+
+                let lossacc = 0;
+                for (let c = 0; c < N; c++) {
+                    if (mask[c]) continue;
+                    const rb = c * P, tb = c * P, lb = c * K;
+                    let msf = 0;
+                    if (msw > 0) {
+                        let ra = 0, ta = 0;
+                        for (let p = 0; p < P; p++) {ra += rendered[rb + p]; ta += target[tb + p]}
+                        ra /= P; ta /= P;
+                        msf = msw * 2 / N * (ra - ta) / P;
+                    }
+                    for (let p = 0; p < P; p++) {
+                        const diff = rendered[rb + p] - target[tb + p];
+                        lossacc += diff * diff;
+                        gradtmp[p] = rf * diff + msf;
+                    }
+                    let dot = 0;
+                    for (let k = 0; k < K; k++) {
+                        let g = divg[k];
+                        const kp = k * P;
+                        for (let p = 0; p < P; p++) g += B[kp + p] * gradtmp[p];
+                        gradw[k] = g;
+                        dot += weights[lb + k] * g;
+                    }
+                    for (let k = 0; k < K; k++) {
+                        const idx = lb + k;
+                        const gl = (weights[idx] * (gradw[k] - dot)) / temp;
+                        m[idx] = b1 * m[idx] + (1 - b1) * gl;
+                        v[idx] = b2 * v[idx] + (1 - b2) * gl * gl;
+                        const mh = m[idx] / t1, vh = v[idx] / t2;
+                        logits[idx] -= curlr * mh / (Math.sqrt(vh) + eps);
+                    }
+                }
+
+                if (it % 15 === 0 || it === iters - 1) {
+                    self.postMessage({type: "progress", shard: d.shard, off: d.off,
+                        iter: it + 1, total: iters,
+                        loss: lossacc / (N * P), argmax: argmaxcopy()}, [lastargmax.buffer]);
+                    lastargmax = new Int32Array(N);
+                }
+            }
+            self.postMessage({type: "done", shard: d.shard, off: d.off,
+                argmax: argmaxcopy(), stopped: stop}, [lastargmax.buffer]);
+        }
+
+        function argmaxcopy() {
+            const a = lastargmax;
+            for (let c = 0; c < N; c++) {
+                if (mask[c]) {a[c] = space; continue}
+                const lb = c * K; let best = 0, bv = -1e30;
+                for (let k = 0; k < K; k++) {if (logits[lb + k] > bv) {bv = logits[lb + k]; best = k}}
+                a[c] = best;
+            }
+            return a;
+        }
+        `;
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const out = document.querySelector(".out");
+        const sizehint = document.querySelector(".sizehint");
+        const countseg = document.querySelector(".countseg");
+        const statseg = document.querySelector(".statseg");
+        const progbar = document.querySelector(".progbar");
+
+        let srcimg = null, srccrop = null;
+        let chars = [], bitmaps = null, cw = 0, ch = 0, P = 0;
+        let gridw = 0, gridh = 0, spaceindex = -1;
+        let darkmode = false, lastargmax = null;
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function computecrop(img) {
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const scale = Math.min(1, 800 / Math.max(iw, ih));
+            const w = Math.max(1, Math.round(iw * scale)), h = Math.max(1, Math.round(ih * scale));
+            const c = document.createElement("canvas");
+            c.width = w; c.height = h;
+            const o = c.getContext("2d", {willReadFrequently: true});
+            o.drawImage(img, 0, 0, w, h);
+            const data = o.getImageData(0, 0, w, h).data;
+            let minx = w, miny = h, maxx = -1, maxy = -1, hasalpha = false, hassolid = false;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const a = data[(y * w + x) * 4 + 3];
+                    if (a < 250) hasalpha = true;
+                    if (a > 8) {
+                        hassolid = true;
+                        if (x < minx) minx = x; if (x > maxx) maxx = x;
+                        if (y < miny) miny = y; if (y > maxy) maxy = y;
+                    }
+                }
+            }
+            if (!hasalpha || !hassolid) {srccrop = {sx: 0, sy: 0, sw: iw, sh: ih}; return}
+            minx = Math.max(0, minx - 1); miny = Math.max(0, miny - 1);
+            maxx = Math.min(w - 1, maxx + 1); maxy = Math.min(h - 1, maxy + 1);
+            const r = 1 / scale;
+            srccrop = {sx: minx * r, sy: miny * r, sw: (maxx - minx + 1) * r, sh: (maxy - miny + 1) * r};
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const BLOCKS = "▀▄▌▐█░▒▓▁▂▃▅▆▇▉▊▋▍▎▏▔▕▖▗▘▙▚▛▜▝▞▟";
+        const UNIRANGES = [
+            [0x21, 0x7e],      // ascii
+            [0xa1, 0xff],      // latin-1
+            [0x2071, 0x209c],  // super/subscript
+            [0x2010, 0x205e],  // punctuation
+            [0x2150, 0x218b],  // fractions and roman numerals
+            [0x2190, 0x21ff],  // arrows
+            [0x2200, 0x22ff],  // math operators
+            [0x2300, 0x2335],  // misc technical
+            [0x25a0, 0x25ff],  // geometric shapes
+            [0x2580, 0x259f],  // block elements
+            [0x2500, 0x257f],  // box drawing
+        ];
+        const MAXGLYPHS = 200;
+        let candidates = [];
+
+        function buildcharset() {
+            const set = document.querySelector(".charset").value;
+            const ban = new Set([...document.querySelector(".ban").value]);
+            let list = [];
+            if (set === "ramp") {
+                list = [..." .'\`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"];
+            } else if (set === "alnum") {
+                list = [..." 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,:;"];
+            } else if (set === "unicode") {
+                for (const [a, b] of UNIRANGES)
+                    for (let c = a; c <= b; c++) list.push(String.fromCodePoint(c));
+            } else {
+                for (let c = 0x20; c <= 0x7e; c++) list.push(String.fromCharCode(c));
+                if (set === "blocks") list.push(...BLOCKS);
+            }
+            const seen = new Set([" "]);
+            candidates = [" "];
+            for (const c of list) {
+                if (ban.has(c) || seen.has(c)) continue;
+                seen.add(c); candidates.push(c);
+            }
+        }
+
+        function rasterglyph(o, c) {
+            o.fillStyle = "#fff"; o.fillRect(0, 0, cw, ch);
+            o.fillStyle = "#000"; o.fillText(c, 0, 0);
+            const data = o.getImageData(0, 0, cw, ch).data;
+            const b = new Float32Array(P);
+            for (let p = 0; p < P; p++) {
+                const j = p * 4;
+                b[p] = (0.299 * data[j] + 0.587 * data[j + 1] + 0.114 * data[j + 2]) / 255;
+            }
+            return b;
+        }
+        function meandiff(a, b) {
+            let s = 0;
+            for (let p = 0; p < P; p++) s += Math.abs(a[p] - b[p]);
+            return s / P;
+        }
+
+        function buildbitmaps() {
+            ch = +document.querySelector(".detail").value;
+            const oc = document.createElement("canvas");
+            const font = ch + "px ui-monospace, \"Cascadia Mono\", Consolas, \"DejaVu Sans Mono\", monospace";
+            const mctx = oc.getContext("2d");
+            mctx.font = font;
+            cw = Math.max(1, Math.round(mctx.measureText("M").width));
+            P = cw * ch;
+            oc.width = cw; oc.height = ch;
+            const o = oc.getContext("2d", {willReadFrequently: true});
+            o.font = font; o.textBaseline = "top"; o.textAlign = "left";
+
+            const blank = rasterglyph(o, " ");
+            const tofu = [rasterglyph(o, String.fromCodePoint(0xf8ff)),
+                          rasterglyph(o, String.fromCodePoint(0xe000))];
+            const BLANKT = 0.01, TOFUT = 0.015, DUPT = 0.02;
+
+            const keptchars = [" "], keptbm = [blank];
+            for (let i = 1; i < candidates.length && keptchars.length < MAXGLYPHS; i++) {
+                const c = candidates[i];
+                if (Math.round(mctx.measureText(c).width) !== cw) continue;
+                const b = rasterglyph(o, c);
+                if (meandiff(b, blank) < BLANKT) continue;
+                if (tofu.some(t => meandiff(b, t) < TOFUT)) continue;
+                let dup = false;
+                for (let k = 0; k < keptbm.length; k++)
+                    if (meandiff(b, keptbm[k]) < DUPT) {dup = true; break}
+                if (dup) continue;
+                keptchars.push(c); keptbm.push(b);
+            }
+
+            chars = keptchars; spaceindex = 0;
+            bitmaps = new Float32Array(chars.length * P);
+            for (let k = 0; k < keptbm.length; k++) bitmaps.set(keptbm[k], k * P);
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const AMIN = 8;
+        function buildtarget() {
+            const cols = clampi(+document.querySelector(".cols").value, 8, 220);
+            gridw = cols;
+            const cr = srccrop || {sx: 0, sy: 0, sw: srcimg.naturalWidth, sh: srcimg.naturalHeight};
+            const iw = cr.sw, ih = cr.sh;
+            gridh = clampi(Math.round(cols * cw * ih / (ch * iw)), 2, 320);
+
+            const gw = gridw * cw, gh = gridh * ch;
+            const oc = document.createElement("canvas");
+            oc.width = gw; oc.height = gh;
+            const o = oc.getContext("2d", {willReadFrequently: true});
+            o.imageSmoothingEnabled = true;
+
+            const fit = document.querySelector(".fit").value;
+            let dw = gw, dh = gh, dx = 0, dy = 0;
+            if (fit !== "stretch") {
+                const s = fit === "contain" ? Math.min(gw / iw, gh / ih) : Math.max(gw / iw, gh / ih);
+                dw = iw * s; dh = ih * s; dx = (gw - dw) / 2; dy = (gh - dh) / 2;
+            }
+            o.drawImage(srcimg, cr.sx, cr.sy, cr.sw, cr.sh, dx, dy, dw, dh);
+            const data = o.getImageData(0, 0, gw, gh).data;
+
+            const b = +document.querySelector(".bri").value;
+            const cval = +document.querySelector(".con").value;
+            const gamma = +document.querySelector(".gam").value / 100;
+            const inv = document.querySelector(".invert").checked;
+            const factor = (259 * (cval * 2.55 + 255)) / (255 * (259 - cval * 2.55));
+
+            const target = new Float32Array(gridw * gridh * P);
+            const blank = new Uint8Array(gridw * gridh);
+            for (let cy = 0; cy < gridh; cy++) {
+                for (let cx = 0; cx < gridw; cx++) {
+                    const cell = cy * gridw + cx, cellbase = cell * P;
+                    let maxa = 0;
+                    for (let py = 0; py < ch; py++) {
+                        for (let px = 0; px < cw; px++) {
+                            const ix = cx * cw + px, iy = cy * ch + py;
+                            const j = (iy * gw + ix) * 4;
+                            const a = data[j + 3];
+                            if (a > maxa) maxa = a;
+                            const al = a / 255;
+                            const rgb = 0.299 * data[j] + 0.587 * data[j + 1] + 0.114 * data[j + 2];
+                            let l = al * rgb + (1 - al) * 255;
+                            l = factor * (l - 128) + 128 + b * 2.55;
+                            l = l < 0 ? 0 : l > 255 ? 255 : l;
+                            l /= 255;
+                            l = Math.pow(l, gamma);
+                            if (inv) l = 1 - l;
+                            target[cellbase + py * cw + px] = l;
+                        }
+                    }
+                    if (maxa < AMIN) blank[cell] = 1;
+                }
+            }
+            sizehint.textContent = gridw + " x " + gridh + " chars,  " + chars.length + " glyphs";
+            return {target: target, blank: blank};
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const LIMITS = [{n: 280, col: "#d8a72b"}, {n: 500, col: "#d0454b"}];
+
+        function buildtext(argmax) {
+            const lines = [];
+            for (let cy = 0; cy < gridh; cy++) {
+                let line = "";
+                for (let cx = 0; cx < gridw; cx++) line += chars[argmax[cy * gridw + cx]];
+                lines.push(line.replace(/\s+$/, ""));
+            }
+            return lines.join("\n");
+        }
+        let fitted = false;
+        function showtext(argmax) {
+            lastargmax = argmax;
+            const txt = buildtext(argmax);
+            out.value = txt;
+            if (!fitted) {autofit(); fitted = true}
+            let col = "#999";
+            for (const l of LIMITS) if (txt.length > l.n) col = l.col;
+            countseg.style.color = col;
+            countseg.textContent = txt.length + " chars";
+        }
+
+        function autofit() {
+            if (!gridw || !gridh) return;
+            const availw = out.clientWidth - 14, availh = out.clientHeight - 14;
+            const fsw = availw / (gridw * 0.6), fsh = availh / gridh;
+            const fs = Math.max(4, Math.min(40, Math.floor(Math.min(fsw, fsh) * 10) / 10));
+            out.style.fontSize = fs + "px";
+            out.style.lineHeight = fs + "px";
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const runbtn = document.querySelector(".runbtn");
+        const stopbtn = document.querySelector(".stopbtn");
+        let running = false;
+
+        const PRESETS = {
+            superfast: {iters: 150, lr: 18},
+            fast: {iters: 450, lr: 12},
+            slow: {iters: 1400, lr: 8},
+        };
+        let preset = "fast";
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        let workers = [], combined = null, shardstate = [], donecount = 0;
+
+        function nshards() {
+            const cores = navigator.hardwareConcurrency || 4;
+            return Math.max(1, Math.min(cores - 1, 6, gridh));
+        }
+        function killworkers() {
+            for (const w of workers) w.terminate();
+            workers = [];
+        }
+
+        function startrun() {
+            if (!srcimg || running) return;
+            buildcharset();
+            buildbitmaps();
+            const built = buildtarget();
+            const target = built.target, blank = built.blank;
+
+            killworkers();
+            running = true; fitted = false; donecount = 0;
+            runbtn.disabled = true; stopbtn.disabled = false;
+            progbar.style.width = "0%";
+            combined = new Int32Array(gridw * gridh);
+
+            const pre = PRESETS[preset];
+            const common = {
+                p: P, numchars: chars.length, gridw: gridw, space: spaceindex,
+                iters: pre.iters, lr: +document.querySelector(".lr").value / 100, warmup: 40,
+                divweight: +document.querySelector(".div").value / 100,
+                msweight: +document.querySelector(".ms").value / 100,
+                tempstart: 1.0, tempend: 0.12,
+                gumbel: document.querySelector(".gumbel").checked,
+            };
+
+            const ns = nshards(), per = Math.floor(gridh / ns), extra = gridh % ns;
+            shardstate = [];
+            let off = 0;
+            for (let s = 0; s < ns; s++) {
+                const rows = per + (s < extra ? 1 : 0);
+                if (rows <= 0) continue;
+                const w = new Worker(URL.createObjectURL(new Blob([workersrc], {type: "text/javascript"})));
+                w.onmessage = onshardmsg;
+                const id = workers.length;
+                workers.push(w);
+                shardstate.push({iter: 0, total: pre.iters, loss: 0});
+                w.postMessage(Object.assign({
+                    type: "run", shard: id, off: off, rows: rows,
+                    bitmaps: bitmaps,
+                    target: target.slice(off * gridw * P, (off + rows) * gridw * P),
+                    mask: blank.slice(off * gridw, (off + rows) * gridw),
+                }, common));
+                off += rows;
+            }
+        }
+
+        function onshardmsg(e) {
+            const d = e.data;
+            combined.set(d.argmax, d.off * gridw);
+            const st = shardstate[d.shard];
+            if (d.type === "progress") {st.iter = d.iter; st.loss = d.loss}
+            showtext(combined);
+
+            let minp = 1, avgloss = 0;
+            for (const s of shardstate) {minp = Math.min(minp, s.iter / s.total); avgloss += s.loss}
+            const total = shardstate[0].total;
+            progbar.style.width = (minp * 100).toFixed(1) + "%";
+            statseg.textContent = "it " + Math.round(minp * total) + "/" + total +
+                "  mse " + (avgloss / shardstate.length).toFixed(4);
+
+            if (d.type === "done" && ++donecount >= workers.length) {
+                running = false;
+                runbtn.disabled = false; stopbtn.disabled = true;
+                progbar.style.width = "100%";
+                statseg.textContent += d.stopped ? "  (stopped)" : "  done";
+            }
+        }
+
+        function restart() {
+            if (!srcimg) return;
+            killworkers(); running = false;
+            startrun();
+        }
+        let runtimer = null;
+        function queuerun() {
+            if (!srcimg) return;
+            clearTimeout(runtimer);
+            runtimer = setTimeout(restart, 260);
+        }
+
+        runbtn.addEventListener("click", restart);
+        stopbtn.addEventListener("click", () => {
+            if (running) for (const w of workers) w.postMessage({type: "stop"});
+        });
+
+        document.querySelectorAll(".preset").forEach(b => {
+            b.addEventListener("click", () => {
+                preset = b.dataset.preset;
+                document.querySelectorAll(".preset").forEach(o => o.classList.toggle("active", o === b));
+                const lr = PRESETS[preset].lr, lrel = document.querySelector(".lr");
+                lrel.value = lr; document.querySelector(".lrseg").textContent = (lr / 100).toFixed(2);
+                queuerun();
+            });
+        });
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        document.querySelector(".imgfile").addEventListener("change", e => {
+            const f = e.target.files[0];
+            if (!f) return;
+            const img = new Image();
+            img.onload = () => {srcimg = img; computecrop(img); restart()};
+            img.src = URL.createObjectURL(f);
+        });
+
+        function seg(cls, segcls, fn, live) {
+            const el = document.querySelector(cls), s = document.querySelector(segcls);
+            el.addEventListener("input", () => {s.textContent = fn(+el.value); if (live) queuerun()});
+            s.textContent = fn(+el.value);
+        }
+        seg(".bri", ".briseg", v => v, true);
+        seg(".con", ".conseg", v => v, true);
+        seg(".gam", ".gamseg", v => (v / 100).toFixed(2), true);
+        seg(".lr", ".lrseg", v => (v / 100).toFixed(2), true);
+        seg(".div", ".divseg", v => (v / 100).toFixed(2), true);
+        seg(".ms", ".msseg", v => (v / 100).toFixed(1), true);
+
+        ["change", "input"].forEach(ev => {
+            document.querySelector(".cols").addEventListener(ev, queuerun);
+        });
+        document.querySelector(".detail").addEventListener("change", queuerun);
+        document.querySelector(".charset").addEventListener("change", queuerun);
+        document.querySelector(".ban").addEventListener("input", queuerun);
+        document.querySelector(".fit").addEventListener("change", queuerun);
+        document.querySelector(".invert").addEventListener("change", queuerun);
+        document.querySelector(".gumbel").addEventListener("change", queuerun);
+
+        document.querySelector(".dark").addEventListener("change", e => {
+            darkmode = e.target.checked;
+            document.body.classList.toggle("dark", darkmode);
+        });
+
+        let fittimer = null;
+        window.addEventListener("resize", () => {clearTimeout(fittimer); fittimer = setTimeout(autofit, 80)});
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        const copybtn = document.querySelector(".copybtn");
+        copybtn.addEventListener("click", () => {
+            navigator.clipboard.writeText(out.value).then(() => {
+                copybtn.classList.add("copied"); copybtn.textContent = "copied";
+                setTimeout(() => {copybtn.classList.remove("copied"); copybtn.textContent = "copy"}, 1100);
+            });
+        });
+        document.querySelector(".dlbtn").addEventListener("click", () => {
+            const blob = new Blob([out.value], {type: "text/plain;charset=utf-8"});
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "coolascii.txt";
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        });
+
+        function clampi(x, lo, hi) {return Math.max(lo, Math.min(hi, x | 0))}
+
+    </script>
+
+</body>
+</html>
