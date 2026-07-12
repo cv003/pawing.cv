@@ -126,7 +126,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":275729444,"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":275729508,"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -214,16 +214,48 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 	} else {
 		setStatusMode('progress');
-		engine.startGame({
-			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
-				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
+		// the pck is split into index.pck.N chunks under 100mb for github;
+		// reassemble to a blob url, or fall back to the plain pck locally
+		async function fetchchunkedpack() {
+			const sizes = [];
+			for (let i = 0; ; i++) {
+				try {
+					const head = await fetch('index.pck.' + i, {method: 'HEAD'});
+					if (!head.ok) break;
+					sizes.push(parseInt(head.headers.get('Content-Length') || '0', 10));
+				} catch (err) {break}
+			}
+			if (sizes.length === 0) return null;
+			const total = sizes.reduce((a, b) => a + b, 0);
+			const parts = [];
+			let done = 0;
+			for (let i = 0; i < sizes.length; i++) {
+				const res = await fetch('index.pck.' + i);
+				if (!res.ok) throw new Error('failed to fetch pck chunk ' + i);
+				const reader = res.body.getReader();
+				const bufs = [];
+				while (true) {
+					const chunk = await reader.read();
+					if (chunk.done) break;
+					bufs.push(chunk.value);
+					done += chunk.value.length;
+					if (total > 0) {statusProgress.value = done; statusProgress.max = total}
 				}
-			},
+				parts.push(new Blob(bufs));
+			}
+			return URL.createObjectURL(new Blob(parts));
+		}
+		fetchchunkedpack().then((mainpack) => {
+			const opts = {
+				'onProgress': function (current, total) {
+					if (current > 0 && total > 0) {
+						statusProgress.value = current;
+						statusProgress.max = total;
+					}
+				},
+			};
+			if (mainpack) opts['mainPack'] = mainpack;
+			return engine.startGame(opts);
 		}).then(() => {
 			setStatusMode('hidden');
 		}, displayFailureNotice);
