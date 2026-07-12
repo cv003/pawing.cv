@@ -26,7 +26,7 @@ body {
 	outline: none;
 }
 
-#status, #status-splash {
+#status, #status-splash, #status-progress {
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -38,7 +38,7 @@ body {
 }
 
 #status {
-	background-color: #000000;
+	background-color: #242424;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -65,8 +65,15 @@ body {
 #status-splash.use-filter--false {
 	image-rendering: pixelated;
 }
+
+#status-progress, #status-notice {
+	display: none;
+}
+
 #status-progress {
-	display: none !important
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
 }
 
 #status-notice {
@@ -83,9 +90,24 @@ body {
 	z-index: 1;
 }
 		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="UCG.icon.png" />
-<link rel="apple-touch-icon" href="UCG.apple-touch-icon.png"/>
-
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+<style>
+#status-progress {
+	position: fixed;
+	left: 0; bottom: 0;
+	width: 100vw; height: 24px;
+	margin: 0; padding: 0;
+	border: 5px solid #ffffff;
+	border-radius: 0;
+	background: #000000;
+	appearance: none; -webkit-appearance: none;
+	box-sizing: border-box;
+}
+#status-progress::-webkit-progress-bar {background: #000000}
+#status-progress::-webkit-progress-value {background: #ffffff}
+#status-progress::-moz-progress-bar {background: #ffffff}
+</style>
 	</head>
 	<body>
 		<canvas id="canvas">
@@ -97,14 +119,14 @@ body {
 		</noscript>
 
 		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--false" src="UCG.png" alt="">
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--false" src="index.png" alt="">
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
 
-		<script src="UCG.js"></script>
+		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"UCG","experimentalVK":false,"fileSizes":{"UCG.pck":49452320,"UCG.wasm":51784311},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":275729444,"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 

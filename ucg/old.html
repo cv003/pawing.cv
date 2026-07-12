@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<title>Uncanny Cat Golf</title>
+	<link rel="icon" href="game/index.icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="UTF-8">
+
+</head>
+<body>
+
+    <div class="bg"></div>
+
+    <iframe src=".proxy/game/"></iframe>
+        
+    <div class="warn">
+        <a>click to enable audio</a>
+    </div>
+
+    <style>
+        html, body, .bg {
+            height: 100%; width: 100%;
+            margin: 0; padding: 0;
+        }
+        body {
+            justify-content: center; align-items: center;
+            position: relative; display: flex;
+            background-color: black;
+        }
+        .bg {
+            position: absolute;
+            background: url("uncannybg.webp");
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: 1; opacity: 0.5;
+        }
+        iframe {
+            border: none;
+            width: 100vw; max-width: calc(100vh * (768 / 512));
+            height: auto; max-height: 100vh;
+            aspect-ratio: 768 / 512;
+            background: black; display: block;
+            z-index: 999;
+        }
+        .warn {
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.75); color: white;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            position: fixed; display: flex; justify-content: center;
+            align-items: center; text-align: center;
+            user-select: none; opacity: 0.9;
+            z-index: 9999;
+        }
+    </style>
+    <script>
+        const iframe = document.querySelector('iframe');
+        async function checkiframe() {
+            const proxey = '.proxy/gameold/';
+            try {
+                const resp = await fetch(proxey, {method: 'HEAD'});
+                iframe.src = resp.status === 404 ? 'gameold/' : proxey;
+            } catch (error) {iframe.src = 'gameold/'}
+        }
+        checkiframe();
+        document.querySelector('.warn').addEventListener('click', function() {this.style.display = 'none'});
+    </script>
+    
+</body>
