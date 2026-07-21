@@ -27,12 +27,17 @@
             var toolname = path.split("/")[0];
             redirectto = `https://coolsite.cv/tools/${toolname}`;
         }
+        else if (path.startsWith("utdr")) {
+            var utdrpath = path.replace(/^utdr\/?/, "");
+            redirectto = utdrpath ? `https://deltarune.eu.cc/${utdrpath}` : "https://deltarune.eu.cc/";
+        }
         else if (path === "archive" || path.startsWith("archive/")) {
             var archivepath = path.replace(/^archive\/?/, "");
             redirectto = `https://archive.coolsite.cv/${archivepath}`;
         }
         else if (path.startsWith("contact")) {redirectto = "https://x.com/messages/compose?recipient_id=1565678264265457664&hellobro"}
         window.__redirectto = redirectto;
+        
 
     </script>
 
