@@ -30,7 +30,8 @@
         }
 
         body {
-            background: black; font: 8px/.55 "Consolas";
+            background: black;
+            font-size: 8px; font-family: "Consolas";
             display: flex; white-space: pre; 
             align-items: center; justify-content: center;
             width: 100vw; height: 100vh;
@@ -101,11 +102,11 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        span {font: 16px/.55 "Consolas"}
+        span {font-size: 16px; font-family: "Consolas"}
         .main > span {
             position: fixed; left: 50%;
             transform: translateX(-50%);
-            top: calc(50% + 36px + 0.5em + 20px);
+            top: calc(50% + 36px + 0.5em + 10px);
             z-index: 1000; white-space: nowrap;
         }
 
@@ -113,18 +114,16 @@
            with the semitransparent black bg but it emanates vibecoded aura 😿 */
         .bottom {
             display: flex; position: fixed; flex-direction: column;
-            justify-content: center; align-items: center; flex-wrap: wrap;
-            bottom: 0; left: 50%; transform: translateX(-50%);
+            justify-content: right; align-items: center; flex-wrap: wrap;
+            bottom: 0; right: 0; transform: none;
             min-width: 200px; width: min(400px, calc(100vw - 300px)); max-width: 90vw; height: auto;
-            padding: 6px 8px; border-radius: 16px 16px 0 0;
+            padding: 6px 8px; border-radius: 16px 0 0 0;
             background: rgba(0,0,0,0.1); z-index: 1000;
-            backdrop-filter: grayscale(100%) blur(10px);
-            /* backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); */
         }
         .bottom span {line-height: 1.5}
         .buttons, .more {
             display: flex; flex-direction: row;
-            justify-content: center; flex-wrap: wrap;
+            justify-content: right; flex-wrap: wrap;
         }
         .more {display: none}
 
@@ -142,12 +141,13 @@
             align-items: center
         }
 
+        .links {font-size: 0.75em; opacity: 0.75}
+
         .status {
             display: flex; position: fixed; white-space: pre-line !important;
             flex-direction: column; right: 0; top: 0;
             z-index: 9999; padding: 6px; border-radius: 0 0 0 16px;
             background: rgba(0,0,0,0.1);
-            backdrop-filter: grayscale(100%) blur(10px);
             row-gap: 5px; text-align: right;
             max-width: 400px; max-width: 50%; height: auto;
         }
@@ -194,14 +194,13 @@
             100% {transform: translateX(calc(-200vw - 360px)) translateY(0)}
         } */
 
-        .projcorner {
+        /*.projcorner {
             position: fixed; display: flex;
             flex-direction: column;
             right: 0; bottom: 0;
             z-index: 9999; gap: 6px; opacity: 0.85;
             padding: 6px; border-radius: 16px 0 0 0;
             background: rgba(0,0,0,0.1);
-            backdrop-filter: grayscale(100%) blur(10px);
         }
         .projcorner a {
             display: inline-flex;
@@ -213,7 +212,7 @@
         }
         @media (max-width: 430px) {
             .projcorner img {width: 70px}
-        }
+        }*/
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -222,7 +221,6 @@
             gap: 6px; padding: 6px;
             z-index: 999; border-radius: 0 16px 0 0;
             background: rgba(0,0,0,0.1);
-            backdrop-filter: grayscale(100%) blur(10px);
             left: 0; bottom: 0;
         }
         .otherstuff a {
@@ -242,7 +240,7 @@
         /*//////////////////////////////////////////////////////////////////////*/
 
         .otherstuff a:hover, a[href] .button:hover {filter: brightness(1.15)}
-        .projcorner a:hover {filter: brightness(1.2)}
+        /*.projcorner a:hover {filter: brightness(1.2)}*/
 
         .copied {
             position: absolute;
@@ -308,17 +306,14 @@
     <center class="main">
         <img draggable="false" class="cvtuah" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
         <img draggable="false" class="cv" id="bounce" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
-        <span><a href=//x.com/cvsilly_>twitter</a> // <a href=//discord.com/users/763502120333869116>discord</a></span>
+        <span>a MYSTERIOUS fellow.. <br>
+        <span class="links"><a href="//x.com/cvsilly_">twitter</a> // <a href="//discord.com/users/763502120333869116">discord</a></span></span>
     </center>
     <div class="otherstuff">
-        <a href="/utdr/" title="undertale/deltarune pages"><img draggable="false" src="/utdr/icon.png"></a>
-        <a href="/gd/" title="geometry dash pages"><img draggable="false" src="/gd/icon.png"></a>
+        <a href="//candies.monster" title="cut the rope pages"><img draggable="false" src="/assets/images/icons/ctr.png"></a>
+        <a href="//deltarune.eu.cc" title="undertale/deltarune pages"><img draggable="false" src="/assets/images/icons/dr.png"></a>
+        <a href="/gd/" title="geometry dash pages"><img draggable="false" src="/assets/images/icons/gd.png"></a>
         <!--a href="/chuzzle/" title="chuzzle pages"><img draggable="false" src="/chuzzle/icon.png"></a-->
-    </div>
-
-    <div class="projcorner">
-        <a href="//discord.gg/soggycat" title="ssoggycat"><img draggable="false" src="/assets/images/projects/ssoggycat.webp"></a>
-        <a href="//candies.monster" title="cdm"><img draggable="false" src="/assets/images/projects/cdm.webp"></a>
     </div>
 
     <div class="bottom">

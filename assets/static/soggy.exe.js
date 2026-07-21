@@ -17,18 +17,96 @@
     const sogimg = "/assets/images/soggyexe/sog.webp";
     const logoimg = "/assets/images/soggyexe/logo.webp";
     const scarygif = "/assets/images/soggyexe/scary.gif";
-    const csshref = "/assets/static/soggy.exe.css";
+    const laughaudiourl = "/assets/audio/laugh.mp3";
     const scaryfadeduration = 300;
-    const popupsizefactor = 1.5;
-    const popuprretrymaxattempts = 6;
-    const popupretrydelayms = 600;
+    const inlinecss = `.soggyoverlay {
+		    position: fixed;
+		    left: 0; top: 0;
+		    width: 100vw; height: 100vh;
+		    pointer-events: none; user-select: none;
+		    z-index: 2147483646;
+		    background: transparent;
+		}
+
+		.soggyscary {
+		    position: absolute;
+		    inset: 0; width: 100%; height: 100%;
+		    object-fit: cover;
+		    opacity: 0; display: none;
+		    pointer-events: none; user-select: none;
+		}
+
+		.soggyoverlaycanvas {
+		    width: 100%; height: 100%;
+		    display: block;
+		}
+
+		.soggytraybtn {
+		    position: fixed;
+		    top: 1em; left: 1em;
+		    width: 20px; height: 20px;
+		    z-index: 2147483647;
+		    pointer-events: auto;
+		    cursor: pointer;
+
+		    display: flex; padding: 6px;
+		    z-index: 999; border-radius: 0 0 16px 0;
+		    background: rgba(0,0,0,0.1);
+		    backdrop-filter: grayscale(100%) blur(10px);
+		    left: 0; top: 0;
+		}
+
+		/*//////////////////////////////////////////////////////////////////////*/
+
+		.soggymenu {
+		    position: fixed;
+		    background: #f2f2f2;
+		    z-index: 2147483648;
+		    padding: 0.25em 0; min-width: 190px;
+		    font-family: Helvetica !important;
+		    font-size: 1.5em;
+		}
+
+		.soggymenunote {
+		    color: rgba(0,0,0,0.5);
+		    padding: 8px 16px; 
+		    opacity: 0.85;
+		    user-select: none;
+		    font-family: Helvetica !important;
+		}
+
+		.soggymenuitem {
+		    color: black;
+		    padding: 10px 18px;
+		    cursor: pointer;
+		    font-family: Helvetica !important;
+		}
+
+		.soggymenuitem:hover {background: #90c8f6}`;
+
+    const currentscript = document.currentScript;
+    const scriptsrcurl = (currentscript && currentscript.src) || "/assets/static/soggy.exe.js";
 
     function randomuni(a, b) {return a + (b - a) * Math.random()}
     function currentseconds() {return performance.now() / 1000}
-    function isdesktopdevice() {
-        return !!(window.matchMedia &&
-            window.matchMedia("(pointer: fine)").matches && // this is awful
-            !window.matchMedia("(hover: none)").matches);
+
+    function fetchasdatauri(url) {
+        return fetch(url, {cache: "no-store"}).then(r => r.blob()).then(blob => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        }));
+    }
+
+    function triggerdownload(filename, text) {
+        const blob = new Blob([text], {type: "application/javascript"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = filename;
+        document.body.appendChild(a);
+        a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     /*//////////////////////////////////////////////////////////////////////*/
@@ -73,15 +151,12 @@
         }
     }
 
-    function ensurestylesheet(href) {
-        if (!href || document.querySelector(`link[data-soggycss="${href}"]`)) {
-            return;
-        }
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = href;
-        link.dataset.soggyCss = href;
-        document.head.appendChild(link);
+    function injectinlinecss(css) {
+        if (document.querySelector("style[data-soggycss]")) return;
+        const style = document.createElement("style");
+        style.dataset.soggyCss = "1";
+        style.textContent = css;
+        document.head.appendChild(style);
     }
 
     class overlaywindow {
@@ -89,10 +164,6 @@
             this.scale = 1.0;
             this.runontrayclick = !!runonclick;
             this.isrunning = !this.runontrayclick;
-            this.popuppermissionchecked = false;
-            this.usepopupmode = false;
-            this.sogpopups = [];
-            this.popupretrytimer = null;
             this.el = document.createElement('div');
             this.el.className = "soggyoverlay"; this.el.tabIndex = -1;
             this.scaryel = document.createElement("img");
@@ -111,7 +182,7 @@
             this.scaryendtime = 0; this.scarynaturalduration = 0;
             this.scaryfadestarted = false;
 
-            this.laughaudio = new window.Audio("/assets/audio/laugh.mp3");
+            this.laughaudio = new window.Audio(laughaudiourl);
             this.laughaudio.preload = "auto";
             this.laughaudio.playbackRate = 0.7;
 
@@ -146,13 +217,9 @@
             const w = this.canvas.width;
             const h = this.canvas.height;
             this.sogs = [];
-            this.closepopupwindows();
             let now = this.gettime();
             for (let i = 0; i < sogcount; ++i) {
                 const s = new sog(this.sogpixmap, w, h);
-                s.popupwindow = null;
-                s.popupfailures = 0;
-                s.popupnextretryat = 0;
                 s.nextjumptime = now + randomuni(minjumpinterval, maxjumpinterval);
                 this.sogs.push(s);
             }
@@ -171,7 +238,7 @@
             let viewportwidth = this.canvas.width;
             for (let s of this.sogs) {
                 let x = s.posx + hspeed * s.dir * delta;
-                if (x < 0.0) {x = 0.0; s.dir = 1.0} 
+                if (x < 0.0) {x = 0.0; s.dir = 1.0}
                 else if (x + s.sizew > viewportwidth) {
                     x = viewportwidth - s.sizew;
                     s.dir = -1.0;
@@ -215,9 +282,6 @@
                 let newy = newbottom - s.sizeh; s.posy = newy;
                 s.cachedcanvas = null; s.cachedwidth = null;
             }
-            if (this.usepopupmode) {
-                this.syncpopupwindows(true);
-            }
             this.update();
         }
 
@@ -234,223 +298,27 @@
             const ctx = this.canvas.getContext('2d');
             ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             if (!this.isrunning) return;
-            if (this.usepopupmode) {
-                this.syncpopupwindows(false);
-                return;
-            }
             for (let s of this.sogs) {
                 const canvas = s.scaledpixmap();
                 ctx.drawImage(canvas, s.posx, s.posy, s.sizew, s.sizeh);
             }
         }
 
-        getpopuppositionforsog(s) {
-            const chromeleft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
-            const chrometop = Math.max(0, window.outerHeight - window.innerHeight - chromeleft);
-            const popupwidth = Math.max(1, Math.round(s.sizew * popupsizefactor));
-            const popupheight = Math.max(1, Math.round(s.sizeh * popupsizefactor));
-            const offsetx = Math.round((popupwidth - s.sizew) / 2);
-            const offsety = Math.round((popupheight - s.sizeh) / 2);
-            return {
-                x: Math.round(window.screenX + chromeleft + s.posx - offsetx),
-                y: Math.round(window.screenY + chrometop + s.posy - offsety)
-            };
-        }
-
-        createsogpopup(s, index) {
-            const popupwidth = Math.max(1, Math.round(s.sizew * popupsizefactor));
-            const popupheight = Math.max(1, Math.round(s.sizeh * popupsizefactor));
-            const popup = window.open(
-                "", `soggypopup${index}_${Date.now()}`,
-                `popup=yes,width=${popupwidth},height=${popupheight},left=0,top=0,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
-            );
-            if (!popup || popup === window) {
-                return null;
-            }
-
-            popup.document.title = "sog";
-            popup.document.documentElement.style.background = "#3e3e3e";
-            popup.document.body.style.margin = "0";
-            popup.document.body.style.overflow = "hidden";
-            popup.document.body.style.width = "100vw";
-            popup.document.body.style.height = "100vh";
-            popup.document.body.style.background = "#3e3e3e";
-            const img = popup.document.createElement("img");
-            img.src = this.sogpixmap.src;
-            img.draggable = false;
-            img.style.display = "block";
-            img.style.width = "100vw";
-            img.style.height = "100vh";
-            img.style.objectFit = "contain";
-            popup.document.body.appendChild(img);
-            try {popup.focus()} catch (_) {}
-            return popup;
-        }
-
-        closepopupwindows() {
-            if (this.popupretrytimer) {
-                clearTimeout(this.popupretrytimer);
-                this.popupretrytimer = null;
-            }
-            if (!this.sogpopups) {return}
-            for (let popup of this.sogpopups) {
-                try {
-                    if (popup && !popup.closed) {popup.close()}
-                } catch (_) {}
-            }
-            this.sogpopups = [];
-            if (this.sogs) {
-                for (let s of this.sogs) {
-                    s.popupwindow = null;
+        async downloadstandalone() {
+            try {
+                const src = await (await fetch(scriptsrcurl, {cache: "no-store"})).text();
+                let out = src;
+                for (const url of [sogimg, logoimg, scarygif, laughaudiourl]) {
+                    const datauri = await fetchasdatauri(url);
+                    out = out.split(JSON.stringify(url)).join(JSON.stringify(datauri));
                 }
+                triggerdownload("soggy.exe.js", out);
+            } catch (e) {
+                window.alert("could not build soggy.exe (assets failed to load)");
             }
         }
 
-        initpopupwindows() {
-            this.closepopupwindows();
-            if (!this.sogs || !this.sogs.length) {
-                return false;
-            }
-            this.usepopupmode = true;
-            this.ensurepopupwindows();
-            this.syncpopupwindows(true);
-            return !!this.sogpopups.length;
-        }
-
-        schedulepopupretry(delayms = popupretrydelayms) {
-            if (this.popupretrytimer || !this.usepopupmode) {
-                return;
-            }
-            this.popupretrytimer = setTimeout(() => {
-                this.popupretrytimer = null;
-                this.ensurepopupwindows();
-            }, Math.max(100, delayms));
-        }
-
-        markpopupfailed(s) {
-            if (!s) {
-                return;
-            }
-            s.popupwindow = null;
-            s.popupfailures = (s.popupfailures || 0) + 1;
-            if (s.popupfailures >= popuprretrymaxattempts) {
-                s.popupnextretryat = Number.POSITIVE_INFINITY;
-                return;
-            }
-            const backoff = popupretrydelayms * Math.pow(1.5, Math.max(0, s.popupfailures - 1));
-            s.popupnextretryat = Date.now() + backoff;
-        }
-
-        ensurepopupwindows() {
-            if (!this.usepopupmode || !this.sogs) {
-                return;
-            }
-            const popups = [];
-            const now = Date.now();
-            let shouldretry = false;
-            let nextretryin = Number.POSITIVE_INFINITY;
-            for (let i = 0; i < this.sogs.length; ++i) {
-                const s = this.sogs[i];
-                let popup = s.popupwindow;
-                if (!popup || popup.closed) {
-                    const nextretryat = s.popupnextretryat || 0;
-                    if (nextretryat === Number.POSITIVE_INFINITY) {
-                        popup = null;
-                    } else if (nextretryat > now) {
-                        shouldretry = true;
-                        nextretryin = Math.min(nextretryin, nextretryat - now);
-                        popup = null;
-                    } else {
-                        popup = this.createsogpopup(s, i);
-                        if (!popup) {
-                            this.markpopupfailed(s);
-                            const retryat = s.popupnextretryat || 0;
-                            if (retryat !== Number.POSITIVE_INFINITY) {
-                                shouldretry = true;
-                                nextretryin = Math.min(nextretryin, Math.max(100, retryat - now));
-                            }
-                        } else {
-                            s.popupwindow = popup;
-                            s.popupfailures = 0;
-                            s.popupnextretryat = 0;
-                        }
-                    }
-                }
-                if (popup && !popup.closed) {
-                    popups.push(popup);
-                }
-            }
-            this.sogpopups = popups;
-            if (shouldretry) {
-                this.schedulepopupretry(nextretryin);
-            }
-        }
-
-        syncpopupwindows(forceResize) {
-            if (!this.usepopupmode || !this.sogs) {
-                return;
-            }
-            for (let i = 0; i < this.sogs.length; ++i) {
-                const s = this.sogs[i];
-                const popup = s.popupwindow;
-                if (!popup || popup.closed) {
-                    if ((s.popupnextretryat || 0) !== Number.POSITIVE_INFINITY) {
-                        this.schedulepopupretry();
-                    }
-                    continue;
-                }
-                const pos = this.getpopuppositionforsog(s);
-                const width = Math.max(1, Math.round(s.sizew * popupsizefactor));
-                const height = Math.max(1, Math.round(s.sizeh * popupsizefactor));
-                try {
-                    if (forceResize) {
-                        popup.resizeTo(width, height);
-                    }
-                    popup.moveTo(pos.x, pos.y);
-                    const unexpectedlylarge = popup.outerWidth > (screen.availWidth * 0.7) &&
-                        popup.outerHeight > (screen.availHeight * 0.7);
-                    if (unexpectedlylarge) {
-                        popup.close();
-                        this.markpopupfailed(s);
-                        if ((s.popupnextretryat || 0) !== Number.POSITIVE_INFINITY) {
-                            this.schedulepopupretry();
-                        }
-                        continue;
-                    }
-                } catch (_) {
-                    try {popup.close()} catch (_) {}
-                    this.markpopupfailed(s);
-                    if ((s.popupnextretryat || 0) !== Number.POSITIVE_INFINITY) {
-                        this.schedulepopupretry();
-                    }
-                    continue;
-                }
-            }
-        }
-
-        requestpopupmode() {
-            if (!isdesktopdevice()) {
-                return false;
-            }
-            if (!this.popuppermissionchecked) {
-                this.popuppermissionchecked = true;
-                const probe = window.open(
-                    "", `soggypopupprobe`,
-                    "popup=yes,width=120,height=80,left=0,top=0,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no"
-                );
-                if (!probe || probe === window) {
-                    this.usepopupmode = false;
-                    return false;
-                }
-                try {
-                    probe.document.title = "sog";
-                    probe.document.body.innerHTML = "";
-                    probe.focus();
-                    probe.close();
-                } catch (_) {}
-            }
-            return this.initpopupwindows();
-        }
+        /*//////////////////////////////////////////////////////////////////////*/
 
         createtray() {
             this.traybtn = document.createElement('img');
@@ -478,7 +346,7 @@
             menu.style.top = y + "px";
 
             let note = document.createElement('div');
-            note.innerText = "thank you for using soggy.exe";
+            note.innerText = "evil sogs..................";
             note.className = "soggymenunote";
             menu.appendChild(note);
             menu.appendChild(document.createElement('hr'));
@@ -492,18 +360,7 @@
             };
             menuchoice("scale up", () => this.scaleup());
             menuchoice("scale down", () => this.scaledown());
-            if (isdesktopdevice()) {
-                if (this.usepopupmode) {
-                    menuchoice("disable popups", () => {
-                        this.usepopupmode = false;
-                        this.closepopupwindows();
-                    });
-                } else {
-                    menuchoice("turn them into popups (buggy)", () => {
-                        this.requestpopupmode();
-                    });
-                }
-            }
+            menuchoice("download", () => this.downloadstandalone());
 
             menu.appendChild(document.createElement('hr'));
 
@@ -525,7 +382,6 @@
                 this.laughaudio.pause();
                 this.laughaudio.currentTime = 0;
             }
-            this.closepopupwindows();
             if (this.menuel) this.menuel.remove();
             if (this.traybtn) this.traybtn.remove();
             if (this.el) this.el.remove();
@@ -591,7 +447,7 @@
         let sogimage = opts.sogimage || sogimg;
         let logoimage = opts.logoimage || logoimg;
         const runonclick = typeof opts.dontautostart === "boolean" ? opts.dontautostart : dontautostart;
-        ensurestylesheet(opts.csshref || csshref);
+        injectinlinecss(inlinecss);
         if (window.soggyoverlayinstance) {return window.soggyoverlayinstance}
         let windowinst = new overlaywindow(sogimage, logoimage, runonclick);
         window.soggyoverlayinstance = windowinst;
@@ -602,6 +458,7 @@
     window.sog = sog;
     window.soggyoverlaymain = main;
 
-    main()
+    if (document.body) {main()}
+    else {window.addEventListener("DOMContentLoaded", () => main())}
 
 })();
