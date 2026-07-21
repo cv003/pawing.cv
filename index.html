@@ -69,10 +69,6 @@
             position: fixed; z-index: -3; inset: 0;
             height: 100vh; display: flex;
             width: calc(100vh * 4250 / 410 * 4);
-            animation: bglevels 120s linear infinite;
-            will-change: transform;
-            backface-visibility: hidden;
-            transform: translateZ(0);
             contain: layout style paint;
         }
         .bglevels img {
@@ -81,7 +77,10 @@
             object-fit: cover; object-position: left center;
             flex-shrink: 0;
             image-rendering: auto;
+            animation: bglevels 120s linear infinite;
+            will-change: transform;
             backface-visibility: hidden;
+            transform: translateZ(0);
         }
         @keyframes bglevels {
             0% {transform: translate3d(0, 0, 0)}
@@ -448,10 +447,13 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
         })();
 
         (function() {
+            function copyablefrom(target) {
+                return target.closest(".button") || target.closest("iframe");
+            }
             document.addEventListener("mousedown", function (e) {
-                const el = e.target.closest(".button") || e.target.closest("iframe");
-                if (!el) return;
                 if (e.button !== 1) return;
+                const el = copyablefrom(e.target);
+                if (!el) return;
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -488,14 +490,12 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
                     copied.style.opacity = "1";
                     setTimeout(function() {copied.style.opacity = "0"}, 1000);
                 }
-                const link = el.tagName === "A" ? el : el.closest("a");
-                let href = null;
-                if (link && link.href) {
-                    href = link.href;
-                    link.removeAttribute("href");
-                }
-                setTimeout(function () {if (link && href) {link.href = href}}, 100);
-                return false;
+            });
+            document.addEventListener("auxclick", function (e) {
+                if (e.button !== 1) return;
+                if (!copyablefrom(e.target)) return;
+                e.preventDefault();
+                e.stopPropagation();
             });
         })();
 
