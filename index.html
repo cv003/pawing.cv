@@ -114,16 +114,16 @@
            with the semitransparent black bg but it emanates vibecoded aura 😿 */
         .bottom {
             display: flex; position: fixed; flex-direction: column;
-            justify-content: right; align-items: center; flex-wrap: wrap;
+            justify-content: flex-start; align-items: flex-end; flex-wrap: wrap;
             bottom: 0; right: 0; transform: none;
-            min-width: 200px; width: min(400px, calc(100vw - 300px)); max-width: 90vw; height: auto;
-            padding: 6px 8px; border-radius: 16px 0 0 0;
+            width: 280px; max-width: 80vw; height: auto;
+            padding: 0; border-radius: 16px 0 0 0;
             background: rgba(0,0,0,0.1); z-index: 1000;
         }
         .bottom span {line-height: 1.5}
         .buttons, .more {
             display: flex; flex-direction: row;
-            justify-content: right; flex-wrap: wrap;
+            justify-content: flex-end; flex-wrap: wrap;
         }
         .more {display: none}
 
@@ -138,7 +138,7 @@
         }
         .section {
             display: flex; flex-direction: column; 
-            align-items: center
+            align-items: flex-end
         }
 
         .links {font-size: 0.75em; opacity: 0.75}
@@ -298,8 +298,8 @@
     
     <div class="copied"><a>copied!</a></div>
     <!-- <div class="projflyers">
-        <a class="projflyer cdm" href="//candies.monster"><img draggable="false" src="/assets/images/projects/cdm.webp"></a>
-        <a class="projflyer ssoggycat" href="//discord.gg/soggycat"><img draggable="false" src="/assets/images/projects/ssoggycat.webp"></a>
+        <a class="projflyer cdm" href="https://candies.monster"><img draggable="false" src="/assets/images/projects/cdm.webp"></a>
+        <a class="projflyer ssoggycat" href="https://discord.gg/soggycat"><img draggable="false" src="/assets/images/projects/ssoggycat.webp"></a>
     </div> -->
 
     <!-- this is a horrifying approach. since you peeked into the code you'll have to endure it now. no, i won't be fixing it -->
@@ -307,11 +307,11 @@
         <img draggable="false" class="cvtuah" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
         <img draggable="false" class="cv" id="bounce" title="cv" src="data:image/octet-stream;base64,UklGRmAAAABXRUJQVlA4WAoAAAAQAAAACwAABwAAQUxQSCIAAAARDzD/ERFCISRJzuX7qPAop/dgEeO1IvofAz68tvry6cEBVlA4IBgAAAAwAQCdASoMAAgAD8D+KaQAA3AA/uRoAAA=" />
         <span>a MYSTERIOUS fellow.. <br>
-        <span class="links"><a href="//x.com/cvsilly_">twitter</a> // <a href="//discord.com/users/763502120333869116">discord</a></span></span>
+        <span class="links"><a href="https://x.com/cvsilly_">twitter</a> // <a href="https://discord.com/users/763502120333869116">discord</a></span></span>
     </center>
     <div class="otherstuff">
-        <a href="//candies.monster" title="cut the rope pages"><img draggable="false" src="/assets/images/icons/ctr.png"></a>
-        <a href="//deltarune.eu.cc" title="undertale/deltarune pages"><img draggable="false" src="/assets/images/icons/dr.png"></a>
+        <a href="https://candies.monster" title="cut the rope pages"><img draggable="false" src="/assets/images/icons/ctr.png"></a>
+        <a href="https://deltarune.eu.cc" title="undertale/deltarune pages"><img draggable="false" src="/assets/images/icons/dr.png"></a>
         <a href="/gd/" title="geometry dash pages"><img draggable="false" src="/assets/images/icons/gd.png"></a>
         <!--a href="/chuzzle/" title="chuzzle pages"><img draggable="false" src="/chuzzle/icon.png"></a-->
     </div>
@@ -319,8 +319,9 @@
     <div class="bottom">
         <span class="bigtext">middle click to copy!</span>
         <div class="buttons">
-            <a href="//s.soggy.cat"><img class="button smooth" src="/assets/images/88x31/ssoggycat.webp"></a>
-            <a href="//coolsite.cv/utdr/swatchlings"><img class="button smooth" src="/assets/images/88x31/swatchlings.gif"></a>
+            <a href="https://coolsite.cv"><img class="button" src="/assets/images/88x31/me.gif"></a>
+            <a href="https://s.soggy.cat"><img class="button smooth" src="/assets/images/88x31/ssoggycat.webp"></a>
+            <a href="https://deltarune.eu.cc/swatchlings"><img class="button smooth" src="/assets/images/88x31/swatchlings.gif"></a>
             <a><img title="MS YURI ⚢ (@museofdeity) on Twitter:
 pride flag i made for people who just don't know" class="button" src="/assets/images/88x31/idk.webp"></a>
             <a><img title="emoji from bluemoji.io" class="button smooth" src="/assets/images/88x31/bluemoji.webp"></a>
@@ -330,36 +331,29 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
             <div class="section">
                 <span class="bigtext">cool people!</span>
                 <div class="buttons">
-                    <a href="//web.archive.org/web/20260104171115im_/https://nazvex.neocities.org/"><img class="button" data-src="/assets/images/88x31/nazvex.gif"></a>
-                    <a href="//s1nez.nekoweb.org"><img class="button" data-src="/assets/images/88x31/s1nez.gif"></a>
-                    <a href="//theawesomeblue.nekoweb.org"><img class="button" data-src="/assets/images/88x31/hq/blue.gif"></a>
-                    <a href="//shabble.fun"><img class="button" data-src="/assets/images/88x31/shabble.gif"></a>
-                    <a href="//240109.xyz/buttons"><img class="button smooth" data-src="/assets/images/88x31/hq/simon.gif"></a>
-                    <a href="//rooot.gay"><img class="button" data-src="/assets/images/88x31/rooot.webp"></a>
+                    <a href="https://web.archive.org/web/20260104171115im_/https://nazvex.neocities.org/"><img class="button" data-src="/assets/images/88x31/nazvex.gif"></a>
+                    <a href="https://s1nez.nekoweb.org"><img class="button" data-src="/assets/images/88x31/s1nez.gif"></a>
+                    <a href="https://theawesomeblue.nekoweb.org"><img class="button" data-src="/assets/images/88x31/hq/blue.gif"></a>
+                    <a href="https://shabble.fun"><img class="button" data-src="/assets/images/88x31/shabble.gif"></a>
+                    <a href="https://240109.xyz/buttons"><img class="button smooth" data-src="/assets/images/88x31/hq/simon.gif"></a>
+                    <a href="https://rooot.gay"><img class="button" data-src="/assets/images/88x31/rooot.webp"></a>
                 </div>
             </div>
             <div class="section">
                 <span class="bigtext">other stuff</span>
                 <div class="buttons">
-                    <a href="//ne0nbandit.art/cable"><img class="button" data-src="/assets/images/88x31/swatch.gif"></a>
-                    <a href="//spacehey.com/holidaygirl1224"><img class="button" data-src="/assets/images/88x31/hq/holidaygirl.gif"></a>
-                    <a href="//spamtonsucks.neocities.org/"><img class="button" data-src="/assets/images/88x31/KILL.gif"></a>
-                    <a href="//lyra.horse"><img class="button" data-src="/assets/images/88x31/rebane.webp"></a>
-                    <a href="//soap.systems"><img class="button smooth" data-src="/assets/images/88x31/soap.webp"></a>
-                    <a href="//xpvm.net"><img class="button smooth" data-src="/assets/images/88x31/neptune.webp"></a>
-                    <a href="//yugoslavia.best"><img class="button smooth" data-src="/assets/images/88x31/penis.webp"></a>
-                    <a href="//wavesmiley.com"><img class="button smooth" data-src="/assets/images/88x31/hq/wavesmiley.gif"></a>
-                    <a href="//tracker.archiveteam.org"><img class="button smooth" data-src="/assets/images/88x31/archiveteam.gif"></a>
-                    <a href="//ezgif.com"><img class="button" data-src="/assets/images/88x31/hq/ezgif.gif"></a>
-                    <a href="//lambyland.net/play"><img class="button" data-src="/assets/images/88x31/hq/lambyland.png"></a>
+                    <a href="https://ne0nbandit.art/cable"><img class="button" data-src="/assets/images/88x31/swatch.gif"></a>
+                    <a href="https://spacehey.com/holidaygirl1224"><img class="button" data-src="/assets/images/88x31/hq/holidaygirl.gif"></a>
+                    <a href="https://spamtonsucks.neocities.org/"><img class="button" data-src="/assets/images/88x31/KILL.gif"></a>
+                    <a href="https://lyra.horse"><img class="button" data-src="/assets/images/88x31/rebane.webp"></a>
+                    <a href="https://soap.systems"><img class="button smooth" data-src="/assets/images/88x31/soap.webp"></a>
+                    <a href="https://xpvm.net"><img class="button smooth" data-src="/assets/images/88x31/neptune.webp"></a>
+                    <a href="https://yugoslavia.best"><img class="button smooth" data-src="/assets/images/88x31/penis.webp"></a>
+                    <a href="https://wavesmiley.com"><img class="button smooth" data-src="/assets/images/88x31/hq/wavesmiley.gif"></a>
+                    <a href="https://tracker.archiveteam.org"><img class="button smooth" data-src="/assets/images/88x31/archiveteam.gif"></a>
+                    <a href="https://ezgif.com"><img class="button" data-src="/assets/images/88x31/hq/ezgif.gif"></a>
+                    <a href="https://lambyland.net/play"><img class="button" data-src="/assets/images/88x31/hq/lambyland.png"></a>
                     <a><img title="from germanpit.de" class="button" data-src="/assets/images/88x31/w3c.webp"></a>
-                    
-                    <!-- FML -->
-                    <a><iframe style="padding-right:4.001px;padding-left:2px" data-src="//incr.easrng.net/badge?key=sog" width="88" height="31" frameborder="0" style="background:url('//incr.easrng.net/bg.gif')"></iframe></a>
-                    <!-- <a class="button utbutton">
-                        <style>.utbutton{width:88px;height:31px;overflow:hidden;position:relative}.ut{width:733px;height:258px;transform:scale(0.12);transform-origin:top left;position:absolute;top:0;left:0}</style>
-                        <iframe data-src="/undertale/index.html" width="733" height="258" frameborder="0" class="ut" scrolling="no"></iframe>
-                    </a> -->
                 </div>
             </div>
         </div>
@@ -378,7 +372,7 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
                     <div style="display:inline;font-size:0.5em">
                         <span class="midtext">${data.timeAgo}</span>
                         &nbsp;·&nbsp;
-                        <a class="bigtext" href="//status.cafe/users/meow" target="_blank">status.cafe</a>
+                        <a class="bigtext" href="https://status.cafe/users/meow" target="_blank">status.cafe</a>
                     </div>
                 `;
             }).catch(function(error) {
@@ -471,14 +465,14 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
                         if (node.tagName === "IMG" || node.tagName === "IFRAME") {
                             if (node.hasAttribute("src")) {
                                 let src = node.getAttribute("src");
-                                if (src && !src.startsWith("//coolsite.cv/")) {
-                                    node.setAttribute("src", "//coolsite.cv/" + src.replace(/^\/+/, ''));
+                                if (src && !src.startsWith("https://coolsite.cv/")) {
+                                    node.setAttribute("src", "https://coolsite.cv/" + src.replace(/^\/+/, ''));
                                 }
                             }
                             if (node.hasAttribute("data-src")) {
                                 let dsrc = node.getAttribute("data-src");
-                                if (dsrc && !dsrc.startsWith("//coolsite.cv/")) {
-                                    node.setAttribute("data-src", "//coolsite.cv/" + dsrc.replace(/^\/+/, ''));
+                                if (dsrc && !dsrc.startsWith("https://coolsite.cv/")) {
+                                    node.setAttribute("data-src", "https://coolsite.cv/" + dsrc.replace(/^\/+/, ''));
                                 }
                             }
                         }
