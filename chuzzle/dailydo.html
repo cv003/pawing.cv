@@ -58,7 +58,7 @@
             z-index: 3;
             background: linear-gradient(180deg,
                 #050177 0%, #050177 4%,
-                rgba(5,1,119,0) 19%, rgba(5,1,119,0) 92%,
+                rgba(5,1,119,0) 16%, rgba(5,1,119,0) 92%,
                 #050177 100%);
         }
 
@@ -118,7 +118,7 @@
             justify-content: center; align-items: center;
             padding-top: 6.5cqw;
         }
-        .dumbcontainer .logo {width: 84cqw !important}
+        .dumbcontainer .logo {width: 76cqw !important}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -319,8 +319,8 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        /* diagonal light bands: 45deg, four bands per cycle (dim, mid, bright, mid),
-           multiplied over the sky so the pillars tint the same way they do in game. */
+        /* diagonal light bands, four per cycle (dim, mid, bright, mid), multiplied
+           over the sky so the pillars tint the same way they do in game. */
         .stripes {
             z-index: 5; overflow: hidden;
             mix-blend-mode: multiply;
@@ -360,34 +360,34 @@
         .scores {
             position: relative; z-index: 6;
             width: 100%; font-size: 4.45cqw;
-            padding-top: 11.8cqw;
+            padding-top: 8.4cqw;
             display: flex; flex-direction: column;
         }
 
         .scores > div {
-            display: flex; align-items: center;
+            display: flex; align-items: baseline;
             line-height: 1.355; white-space: nowrap;
-            padding-left: 10.8cqw; padding-right: 6.7cqw;
+            padding-left: 9.5cqw; padding-right: 6.7cqw;
             color: hsl(var(--h, 320deg), 100%, 76%);
         }
 
         .scores rank, .scores name, .scores score {
-            -webkit-text-stroke: 0.29em #1c1013;
+            -webkit-text-stroke: 0.24em #1c1013;
             paint-order: stroke fill;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.09em; text-transform: uppercase;
         }
 
         .scores rank {
             flex: none; width: 2.1em;
             text-align: right; font-style: italic;
-            font-size: 0.82em; margin-right: 0.35em;
+            font-size: 0.73em; margin-right: 0.45em;
         }
         .scores score {margin-left: auto}
 
         .scores img {
             flex: none; height: 0.62em;
-            margin-left: 0.45em;
-            outline: 0.09em solid #170d12;
+            align-self: center; margin-left: 0.45em;
+            outline: 0.09em solid #1c1013;
         }
 
 
