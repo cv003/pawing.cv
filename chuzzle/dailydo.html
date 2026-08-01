@@ -29,12 +29,23 @@
             font-display: swap;
         }
 
+        /* --u is the in-game screen width every proportion is derived from. the sky
+           spans the whole viewport, the content column is --u wide and centred. */
+        :root {--u: min(56.25vh, 100vw)}
+
         body {
-            background-color: black; padding: 0;
+            background-color: #a7723b; padding: 0;
             color: white; height: 100vh; margin: 0;
             display: flex; flex-wrap: wrap; gap: 6px;
             justify-content: center; align-content: flex-start;
             overflow: hidden;
+        }
+
+        .sky {
+            position: fixed; inset: 0;
+            z-index: 0; overflow: hidden;
+            isolation: isolate; pointer-events: none;
+            background-color: #a7723b;
         }
 
         .bg, .pillars, .bigstars, .stripes, .vignette {
@@ -46,12 +57,13 @@
             z-index: 4; opacity: 0.45;
             mix-blend-mode: screen;
             background-image: url("assets/images/stars.webp");
-            background-repeat: repeat; background-size: 44cqw 44cqw;
+            background-repeat: repeat;
+            background-size: calc(var(--u) * 0.44) calc(var(--u) * 0.44);
             animation: skydrift 90s linear infinite;
         }
         @keyframes skydrift {
             from {background-position: 0 0}
-            to {background-position: 0 -44cqw}
+            to {background-position: 0 calc(var(--u) * -0.44)}
         }
 
         .vignette {
@@ -108,7 +120,7 @@
         }
         .logo .lgouter {stroke: #feff48; stroke-width: 30}
         .logo .lgmid {stroke: #60204a; stroke-width: 17}
-        .logo .lgblack {stroke: rgba(0,0,0,0.5); stroke-width: 54}
+        .logo .lgblack {stroke: rgba(96,32,74,0.25); stroke-width: 54}
         .pucontent .logo .lgblack {stroke: #4e4c02; stroke-width: 25; opacity: 1}
         .logo .inner {fill: url(#lgrgb); stroke: none} .logo .lglight {fill: url(#lgfade); stroke: none}
 
@@ -283,7 +295,7 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .pillars {z-index: 1}
+        .pillars {z-index: 2}
         .pillars.right {transform: scaleX(-1)}
 
         .pillar {
@@ -293,102 +305,199 @@
 
         .pillar::before {
             content: ""; position: absolute;
-            top: 2cqw; left: 2cqw;
-            width: 5cqw; height: 5cqw;
+            top: calc(var(--u) * 0.02); left: calc(var(--u) * 0.02);
+            width: calc(var(--u) * 0.05); height: calc(var(--u) * 0.05);
             border-radius: 50%;
             background: rgba(255,255,255,0.45);
-            filter: blur(1.6cqw);
+            filter: blur(calc(var(--u) * 0.016));
         }
 
-        .plorange {height: 75%; left: -8cqw; width: 13cqw; background: #ffb040; z-index: 1}
-        .plpink {height: 49%; left: 0; width: 10cqw; background: #ff7aa8; z-index: 2}
-        .plmagenta {height: 22%; left: -5cqw; width: 24cqw; background: #fd77c0; z-index: 3}
+        .plorange {
+            height: 75%; width: calc(var(--u) * 0.13);
+            left: calc(var(--u) * -0.08);
+            background: #ffb040; z-index: 1;
+        }
+        .plpink {
+            height: 49%; width: calc(var(--u) * 0.1);
+            left: 0; background: #ff7aa8; z-index: 2;
+        }
+        .plmagenta {
+            height: 22%; width: calc(var(--u) * 0.24);
+            left: calc(var(--u) * -0.05);
+            background: #fd77c0; z-index: 3;
+        }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .bigstars {z-index: 2}
-        .bigstars img {
+        /* the stars ride three arches that scroll up behind the pillars. the strip
+           holds four so one is always waiting off the bottom; it travels exactly one
+           arch gap, which makes the loop invisible. */
+        .bigstars {z-index: 1; overflow: hidden}
+        .bigstars .strip {
             position: absolute;
-            width: 11cqw;
-            animation: starbob 9s ease-in-out infinite;
+            left: 0; right: 0; top: calc(var(--u) * -0.85);
+            animation: archrise 34s linear infinite;
         }
-        @keyframes starbob {
-            0%, 100% {transform: translateY(-1.2cqw)}
-            50% {transform: translateY(1.2cqw)}
+        @keyframes archrise {
+            from {transform: translate3d(0, 0, 0)}
+            to {transform: translate3d(0, calc(var(--u) * -0.85), 0)}
+        }
+
+        .arch {
+            position: absolute;
+            left: 0; right: 0; height: calc(var(--u) * 0.85);
+        }
+        .arch img {
+            position: absolute;
+            width: calc(var(--u) * 0.115);
+            transform: translate(-50%, -50%);
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
         /* diagonal light bands, four per cycle (dim, mid, bright, mid), multiplied
-           over the sky so the pillars tint the same way they do in game. */
+           over the sky so the pillars tint the same way they do in game. hard stops
+           only: an interpolated ramp dithers differently every frame while it moves. */
         .stripes {
             z-index: 5; overflow: hidden;
-            mix-blend-mode: multiply;
+            mix-blend-mode: multiply; opacity: 0.9;
         }
         .stripes::before {
             content: ""; position: absolute;
-            top: 0; left: 0;
-            right: -74cqw; bottom: -74cqw;
+            top: calc(var(--u) * -0.05); left: calc(var(--u) * -0.05);
+            right: calc(var(--u) * -0.8); bottom: calc(var(--u) * -0.8);
             background-image: repeating-linear-gradient(135deg,
-                #b77eff 0 12.2cqw,
-                #ec94ed 13.5cqw 37.9cqw,
-                #ffffbf 39.2cqw 63.6cqw,
-                #ec94ed 64.9cqw 89.3cqw,
-                #b77eff 90.6cqw 102.8cqw);
+                #bb85fb 0 calc(var(--u) * 0.1285),
+                #ea97e6 calc(var(--u) * 0.1285) calc(var(--u) * 0.3855),
+                #fbf8c8 calc(var(--u) * 0.3855) calc(var(--u) * 0.6425),
+                #ea97e6 calc(var(--u) * 0.6425) calc(var(--u) * 0.8995),
+                #bb85fb calc(var(--u) * 0.8995) calc(var(--u) * 1.028));
             animation: stripescroll 23s linear infinite;
-            will-change: transform;
         }
         @keyframes stripescroll {
             from {transform: translate3d(0, 0, 0)}
-            to {transform: translate3d(-72.7cqw, -72.7cqw, 0)}
+            to {
+                transform: translate3d(calc(var(--u) * -0.727),
+                    calc(var(--u) * -0.727), 0);
+            }
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
         .dailydo {
             position: fixed; top: 0; left: 50%;
-            height: 100vh; width: min(56.25vh, 100vw);
+            height: 100vh; width: var(--u);
             transform: translateX(-50%);
             container-type: inline-size;
             font-family: "blippo";
-            background-color: #a7723b;
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
-            overflow: hidden; isolation: isolate;
+            overflow: hidden; z-index: 1;
         }
 
         .scores {
-            position: relative; z-index: 6;
-            width: 100%; font-size: 4.45cqw;
+            position: relative;
+            width: 100%; font-size: 4.28cqw;
             padding-top: 8.4cqw;
             display: flex; flex-direction: column;
+            flex: 1 1 auto; min-height: 0; overflow: hidden;
         }
 
         .scores > div {
             display: flex; align-items: baseline;
-            line-height: 1.355; white-space: nowrap;
+            line-height: 1.41; white-space: nowrap;
             padding-left: 9.5cqw; padding-right: 6.7cqw;
-            color: hsl(var(--h, 320deg), 100%, 76%);
         }
 
         .scores rank, .scores name, .scores score {
-            -webkit-text-stroke: 0.24em #1c1013;
-            paint-order: stroke fill;
-            letter-spacing: 0.09em; text-transform: uppercase;
+            -webkit-text-stroke: 0.3em #261b19;
+            paint-order: stroke fill; font-weight: 300;
+            text-shadow: 0 0.13em 0 #261b19;
+            letter-spacing: 0.04em; text-transform: uppercase;
         }
 
         .scores rank {
-            flex: none; width: 2.1em;
+            flex: none; width: 2.4em;
             text-align: right; font-style: italic;
-            font-size: 0.73em; margin-right: 0.45em;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.75em; margin-right: 0.55em;
+            letter-spacing: 0; font-weight: 800
         }
         .scores score {margin-left: auto}
 
         .scores img {
             flex: none; height: 0.62em;
             align-self: center; margin-left: 0.45em;
-            outline: 0.09em solid #1c1013;
+            border: 0.09em solid #261b19;
+            box-shadow: 0 0.125em 0 #261b19;
         }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .footer {
+            position: relative; flex: none;
+            width: 100%; padding-top: 2cqw;
+            padding-bottom: 5cqw;
+            display: flex; justify-content: center;
+            align-items: center;
+        }
+        .footer .logo {
+            width: auto !important; height: 14cqw;
+            max-width: 62cqw;
+        }
+        .footer .logo .inner {fill: url(#lgrgb2)}
+        .footer .logo .lglight {fill: url(#lgfade2)}
+
+        .calbutton {
+            position: absolute; left: 4cqw;
+            width: 13cqw; height: 13cqw;
+            padding: 0; margin: 0; cursor: pointer;
+            border-radius: 26%; background: #241d44;
+            box-shadow: 0 0 0 0.9cqw #feff48, 0 0 0 1.4cqw #60204a;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .calbutton svg {width: 72%; height: 72%}
+        .calbutton:active {transform: translateY(0.4cqw)}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .calendar {
+            position: absolute; z-index: 8;
+            left: 50%; bottom: 24cqw;
+            transform: translateX(-50%);
+            width: 78cqw; padding: 3cqw;
+            border-radius: 2cqw; text-align: center;
+            background: #2c2350;
+            box-shadow: 0 0 0 1.1cqw #feff48, 0 0 0 1.7cqw #60204a;
+            font-family: "blippo"; font-size: 4cqw;
+            display: none;
+        }
+        .calendar.open {display: block}
+
+        .calendar .caption {
+            color: #ffe66b; letter-spacing: 0.06em;
+            text-transform: uppercase; padding-bottom: 2cqw;
+        }
+        .calendar .grid {
+            display: grid; gap: 1cqw;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .calendar .grid span {
+            color: #9c86c8; font-size: 0.7em;
+            padding-bottom: 0.4cqw;
+        }
+        .calendar .grid button {
+            font-family: "blippo"; font-size: 1em;
+            margin: 0; padding: 1.2cqw 0;
+            border-radius: 22%; color: #6b5a8e;
+            background: rgba(255,255,255,0.05);
+            cursor: default;
+        }
+        .calendar .grid button.live {
+            color: #2c2350; cursor: pointer;
+            background: linear-gradient(180deg, #fff5a8 0%, #ffd200 100%);
+        }
+        .calendar .grid button.today {box-shadow: 0 0 0 0.5cqw #ff7aa8}
 
 
 
@@ -396,33 +505,28 @@
     </head>
     <body>
 
+        <div class="sky">
+
+            <div class="pillars left">
+                <span class="pillar plorange"></span>
+                <span class="pillar plpink"></span>
+                <span class="pillar plmagenta"></span>
+            </div>
+            <div class="pillars right">
+                <span class="pillar plorange"></span>
+                <span class="pillar plpink"></span>
+                <span class="pillar plmagenta"></span>
+            </div>
+
+            <div class="bigstars"><div class="strip"></div></div>
+
+            <div class="bg"></div>
+            <div class="stripes"></div>
+            <div class="vignette"></div>
+
+        </div>
+
         <div class="dailydo">
-
-        <div class="bg"></div>
-
-        <div class="pillars left">
-            <span class="pillar plorange"></span>
-            <span class="pillar plpink"></span>
-            <span class="pillar plmagenta"></span>
-        </div>
-        <div class="pillars right">
-            <span class="pillar plorange"></span>
-            <span class="pillar plpink"></span>
-            <span class="pillar plmagenta"></span>
-        </div>
-
-        <div class="bigstars">
-            <img src="assets/images/star.png" style="left: 56cqw; top: 20cqw; width: 14cqw; animation-delay: -1s">
-            <img src="assets/images/star.png" style="left: 41cqw; top: 33cqw; width: 8cqw; animation-delay: -4s">
-            <img src="assets/images/star.png" style="left: 2cqw; top: 51cqw; width: 10cqw; animation-delay: -6s">
-            <img src="assets/images/star.png" style="left: 63cqw; top: 62cqw; width: 12cqw; animation-delay: -2s">
-            <img src="assets/images/star.png" style="left: 28cqw; top: 84cqw; width: 8cqw; animation-delay: -7s">
-            <img src="assets/images/star.png" style="left: 74cqw; top: 104cqw; width: 9cqw; animation-delay: -3s">
-            <img src="assets/images/star.png" style="left: 8cqw; top: 118cqw; width: 12cqw; animation-delay: -5s">
-        </div>
-
-        <div class="stripes"></div>
-        <div class="vignette"></div>
 
         <div class="dumbcontainer">
             <svg class="logo" viewBox="0 0 900 170">
@@ -452,28 +556,223 @@
         <div class="scores">
             <div>
                 <rank>1.</rank>
-                <name title="ID: 6983030">YEE YI</name>
-                <img src="assets/images/flags/CN.png">
-                <score>13250</score>
+                <name title="ID: 8904288">^_^</name>
+                <img src="assets/images/flags/ID.png" alt="ID">
+                <score>15290</score>
             </div>
             <div>
                 <rank>2.</rank>
-                <name title="ID: 8748622">RIE</name>
-                <img src="assets/images/flags/NZ.png">
-                <score>10795</score>
+                <name title="ID: 7653007">YULKA</name>
+                <img src="assets/images/flags/RU.png" alt="RU">
+                <score>15095</score>
             </div>
             <div>
                 <rank>3.</rank>
-                <name title="ID: 593738">PLAYER 1</name>
-                <img src="assets/images/flags/JP.png">
-                <score>8480</score>
+                <name title="ID: 8056411">AMANDA</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>14285</score>
             </div>
             <div>
                 <rank>4.</rank>
-                <name title="ID: 8645045">POI</name>
-                <img src="assets/images/flags/PH.png">
-                <score>8395</score>
+                <name title="ID: 8028962">PLAYER 1</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>10880</score>
             </div>
+            <div>
+                <rank>5.</rank>
+                <name title="ID: 8808084">PLAYER 1</name>
+                <img src="assets/images/flags/CN.png" alt="CN">
+                <score>10305</score>
+            </div>
+            <div>
+                <rank>6.</rank>
+                <name title="ID: 8956395">KATIE</name>
+                <img src="assets/images/flags/GB.png" alt="GB">
+                <score>10190</score>
+            </div>
+            <div>
+                <rank>7.</rank>
+                <name title="ID: 8450078">PLAYER 1</name>
+                <img src="assets/images/flags/DE.png" alt="DE">
+                <score>8695</score>
+            </div>
+            <div>
+                <rank>8.</rank>
+                <name title="ID: 0">ZBIGNIEW ZAZA</name>
+                <img src="assets/images/flags/PL.png" alt="PL">
+                <score>8645</score>
+            </div>
+            <div>
+                <rank>9.</rank>
+                <name title="ID: 8604485">PLAYER 1</name>
+                <img src="assets/images/flags/FI.png" alt="FI">
+                <score>8540</score>
+            </div>
+            <div>
+                <rank>10.</rank>
+                <name title="ID: 8992316">PLAYER 1</name>
+                <img src="assets/images/flags/RU.png" alt="RU">
+                <score>7100</score>
+            </div>
+            <div>
+                <rank>11.</rank>
+                <name title="ID: 8851320">PAMMY</name>
+                <img src="assets/images/flags/GB.png" alt="GB">
+                <score>6950</score>
+            </div>
+            <div>
+                <rank>12.</rank>
+                <name title="ID: 8216702">YU</name>
+                <img src="assets/images/flags/JP.png" alt="JP">
+                <score>6500</score>
+            </div>
+            <div>
+                <rank>13.</rank>
+                <name title="ID: 8831510">PLAYER 1</name>
+                <img src="assets/images/flags/TH.png" alt="TH">
+                <score>6490</score>
+            </div>
+            <div>
+                <rank>14.</rank>
+                <name title="ID: 8167090">TBNNOEY</name>
+                <img src="assets/images/flags/TH.png" alt="TH">
+                <score>6475</score>
+            </div>
+            <div>
+                <rank>15.</rank>
+                <name title="ID: 8423367">PLAYER 1</name>
+                <img src="assets/images/flags/SA.png" alt="SA">
+                <score>6315</score>
+            </div>
+            <div>
+                <rank>16.</rank>
+                <name title="ID: 4366254">PLAYER 1</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>5865</score>
+            </div>
+            <div>
+                <rank>17.</rank>
+                <name title="ID: 8471750">PLAYER 1</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>5800</score>
+            </div>
+            <div>
+                <rank>18.</rank>
+                <name title="ID: 8719544">LIBMINI</name>
+                <img src="assets/images/flags/VN.png" alt="VN">
+                <score>5755</score>
+            </div>
+            <div>
+                <rank>19.</rank>
+                <name title="ID: 8278649">LILLIAN</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>5700</score>
+            </div>
+            <div>
+                <rank>20.</rank>
+                <name title="ID: 8241061">MOTOKI^^</name>
+                <img src="assets/images/flags/JP.png" alt="JP">
+                <score>5570</score>
+            </div>
+            <div>
+                <rank>21.</rank>
+                <name title="ID: 6725466">PLAYER 1</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>5535</score>
+            </div>
+            <div>
+                <rank>22.</rank>
+                <name title="ID: 8600103">ZEA</name>
+                <img src="assets/images/flags/FR.png" alt="FR">
+                <score>5345</score>
+            </div>
+            <div>
+                <rank>23.</rank>
+                <name title="ID: 8427321">PLAYER 1</name>
+                <img src="assets/images/flags/JP.png" alt="JP">
+                <score>5220</score>
+            </div>
+            <div>
+                <rank>24.</rank>
+                <name title="ID: 8522404">SUPIRTEMBAK</name>
+                <img src="assets/images/flags/ID.png" alt="ID">
+                <score>5195</score>
+            </div>
+            <div>
+                <rank>25.</rank>
+                <name title="ID: 8658147">MICHELLE</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>5185</score>
+            </div>
+            <div>
+                <rank>26.</rank>
+                <name title="ID: 8951917">PLAYER 1</name>
+                <img src="assets/images/flags/TH.png" alt="TH">
+                <score>5185</score>
+            </div>
+            <div>
+                <rank>27.</rank>
+                <name title="ID: 6808799">PLAYER 1</name>
+                <img src="assets/images/flags/FR.png" alt="FR">
+                <score>5135</score>
+            </div>
+            <div>
+                <rank>28.</rank>
+                <name title="ID: 7308970">B</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>5095</score>
+            </div>
+            <div>
+                <rank>29.</rank>
+                <name title="ID: 8533883">HONG</name>
+                <img src="assets/images/flags/US.png" alt="US">
+                <score>4840</score>
+            </div>
+            <div>
+                <rank>30.</rank>
+                <name title="ID: 8681428">LILY</name>
+                <img src="assets/images/flags/GB.png" alt="GB">
+                <score>4800</score>
+            </div>
+        </div>
+
+        <div class="calendar">
+            <div class="caption">Pick a day</div>
+            <div class="grid"></div>
+        </div>
+
+        <div class="footer">
+            <button class="calbutton" title="Older scores">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#8ee8e0" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2.5" y="4.5" width="19" height="17" rx="2.5"/>
+                    <path d="M2.5 9.5h19M7 2.5v4M17 2.5v4"/>
+                    <path d="M6.5 13h2M11 13h2M15.5 13h2M6.5 17.5h2M11 17.5h2M15.5 17.5h2"
+                        stroke="#ffd200"/>
+                </svg>
+            </button>
+            <svg class="logo" viewBox="0 0 900 170">
+                <defs>
+                    <linearGradient id="lgrgb2" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
+                        <stop offset="80%" stop-color="#f8b5c8"/>
+                    </linearGradient>
+                    <linearGradient id="lgfade2" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                        <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <filter id="erode2">
+                        <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
+                        <feComposite in2="eroded" operator="in"/>
+                    </filter>
+                </defs>
+                <mask id="lgcrop2"><text x="30" y="130" filter="url(#erode2)">Play!</text></mask>
+                <g><text x="30" y="130" class="lgblack">Play!</text>
+                    <text x="30" y="130" class="lgouter">Play!</text>
+                    <text x="30" y="130" class="lgmid">Play!</text>
+                    <text x="30" y="130" class="inner">Play!</text>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text></g>
+            </svg>
         </div>
 
         </div>
@@ -537,20 +836,127 @@
             document.fonts.ready.then(trimall);
         } else {window.addEventListener("load", trimall)}
 
-        /* rows sweep the colour wheel from magenta at the ends to green in the
-           middle, the way the in-game list does down the screen. */
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* row colours, straight out of DailyDoKit::DailyDoKit. the game feeds eight
+           corners through Color::Pastel(0.5) and samples the resulting cycler at
+           (row y / list height) * 7, wrapping past the end. the list is a palindrome
+           around green, which is why the sweep mirrors instead of jumping. */
+        const cyclercorners = [
+            [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 0.5, 0],
+            [0, 1, 0], [1, 0.5, 0], [1, 0, 0], [1, 0, 1]
+        ];
+        const cyclerspan = 0.875;
+
+        function pastel(v, floor) {return Math.max(floor, Math.min(1, v * 1.5))}
+
+        const cyclerstops = cyclercorners.map(function(c) {
+            return c.map(function(v) {return pastel(v, 0.5)});
+        });
+
+        function cyclerget(t) {
+            const last = cyclerstops.length - 1;
+            let at = t % last;
+            if (at < 0) at += last;
+            const lo = Math.floor(at); const mix = at - lo;
+            const a = cyclerstops[lo]; const b = cyclerstops[lo + 1];
+            const ch = a.map(function(v, i) {return Math.round(255 * (v + (b[i] - v) * mix))});
+            return "rgb(" + ch[0] + "," + ch[1] + "," + ch[2] + ")";
+        }
+
         function rainbowrows() {
-            const rows = document.querySelectorAll(".scores > div");
-            rows.forEach(function(row, i) {
-                const p = rows.length > 1 ? i / (rows.length - 1) : 0.5;
-                row.style.setProperty("--h", (113 - 180 * Math.abs(2 * p - 1)) + "deg");
+            const stage = document.querySelector(".dailydo");
+            const height = stage.getBoundingClientRect().height * cyclerspan;
+            const last = cyclerstops.length - 1;
+            document.querySelectorAll(".scores > div").forEach(function(row) {
+                const box = row.getBoundingClientRect();
+                row.style.color = cyclerget((box.top + box.height / 2) / height * last);
             });
         }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* the stars sit on wide shallow arches, four stacked so the scroll can loop. */
+        function buildarches() {
+            const strip = document.querySelector(".bigstars .strip");
+            if (!strip) return;
+            const sizes = [0.1, 0.155, 0.115, 0.17, 0.125];
+            for (let arch = 0; arch < 4; arch++) {
+                const row = document.createElement("div");
+                row.className = "arch";
+                row.style.top = "calc(var(--u) * " + (arch * 0.85) + ")";
+                for (let i = 0; i < sizes.length; i++) {
+                    const p = i / (sizes.length - 1);
+                    const rise = 1 - Math.pow(2 * p - 1, 2);
+                    const star = document.createElement("img");
+                    star.src = "assets/images/star.png";
+                    star.alt = "";
+                    star.style.left = (-8 + p * 116) + "%";
+                    star.style.top = (72 - rise * 52 + (arch % 2 ? 6 : 0)) + "%";
+                    star.style.width = "calc(var(--u) * " + sizes[(i + arch) % sizes.length] + ")";
+                    row.appendChild(star);
+                }
+                strip.appendChild(row);
+            }
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* the game only walks back to yesterday, but the server keeps two weeks. */
+        const calendarreach = 14;
+
+        function daykey(date) {
+            const pad = function(n) {return String(n).padStart(2, "0")};
+            return date.getFullYear() + "-" + pad(date.getDate()) + "-" + pad(date.getMonth() + 1);
+        }
+
+        function buildcalendar() {
+            const grid = document.querySelector(".calendar .grid");
+            if (!grid) return;
+            const names = ["S", "M", "T", "W", "T", "F", "S"];
+            const day = 86400000;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            /* six weeks around today, starting on the sunday that lands furthest
+               back, so both ends of the reachable window show as dimmed. */
+            const start = new Date(today.getTime() - (calendarreach + 7) * day);
+            start.setDate(start.getDate() - start.getDay());
+            const oldest = today.getTime() - calendarreach * day;
+            const newest = today.getTime() + day;
+
+            for (const n of names) {
+                const head = document.createElement("span");
+                head.textContent = n;
+                grid.appendChild(head);
+            }
+            for (let i = 0; i < 42; i++) {
+                const at = new Date(start.getTime() + i * day);
+                const cell = document.createElement("button");
+                cell.textContent = at.getDate();
+                cell.title = daykey(at);
+                if (at.getTime() >= oldest && at.getTime() <= newest) {
+                    cell.className = "live" + (at.getTime() === today.getTime() ? " today" : "");
+                    cell.dataset.day = daykey(at);
+                }
+                grid.appendChild(cell);
+            }
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        buildarches();
+        buildcalendar();
         rainbowrows();
+        window.addEventListener("resize", rainbowrows);
+
+        document.querySelector(".calbutton").addEventListener("click", function() {
+            document.querySelector(".calendar").classList.toggle("open");
+        });
 
         document.addEventListener("click", function(e) {
             if (e.target.tagName === "BUTTON") {
-                new Audio('assets/audio/click.ogg').play();
+                new Audio("assets/audio/click.ogg").play();
             }
         });
 

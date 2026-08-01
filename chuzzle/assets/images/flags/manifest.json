@@ -1,6 +1,6 @@
 {
-  "bundle": "chuzzle\\datainfo\\assets\\images\\Overlay.bundle",
-  "image": "chuzzle\\datainfo\\assets\\images\\Overlay.png",
+  "bundle": "chuzzle\\datainfo\\apk\\assets\\images\\Overlay.bundle",
+  "image": "chuzzle\\datainfo\\apk\\assets\\images\\Overlay.png",
   "endianness": "little",
   "consumed_bytes_after_flags": 14361,
   "flags_written": 248,
