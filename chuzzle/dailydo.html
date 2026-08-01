@@ -5,13 +5,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>Daily-Do!</title>
         <link rel="icon" type="image/png" href="assets/images/icons/dailydo.webp">
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="assets/fonts/blippo.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="assets/fonts/harlowsolidlet.woff2">
+        <link rel="preload" as="image" href="assets/images/star.png">
+        <link rel="preload" as="image" href="assets/images/stars.webp">
 
         <style>
 
         @font-face {
             font-family: "blippo";
             src: url("assets/fonts/blippo.woff2") format("woff2");
-            font-display: swap;
+            font-display: block;
         }
         @font-face {
             font-family: "nimbus sans becker";
@@ -26,7 +32,7 @@
         @font-face {
             font-family: "harlow solid";
             src: url("assets/fonts/harlowsolidlet.woff2") format("woff2");
-            font-display: swap;
+            font-display: block;
         }
 
         /* --u is the in-game screen width every proportion is derived from. the sky
@@ -53,17 +59,19 @@
             pointer-events: none;
         }
 
-        .bg {
-            z-index: 4; opacity: 0.45;
-            mix-blend-mode: screen;
+        .bg {z-index: 4; opacity: 0.45; mix-blend-mode: screen; overflow: hidden}
+        .bg::before {
+            content: ""; position: absolute;
+            left: 0; right: 0;
+            top: calc(var(--u) * -0.44); bottom: calc(var(--u) * -0.44);
             background-image: url("assets/images/stars.webp");
             background-repeat: repeat;
             background-size: calc(var(--u) * 0.44) calc(var(--u) * 0.44);
             animation: skydrift 90s linear infinite;
         }
         @keyframes skydrift {
-            from {background-position: 0 0}
-            to {background-position: 0 calc(var(--u) * -0.44)}
+            from {transform: translate3d(0, 0, 0)}
+            to {transform: translate3d(0, calc(var(--u) * -0.44), 0)}
         }
 
         .vignette {
@@ -99,14 +107,18 @@
 
         .logo {
             display: block; width: 600px; max-width: 90vw;
+            visibility: hidden;
             margin: 0; overflow: visible; user-select: none;
-            animation: shine 3s infinite; z-index: 999;
+            z-index: 999;
+        }
+        .fontsready .logo {visibility: visible}
+        .logo .shine {
+            fill: #fff; stroke: none; opacity: 0;
+            animation: shine 3s infinite;
         }
         @keyframes shine {
-            0% {filter: brightness(1)}
-            25% {filter: brightness(1.5)}
-            50% {filter: brightness(1)}
-            100% {filter: brightness(1)}
+            0%, 50%, 100% {opacity: 0}
+            25% {opacity: 0.35}
         }
 
         .logo text {
@@ -128,7 +140,7 @@
             position: relative; z-index: 6;
             width: 100%; display: flex;
             justify-content: center; align-items: center;
-            padding-top: 6.5cqw;
+            padding-top: 0;
         }
         .dumbcontainer .logo {width: 76cqw !important}
 
@@ -307,18 +319,23 @@
         .pillar {
             position: absolute;
             bottom: 0; border-radius: 999px 999px 0 0;
-            filter: blur(calc(var(--u) * 0.004));
+            overflow: hidden;
         }
 
         .pillar::before {
             content: ""; position: absolute;
             inset: 0; border-radius: inherit;
-            background:
-                radial-gradient(ellipse at 28% 3%,
-                    rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 26%),
-                linear-gradient(180deg,
-                    rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 22%,
-                    rgba(0,0,0,0) 62%, rgba(0,0,0,0.18) 100%);
+            background: linear-gradient(180deg,
+                rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 20%,
+                rgba(0,0,0,0) 60%, rgba(0,0,0,0.18) 100%);
+        }
+        .pillar::after {
+            content: ""; position: absolute;
+            top: calc(var(--u) * 0.022); left: calc(var(--u) * 0.022);
+            width: calc(var(--u) * 0.05); height: calc(var(--u) * 0.05);
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            filter: blur(calc(var(--u) * 0.018));
         }
 
         .plorange {
@@ -371,10 +388,7 @@
             from {transform: rotate(0deg)}
             to {transform: rotate(-360deg)}
         }
-        @keyframes starspin {
-            from {transform: translate(-50%, -50%) rotate(0deg)}
-            to {transform: translate(-50%, -50%) rotate(360deg)}
-        }
+
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -446,30 +460,33 @@
 
         .scores > div {
             display: flex; align-items: baseline;
-            line-height: 1.23; white-space: nowrap;
+            line-height: 0.8; white-space: nowrap;
             padding-left: 9.5cqw; padding-right: 6.7cqw;
-            filter: drop-shadow(0 0.12em 0 #261b19);
         }
 
         .scores rank, .scores name, .scores score {
             -webkit-text-stroke: 0.3em #261b19;
             paint-order: stroke fill; font-weight: 300; /* don't change weight please */
-            letter-spacing: 0.04em; text-transform: uppercase;
+            text-transform: uppercase;
+            /* has to clear the 0.15em the stroke already sticks out by */
+            text-shadow: 0 0.27em 0 #261b19;
         }
 
         .scores rank {
             flex: none; width: 2.4em;
             text-align: right; font-style: italic;
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.75em; margin-right: 0.55em;
+            font-size: 0.6em; margin-right: 0.35em;
             letter-spacing: 0; font-weight: 800
         }
         .scores score {margin-left: auto}
 
         .scores img {
             flex: none; height: 0.81em;
-            align-self: baseline; margin-left: 0.2em;
+            align-self: baseline; margin-left: 0.3em;
+            position: relative; top: 0.26em;
             border: 0.15em solid #261b19;
+            box-shadow: 0 0.12em 0 #261b19;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -477,7 +494,7 @@
         .footer {
             position: absolute; bottom: 0;
             width: 100%; padding-top: 2cqw;
-            padding-bottom: 5cqw;
+            padding-bottom: 0;
             display: flex; justify-content: center;
             align-items: center;
         }
@@ -496,7 +513,10 @@
         }
         .calbutton {left: 4cqw}
         .todaybutton {right: 4cqw; display: none}
-        .calbutton img {width: 100%; height: 100%}
+        .calbutton img, .todaybutton img {
+            width: auto; height: 100%;
+            max-width: 100%; object-fit: contain;
+        }
         .calbutton:active img, .todaybutton:active img {
             filter: brightness(1.85) saturate(0.75);
         }
@@ -614,7 +634,8 @@
                     <text x="30" y="130" class="lgouter">Today's Scores</text>
                     <text x="30" y="130" class="lgmid">Today's Scores</text>
                     <text x="30" y="130" class="inner">Today's Scores</text>
-                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text></g>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text>
+                    <text x="30" y="130" class="shine">Today's Scores</text></g>
             </svg>
             </div>
 
@@ -650,7 +671,8 @@
                         <text x="30" y="130" class="lgouter">Play!</text>
                         <text x="30" y="130" class="lgmid">Play!</text>
                         <text x="30" y="130" class="inner">Play!</text>
-                        <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text></g>
+                        <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text>
+                    <text x="30" y="130" class="shine">Play!</text></g>
                 </svg>
             </div>
         </div>
@@ -709,7 +731,10 @@
             svg.setAttribute("viewBox", `${xmin} ${ymin} ${width} ${height}`);
         }
 
-        function trimall() {document.querySelectorAll("svg.logo").forEach(logotrimmer)}
+        function trimall() {
+            document.querySelectorAll("svg.logo").forEach(logotrimmer);
+            document.documentElement.classList.add("fontsready");
+        }
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(trimall);
         } else {window.addEventListener("load", trimall)}
@@ -777,6 +802,7 @@
             rowheight = probe.offsetHeight;
             probe.remove();
 
+            paintedat = null;
             const want = poolsize(host);
             while (pool.length > want) pool.pop().remove();
             while (pool.length < want) {
@@ -789,8 +815,12 @@
 
         function contentheight() {return padtop + board.length * rowheight + padbottom}
 
+        let paintedat = null;
+
         function paintrows(at, host) {
             if (!rowheight || !pool.length) return;
+            if (paintedat === at) return;
+            paintedat = at;
             const height = host.clientHeight * cyclerspan;
             const last = cyclerstops.length - 1;
             const first = Math.max(0, Math.min(board.length - pool.length,
@@ -820,9 +850,9 @@
            ring clears the screen, so you see about four sliding along an arch. the
            stars counter-rotate so they never tip over. */
         const rings = [
-            {y: 0.70, r: 0.60, n: 15, size: 0.115, secs: 150},
-            {y: 1.06, r: 0.55, n: 14, size: 0.1, secs: 122},
-            {y: 1.40, r: 0.50, n: 13, size: 0.085, secs: 98}
+            {y: 0.94, r: 0.60, n: 15, size: 0.115, secs: 150},
+            {y: 1.22, r: 0.55, n: 14, size: 0.1, secs: 122},
+            {y: 1.48, r: 0.50, n: 13, size: 0.085, secs: 98}
         ];
 
         function buildrings() {
@@ -846,9 +876,6 @@
                     star.style.left = "calc(var(--u) * " + (Math.sin(angle) * spec.r).toFixed(4) + ")";
                     star.style.top = "calc(var(--u) * " + (-Math.cos(angle) * spec.r).toFixed(4) + ")";
                     star.style.width = "calc(var(--u) * " + spec.size + ")";
-                    star.style.animation = "starspin " + (spec.secs * 0.42) + "s linear infinite";
-                    star.style.animationDelay = (-spec.secs * 0.42 * i / spec.n) + "s";
-                    if (index % 2) star.style.animationDirection = "reverse";
                     ring.appendChild(star);
                 }
                 clip.appendChild(ring);
@@ -864,13 +891,12 @@
             "!\"#$%&'()*+,-.0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]{} ".split("")
         );
 
-        const namecap = 12;
-
+        const namecap = 15;
         function drawname(text) {
             const clean = text.toUpperCase().split("").map(function(c) {
                 return drawable.has(c) ? c : "?";
             }).join("");
-            return clean.length > namecap ? clean.slice(0, namecap) + "..." : clean;
+            return clean.length > namecap ? clean.slice(0, namecap) + " ..." : clean;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -1012,8 +1038,9 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        /* the game only walks back to yesterday, but the server keeps two weeks. */
-        const calendarreach = 14;
+        /* the game only walks back to yesterday. the server keeps today plus the
+           thirteen days behind it: day-13 still answers, day-14 comes back empty. */
+        const calendarreach = 13;
 
         function daykey(date) {
             const pad = function(n) {return String(n).padStart(2, "0")};
