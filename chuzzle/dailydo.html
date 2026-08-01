@@ -295,62 +295,70 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .pillars {z-index: 2}
-        .pillars.right {transform: scaleX(-1)}
+        /* the pillars belong to the game screen, not the browser window, so they
+           hug the content column and stay there however wide the monitor is. */
+        .pillars {
+            z-index: 2; left: 50%;
+            width: var(--u); right: auto;
+            transform: translateX(-50%);
+        }
+        .pillars.right {transform: translateX(-50%) scaleX(-1)}
 
         .pillar {
             position: absolute;
             bottom: 0; border-radius: 999px 999px 0 0;
+            filter: blur(calc(var(--u) * 0.004));
         }
 
         .pillar::before {
             content: ""; position: absolute;
-            top: calc(var(--u) * 0.02); left: calc(var(--u) * 0.02);
-            width: calc(var(--u) * 0.05); height: calc(var(--u) * 0.05);
-            border-radius: 50%;
-            background: rgba(255,255,255,0.45);
-            filter: blur(calc(var(--u) * 0.016));
+            inset: 0; border-radius: inherit;
+            background:
+                radial-gradient(ellipse at 28% 3%,
+                    rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 26%),
+                linear-gradient(180deg,
+                    rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 22%,
+                    rgba(0,0,0,0) 62%, rgba(0,0,0,0.18) 100%);
         }
 
         .plorange {
-            height: 75%; width: calc(var(--u) * 0.13);
-            left: calc(var(--u) * -0.08);
+            height: 75%; width: calc(var(--u) * 0.15);
+            left: calc(var(--u) * -0.075);
             background: #ffb040; z-index: 1;
         }
         .plpink {
-            height: 49%; width: calc(var(--u) * 0.1);
-            left: 0; background: #ff7aa8; z-index: 2;
+            height: 49%; width: calc(var(--u) * 0.11);
+            left: calc(var(--u) * 0.01);
+            background: #ff7aa8; z-index: 2;
         }
         .plmagenta {
-            height: 22%; width: calc(var(--u) * 0.24);
-            left: calc(var(--u) * -0.05);
+            height: 22%; width: calc(var(--u) * 0.25);
+            left: calc(var(--u) * -0.06);
             background: #fd77c0; z-index: 3;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        /* the stars ride three arches that scroll up behind the pillars. the strip
-           holds four so one is always waiting off the bottom; it travels exactly one
-           arch gap, which makes the loop invisible. */
-        .bigstars {z-index: 1; overflow: hidden}
-        .bigstars .strip {
-            position: absolute;
-            left: 0; right: 0; top: calc(var(--u) * -0.85);
-            animation: archrise 34s linear infinite;
+        /* three rings of stars, each one lower and tighter than the last. only the
+           top of each ring clears the screen, so what you see is an arch of about
+           four stars sliding along it. */
+        .bigstars {z-index: 1}
+        .ring {
+            position: absolute; left: 50%; top: 0;
+            width: 0; height: 0;
+            animation: ringturn 90s linear infinite;
         }
-        @keyframes archrise {
-            from {transform: translate3d(0, 0, 0)}
-            to {transform: translate3d(0, calc(var(--u) * -0.85), 0)}
-        }
-
-        .arch {
+        .ring img {
             position: absolute;
-            left: 0; right: 0; height: calc(var(--u) * 0.85);
+            opacity: 0.85; transform: translate(-50%, -50%);
         }
-        .arch img {
-            position: absolute;
-            width: calc(var(--u) * 0.115);
-            transform: translate(-50%, -50%);
+        @keyframes ringturn {
+            from {transform: rotate(0deg)}
+            to {transform: rotate(-360deg)}
+        }
+        @keyframes ringturnback {
+            from {transform: translate(-50%, -50%) rotate(0deg)}
+            to {transform: translate(-50%, -50%) rotate(360deg)}
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -384,35 +392,49 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .dailydo {
+        /* the list owns the full page height and runs under the vignette; the
+           logo and the footer sit above it. */
+        .dailydo, .ui {
             position: fixed; top: 0; left: 50%;
             height: 100vh; width: var(--u);
             transform: translateX(-50%);
             container-type: inline-size;
             font-family: "blippo";
+        }
+        .dailydo {z-index: 1; overflow: hidden}
+        .ui {
+            z-index: 3; pointer-events: none;
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
-            overflow: hidden; z-index: 1;
+        }
+        .ui .dumbcontainer, .ui .footer, .ui .calendar {pointer-events: auto}
+
+        .vignette.over {
+            position: fixed; inset: 0;
+            z-index: 2; pointer-events: none;
         }
 
         .scores {
-            position: relative;
-            width: 100%; font-size: 4.28cqw;
-            padding-top: 8.4cqw;
+            position: absolute; inset: 0;
+            width: 100%; font-size: 4.9cqw;
+            padding-top: 34cqw; padding-bottom: 30cqw;
             display: flex; flex-direction: column;
-            flex: 1 1 auto; min-height: 0; overflow: hidden;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none; cursor: grab;
+            will-change: transform;
         }
+        .scores.dragging {cursor: grabbing}
 
         .scores > div {
             display: flex; align-items: baseline;
-            line-height: 1.41; white-space: nowrap;
+            line-height: 1.23; white-space: nowrap;
             padding-left: 9.5cqw; padding-right: 6.7cqw;
+            filter: drop-shadow(0 0.12em 0 #261b19);
         }
 
         .scores rank, .scores name, .scores score {
             -webkit-text-stroke: 0.3em #261b19;
-            paint-order: stroke fill; font-weight: 300;
-            text-shadow: 0 0.13em 0 #261b19;
+            paint-order: stroke fill; font-weight: 900;
             letter-spacing: 0.04em; text-transform: uppercase;
         }
 
@@ -425,17 +447,18 @@
         }
         .scores score {margin-left: auto}
 
+        /* the flag matches the cap height and carries the same outline weight the
+           text does, so its frame reads as part of the same row. */
         .scores img {
-            flex: none; height: 0.62em;
-            align-self: center; margin-left: 0.45em;
-            border: 0.09em solid #261b19;
-            box-shadow: 0 0.125em 0 #261b19;
+            flex: none; height: 0.81em;
+            align-self: center; margin-left: 0.5em;
+            border: 0.15em solid #261b19;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
         .footer {
-            position: relative; flex: none;
+            position: absolute; bottom: 0;
             width: 100%; padding-top: 2cqw;
             padding-bottom: 5cqw;
             display: flex; justify-content: center;
@@ -518,42 +541,15 @@
                 <span class="pillar plmagenta"></span>
             </div>
 
-            <div class="bigstars"><div class="strip"></div></div>
+            <div class="bigstars"></div>
 
             <div class="bg"></div>
             <div class="stripes"></div>
-            <div class="vignette"></div>
 
         </div>
 
         <div class="dailydo">
-
-        <div class="dumbcontainer">
-            <svg class="logo" viewBox="0 0 900 170">
-                <defs>
-                    <linearGradient id="lgrgb" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
-                        <stop offset="80%" stop-color="#f8b5c8"/>
-                    </linearGradient>
-                    <linearGradient id="lgfade" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
-                        <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
-                    </linearGradient>
-                    <filter id="erode">
-                        <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
-                        <feComposite in2="eroded" operator="in"/>
-                    </filter>
-                </defs>
-                <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Today's Scores</text></mask>
-                <g><text x="30" y="130" class="lgblack">Today's Scores</text>
-                    <text x="30" y="130" class="lgouter">Today's Scores</text>
-                    <text x="30" y="130" class="lgmid">Today's Scores</text>
-                    <text x="30" y="130" class="inner">Today's Scores</text>
-                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text></g>
-            </svg>
-        </div>
-
-        <div class="scores">
+            <div class="scores">
             <div>
                 <rank>1.</rank>
                 <name title="ID: 8904288">^_^</name>
@@ -734,47 +730,75 @@
                 <img src="assets/images/flags/GB.png" alt="GB">
                 <score>4800</score>
             </div>
+            </div>
         </div>
 
-        <div class="calendar">
-            <div class="caption">Pick a day</div>
-            <div class="grid"></div>
-        </div>
+        <div class="vignette over"></div>
 
-        <div class="footer">
-            <button class="calbutton" title="Older scores">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#8ee8e0" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2.5" y="4.5" width="19" height="17" rx="2.5"/>
-                    <path d="M2.5 9.5h19M7 2.5v4M17 2.5v4"/>
-                    <path d="M6.5 13h2M11 13h2M15.5 13h2M6.5 17.5h2M11 17.5h2M15.5 17.5h2"
-                        stroke="#ffd200"/>
-                </svg>
-            </button>
+        <div class="ui">
+            <div class="dumbcontainer">
             <svg class="logo" viewBox="0 0 900 170">
                 <defs>
-                    <linearGradient id="lgrgb2" x2="0" y2="1">
+                    <linearGradient id="lgrgb" x2="0" y2="1">
                         <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
                         <stop offset="80%" stop-color="#f8b5c8"/>
                     </linearGradient>
-                    <linearGradient id="lgfade2" x2="0" y2="1">
+                    <linearGradient id="lgfade" x2="0" y2="1">
                         <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
                         <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
                     </linearGradient>
-                    <filter id="erode2">
+                    <filter id="erode">
                         <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
                         <feComposite in2="eroded" operator="in"/>
                     </filter>
                 </defs>
-                <mask id="lgcrop2"><text x="30" y="130" filter="url(#erode2)">Play!</text></mask>
-                <g><text x="30" y="130" class="lgblack">Play!</text>
-                    <text x="30" y="130" class="lgouter">Play!</text>
-                    <text x="30" y="130" class="lgmid">Play!</text>
-                    <text x="30" y="130" class="inner">Play!</text>
-                    <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text></g>
+                <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Today's Scores</text></mask>
+                <g><text x="30" y="130" class="lgblack">Today's Scores</text>
+                    <text x="30" y="130" class="lgouter">Today's Scores</text>
+                    <text x="30" y="130" class="lgmid">Today's Scores</text>
+                    <text x="30" y="130" class="inner">Today's Scores</text>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text></g>
             </svg>
-        </div>
+            </div>
 
+            <div class="calendar">
+                <div class="caption">Pick a day</div>
+                <div class="grid"></div>
+            </div>
+
+            <div class="footer">
+                <button class="calbutton" title="Older scores">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#8ee8e0" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2.5" y="4.5" width="19" height="17" rx="2.5"/>
+                        <path d="M2.5 9.5h19M7 2.5v4M17 2.5v4"/>
+                        <path d="M6.5 13h2M11 13h2M15.5 13h2M6.5 17.5h2M11 17.5h2M15.5 17.5h2"
+                            stroke="#ffd200"/>
+                    </svg>
+                </button>
+                <svg class="logo" viewBox="0 0 900 170">
+                    <defs>
+                        <linearGradient id="lgrgb2" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
+                            <stop offset="80%" stop-color="#f8b5c8"/>
+                        </linearGradient>
+                        <linearGradient id="lgfade2" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                            <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+                        </linearGradient>
+                        <filter id="erode2">
+                            <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
+                            <feComposite in2="eroded" operator="in"/>
+                        </filter>
+                    </defs>
+                    <mask id="lgcrop2"><text x="30" y="130" filter="url(#erode2)">Play!</text></mask>
+                    <g><text x="30" y="130" class="lgblack">Play!</text>
+                        <text x="30" y="130" class="lgouter">Play!</text>
+                        <text x="30" y="130" class="lgmid">Play!</text>
+                        <text x="30" y="130" class="inner">Play!</text>
+                        <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text></g>
+                </svg>
+            </div>
         </div>
 
         <!--div class="codediv">
@@ -876,28 +900,113 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        /* the stars sit on wide shallow arches, four stacked so the scroll can loop. */
-        function buildarches() {
-            const strip = document.querySelector(".bigstars .strip");
-            if (!strip) return;
-            const sizes = [0.1, 0.155, 0.115, 0.17, 0.125];
-            for (let arch = 0; arch < 4; arch++) {
-                const row = document.createElement("div");
-                row.className = "arch";
-                row.style.top = "calc(var(--u) * " + (arch * 0.85) + ")";
-                for (let i = 0; i < sizes.length; i++) {
-                    const p = i / (sizes.length - 1);
-                    const rise = 1 - Math.pow(2 * p - 1, 2);
+        /* three rings of stars turning behind the pillars. only the top of each
+           ring clears the screen, so you see about four sliding along an arch. the
+           stars counter-rotate so they never tip over. */
+        const rings = [
+            {y: 0.60, r: 0.62, n: 11, size: 0.125, secs: 150},
+            {y: 1.32, r: 0.50, n: 10, size: 0.105, secs: 122},
+            {y: 1.94, r: 0.40, n: 9, size: 0.085, secs: 98}
+        ];
+
+        function buildrings() {
+            const host = document.querySelector(".bigstars");
+            if (!host) return;
+            rings.forEach(function(spec, index) {
+                const ring = document.createElement("div");
+                ring.className = "ring";
+                ring.style.top = "calc(var(--u) * " + spec.y + ")";
+                ring.style.animationDuration = spec.secs + "s";
+                if (index % 2) ring.style.animationDirection = "reverse";
+                for (let i = 0; i < spec.n; i++) {
+                    const angle = (i / spec.n) * Math.PI * 2;
                     const star = document.createElement("img");
                     star.src = "assets/images/star.png";
                     star.alt = "";
-                    star.style.left = (-8 + p * 116) + "%";
-                    star.style.top = (72 - rise * 52 + (arch % 2 ? 6 : 0)) + "%";
-                    star.style.width = "calc(var(--u) * " + sizes[(i + arch) % sizes.length] + ")";
-                    row.appendChild(star);
+                    star.style.left = "calc(var(--u) * " + (Math.sin(angle) * spec.r).toFixed(4) + ")";
+                    star.style.top = "calc(var(--u) * " + (-Math.cos(angle) * spec.r).toFixed(4) + ")";
+                    star.style.width = "calc(var(--u) * " + spec.size + ")";
+                    star.style.animation = "ringturnback " + spec.secs + "s linear infinite";
+                    if (index % 2) star.style.animationDirection = "reverse";
+                    ring.appendChild(star);
                 }
-                strip.appendChild(row);
+                host.appendChild(ring);
+            });
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* blippo has no glyph for these, and the game shows a question mark
+           wherever a name uses something it cannot draw. */
+        const drawable = new Set(
+            "!\"#$%&'()*+,-.0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]{} ".split("")
+        );
+
+        function sanitisenames() {
+            document.querySelectorAll(".scores name").forEach(function(cell) {
+                cell.textContent = cell.textContent.toUpperCase().split("").map(function(c) {
+                    return drawable.has(c) ? c : "?";
+                }).join("");
+            });
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* the list is flung rather than scrolled: drag or wheel adds velocity and
+           friction bleeds it off over a few seconds, same as the game. */
+        function makefling(list) {
+            let at = 0; let velocity = 0; let dragging = false;
+            let lastY = 0; let lastTime = 0; let running = false;
+
+            function limit() {
+                const room = list.scrollHeight - list.parentElement.clientHeight;
+                return room > 0 ? room : 0;
             }
+            function place() {list.style.transform = "translate3d(0," + (-at) + "px,0)"}
+
+            function step() {
+                if (!dragging) {
+                    at += velocity;
+                    velocity *= 0.955;
+                    if (at < 0) {at = 0; velocity = 0}
+                    if (at > limit()) {at = limit(); velocity = 0}
+                    if (Math.abs(velocity) < 0.05) {velocity = 0; running = false; place(); return}
+                }
+                place();
+                requestAnimationFrame(step);
+            }
+            function kick() {if (!running) {running = true; requestAnimationFrame(step)}}
+
+            list.addEventListener("wheel", function(e) {
+                e.preventDefault();
+                velocity += e.deltaY * 0.22;
+                kick();
+            }, {passive: false});
+
+            list.addEventListener("pointerdown", function(e) {
+                dragging = true; velocity = 0;
+                lastY = e.clientY; lastTime = e.timeStamp;
+                list.setPointerCapture(e.pointerId);
+                list.classList.add("dragging");
+                kick();
+            });
+            list.addEventListener("pointermove", function(e) {
+                if (!dragging) return;
+                const moved = e.clientY - lastY;
+                const gap = Math.max(1, e.timeStamp - lastTime);
+                at -= moved;
+                at = Math.max(-60, Math.min(limit() + 60, at));
+                velocity = -moved / gap * 16;
+                lastY = e.clientY; lastTime = e.timeStamp;
+            });
+            function letgo() {
+                if (!dragging) return;
+                dragging = false;
+                list.classList.remove("dragging");
+                kick();
+            }
+            list.addEventListener("pointerup", letgo);
+            list.addEventListener("pointercancel", letgo);
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -945,9 +1054,11 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        buildarches();
+        sanitisenames();
+        buildrings();
         buildcalendar();
         rainbowrows();
+        makefling(document.querySelector(".scores"));
         window.addEventListener("resize", rainbowrows);
 
         document.querySelector(".calbutton").addEventListener("click", function() {
