@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>chuzzle stuff</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="googlebot" content="index,follow">
+    <meta name="google" content="notranslate">
+
+    <!-- the css import is too slow so this will almost always load faster -->
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/blippo.woff2" crossorigin>
+
+    <style>
+
+        @font-face {
+            font-family: "blippo";
+            src: url("assets/fonts/blippo.woff2") format("woff2");
+            font-display: swap;
+        }
+        body {
+            background-color: black;
+            color: white; height: 100vh; margin: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0; width: 100vw; height: 100vh;
+            opacity: 0.35; z-index: -1; pointer-events: none;
+            left: -8vw; top: -8vh; width: 116vw; height: 116vh;
+            background-image: url("assets/images/bg.webp");
+            background-repeat: repeat; background-size: 600px 600px;
+            background-position: 0 0;
+            transform: rotate(-5deg); animation: bgscroll 60s linear infinite;
+        }
+        @keyframes bgscroll {
+            from {background-position: 0 0}
+            to {background-position: 600px 600px}
+        }
+
+        canvas, img, p, a {user-select: none}
+        a, .small {
+            position: relative;
+            display: inline-block;
+            font-family: "blippo", system-ui, sans-serif; text-align: center;
+            font-size: 50px;
+            -webkit-text-stroke: 16px black;
+            paint-order: stroke fill; filter: drop-shadow(0 0.275em 0 black);
+        }
+        a sup {
+            -webkit-text-stroke: 0.18em black;
+            display: inline-block;
+            margin: 0 0.12em 0 0.05em;
+        }
+        
+        .text {
+            margin-top: 0; max-width: 90%;
+            width: auto; object-fit: contain;
+        }
+        .small {font-size: 0.9em; -webkit-text-stroke: 1em black}
+
+        svg {position: absolute}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .chuzz {
+            display: flex; position: fixed;
+            width: 100px; bottom: 0.5em;
+            will-change: transform;
+            animation: chuzzhop 2.6s linear infinite;
+        }
+
+        /* traced as you might be able to tell by the complexity */
+        @keyframes chuzzhop {
+            0% {transform: translate(12px, -1px) scaleX(1)} 1.149% {transform: translate(30px, -20px) scaleX(1)}
+            2.299% {transform: translate(33px, -39px) scaleX(1)} 3.448% {transform: translate(38px, -47px) scaleX(1)}
+            4.598% {transform: translate(50px, -60px) scaleX(1)} 5.747% {transform: translate(60px, -52px) scaleX(1)}
+            6.897% {transform: translate(64px, -36px) scaleX(1)} 8.046% {transform: translate(72px, 1px) scaleX(1)}
+            9.195% {transform: translate(74px, 13px) scaleX(1)} 9.196% {transform: translate(74px, 13px) scaleX(-1)}
+            10.345% {transform: translate(67px, -24px) scaleX(-1)} 11.494% {transform: translate(57px, -45px) scaleX(-1)}
+            12.644% {transform: translate(54px, -49px) scaleX(-1)} 13.793% {transform: translate(49px, -62px) scaleX(-1)}
+            14.943% {transform: translate(28px, -68px) scaleX(-1)} 16.092% {transform: translate(22px, -64px) scaleX(-1)}
+            17.241% {transform: translate(17px, -40px) scaleX(-1)} 18.391% {transform: translate(14px, -23px) scaleX(-1)}
+            19.540% {transform: translate(2px, 12px) scaleX(-1)} 20.690% {transform: translate(-3px, 7px) scaleX(-1)}
+            21.839% {transform: translate(-6px, -2px) scaleX(-1)} 22.989% {transform: translate(-9px, -10px) scaleX(-1)}
+            24.138% {transform: translate(-12px, -17px) scaleX(-1)} 25.287% {transform: translate(-18px, -25px) scaleX(-1)}
+            26.437% {transform: translate(-21px, -22px) scaleX(-1)} 27.586% {transform: translate(-24px, -15px) scaleX(-1)}
+            28.736% {transform: translate(-26px, 7px) scaleX(-1)} 29.885% {transform: translate(-27px, 9px) scaleX(-1)}
+            29.886% {transform: translate(-27px, 9px) scaleX(1)} 31.035% {transform: translate(-26px, -3px) scaleX(1)}
+            32.184% {transform: translate(-25px, -8px) scaleX(1)} 33.333% {transform: translate(-16px, -19px) scaleX(1)}
+            34.483% {transform: translate(-12px, -22px) scaleX(1)} 35.632% {transform: translate(-9px, -25px) scaleX(1)}
+            36.782% {transform: translate(-7px, -28px) scaleX(1)} 37.931% {transform: translate(1px, -8px) scaleX(1)}
+            39.081% {transform: translate(5px, 7px) scaleX(1)} 40.230% {transform: translate(5px, 5px) scaleX(1)}
+            41.380% {transform: translate(5px, -9px) scaleX(1)} 41.381% {transform: translate(5px, -9px) scaleX(-1)}
+            42.529% {transform: translate(-7px, -30px) scaleX(-1)} 43.678% {transform: translate(-12px, -36px) scaleX(-1)}
+            44.828% {transform: translate(-15px, -37px) scaleX(-1)} 45.977% {transform: translate(-22px, -41px) scaleX(-1)}
+            47.127% {transform: translate(-29px, 1px) scaleX(-1)} 48.276% {transform: translate(-38px, 16px) scaleX(-1)}
+            48.277% {transform: translate(-38px, 16px) scaleX(1)} 49.426% {transform: translate(-33px, -1px) scaleX(1)}
+            50.575% {transform: translate(-32px, -5px) scaleX(1)} 51.724% {transform: translate(-24px, -25px) scaleX(1)}
+            52.874% {transform: translate(-20px, -32px) scaleX(1)} 54.023% {transform: translate(-13px, -35px) scaleX(1)}
+            55.173% {transform: translate(-9px, -36px) scaleX(1)} 56.322% {transform: translate(-3px, -34px) scaleX(1)}
+            57.471% {transform: translate(-1px, -19px) scaleX(1)} 58.621% {transform: translate(0px, -4px) scaleX(1)}
+            59.770% {transform: translate(1px, 6px) scaleX(1)} 60.920% {transform: translate(3px, 0px) scaleX(1)}
+            62.069% {transform: translate(0px, -3px) scaleX(1)} 62.070% {transform: translate(0px, -3px) scaleX(-1)}
+            63.219% {transform: translate(-2px, -7px) scaleX(-1)} 64.368% {transform: translate(-5px, -12px) scaleX(-1)}
+            65.517% {transform: translate(-10px, -18px) scaleX(-1)} 66.667% {transform: translate(-12px, -19px) scaleX(-1)}
+            67.816% {transform: translate(-15px, -22px) scaleX(-1)} 68.966% {transform: translate(-16px, -20px) scaleX(-1)}
+            70.115% {transform: translate(-19px, 1px) scaleX(-1)} 71.264% {transform: translate(-20px, 3px) scaleX(-1)}
+            71.265% {transform: translate(-20px, 3px) scaleX(1)} 72.414% {transform: translate(-17px, -10px) scaleX(1)}
+            73.563% {transform: translate(-14px, -20px) scaleX(1)} 74.713% {transform: translate(-3px, -33px) scaleX(1)}
+            75.862% {transform: translate(2px, -33px) scaleX(1)} 77.012% {transform: translate(7px, -27px) scaleX(1)}
+            78.161% {transform: translate(13px, -14px) scaleX(1)} 79.310% {transform: translate(19px, 8px) scaleX(1)}
+            80.460% {transform: translate(21px, -1px) scaleX(1)} 81.609% {transform: translate(23px, -13px) scaleX(1)}
+            82.759% {transform: translate(26px, -20px) scaleX(1)} 83.908% {transform: translate(36px, -37px) scaleX(1)}
+            85.058% {transform: translate(43px, -36px) scaleX(1)} 86.207% {transform: translate(47px, -38px) scaleX(1)}
+            87.356% {transform: translate(51px, -28px) scaleX(1)} 88.506% {transform: translate(58px, -3px) scaleX(1)}
+            89.655% {transform: translate(62px, 12px) scaleX(1)} 89.656% {transform: translate(62px, 12px) scaleX(-1)}
+            94.8% {transform: translate(38px, -24px) scaleX(-1)} 97.5% {transform: translate(24px, -32px) scaleX(-1)}
+            98% {transform: translate(18px, -18px) scaleX(-1)} 99% {transform: translate(14px, -5px) scaleX(-1)}
+            99.001% {transform: translate(14px, -5px) scaleX(1)} 100% {transform: translate(12px, -1px) scaleX(1)}
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .bottom {
+            position: fixed; display: flex;
+            flex-direction: row;
+            bottom: 10em; justify-content: center; align-items: center;
+        }
+        .button {
+            display: flex;
+            width: 1.5em; height: 1.5em;
+            justify-content: center; align-items: center;
+            overflow: hidden; user-select: none;
+            padding: 0 0.1em;
+        }
+        .button img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+        .wip {filter: grayscale(1); opacity: 0.5}
+
+    </style>
+
+</head>
+<body>
+
+    <div class="bg"></div>
+
+    <img class="chuzz" src="assets/images/bluechuzzle2.webp" draggable="false">
+    <a class="text">uhh.. hello bro<sup>3</sup>?</a>
+    <a class="text small" txt="i highly doubt i'll be making any more chuzzle pages lol">i highly doubt i'll be making any more chuzzle pages lol</a>
+
+    <div class="bottom">
+        <a class="button" href="raptconvert" title="decrypt chuzzle 2/snap/hoggy/other endpoint urls">
+            <img src="assets/images/icons/convert.webp">
+        </a>
+        <a class="button" href="dailydo" title="view the mobile daily do leaderboards online">
+            <img src="assets/images/icons/dailydo.webp">
+        </a>
+        <a class="button" href="codes" title="a list of local chuzzle 2 cheat codes">
+            <img src="assets/images/icons/codes.webp">
+        </a>
+    </div>
+
+    <script>
+
+        // no fancy js for this page right now
+        document.addEventListener("DOMContentLoaded", function() {
+            const chuzz = document.querySelector(".chuzz");
+            const shrieks = [];
+            for (let i = 1; i <= 5; i++) {
+                const audio = new Audio(`assets/audio/shriek${i}.ogg`);
+                audio.preload = "auto";
+                shrieks.push(audio);
+            }
+            if (chuzz) {
+                chuzz.addEventListener("click", function() {
+                    const rand = Math.floor(Math.random() * shrieks.length);
+                    const shriekclone = shrieks[rand].cloneNode();
+                    shriekclone.play();
+                });
+            }
+        });
+
+        // wait, you're here?
+        // on this third filler redirect page?
+        // you're that interested in finding secrets?
+
+
+        // um
+
+        
+        // check assets/videos/chuzzlesliveforever.mp4! yeah!
+
+
+        // i didn't have anything prepared..
+        // i hope you're having fun looking through the junk my sites have to offer, most people stop at what's in soggy.cat's main repo
+
+    </script>
+</body>

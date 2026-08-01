@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>Daily-Do!</title>
+        <link rel="icon" type="image/png" href="assets/images/icons/dailydo.webp">
+
+        <style>
+
+        @font-face {
+            font-family: "blippo";
+            src: url("assets/fonts/blippo.woff2") format("woff2");
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "nimbus sans becker";
+            src: url("assets/fonts/nimbussansbeckerpbold.woff2") format("woff2");
+            font-display: swap; font-weight: 300;
+        }
+        @font-face {
+            font-family: "nimbus sans becker";
+            src: url("assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
+            font-display: swap; font-weight: 600;
+        }
+        @font-face {
+            font-family: "harlow solid";
+            src: url("assets/fonts/harlowsolidlet.woff2") format("woff2");
+            font-display: swap;
+        }
+
+        body {
+            background-color: black; padding: 0;
+            color: white; height: 100vh; margin: 0;
+            display: flex; flex-wrap: wrap; gap: 6px;
+            justify-content: center; align-content: flex-start;
+            overflow: hidden;
+        }
+
+        .bg, .pillars, .bigstars, .stripes, .vignette {
+            position: absolute; inset: 0;
+            pointer-events: none;
+        }
+
+        .bg {
+            z-index: 4; opacity: 0.45;
+            mix-blend-mode: screen;
+            background-image: url("assets/images/stars.webp");
+            background-repeat: repeat; background-size: 44cqw 44cqw;
+            animation: skydrift 90s linear infinite;
+        }
+        @keyframes skydrift {
+            from {background-position: 0 0}
+            to {background-position: 0 -44cqw}
+        }
+
+        .vignette {
+            z-index: 3;
+            background: linear-gradient(180deg,
+                #050177 0%, #050177 4%,
+                rgba(5,1,119,0) 19%, rgba(5,1,119,0) 92%,
+                #050177 100%);
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        textarea {max-width: 90vw}
+
+        canvas, img, p, a {user-select: none}
+        a {
+            position: relative;
+            display: inline-block;
+            font-size: 50px;
+            text-shadow: 0 0.175em 0 black; paint-order: stroke fill;
+        }
+        p {font-size: 0.75em; opacity: 0.5; max-width: 600px}
+
+        a, p, span, li, ul, label, button, div {
+            font-weight: 600; color: #babfd8;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ul {padding-top: 1em; list-style: none; padding-left: 0}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .logo {
+            display: block; width: 600px; max-width: 90vw;
+            margin: 0; overflow: visible; user-select: none;
+            animation: shine 3s infinite; z-index: 999;
+        }
+        @keyframes shine {
+            0% {filter: brightness(1)}
+            25% {filter: brightness(1.5)}
+            50% {filter: brightness(1)}
+            100% {filter: brightness(1)}
+        }
+
+        .logo text {
+            font-family: "harlow solid", system-ui, sans-serif;
+            font-size: 120px; font-weight: 400; paint-order: stroke fill;
+            dominant-baseline: alphabetic;
+        }
+        .logo .lgouter, .lgmid, .logo .lgblack {
+            fill: none; stroke-linejoin: round;
+            stroke-linecap: round; stroke-miterlimit: 1;
+        }
+        .logo .lgouter {stroke: #feff48; stroke-width: 30}
+        .logo .lgmid {stroke: #60204a; stroke-width: 17}
+        .logo .lgblack {stroke: rgba(0,0,0,0.5); stroke-width: 54}
+        .pucontent .logo .lgblack {stroke: #4e4c02; stroke-width: 25; opacity: 1}
+        .logo .inner {fill: url(#lgrgb); stroke: none} .logo .lglight {fill: url(#lgfade); stroke: none}
+
+        .dumbcontainer {
+            position: relative; z-index: 6;
+            width: 100%; display: flex;
+            justify-content: center; align-items: center;
+            padding-top: 6.5cqw;
+        }
+        .dumbcontainer .logo {width: 84cqw !important}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        label {
+            z-index: 999; color: white;
+            padding-left: 25px; margin-bottom: -10px;
+            display: inline-block;
+        }
+
+        hr {
+            width: calc(100% - 39px); height: 3px;
+            position: absolute; 
+            background-color: #c67228; border: none;
+            left: 50%; transform: translateX(-50%);
+        }
+
+        button {
+            color: white; font-size: 1em;
+            margin-top: 1.25em; text-transform: uppercase;
+            outline: none; border: none; background: none;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .codediv {
+            display: flex;
+            flex-direction: column; overflow: hidden;
+            justify-content: center; align-items: center;
+            width: 100%; max-width: 400px;
+            flex: 1 1 320px; padding-bottom: 1em;
+        }
+
+        .code {
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+            background-color: #2e0029; color: white;
+            font-size: 1.5em; font-weight: 500;
+            outline: none; border: none; resize: none;
+            width: calc(100% - 20px); height: 1em; border-radius: 1em;
+            padding: 0.25em; margin: 0.5em; user-select: all;
+        }
+        .code:has(br) {height: auto}
+        .code:has(sup) {height: 1.5em}
+
+        .code div {
+            display: flex; align-items: center; justify-content: center;
+            color: white; flex-direction: row;
+            font-size: 1em; font-weight: 500; gap: 0.25em;
+        }
+        .code img {height: 1.25em}
+        .code sup {
+            line-height: 0.9; font-size: 0.65em;
+            opacity: 0.25; user-select: none;
+        }
+
+        .note {
+            position: relative; line-height: 1;
+            padding-left: 0.75em; padding-right: 0.75em;
+            top: -0.35em; padding-bottom: 0.5em; 
+        }
+        .note a {
+            font-size: 1em; text-decoration: none;
+            color:#a5d1eb;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .popup {
+            position: relative; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center;
+            width: calc(100% - 100px); 
+            border-radius: 0.5em; margin: 40px;
+            background: #ffd200;
+            isolation: isolate;
+            box-shadow:
+                0 0 0 1px #FFD200, 0 0 0 3px #FFDC0E, 0 0 0 5px #FFE619, 
+                0 0 0 7px #FFEF21, 0 0 0 9px #FFF928, 0 0 0 11px #FFD632,
+                0 0 0 13px #FFDD3A, 0 0 0 15px #FFE543, 0 0 0 17px #FFED4C, 
+                0 0 0 19px #FFFF80, 0 0 0 21px #FFFF80, 0 0 0 23px #FFFF80,
+                0 0 0 25px #FFFF80, 0 0 0 27px #FFFF80, 0 0 0 29px #FFFF80, 
+                0 0 0 31px #f0807e, 0 0 0 33px #fd8886, 0 0 0 35px #ff8d89,
+                0 0 0 37px #ff8e8a, 0 0 0 39px #ff908b, 0 0 0 41px #ff918c, 
+                0 0 0 43px #ff918e, 0 0 0 45px #ff928f;
+        }
+        .puglows {
+            position: absolute; inset: -45px;
+            border-radius: 1.5em; overflow: hidden;
+            pointer-events: none; z-index: 0;
+        }
+        .puw, .pur {
+            position: absolute; inset: -40px;
+            opacity: 0.7; filter: blur(5px);
+            mix-blend-mode: screen;
+        }
+        .puw {background:
+                radial-gradient(circle at 0 0, white 0 75px, transparent 105px),
+                radial-gradient(circle at 100% 100%, white 0 75px, transparent 105px);
+        }
+        .pur {background:
+                radial-gradient(circle at 100% 0, red 0 75px, transparent 105px),
+                radial-gradient(circle at 0 100%, red 0 75px, transparent 105px);
+        }
+
+        .pucontent {
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center;
+            width: calc(100% + 15px); height: 96%;
+            border-radius: 0.75em; text-align: center;
+            /* outline: 1px solid red; */
+            box-shadow: 0 -8px 12px -8px #e7bd00;
+        }
+        .pucontent .logo {height: 70px; z-index: 100}
+
+        .pucontent div {
+            position: relative; display: flex; top: -5px;
+            width: calc(100% - 30px);
+            padding-top: 0.6em; padding-bottom: 0.6em;
+            background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
+            box-shadow: 0 0 0 10px #03104d; color: white !important;
+            border-radius: 0.25em; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .pucontent div button {
+            width: calc(100% - 70px); border-radius: 0.25em;
+            padding-top: 5px; padding-bottom: 5px; user-select: none;
+            margin-top: 0.25em; margin-bottom: 0.25em;
+            font-family: "harlow solid", system-ui, sans-serif;
+            text-transform: capitalize; font-size: 2em;
+            background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+            font-weight: 100; -webkit-text-stroke: 6px black;
+            paint-order: stroke fill; color: white;
+        }
+        .pucontent div button:active {
+            background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
+            padding-top: 7px; padding-bottom: 3px;
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .loading {
+            position: relative; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center;
+            width: calc(100% - 80px); gap: 0.5em; user-select: none;
+            border-radius: 0.85em; margin: 40px; 
+            padding: 1.25em 0.75em;
+            isolation: isolate; background-color: #0000fe;
+            box-shadow:
+                0 0 0 1px #050505, 0 1px 4px 0px #000c inset,
+                0 0 0 1px #ccc8b2, 0 0 0 2px #cdc28a, 0 0 0 3px #cfbd68,
+                0 0 0 5px #d6b936, 0 0 0 7px #ddb917, 0 0 0 9px #e5bf12,
+                0 0 0 11px #e98b08, 0 0 0 12px #ed5b00, 0 0 0 13px #f25d00,
+                0 0 0 18px #ff6a0d, 0 0 0 19px #fd491b, 0 0 0 20px #fb332e,
+                0 0 0 21px #fb413d, 0 0 0 22px #fc5652, 0 0 0 23px #fc706d,
+                0 0 0 24px #fd908e, 0 0 0 25px #feb7b5, 0 0 0 26px #fee2e1;
+        }
+        .loading div {
+            text-align: center; color: white; font-weight: 100;
+            font-family: "blippo"; font-size: 1.55em;
+            -webkit-text-stroke: 8px #0000c7; paint-order: stroke fill;
+        }
+        .loading img {width: 100px}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .pillars {z-index: 1}
+        .pillars.right {transform: scaleX(-1)}
+
+        .pillar {
+            position: absolute;
+            bottom: 0; border-radius: 999px 999px 0 0;
+        }
+
+        .pillar::before {
+            content: ""; position: absolute;
+            top: 2cqw; left: 2cqw;
+            width: 5cqw; height: 5cqw;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.45);
+            filter: blur(1.6cqw);
+        }
+
+        .plorange {height: 75%; left: -8cqw; width: 13cqw; background: #ffb040; z-index: 1}
+        .plpink {height: 49%; left: 0; width: 10cqw; background: #ff7aa8; z-index: 2}
+        .plmagenta {height: 22%; left: -5cqw; width: 24cqw; background: #fd77c0; z-index: 3}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .bigstars {z-index: 2}
+        .bigstars img {
+            position: absolute;
+            width: 11cqw;
+            animation: starbob 9s ease-in-out infinite;
+        }
+        @keyframes starbob {
+            0%, 100% {transform: translateY(-1.2cqw)}
+            50% {transform: translateY(1.2cqw)}
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* diagonal light bands: 45deg, four bands per cycle (dim, mid, bright, mid),
+           multiplied over the sky so the pillars tint the same way they do in game. */
+        .stripes {
+            z-index: 5; overflow: hidden;
+            mix-blend-mode: multiply;
+        }
+        .stripes::before {
+            content: ""; position: absolute;
+            top: 0; left: 0;
+            right: -74cqw; bottom: -74cqw;
+            background-image: repeating-linear-gradient(135deg,
+                #b77eff 0 12.2cqw,
+                #ec94ed 13.5cqw 37.9cqw,
+                #ffffbf 39.2cqw 63.6cqw,
+                #ec94ed 64.9cqw 89.3cqw,
+                #b77eff 90.6cqw 102.8cqw);
+            animation: stripescroll 23s linear infinite;
+            will-change: transform;
+        }
+        @keyframes stripescroll {
+            from {transform: translate3d(0, 0, 0)}
+            to {transform: translate3d(-72.7cqw, -72.7cqw, 0)}
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .dailydo {
+            position: fixed; top: 0; left: 50%;
+            height: 100vh; width: min(56.25vh, 100vw);
+            transform: translateX(-50%);
+            container-type: inline-size;
+            font-family: "blippo";
+            background-color: #a7723b;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            overflow: hidden; isolation: isolate;
+        }
+
+        .scores {
+            position: relative; z-index: 6;
+            width: 100%; font-size: 4.45cqw;
+            padding-top: 11.8cqw;
+            display: flex; flex-direction: column;
+        }
+
+        .scores > div {
+            display: flex; align-items: center;
+            line-height: 1.355; white-space: nowrap;
+            padding-left: 10.8cqw; padding-right: 6.7cqw;
+            color: hsl(var(--h, 320deg), 100%, 76%);
+        }
+
+        .scores rank, .scores name, .scores score {
+            -webkit-text-stroke: 0.29em #1c1013;
+            paint-order: stroke fill;
+            letter-spacing: 0.02em;
+        }
+
+        .scores rank {
+            flex: none; width: 2.1em;
+            text-align: right; font-style: italic;
+            font-size: 0.82em; margin-right: 0.35em;
+        }
+        .scores score {margin-left: auto}
+
+        .scores img {
+            flex: none; height: 0.62em;
+            margin-left: 0.45em;
+            outline: 0.09em solid #170d12;
+        }
+
+
+
+        </style>
+    </head>
+    <body>
+
+        <div class="dailydo">
+
+        <div class="bg"></div>
+
+        <div class="pillars left">
+            <span class="pillar plorange"></span>
+            <span class="pillar plpink"></span>
+            <span class="pillar plmagenta"></span>
+        </div>
+        <div class="pillars right">
+            <span class="pillar plorange"></span>
+            <span class="pillar plpink"></span>
+            <span class="pillar plmagenta"></span>
+        </div>
+
+        <div class="bigstars">
+            <img src="assets/images/star.png" style="left: 56cqw; top: 20cqw; width: 14cqw; animation-delay: -1s">
+            <img src="assets/images/star.png" style="left: 41cqw; top: 33cqw; width: 8cqw; animation-delay: -4s">
+            <img src="assets/images/star.png" style="left: 2cqw; top: 51cqw; width: 10cqw; animation-delay: -6s">
+            <img src="assets/images/star.png" style="left: 63cqw; top: 62cqw; width: 12cqw; animation-delay: -2s">
+            <img src="assets/images/star.png" style="left: 28cqw; top: 84cqw; width: 8cqw; animation-delay: -7s">
+            <img src="assets/images/star.png" style="left: 74cqw; top: 104cqw; width: 9cqw; animation-delay: -3s">
+            <img src="assets/images/star.png" style="left: 8cqw; top: 118cqw; width: 12cqw; animation-delay: -5s">
+        </div>
+
+        <div class="stripes"></div>
+        <div class="vignette"></div>
+
+        <div class="dumbcontainer">
+            <svg class="logo" viewBox="0 0 900 170">
+                <defs>
+                    <linearGradient id="lgrgb" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
+                        <stop offset="80%" stop-color="#f8b5c8"/>
+                    </linearGradient>
+                    <linearGradient id="lgfade" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                        <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <filter id="erode">
+                        <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
+                        <feComposite in2="eroded" operator="in"/>
+                    </filter>
+                </defs>
+                <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Today's Scores</text></mask>
+                <g><text x="30" y="130" class="lgblack">Today's Scores</text>
+                    <text x="30" y="130" class="lgouter">Today's Scores</text>
+                    <text x="30" y="130" class="lgmid">Today's Scores</text>
+                    <text x="30" y="130" class="inner">Today's Scores</text>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text></g>
+            </svg>
+        </div>
+
+        <div class="scores">
+            <div>
+                <rank>1.</rank>
+                <name title="ID: 6983030">YEE YI</name>
+                <img src="assets/images/flags/CN.png">
+                <score>13250</score>
+            </div>
+            <div>
+                <rank>2.</rank>
+                <name title="ID: 8748622">RIE</name>
+                <img src="assets/images/flags/NZ.png">
+                <score>10795</score>
+            </div>
+            <div>
+                <rank>3.</rank>
+                <name title="ID: 593738">PLAYER 1</name>
+                <img src="assets/images/flags/JP.png">
+                <score>8480</score>
+            </div>
+            <div>
+                <rank>4.</rank>
+                <name title="ID: 8645045">POI</name>
+                <img src="assets/images/flags/PH.png">
+                <score>8395</score>
+            </div>
+        </div>
+
+        </div>
+
+        <!--div class="codediv">
+            <div class="code">Big text<sup>(small text)</sup></div>
+            <div class="popup">
+                <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <defs>
+                            <linearGradient id="lgrgb" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack">Title!</text>
+                            <text x="30" y="130" class="inner">Title!</text></g>
+                    </svg>
+                    <div>
+                        Hello there!<br>
+                        <button>Hello</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading">
+                <div class="ldglow"><span class="ldul"></span><span class="lddr"></span></div>
+                <div>Loading awesomeness...</div>
+                <img src="assets/images/celestial.webp" anti chuzzle stealing algorithm i mean draggable="false">
+            </div>
+        </div-->
+
+    </body>
+    <script>
+
+        function logotrimmer(svg) {
+            const texts = svg.querySelectorAll("text");
+            if (!texts.length) return;
+            let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+            for (const text of texts) {
+                const box = text.getBBox();
+                xmin = Math.min(xmin, box.x); ymin = Math.min(ymin, box.y);
+                xmax = Math.max(xmax, box.x + box.width); ymax = Math.max(ymax, box.y + box.height);
+            }
+
+            const outline = svg.querySelector(".lgblack");
+            const strokeWidth = outline ? parseFloat(getComputedStyle(outline).strokeWidth) || 0 : 0;
+            const pad = Math.ceil(strokeWidth / 2) + 1;
+
+            xmin -= pad; ymin -= pad; xmax += pad; ymax += pad;
+
+            const width = Math.max(1, xmax - xmin); const height = Math.max(1, ymax - ymin);
+            svg.setAttribute("viewBox", `${xmin} ${ymin} ${width} ${height}`);
+        }
+
+        function trimall() {document.querySelectorAll("svg.logo").forEach(logotrimmer)}
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(trimall);
+        } else {window.addEventListener("load", trimall)}
+
+        /* rows sweep the colour wheel from magenta at the ends to green in the
+           middle, the way the in-game list does down the screen. */
+        function rainbowrows() {
+            const rows = document.querySelectorAll(".scores > div");
+            rows.forEach(function(row, i) {
+                const p = rows.length > 1 ? i / (rows.length - 1) : 0.5;
+                row.style.setProperty("--h", (113 - 180 * Math.abs(2 * p - 1)) + "deg");
+            });
+        }
+        rainbowrows();
+
+        document.addEventListener("click", function(e) {
+            if (e.target.tagName === "BUTTON") {
+                new Audio('assets/audio/click.ogg').play();
+            }
+        });
+
+    </script>
+
+</html>

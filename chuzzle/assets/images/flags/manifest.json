@@ -1,0 +1,7202 @@
+{
+  "bundle": "chuzzle\\datainfo\\assets\\images\\Overlay.bundle",
+  "image": "chuzzle\\datainfo\\assets\\images\\Overlay.png",
+  "endianness": "little",
+  "consumed_bytes_after_flags": 14361,
+  "flags_written": 248,
+  "mapping_entries_used": 248,
+  "records": [
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 1042.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 0,
+      "file": "--.png",
+      "requested_rect": [
+        541,
+        1042,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        1042,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 226.0,
+      "rect_y": 775.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 1,
+      "file": "AD.png",
+      "requested_rect": [
+        226,
+        775,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        226,
+        775,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1421.0,
+      "rect_y": 52.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 2,
+      "file": "AE.png",
+      "requested_rect": [
+        1421,
+        52,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1421,
+        52,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 95.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 3,
+      "file": "AF.png",
+      "requested_rect": [
+        246,
+        95,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        95,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1612.0,
+      "rect_y": 291.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 4,
+      "file": "AG.png",
+      "requested_rect": [
+        1612,
+        291,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1612,
+        291,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1142.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 5,
+      "file": "AI.png",
+      "requested_rect": [
+        246,
+        1142,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1142,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 117.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 6,
+      "file": "AL.png",
+      "requested_rect": [
+        117,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        117,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 225.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 7,
+      "file": "AM.png",
+      "requested_rect": [
+        225,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        225,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1392.0,
+      "rect_y": 356.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 8,
+      "file": "AN.png",
+      "requested_rect": [
+        1392,
+        356,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1392,
+        356,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 255.0,
+      "rect_y": 2007.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 9,
+      "file": "AO.png",
+      "requested_rect": [
+        255,
+        2007,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        255,
+        2007,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 828.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 10,
+      "file": "AR.png",
+      "requested_rect": [
+        563,
+        828,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        828,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 214.0,
+      "rect_y": 1540.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 11,
+      "file": "AS.png",
+      "requested_rect": [
+        214,
+        1540,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        214,
+        1540,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 225.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 12,
+      "file": "AT.png",
+      "requested_rect": [
+        225,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        225,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 53.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 13,
+      "file": "AU.png",
+      "requested_rect": [
+        53,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        53,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 496.0,
+      "rect_y": 1225.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 14,
+      "file": "AW.png",
+      "requested_rect": [
+        496,
+        1225,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        496,
+        1225,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 543.0,
+      "rect_y": 1148.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 15,
+      "file": "AX.png",
+      "requested_rect": [
+        543,
+        1148,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        543,
+        1148,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 224.0,
+      "rect_y": 947.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 16,
+      "file": "AZ.png",
+      "requested_rect": [
+        224,
+        947,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        224,
+        947,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 35.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 17,
+      "file": "BA.png",
+      "requested_rect": [
+        35,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        35,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 266.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 18,
+      "file": "BB.png",
+      "requested_rect": [
+        972,
+        266,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        266,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1973.0,
+      "rect_y": 251.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 19,
+      "file": "BD.png",
+      "requested_rect": [
+        1973,
+        251,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1973,
+        251,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1482.0,
+      "rect_y": 62.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 20,
+      "file": "BE.png",
+      "requested_rect": [
+        1482,
+        62,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1482,
+        62,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 792.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 21,
+      "file": "BF.png",
+      "requested_rect": [
+        563,
+        792,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        792,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 988.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 22,
+      "file": "BG.png",
+      "requested_rect": [
+        541,
+        988,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        988,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 988.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 23,
+      "file": "BH.png",
+      "requested_rect": [
+        559,
+        988,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        988,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1097.0,
+      "rect_y": 79.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 24,
+      "file": "BI.png",
+      "requested_rect": [
+        1097,
+        79,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1097,
+        79,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 159.0,
+      "rect_y": 1281.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 25,
+      "file": "BJ.png",
+      "requested_rect": [
+        159,
+        1281,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        159,
+        1281,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1515.0,
+      "rect_y": 62.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 26,
+      "file": "BM.png",
+      "requested_rect": [
+        1515,
+        62,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1515,
+        62,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 171.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 27,
+      "file": "BN.png",
+      "requested_rect": [
+        171,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        171,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1955.0,
+      "rect_y": 346.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 28,
+      "file": "BO.png",
+      "requested_rect": [
+        1955,
+        346,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1955,
+        346,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 774.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 29,
+      "file": "BR.png",
+      "requested_rect": [
+        563,
+        774,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        774,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1533.0,
+      "rect_y": 98.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 30,
+      "file": "BS.png",
+      "requested_rect": [
+        1533,
+        98,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1533,
+        98,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 284.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 31,
+      "file": "BT.png",
+      "requested_rect": [
+        972,
+        284,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        284,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1937.0,
+      "rect_y": 341.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 32,
+      "file": "BV.png",
+      "requested_rect": [
+        1937,
+        341,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1937,
+        341,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2027.0,
+      "rect_y": 269.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 33,
+      "file": "BW.png",
+      "requested_rect": [
+        2027,
+        269,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2027,
+        269,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 916.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 34,
+      "file": "BY.png",
+      "requested_rect": [
+        246,
+        916,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        916,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1244.0,
+      "rect_y": 345.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 35,
+      "file": "BZ.png",
+      "requested_rect": [
+        1244,
+        345,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1244,
+        345,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 134.0,
+      "rect_y": 947.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 36,
+      "file": "CA.png",
+      "requested_rect": [
+        134,
+        947,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        134,
+        947,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 59.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 37,
+      "file": "CATALONIA.png",
+      "requested_rect": [
+        246,
+        59,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        59,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 844.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 38,
+      "file": "CC.png",
+      "requested_rect": [
+        246,
+        844,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        844,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1457.0,
+      "rect_y": 88.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 39,
+      "file": "CD.png",
+      "requested_rect": [
+        1457,
+        88,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1457,
+        88,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2020.0,
+      "rect_y": 183.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 40,
+      "file": "CF.png",
+      "requested_rect": [
+        2020,
+        183,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2020,
+        183,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 880.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 41,
+      "file": "CG.png",
+      "requested_rect": [
+        246,
+        880,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        880,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 258.0,
+      "rect_y": 1810.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 42,
+      "file": "CH.png",
+      "requested_rect": [
+        258,
+        1810,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        258,
+        1810,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1482.0,
+      "rect_y": 44.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 43,
+      "file": "CI.png",
+      "requested_rect": [
+        1482,
+        44,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1482,
+        44,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 153.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 44,
+      "file": "CK.png",
+      "requested_rect": [
+        153,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        153,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 218.0,
+      "rect_y": 1670.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 45,
+      "file": "CL.png",
+      "requested_rect": [
+        218,
+        1670,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        218,
+        1670,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1186.0,
+      "rect_y": 37.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 46,
+      "file": "CM.png",
+      "requested_rect": [
+        1186,
+        37,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1186,
+        37,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 260.0,
+      "rect_y": 947.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 47,
+      "file": "CN.png",
+      "requested_rect": [
+        260,
+        947,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        260,
+        947,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 261.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 48,
+      "file": "CO.png",
+      "requested_rect": [
+        261,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        261,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 207.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 49,
+      "file": "CR.png",
+      "requested_rect": [
+        207,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        207,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 160.0,
+      "rect_y": 775.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 50,
+      "file": "CS.png",
+      "requested_rect": [
+        160,
+        775,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        160,
+        775,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1937.0,
+      "rect_y": 287.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 51,
+      "file": "CU.png",
+      "requested_rect": [
+        1937,
+        287,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1937,
+        287,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 116.0,
+      "rect_y": 983.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 52,
+      "file": "CV.png",
+      "requested_rect": [
+        116,
+        983,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        116,
+        983,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 261.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 53,
+      "file": "CX.png",
+      "requested_rect": [
+        261,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        261,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 237.0,
+      "rect_y": 1894.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 54,
+      "file": "CY.png",
+      "requested_rect": [
+        237,
+        1894,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        237,
+        1894,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1071.0,
+      "rect_y": 98.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 55,
+      "file": "CZ.png",
+      "requested_rect": [
+        1071,
+        98,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1071,
+        98,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1666.0,
+      "rect_y": 291.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 56,
+      "file": "DE.png",
+      "requested_rect": [
+        1666,
+        291,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1666,
+        291,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 282.0,
+      "rect_y": 59.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 57,
+      "file": "DJ.png",
+      "requested_rect": [
+        282,
+        59,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        282,
+        59,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1477.0,
+      "rect_y": 356.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 58,
+      "file": "DK.png",
+      "requested_rect": [
+        1477,
+        356,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1477,
+        356,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 532.0,
+      "rect_y": 1225.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 59,
+      "file": "DM.png",
+      "requested_rect": [
+        532,
+        1225,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        532,
+        1225,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1186.0,
+      "rect_y": 1.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 60,
+      "file": "DO.png",
+      "requested_rect": [
+        1186,
+        1,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1186,
+        1,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1533.0,
+      "rect_y": 80.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 61,
+      "file": "DZ.png",
+      "requested_rect": [
+        1533,
+        80,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1533,
+        80,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 116.0,
+      "rect_y": 947.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 62,
+      "file": "EC.png",
+      "requested_rect": [
+        116,
+        947,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        116,
+        947,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1658.0,
+      "rect_y": 346.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 63,
+      "file": "EE.png",
+      "requested_rect": [
+        1658,
+        346,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1658,
+        346,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1186.0,
+      "rect_y": 91.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 64,
+      "file": "EG.png",
+      "requested_rect": [
+        1186,
+        91,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1186,
+        91,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1421.0,
+      "rect_y": 88.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 65,
+      "file": "EH.png",
+      "requested_rect": [
+        1421,
+        88,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1421,
+        88,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 846.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 66,
+      "file": "ENGLAND.png",
+      "requested_rect": [
+        563,
+        846,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        846,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 255.0,
+      "rect_y": 1894.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 67,
+      "file": "ER.png",
+      "requested_rect": [
+        255,
+        1894,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        255,
+        1894,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 135.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 68,
+      "file": "ES.png",
+      "requested_rect": [
+        135,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        135,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 124.0,
+      "rect_y": 775.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 69,
+      "file": "ET.png",
+      "requested_rect": [
+        124,
+        775,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        124,
+        775,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 836.0,
+      "rect_y": 55.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 70,
+      "file": "EUROPEANUNION.png",
+      "requested_rect": [
+        836,
+        55,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        836,
+        55,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 159.0,
+      "rect_y": 1263.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 71,
+      "file": "FAM.png",
+      "requested_rect": [
+        159,
+        1263,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        159,
+        1263,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 898.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 72,
+      "file": "FI.png",
+      "requested_rect": [
+        246,
+        898,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        898,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2019.0,
+      "rect_y": 206.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 73,
+      "file": "FJ.png",
+      "requested_rect": [
+        2019,
+        206,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2019,
+        206,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1439.0,
+      "rect_y": 70.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 74,
+      "file": "FK.png",
+      "requested_rect": [
+        1439,
+        70,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1439,
+        70,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2009.0,
+      "rect_y": 269.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 75,
+      "file": "FM.png",
+      "requested_rect": [
+        2009,
+        269,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2009,
+        269,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 153.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 76,
+      "file": "FO.png",
+      "requested_rect": [
+        153,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        153,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 338.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 77,
+      "file": "FR.png",
+      "requested_rect": [
+        972,
+        338,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        338,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 134.0,
+      "rect_y": 983.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 78,
+      "file": "GA.png",
+      "requested_rect": [
+        134,
+        983,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        134,
+        983,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 1024.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 79,
+      "file": "GB.png",
+      "requested_rect": [
+        559,
+        1024,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        1024,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 259.0,
+      "rect_y": 1344.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 80,
+      "file": "GD.png",
+      "requested_rect": [
+        259,
+        1344,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        259,
+        1344,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 1024.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 81,
+      "file": "GE.png",
+      "requested_rect": [
+        541,
+        1024,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        1024,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1196.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 82,
+      "file": "GF.png",
+      "requested_rect": [
+        246,
+        1196,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1196,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2011.0,
+      "rect_y": 99.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 83,
+      "file": "GH.png",
+      "requested_rect": [
+        2011,
+        99,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2011,
+        99,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1096.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 84,
+      "file": "GI.png",
+      "requested_rect": [
+        246,
+        1096,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1096,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 226.0,
+      "rect_y": 793.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 85,
+      "file": "GL.png",
+      "requested_rect": [
+        226,
+        793,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        226,
+        793,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2029.0,
+      "rect_y": 99.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 86,
+      "file": "GM.png",
+      "requested_rect": [
+        2029,
+        99,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2029,
+        99,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 219.0,
+      "rect_y": 2025.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 87,
+      "file": "GN.png",
+      "requested_rect": [
+        219,
+        2025,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        219,
+        2025,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 99.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 88,
+      "file": "GP.png",
+      "requested_rect": [
+        99,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        99,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 239.0,
+      "rect_y": 1283.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 89,
+      "file": "GQ.png",
+      "requested_rect": [
+        239,
+        1283,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        239,
+        1283,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1533.0,
+      "rect_y": 62.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 90,
+      "file": "GR.png",
+      "requested_rect": [
+        1533,
+        62,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1533,
+        62,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1993.0,
+      "rect_y": 99.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 91,
+      "file": "GS.png",
+      "requested_rect": [
+        1993,
+        99,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1993,
+        99,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1937.0,
+      "rect_y": 323.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 92,
+      "file": "GT.png",
+      "requested_rect": [
+        1937,
+        323,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1937,
+        323,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1214.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 93,
+      "file": "GU.png",
+      "requested_rect": [
+        246,
+        1214,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1214,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 135.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 94,
+      "file": "GW.png",
+      "requested_rect": [
+        135,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        135,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1991.0,
+      "rect_y": 251.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 95,
+      "file": "GY.png",
+      "requested_rect": [
+        1991,
+        251,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1991,
+        251,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1124.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 96,
+      "file": "HK.png",
+      "requested_rect": [
+        246,
+        1124,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1124,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1186.0,
+      "rect_y": 19.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 97,
+      "file": "HM.png",
+      "requested_rect": [
+        1186,
+        19,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1186,
+        19,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1457.0,
+      "rect_y": 70.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 98,
+      "file": "HN.png",
+      "requested_rect": [
+        1457,
+        70,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1457,
+        70,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1973.0,
+      "rect_y": 328.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 99,
+      "file": "HR.png",
+      "requested_rect": [
+        1973,
+        328,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1973,
+        328,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 99.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 100,
+      "file": "HT.png",
+      "requested_rect": [
+        99,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        99,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2029.0,
+      "rect_y": 81.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 101,
+      "file": "HU.png",
+      "requested_rect": [
+        2029,
+        81,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2029,
+        81,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 836.0,
+      "rect_y": 19.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 102,
+      "file": "ID.png",
+      "requested_rect": [
+        836,
+        19,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        836,
+        19,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 522.0,
+      "rect_y": 56.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 103,
+      "file": "IE.png",
+      "requested_rect": [
+        522,
+        56,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        522,
+        56,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2011.0,
+      "rect_y": 81.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 104,
+      "file": "IL.png",
+      "requested_rect": [
+        2011,
+        81,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2011,
+        81,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1955.0,
+      "rect_y": 251.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 105,
+      "file": "IN.png",
+      "requested_rect": [
+        1955,
+        251,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1955,
+        251,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1937.0,
+      "rect_y": 269.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 106,
+      "file": "IO.png",
+      "requested_rect": [
+        1937,
+        269,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1937,
+        269,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 243.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 107,
+      "file": "IQ.png",
+      "requested_rect": [
+        243,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        243,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2021.0,
+      "rect_y": 326.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 108,
+      "file": "IR.png",
+      "requested_rect": [
+        2021,
+        326,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2021,
+        326,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 287.0,
+      "rect_y": 95.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 109,
+      "file": "IS.png",
+      "requested_rect": [
+        287,
+        95,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        287,
+        95,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 302.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 110,
+      "file": "IT.png",
+      "requested_rect": [
+        972,
+        302,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        302,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 862.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 111,
+      "file": "JM.png",
+      "requested_rect": [
+        246,
+        862,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        862,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1515.0,
+      "rect_y": 44.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 112,
+      "file": "JO.png",
+      "requested_rect": [
+        1515,
+        44,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1515,
+        44,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 207.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 113,
+      "file": "JP.png",
+      "requested_rect": [
+        207,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        207,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 159.0,
+      "rect_y": 1245.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 114,
+      "file": "KE.png",
+      "requested_rect": [
+        159,
+        1245,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        159,
+        1245,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 522.0,
+      "rect_y": 74.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 115,
+      "file": "KG.png",
+      "requested_rect": [
+        522,
+        74,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        522,
+        74,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 738.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 116,
+      "file": "KH.png",
+      "requested_rect": [
+        563,
+        738,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        738,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 970.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 117,
+      "file": "KI.png",
+      "requested_rect": [
+        541,
+        970,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        970,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 242.0,
+      "rect_y": 947.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 118,
+      "file": "KM.png",
+      "requested_rect": [
+        242,
+        947,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        242,
+        947,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1439.0,
+      "rect_y": 88.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 119,
+      "file": "KN.png",
+      "requested_rect": [
+        1439,
+        88,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1439,
+        88,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1671.0,
+      "rect_y": 309.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 120,
+      "file": "KP.png",
+      "requested_rect": [
+        1671,
+        309,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1671,
+        309,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 232.0,
+      "rect_y": 1540.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 121,
+      "file": "KR.png",
+      "requested_rect": [
+        232,
+        1540,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        232,
+        1540,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 264.0,
+      "rect_y": 59.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 122,
+      "file": "KW.png",
+      "requested_rect": [
+        264,
+        59,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        264,
+        59,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 258.0,
+      "rect_y": 1792.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 123,
+      "file": "KY.png",
+      "requested_rect": [
+        258,
+        1792,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        258,
+        1792,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1663.0,
+      "rect_y": 249.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 124,
+      "file": "KZ.png",
+      "requested_rect": [
+        1663,
+        249,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1663,
+        249,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 258.0,
+      "rect_y": 1828.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 125,
+      "file": "LA.png",
+      "requested_rect": [
+        258,
+        1828,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        258,
+        1828,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1412.0,
+      "rect_y": 354.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 126,
+      "file": "LB.png",
+      "requested_rect": [
+        1412,
+        354,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1412,
+        354,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2008.0,
+      "rect_y": 1.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 127,
+      "file": "LC.png",
+      "requested_rect": [
+        2008,
+        1,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2008,
+        1,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1671.0,
+      "rect_y": 327.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 128,
+      "file": "LI.png",
+      "requested_rect": [
+        1671,
+        327,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1671,
+        327,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1160.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 129,
+      "file": "LK.png",
+      "requested_rect": [
+        246,
+        1160,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1160,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 189.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 130,
+      "file": "LR.png",
+      "requested_rect": [
+        189,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        189,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1003.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 131,
+      "file": "LS.png",
+      "requested_rect": [
+        246,
+        1003,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1003,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 952.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 132,
+      "file": "LT.png",
+      "requested_rect": [
+        559,
+        952,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        952,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 432.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 133,
+      "file": "LU.png",
+      "requested_rect": [
+        246,
+        432,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        432,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 248.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 134,
+      "file": "LV.png",
+      "requested_rect": [
+        972,
+        248,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        248,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 952.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 135,
+      "file": "LY.png",
+      "requested_rect": [
+        541,
+        952,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        952,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1071.0,
+      "rect_y": 44.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 136,
+      "file": "MA.png",
+      "requested_rect": [
+        1071,
+        44,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1071,
+        44,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 543.0,
+      "rect_y": 1130.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 137,
+      "file": "MC.png",
+      "requested_rect": [
+        543,
+        1130,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        543,
+        1130,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1097.0,
+      "rect_y": 97.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 138,
+      "file": "MD.png",
+      "requested_rect": [
+        1097,
+        97,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1097,
+        97,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 514.0,
+      "rect_y": 1225.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 139,
+      "file": "ME.png",
+      "requested_rect": [
+        514,
+        1225,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        514,
+        1225,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 189.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 140,
+      "file": "MG.png",
+      "requested_rect": [
+        189,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        189,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 219.0,
+      "rect_y": 2007.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 141,
+      "file": "MH.png",
+      "requested_rect": [
+        219,
+        2007,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        219,
+        2007,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1515.0,
+      "rect_y": 98.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 142,
+      "file": "MK.png",
+      "requested_rect": [
+        1515,
+        98,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1515,
+        98,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1991.0,
+      "rect_y": 269.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 143,
+      "file": "ML.png",
+      "requested_rect": [
+        1991,
+        269,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1991,
+        269,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1973.0,
+      "rect_y": 269.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 144,
+      "file": "MM.png",
+      "requested_rect": [
+        1973,
+        269,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1973,
+        269,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 224.0,
+      "rect_y": 965.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 145,
+      "file": "MN.png",
+      "requested_rect": [
+        224,
+        965,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        224,
+        965,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 160.0,
+      "rect_y": 793.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 146,
+      "file": "MO.png",
+      "requested_rect": [
+        160,
+        793,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        160,
+        793,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 208.0,
+      "rect_y": 793.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 147,
+      "file": "MP.png",
+      "requested_rect": [
+        208,
+        793,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        208,
+        793,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1645.0,
+      "rect_y": 249.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 148,
+      "file": "MQ.png",
+      "requested_rect": [
+        1645,
+        249,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1645,
+        249,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 257.0,
+      "rect_y": 1739.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 149,
+      "file": "MR.png",
+      "requested_rect": [
+        257,
+        1739,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        257,
+        1739,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 142.0,
+      "rect_y": 775.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 150,
+      "file": "MS.png",
+      "requested_rect": [
+        142,
+        775,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        142,
+        775,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2020.0,
+      "rect_y": 165.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 151,
+      "file": "MT.png",
+      "requested_rect": [
+        2020,
+        165,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2020,
+        165,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 224.0,
+      "rect_y": 983.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 152,
+      "file": "MU.png",
+      "requested_rect": [
+        224,
+        983,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        224,
+        983,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 1006.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 153,
+      "file": "MV.png",
+      "requested_rect": [
+        559,
+        1006,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        1006,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1975.0,
+      "rect_y": 99.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 154,
+      "file": "MW.png",
+      "requested_rect": [
+        1975,
+        99,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1975,
+        99,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1071.0,
+      "rect_y": 80.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 155,
+      "file": "MX.png",
+      "requested_rect": [
+        1071,
+        80,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1071,
+        80,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1645.0,
+      "rect_y": 267.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 156,
+      "file": "MY.png",
+      "requested_rect": [
+        1645,
+        267,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1645,
+        267,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1648.0,
+      "rect_y": 291.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 157,
+      "file": "MZ.png",
+      "requested_rect": [
+        1648,
+        291,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1648,
+        291,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 756.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 158,
+      "file": "NA.png",
+      "requested_rect": [
+        563,
+        756,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        756,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1993.0,
+      "rect_y": 81.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 159,
+      "file": "NC.png",
+      "requested_rect": [
+        1993,
+        81,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1993,
+        81,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 257.0,
+      "rect_y": 1283.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 160,
+      "file": "NE.png",
+      "requested_rect": [
+        257,
+        1283,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        257,
+        1283,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 836.0,
+      "rect_y": 73.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 161,
+      "file": "NF.png",
+      "requested_rect": [
+        836,
+        73,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        836,
+        73,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2021.0,
+      "rect_y": 344.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 162,
+      "file": "NG.png",
+      "requested_rect": [
+        2021,
+        344,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2021,
+        344,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 561.0,
+      "rect_y": 1148.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 163,
+      "file": "NI.png",
+      "requested_rect": [
+        561,
+        1148,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        561,
+        1148,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1421.0,
+      "rect_y": 70.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 164,
+      "file": "NL.png",
+      "requested_rect": [
+        1421,
+        70,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1421,
+        70,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1903.0,
+      "rect_y": 290.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 165,
+      "file": "NO.png",
+      "requested_rect": [
+        1903,
+        290,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1903,
+        290,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1591.0,
+      "rect_y": 354.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 166,
+      "file": "NP.png",
+      "requested_rect": [
+        1591,
+        354,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1591,
+        354,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 77.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 167,
+      "file": "NR.png",
+      "requested_rect": [
+        246,
+        77,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        77,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 522.0,
+      "rect_y": 92.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 168,
+      "file": "NU.png",
+      "requested_rect": [
+        522,
+        92,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        522,
+        92,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 171.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 169,
+      "file": "NZ.png",
+      "requested_rect": [
+        171,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        171,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 134.0,
+      "rect_y": 965.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 170,
+      "file": "OM.png",
+      "requested_rect": [
+        134,
+        965,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        134,
+        965,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1457.0,
+      "rect_y": 52.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 171,
+      "file": "PA.png",
+      "requested_rect": [
+        1457,
+        52,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1457,
+        52,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 124.0,
+      "rect_y": 793.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 172,
+      "file": "PE.png",
+      "requested_rect": [
+        124,
+        793,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        124,
+        793,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 356.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 173,
+      "file": "PF.png",
+      "requested_rect": [
+        972,
+        356,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        356,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 287.0,
+      "rect_y": 77.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 174,
+      "file": "PG.png",
+      "requested_rect": [
+        287,
+        77,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        287,
+        77,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1097.0,
+      "rect_y": 43.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 175,
+      "file": "PH.png",
+      "requested_rect": [
+        1097,
+        43,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1097,
+        43,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2019.0,
+      "rect_y": 224.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 176,
+      "file": "PK.png",
+      "requested_rect": [
+        2019,
+        224,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2019,
+        224,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 208.0,
+      "rect_y": 775.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 177,
+      "file": "PL.png",
+      "requested_rect": [
+        208,
+        775,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        208,
+        775,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 250.0,
+      "rect_y": 1540.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 178,
+      "file": "PM.png",
+      "requested_rect": [
+        250,
+        1540,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        250,
+        1540,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1937.0,
+      "rect_y": 251.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 179,
+      "file": "PN.png",
+      "requested_rect": [
+        1937,
+        251,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1937,
+        251,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 243.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 180,
+      "file": "PR.png",
+      "requested_rect": [
+        243,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        243,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1515.0,
+      "rect_y": 80.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 181,
+      "file": "PS.png",
+      "requested_rect": [
+        1515,
+        80,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1515,
+        80,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 826.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 182,
+      "file": "PT.png",
+      "requested_rect": [
+        246,
+        826,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        826,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1078.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 183,
+      "file": "PW.png",
+      "requested_rect": [
+        246,
+        1078,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1078,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 142.0,
+      "rect_y": 793.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 184,
+      "file": "PY.png",
+      "requested_rect": [
+        142,
+        793,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        142,
+        793,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 836.0,
+      "rect_y": 91.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 185,
+      "file": "QA.png",
+      "requested_rect": [
+        836,
+        91,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        836,
+        91,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 1103.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 186,
+      "file": "RE.png",
+      "requested_rect": [
+        541,
+        1103,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        1103,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1955.0,
+      "rect_y": 328.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 187,
+      "file": "RO.png",
+      "requested_rect": [
+        1955,
+        328,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1955,
+        328,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1630.0,
+      "rect_y": 291.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 188,
+      "file": "RS.png",
+      "requested_rect": [
+        1630,
+        291,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1630,
+        291,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 702.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 189,
+      "file": "RU.png",
+      "requested_rect": [
+        563,
+        702,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        702,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 450.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 190,
+      "file": "RW.png",
+      "requested_rect": [
+        246,
+        450,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        450,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 255.0,
+      "rect_y": 2025.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 191,
+      "file": "SA.png",
+      "requested_rect": [
+        255,
+        2025,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        255,
+        2025,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2026.0,
+      "rect_y": 1.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 192,
+      "file": "SB.png",
+      "requested_rect": [
+        2026,
+        1,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2026,
+        1,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 720.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 193,
+      "file": "SC.png",
+      "requested_rect": [
+        563,
+        720,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        720,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2026.0,
+      "rect_y": 19.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 194,
+      "file": "SCOTLAND.png",
+      "requested_rect": [
+        2026,
+        19,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2026,
+        19,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 35.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 195,
+      "file": "SD.png",
+      "requested_rect": [
+        35,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        35,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1591.0,
+      "rect_y": 336.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 196,
+      "file": "SE.png",
+      "requested_rect": [
+        1591,
+        336,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1591,
+        336,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 970.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 197,
+      "file": "SG.png",
+      "requested_rect": [
+        559,
+        970,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        970,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 177.0,
+      "rect_y": 1283.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 198,
+      "file": "SH.png",
+      "requested_rect": [
+        177,
+        1283,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        177,
+        1283,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 206.0,
+      "rect_y": 947.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 199,
+      "file": "SI.png",
+      "requested_rect": [
+        206,
+        947,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        206,
+        947,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2027.0,
+      "rect_y": 251.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 200,
+      "file": "SJ.png",
+      "requested_rect": [
+        2027,
+        251,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2027,
+        251,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1937.0,
+      "rect_y": 305.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 201,
+      "file": "SK.png",
+      "requested_rect": [
+        1937,
+        305,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1937,
+        305,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1955.0,
+      "rect_y": 269.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 202,
+      "file": "SL.png",
+      "requested_rect": [
+        1955,
+        269,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1955,
+        269,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1186.0,
+      "rect_y": 55.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 203,
+      "file": "SM.png",
+      "requested_rect": [
+        1186,
+        55,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1186,
+        55,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1533.0,
+      "rect_y": 44.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 204,
+      "file": "SN.png",
+      "requested_rect": [
+        1533,
+        44,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1533,
+        44,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 525.0,
+      "rect_y": 1130.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 205,
+      "file": "SO.png",
+      "requested_rect": [
+        525,
+        1130,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        525,
+        1130,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1640.0,
+      "rect_y": 346.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 206,
+      "file": "SR.png",
+      "requested_rect": [
+        1640,
+        346,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1640,
+        346,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1903.0,
+      "rect_y": 344.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 207,
+      "file": "ST.png",
+      "requested_rect": [
+        1903,
+        344,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1903,
+        344,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 522.0,
+      "rect_y": 38.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 208,
+      "file": "SV.png",
+      "requested_rect": [
+        522,
+        38,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        522,
+        38,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 206.0,
+      "rect_y": 965.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 209,
+      "file": "SY.png",
+      "requested_rect": [
+        206,
+        965,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        206,
+        965,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 257.0,
+      "rect_y": 1757.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 210,
+      "file": "SZ.png",
+      "requested_rect": [
+        257,
+        1757,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        257,
+        1757,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1439.0,
+      "rect_y": 52.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 211,
+      "file": "TC.png",
+      "requested_rect": [
+        1439,
+        52,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1439,
+        52,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1186.0,
+      "rect_y": 73.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 212,
+      "file": "TD.png",
+      "requested_rect": [
+        1186,
+        73,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1186,
+        73,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 972.0,
+      "rect_y": 320.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 213,
+      "file": "TF.png",
+      "requested_rect": [
+        972,
+        320,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        972,
+        320,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 254.0,
+      "rect_y": 1670.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 214,
+      "file": "TG.png",
+      "requested_rect": [
+        254,
+        1670,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        254,
+        1670,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1903.0,
+      "rect_y": 326.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 215,
+      "file": "TH.png",
+      "requested_rect": [
+        1903,
+        326,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1903,
+        326,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1612.0,
+      "rect_y": 347.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 216,
+      "file": "TJ.png",
+      "requested_rect": [
+        1612,
+        347,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1612,
+        347,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1097.0,
+      "rect_y": 61.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 217,
+      "file": "TK.png",
+      "requested_rect": [
+        1097,
+        61,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1097,
+        61,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1444.0,
+      "rect_y": 356.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 218,
+      "file": "TL.png",
+      "requested_rect": [
+        1444,
+        356,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1444,
+        356,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1021.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 219,
+      "file": "TM.png",
+      "requested_rect": [
+        246,
+        1021,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1021,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1975.0,
+      "rect_y": 81.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 220,
+      "file": "TN.png",
+      "requested_rect": [
+        1975,
+        81,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1975,
+        81,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 116.0,
+      "rect_y": 965.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 221,
+      "file": "TO.png",
+      "requested_rect": [
+        116,
+        965,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        116,
+        965,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 525.0,
+      "rect_y": 1148.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 222,
+      "file": "TR.png",
+      "requested_rect": [
+        525,
+        1148,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        525,
+        1148,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 237.0,
+      "rect_y": 2007.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 223,
+      "file": "TT.png",
+      "requested_rect": [
+        237,
+        2007,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        237,
+        2007,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1071.0,
+      "rect_y": 62.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 224,
+      "file": "TV.png",
+      "requested_rect": [
+        1071,
+        62,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1071,
+        62,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2008.0,
+      "rect_y": 19.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 225,
+      "file": "TW.png",
+      "requested_rect": [
+        2008,
+        19,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2008,
+        19,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1541.0,
+      "rect_y": 356.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 226,
+      "file": "TZ.png",
+      "requested_rect": [
+        1541,
+        356,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1541,
+        356,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 561.0,
+      "rect_y": 1130.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 227,
+      "file": "UA.png",
+      "requested_rect": [
+        561,
+        1130,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        561,
+        1130,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 1042.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 228,
+      "file": "UG.png",
+      "requested_rect": [
+        559,
+        1042,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        1042,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 53.0,
+      "rect_y": 1386.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 229,
+      "file": "UM.png",
+      "requested_rect": [
+        53,
+        1386,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        53,
+        1386,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1374.0,
+      "rect_y": 356.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 230,
+      "file": "US.png",
+      "requested_rect": [
+        1374,
+        356,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1374,
+        356,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 246.0,
+      "rect_y": 1178.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 231,
+      "file": "UY.png",
+      "requested_rect": [
+        246,
+        1178,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        246,
+        1178,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 541.0,
+      "rect_y": 1006.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 232,
+      "file": "UZ.png",
+      "requested_rect": [
+        541,
+        1006,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        541,
+        1006,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2012.0,
+      "rect_y": 56.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 233,
+      "file": "VA.png",
+      "requested_rect": [
+        2012,
+        56,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2012,
+        56,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 684.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 234,
+      "file": "VC.png",
+      "requested_rect": [
+        563,
+        684,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        684,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 836.0,
+      "rect_y": 37.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 235,
+      "file": "VE.png",
+      "requested_rect": [
+        836,
+        37,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        836,
+        37,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 836.0,
+      "rect_y": 1.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 236,
+      "file": "VG.png",
+      "requested_rect": [
+        836,
+        1,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        836,
+        1,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 117.0,
+      "rect_y": 1368.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 237,
+      "file": "VI.png",
+      "requested_rect": [
+        117,
+        1368,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        117,
+        1368,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1903.0,
+      "rect_y": 308.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 238,
+      "file": "VN.png",
+      "requested_rect": [
+        1903,
+        308,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1903,
+        308,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 559.0,
+      "rect_y": 1103.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 239,
+      "file": "VU.png",
+      "requested_rect": [
+        559,
+        1103,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        559,
+        1103,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2012.0,
+      "rect_y": 38.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 240,
+      "file": "WALES.png",
+      "requested_rect": [
+        2012,
+        38,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2012,
+        38,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 563.0,
+      "rect_y": 810.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 241,
+      "file": "WF.png",
+      "requested_rect": [
+        563,
+        810,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        563,
+        810,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 236.0,
+      "rect_y": 1670.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 242,
+      "file": "WS.png",
+      "requested_rect": [
+        236,
+        1670,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        236,
+        1670,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1973.0,
+      "rect_y": 346.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 243,
+      "file": "YE.png",
+      "requested_rect": [
+        1973,
+        346,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1973,
+        346,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 206.0,
+      "rect_y": 983.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 244,
+      "file": "YT.png",
+      "requested_rect": [
+        206,
+        983,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        206,
+        983,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 1663.0,
+      "rect_y": 267.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 245,
+      "file": "ZA.png",
+      "requested_rect": [
+        1663,
+        267,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        1663,
+        267,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 2009.0,
+      "rect_y": 251.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 246,
+      "file": "ZM.png",
+      "requested_rect": [
+        2009,
+        251,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        2009,
+        251,
+        16,
+        16
+      ]
+    },
+    {
+      "sprite_id": 0,
+      "rect_x": 237.0,
+      "rect_y": 2025.0,
+      "rect_w": 16.0,
+      "rect_h": 16.0,
+      "width": 16,
+      "height": 16,
+      "anchor_w": 16.0,
+      "anchor_h": 16.0,
+      "anchor_x": 0.0,
+      "anchor_y": 0.0,
+      "rotated": false,
+      "point_count": 0,
+      "icon_index": 247,
+      "file": "ZW.png",
+      "requested_rect": [
+        237,
+        2025,
+        16,
+        16
+      ],
+      "clamped_rect": [
+        237,
+        2025,
+        16,
+        16
+      ]
+    }
+  ]
+}
