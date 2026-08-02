@@ -436,7 +436,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
         }
-        .ui .dumbcontainer, .ui .footer, .ui .calendar {pointer-events: auto}
+        .ui .dumbcontainer, .ui .footer {pointer-events: auto}
 
         .vignette.over {
             position: fixed; inset: 0;
@@ -445,11 +445,10 @@
 
         .scroller {
             position: absolute; inset: 0;
-            overflow: hidden; cursor: grab;
+            overflow: hidden; cursor: scroll;
             touch-action: none;
             user-select: none; -webkit-user-select: none;
         }
-        .scroller.dragging {cursor: grabbing}
 
         .scores {
             position: absolute; inset: 0;
@@ -464,12 +463,22 @@
             padding-left: 9.5cqw; padding-right: 6.7cqw;
         }
 
+        /* the drop has to carry the outline down with it, and text-shadow only
+           ever shadows the unstroked glyph. so the shadow is a ring of copies at
+           the stroke's own radius, recentred on the drop offset - same trick
+           candies.monster uses to fake paint-order on old browsers. */
         .scores rank, .scores name, .scores score {
             -webkit-text-stroke: 0.3em #261b19;
             paint-order: stroke fill; font-weight: 300; /* don't change weight please */
             text-transform: uppercase;
-            /* has to clear the 0.15em the stroke already sticks out by */
-            text-shadow: 0 0.27em 0 #261b19;
+            text-shadow:
+                0.150em 0.120em 0 #261b19, 0.130em 0.195em 0 #261b19,
+                0.075em 0.250em 0 #261b19, 0.000em 0.270em 0 #261b19,
+                -0.075em 0.250em 0 #261b19, -0.130em 0.195em 0 #261b19,
+                -0.150em 0.120em 0 #261b19, -0.130em 0.045em 0 #261b19,
+                -0.075em -0.010em 0 #261b19, 0.000em -0.030em 0 #261b19,
+                0.075em -0.010em 0 #261b19, 0.130em 0.045em 0 #261b19,
+                0 0.120em 0 #261b19;
         }
 
         .scores rank {
@@ -477,14 +486,30 @@
             text-align: right; font-style: italic;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 0.6em; margin-right: 0.35em;
-            letter-spacing: 0; font-weight: 800
+            letter-spacing: 0; font-weight: 800;
+            /* scaled by 1/0.6 so the outline matches the rest of the row */
+            -webkit-text-stroke-width: 0.5em;
+            text-shadow:
+                0.250em 0.200em 0 #261b19, 0.217em 0.325em 0 #261b19,
+                0.125em 0.417em 0 #261b19, 0.000em 0.450em 0 #261b19,
+                -0.125em 0.417em 0 #261b19, -0.217em 0.325em 0 #261b19,
+                -0.250em 0.200em 0 #261b19, -0.217em 0.075em 0 #261b19,
+                -0.125em -0.017em 0 #261b19, 0.000em -0.050em 0 #261b19,
+                0.125em -0.017em 0 #261b19, 0.217em 0.075em 0 #261b19,
+                0 0.200em 0 #261b19;
         }
         .scores score {margin-left: auto}
+        /* blippo digits run 0.32em to 0.76em wide, so each gets a fixed cell to
+           sit in - the game columns them the same way. */
+        .scores score d {
+            display: inline-block; width: 0.637em;
+            text-align: center;
+        }
 
         .scores img {
-            flex: none; height: 0.81em;
+            flex: none; height: 0.7em;
             align-self: baseline; margin-left: 0.3em;
-            position: relative; top: 0.26em;
+            position: relative; top: 0.125em;
             border: 0.15em solid #261b19;
             box-shadow: 0 0.12em 0 #261b19;
         }
@@ -504,6 +529,8 @@
         }
         .footer .logo .inner {fill: url(#lgrgb2)}
         .footer .logo .lglight {fill: url(#lgfade2)}
+        .calwrap .logo .inner {fill: url(#lgrgb3)}
+        .calwrap .logo .lglight {fill: url(#lgfade)}
 
         .calbutton, .todaybutton {
             position: absolute; width: 15cqw; height: 15cqw;
@@ -523,6 +550,42 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
+        .profile .popup {max-width: calc(var(--u) * 0.9)}
+        .profile .pucontent .logo {height: calc(var(--u) * 0.075)}
+        .profile .pucontent > div {
+            font-size: calc(var(--u) * 0.03);
+            line-height: 1.7; letter-spacing: 0.04em;
+            padding: calc(var(--u) * 0.03) calc(var(--u) * 0.04);
+        }
+        .profile .pucontent > div b {
+            color: #ffd200; font-weight: inherit;
+            display: block; padding-bottom: calc(var(--u) * 0.012);
+        }
+        .profile .pucontent > div span {
+            display: flex; justify-content: space-between;
+            gap: calc(var(--u) * 0.05); color: white;
+            white-space: nowrap;
+        }
+        .profile .pucontent > div span i {color: #8ea2e0; font-style: normal}
+        .profile .pucontent img {
+            height: calc(var(--u) * 0.05);
+            border: calc(var(--u) * 0.005) solid #261b19;
+            vertical-align: middle;
+        }
+
+        /* the id is handed out by the server, not derived on device, so all this
+           can show is whatever has been stored for this browser. */
+        .debugid {
+            position: fixed; top: 0; right: 0;
+            z-index: 10; padding: 0.4em 0.6em;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px; font-weight: 400;
+            color: #9fb4ff; background: rgba(0,0,0,0.55);
+            border-bottom-left-radius: 0.6em;
+            letter-spacing: 0; cursor: pointer;
+            white-space: pre;
+        }
+
         .idtip {
             position: fixed; z-index: 9;
             padding: 0.35em 0.7em; border-radius: 1em;
@@ -537,43 +600,130 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .calendar {
-            position: absolute; z-index: 8;
-            left: 50%; bottom: 24cqw;
-            transform: translateX(-50%);
-            width: 78cqw; padding: 3cqw;
-            border-radius: 2cqw; text-align: center;
-            background: #2c2350;
-            box-shadow: 0 0 0 1.1cqw #feff48, 0 0 0 1.7cqw #60204a;
-            font-family: "blippo"; font-size: 4cqw;
-            display: none;
+        /* body level, not inside .ui: that column sets container-type, which makes
+           it the containing block for fixed children and would pin the dim to the
+           column instead of the window. sizes go through --u for the same reason. */
+        .calwrap {
+            position: fixed; inset: 0; z-index: 8;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.55);
         }
-        .calendar.open {display: block}
+        .calwrap.open {display: flex}
 
-        .calendar .caption {
-            color: #ffe66b; letter-spacing: 0.06em;
-            text-transform: uppercase; padding-bottom: 2cqw;
+        .calwrap .popup {
+            width: calc(var(--u) * 0.78); margin: 0;
+            max-width: calc(100vw - var(--u) * 0.16);
+            font-family: "blippo";
         }
-        .calendar .grid {
-            display: grid; gap: 1cqw;
+        .calwrap .pucontent {
+            width: 100%; height: auto;
+            padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.04);
+        }
+        .calwrap .pucontent .logo {
+            width: auto !important; height: calc(var(--u) * 0.062);
+            max-width: calc(var(--u) * 0.52);
+        }
+        .calwrap .pucontent > div {
+            width: calc(100% - var(--u) * 0.08);
+            padding: calc(var(--u) * 0.024) calc(var(--u) * 0.024) calc(var(--u) * 0.02);
+        }
+
+        /* .pucontent div also matches this one, so the panel look has to be undone */
+        .pucontent .calgrid {
+            display: grid; gap: calc(var(--u) * 0.008);
             grid-template-columns: repeat(7, 1fr);
+            width: auto; padding: 0; top: 0;
+            background: none; box-shadow: none;
+            border-radius: 0;
         }
-        .calendar .grid span {
-            color: #9c86c8; font-size: 0.7em;
-            padding-bottom: 0.4cqw;
+        .pucontent .calgrid span {
+            color: #8ea2e0; font-size: calc(var(--u) * 0.024);
+            letter-spacing: 0.05em; padding-bottom: calc(var(--u) * 0.006);
         }
-        .calendar .grid button {
-            font-family: "blippo"; font-size: 1em;
-            margin: 0; padding: 1.2cqw 0;
-            border-radius: 22%; color: #6b5a8e;
-            background: rgba(255,255,255,0.05);
-            cursor: default;
+        /* every day is the same button; the ones out of reach are just faded and
+           taken out of the way of the pointer. */
+        .pucontent .calgrid button {
+            width: 100%; aspect-ratio: 1; height: auto;
+            margin: 0; padding: 0; border-radius: 0.25em;
+            font-family: "blippo"; font-size: calc(var(--u) * 0.03);
+            text-transform: none; color: white;
+            cursor: pointer; box-shadow: none;
+            background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
+                #1130bf 80%, #a2aee6 100%);
+            -webkit-text-stroke: calc(var(--u) * 0.006) black;
+            paint-order: stroke fill;
         }
-        .calendar .grid button.live {
-            color: #2c2350; cursor: pointer;
-            background: linear-gradient(180deg, #fff5a8 0%, #ffd200 100%);
+        .pucontent .calgrid button:not(.live) {
+            opacity: 0.5; pointer-events: none;
         }
-        .calendar .grid button.today {box-shadow: 0 0 0 0.5cqw #ff7aa8}
+        .pucontent .calgrid button.live:active {
+            background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
+                #6020cf 80%, #ba9fe6 100%);
+        }
+        .pucontent .calgrid button.today {box-shadow: 0 0 0 calc(var(--u) * 0.005) #ffd200}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        /* UnderDeko: built by FunDialog::Initialize, ticked by FunDialog::Update,
+           drawn by FunDialog::Draw. it spawns Anim_RetroCircle every 50 frames at
+           the dialog centre less 25px, colour from a global counter mod 6 (red
+           green blue yellow magenta cyan), starting scale (dialogheight / 386) / 2,
+           alpha 0.5, scale multiplied by 1.005 and alpha dropped 0.00175 a frame -
+           so about 4.8s of life and 4.2x growth, drawn additive. and every 15
+           frames an Anim_UnderStar somewhere on a rect inset 100px from the dialog,
+           travelling straight out from the centre at 0.5px a frame. */
+        /* sits on the backdrop rather than inside the popup: the dialog body is
+           opaque yellow, and screen blending over that shows nothing. */
+        .deko {
+            position: absolute; left: 50%; top: 50%;
+            width: calc(var(--u) * 1.06); height: calc(var(--u) * 1.06);
+            transform: translate(-50%, -50%);
+            overflow: hidden; pointer-events: none;
+            border-radius: 6%; z-index: 0;
+        }
+        .calwrap .popup {position: relative; z-index: 1}
+        .deko b {
+            position: absolute; left: 50%; top: 50%;
+            width: calc(var(--u) * 0.5); height: calc(var(--u) * 0.5);
+            margin: calc(var(--u) * -0.25) 0 0 calc(var(--u) * -0.25);
+            border-radius: 50%; mix-blend-mode: screen;
+            opacity: 0; animation: retrocircle 4.8s linear infinite;
+        }
+        .deko b:nth-child(1) {background: radial-gradient(circle, #f00 60%, rgba(255,0,0,0) 72%)}
+        .deko b:nth-child(2) {background: radial-gradient(circle, #0f0 60%, rgba(0,255,0,0) 72%)}
+        .deko b:nth-child(3) {background: radial-gradient(circle, #00f 60%, rgba(0,0,255,0) 72%)}
+        .deko b:nth-child(4) {background: radial-gradient(circle, #ff0 60%, rgba(255,255,0,0) 72%)}
+        .deko b:nth-child(5) {background: radial-gradient(circle, #f0f 60%, rgba(255,0,255,0) 72%)}
+        .deko b:nth-child(6) {background: radial-gradient(circle, #0ff 60%, rgba(0,255,255,0) 72%)}
+        .deko b:nth-child(2) {animation-delay: -0.8s}
+        .deko b:nth-child(3) {animation-delay: -1.6s}
+        .deko b:nth-child(4) {animation-delay: -2.4s}
+        .deko b:nth-child(5) {animation-delay: -3.2s}
+        .deko b:nth-child(6) {animation-delay: -4.0s}
+
+        /* 1.005^frame over 286 frames, so it only ever reaches about 4.2x */
+        @keyframes retrocircle {
+            0% {transform: translateY(-2.6%) scale(1); opacity: 0.5}
+            25% {transform: translateY(-2.6%) scale(1.43); opacity: 0.375}
+            50% {transform: translateY(-2.6%) scale(2.04); opacity: 0.25}
+            75% {transform: translateY(-2.6%) scale(2.91); opacity: 0.125}
+            100% {transform: translateY(-2.6%) scale(4.2); opacity: 0}
+        }
+
+        .deko i {
+            position: absolute;
+            width: calc(var(--u) * 0.055); height: calc(var(--u) * 0.055);
+            background: url("assets/images/star.png") center/contain no-repeat;
+            opacity: 0; animation: understar 3s linear infinite;
+        }
+        @keyframes understar {
+            0% {opacity: 0; transform: translate(0, 0) scale(0.3) rotate(0deg)}
+            18% {opacity: 0.95}
+            100% {
+                opacity: 0;
+                transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(190deg);
+            }
+        }
 
 
 
@@ -608,9 +758,46 @@
         </div>
 
         <div class="idtip"></div>
+        <div class="debugid"></div>
+
+        <div class="calwrap profile" data-role="profile">
+            <div class="popup">
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <g><text x="30" y="130" class="lgblack">Player</text>
+                            <text x="30" y="130" class="lgouter">Player</text>
+                            <text x="30" y="130" class="lgmid">Player</text>
+                            <text x="30" y="130" class="inner">Player</text></g>
+                    </svg>
+                    <div></div>
+                </div>
+            </div>
+        </div>
 
 
         <div class="vignette over"></div>
+
+        <div class="calwrap" data-role="calendar">
+            <div class="deko"></div>
+            <div class="popup">
+                <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <defs>
+                            <linearGradient id="lgrgb3" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
+                                <stop offset="80%" stop-color="#f8b5c8"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack">Pick A Day!</text>
+                            <text x="30" y="130" class="lgouter">Pick A Day!</text>
+                            <text x="30" y="130" class="lgmid">Pick A Day!</text>
+                            <text x="30" y="130" class="inner">Pick A Day!</text></g>
+                    </svg>
+                    <div><div class="calgrid"></div></div>
+                </div>
+            </div>
+        </div>
 
         <div class="ui">
             <div class="dumbcontainer">
@@ -639,17 +826,12 @@
             </svg>
             </div>
 
-            <div class="calendar">
-                <div class="caption">Pick a day</div>
-                <div class="grid"></div>
-            </div>
-
             <div class="footer">
                 <button class="calbutton" title="Older scores">
-                    <img src="assets/images/icons/calendar.png" alt="calendar">
+                    <img src="assets/images/calendar.png" alt="calendar">
                 </button>
                 <button class="todaybutton" title="Back to today">
-                    <img src="assets/images/icons/calendar.png" alt="today">
+                    <img src="assets/images/calendar.png" alt="today">
                 </button>
                 <svg class="logo" viewBox="0 0 900 170">
                     <defs>
@@ -714,6 +896,9 @@
         function logotrimmer(svg) {
             const texts = svg.querySelectorAll("text");
             if (!texts.length) return;
+            /* getBBox reads zero inside a display:none subtree, which would collapse
+               the viewBox and blow the logo up. leave it alone until it is on screen. */
+            if (!svg.getClientRects().length) return;
             let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
             for (const text of texts) {
                 const box = text.getBBox();
@@ -728,7 +913,13 @@
             xmin -= pad; ymin -= pad; xmax += pad; ymax += pad;
 
             const width = Math.max(1, xmax - xmin); const height = Math.max(1, ymax - ymin);
+            if (width < 2 || height < 2) return;
             svg.setAttribute("viewBox", `${xmin} ${ymin} ${width} ${height}`);
+            svg.dataset.trimmed = "1";
+        }
+
+        function trimpending(root) {
+            root.querySelectorAll("svg.logo:not([data-trimmed])").forEach(logotrimmer);
         }
 
         function trimall() {
@@ -775,6 +966,14 @@
 
         function poolsize(host) {
             return rowheight ? Math.ceil(host.clientHeight / rowheight) + 4 : 0;
+        }
+
+        function setdigits(cell, text) {
+            while (cell.childNodes.length > text.length) cell.lastChild.remove();
+            while (cell.childNodes.length < text.length) {
+                cell.appendChild(document.createElement("d"));
+            }
+            for (let i = 0; i < text.length; i++) cell.childNodes[i].textContent = text[i];
         }
 
         function makerow() {
@@ -835,13 +1034,16 @@
                     row.style.display = "";
                     row.parts.rank.textContent = (index + 1) + ".";
                     row.parts.name.textContent = entry.name;
-                    row.parts.score.textContent = entry.score;
+                    setdigits(row.parts.score, entry.score);
                     row.parts.flag.src = "assets/images/flags/" + entry.cc + ".png";
                     row.dataset.id = entry.id;
+                    row.dataset.at = index;
                 }
                 const top = padtop + index * rowheight - at;
                 row.style.top = top + "px";
-                row.style.color = cyclerget((top + rowheight / 2) / height * last);
+                const t = (top + rowheight / 2) / height * last;
+                /* stop just short of the end: cyclerget wraps, so exactly last is blue again */
+                row.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
             }
             filled = first;
         }
@@ -892,7 +1094,17 @@
         );
 
         const namecap = 15;
+        function tidyname(text) {
+            let out = text.replace(/%%/g, "%").replace(/%(?= )/g, "");
+            out = out.replace(/%([0-9a-f]{2})/gi, function(whole, hex) {
+                const code = parseInt(hex, 16);
+                return code >= 32 ? String.fromCharCode(code) : whole;
+            });
+            return out;
+        }
+
         function drawname(text) {
+            text = tidyname(text);
             const clean = text.toUpperCase().split("").map(function(c) {
                 return drawable.has(c) ? c : "?";
             }).join("");
@@ -977,6 +1189,37 @@
 
         /* the sample board is a tab separated dump straight from the worker:
            country, name, score, guid. */
+        const countrynames = {
+            "--": "Unknown", "AD": "Andorra", "AE": "United Arab Emirates", "AF": "Afghanistan",
+            "AG": "Antigua and Barbuda", "AL": "Albania", "AM": "Armenia", "AO": "Angola", "AR": "Argentina",
+            "AT": "Austria", "AU": "Australia", "AZ": "Azerbaijan", "BA": "Bosnia and Herzegovina",
+            "BB": "Barbados", "BD": "Bangladesh", "BE": "Belgium", "BG": "Bulgaria", "BH": "Bahrain",
+            "BN": "Brunei", "BO": "Bolivia", "BR": "Brazil", "BS": "Bahamas", "BY": "Belarus",
+            "BZ": "Belize", "CA": "Canada", "CH": "Switzerland", "CI": "Ivory Coast", "CL": "Chile",
+            "CM": "Cameroon", "CN": "China", "CO": "Colombia", "CR": "Costa Rica", "CU": "Cuba",
+            "CY": "Cyprus", "CZ": "Czechia", "DE": "Germany", "DK": "Denmark", "DO": "Dominican Republic",
+            "DZ": "Algeria", "EC": "Ecuador", "EE": "Estonia", "EG": "Egypt", "ES": "Spain", "ET": "Ethiopia",
+            "FI": "Finland", "FJ": "Fiji", "FR": "France", "GB": "United Kingdom", "GE": "Georgia",
+            "GH": "Ghana", "GR": "Greece", "GT": "Guatemala", "HK": "Hong Kong", "HN": "Honduras",
+            "HR": "Croatia", "HU": "Hungary", "ID": "Indonesia", "IE": "Ireland", "IL": "Israel",
+            "IN": "India", "IQ": "Iraq", "IR": "Iran", "IS": "Iceland", "IT": "Italy", "JM": "Jamaica",
+            "JO": "Jordan", "JP": "Japan", "KE": "Kenya", "KG": "Kyrgyzstan", "KH": "Cambodia",
+            "KR": "South Korea", "KW": "Kuwait", "KZ": "Kazakhstan", "LB": "Lebanon", "LK": "Sri Lanka",
+            "LT": "Lithuania", "LU": "Luxembourg", "LV": "Latvia", "LY": "Libya", "MA": "Morocco",
+            "MD": "Moldova", "ME": "Montenegro", "MK": "North Macedonia", "MM": "Myanmar", "MN": "Mongolia",
+            "MO": "Macau", "MT": "Malta", "MU": "Mauritius", "MV": "Maldives", "MX": "Mexico",
+            "MY": "Malaysia", "MZ": "Mozambique", "NA": "Namibia", "NG": "Nigeria", "NI": "Nicaragua",
+            "NL": "Netherlands", "NO": "Norway", "NP": "Nepal", "NZ": "New Zealand", "OM": "Oman",
+            "PA": "Panama", "PE": "Peru", "PH": "Philippines", "PK": "Pakistan", "PL": "Poland",
+            "PR": "Puerto Rico", "PS": "Palestine", "PT": "Portugal", "PY": "Paraguay", "QA": "Qatar",
+            "RO": "Romania", "RS": "Serbia", "RU": "Russia", "SA": "Saudi Arabia", "SE": "Sweden",
+            "SG": "Singapore", "SI": "Slovenia", "SK": "Slovakia", "SV": "El Salvador", "SY": "Syria",
+            "TH": "Thailand", "TN": "Tunisia", "TR": "Turkey", "TT": "Trinidad and Tobago", "TW": "Taiwan",
+            "TZ": "Tanzania", "UA": "Ukraine", "UG": "Uganda", "US": "United States", "UY": "Uruguay",
+            "UZ": "Uzbekistan", "VE": "Venezuela", "VN": "Vietnam", "YE": "Yemen", "ZA": "South Africa",
+            "ZM": "Zambia", "ZW": "Zimbabwe"
+        };
+
         const sampleboard = "assets/data/dailydo-sample.txt";
         const knownflags = new Set(("AD AE AF AG AI AL AM AN AO AR AS AT AU AW AX AZ BA BB BD BE BF " +
             "BG BH BI BJ BM BN BO BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CS CU " +
@@ -993,9 +1236,13 @@
             for (const line of text.split(String.fromCharCode(10))) {
                 const bits = line.split(String.fromCharCode(9));
                 if (bits.length < 3) continue;
+                const clean = tidyname(bits[1]);
                 out.push({
                     cc: knownflags.has(bits[0]) ? bits[0] : "--",
+                    country: bits[0],
                     name: drawname(bits[1]),
+                    full: clean,
+                    raw: bits[1],
                     score: bits[2],
                     id: bits[3] || ""
                 });
@@ -1019,12 +1266,13 @@
             host.addEventListener("pointermove", function(e) {
                 const cell = e.target;
                 const row = cell.parentElement;
-                if (cell.tagName !== "NAME" || !row || !row.dataset.id
+                if (cell.tagName !== "IMG" || !row || !row.dataset.at
                     || host.classList.contains("dragging")) {
                     drop();
                     return;
                 }
-                tip.textContent = "ID: " + row.dataset.id;
+                const entry = board[row.dataset.at];
+                tip.textContent = countrynames[entry.country] || entry.country;
                 tip.style.left = (e.clientX + 14) + "px";
                 tip.style.top = (e.clientY + 16) + "px";
                 tip.classList.add("on");
@@ -1034,6 +1282,94 @@
             host.addEventListener("pointerdown", drop);
             window.addEventListener("blur", drop);
             document.querySelector(".scores").addEventListener("scrolled", drop);
+        }
+
+        /* ids are handed out, not derived: go.php answers command=getguid with
+           [GUID]9010877[/GUID], and its ping reports the caller's country in
+           [EXE_CCODE], which is the flag the game submits with. dailydo.php has
+           neither command. so there is no formula to mirror - click to be issued
+           one. they run sequentially, and the live counter sits just above the
+           highest id on the boards. */
+        const guidroute = "https://dailydo.coolsite.cv/guid";
+
+        async function askforguid() {
+            const box = document.querySelector(".debugid");
+            box.textContent = "asking the server...";
+            let note = null;
+            try {
+                const reply = await fetch(guidroute);
+                const got = await reply.json();
+                if (got.guid) {
+                    try {localStorage.setItem("chuzzleguid", got.guid)} catch (e) {}
+                }
+                if (got.ccode) {
+                    try {localStorage.setItem("chuzzleccode", got.ccode)} catch (e) {}
+                }
+                if (got.proxyccode) {
+                    try {localStorage.setItem("chuzzleproxycc", got.proxyccode)} catch (e) {}
+                }
+                note = got.guid ? null : "server gave no guid";
+            } catch (e) {
+                note = "request failed";
+            }
+            showdebugid(note);
+        }
+
+        function showdebugid(note) {
+            const box = document.querySelector(".debugid");
+            if (!box) return;
+            let held = null;
+            /* localStorage throws outright on a file:// origin */
+            try {held = localStorage.getItem("chuzzleguid")} catch (e) {}
+            const seat = held ? board.findIndex(function(e) {return e.id === held}) : -1;
+            let ccode = null; let proxycc = null;
+            try {
+                ccode = localStorage.getItem("chuzzleccode");
+                proxycc = localStorage.getItem("chuzzleproxycc");
+            } catch (e) {}
+            const lines = ["guid " + (held || "none issued - click to ask")];
+            if (held) {
+                lines.push("board " + (seat < 0 ? "no match" : "#" + (seat + 1)));
+                /* your connection as the edge sees it, then what raptisoft
+                   geolocated - that one describes the worker, not you. */
+                if (ccode) lines.push("country " + ccode);
+                if (proxycc && proxycc !== ccode) lines.push("raptisoft saw " + proxycc);
+            }
+            if (note) lines.push(note);
+            box.textContent = lines.join(String.fromCharCode(10));
+        }
+
+        /* clicking a row opens everything known about that player, untrimmed. */
+        function makeprofile() {
+            const wrap = document.querySelector("[data-role=profile]");
+            const body = wrap.querySelector(".pucontent > div");
+            const host = document.querySelector(".scroller");
+            let downat = 0;
+
+            host.addEventListener("pointerdown", function(e) {downat = e.clientY});
+            host.addEventListener("click", function(e) {
+                const row = e.target.closest ? e.target.closest("[data-at]") : null;
+                if (!row || Math.abs(e.clientY - downat) > 6) return;
+                const entry = board[row.dataset.at];
+                if (!entry) return;
+                const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
+                const rows = [
+                    ["Rank", "#" + (Number(row.dataset.at) + 1)],
+                    ["Name", entry.full],
+                    ["Score", Number(entry.score).toLocaleString("en")],
+                    ["Country", flag + " " + (countrynames[entry.country] || entry.country)],
+                    ["Player ID", entry.id || "unknown"]
+                ];
+                if (entry.raw !== entry.full) rows.push(["As stored", entry.raw]);
+                body.innerHTML = "<b>" + entry.full + "</b>" + rows.map(function(r) {
+                    return "<span><i>" + r[0] + "</i>" + r[1] + "</span>";
+                }).join("");
+                wrap.classList.add("open");
+                trimpending(wrap);
+            });
+            wrap.addEventListener("click", function(e) {
+                if (e.target === wrap) wrap.classList.remove("open");
+            });
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -1048,9 +1384,9 @@
         }
 
         function buildcalendar() {
-            const grid = document.querySelector(".calendar .grid");
+            const grid = document.querySelector(".calgrid");
             if (!grid) return;
-            const names = ["S", "M", "T", "W", "T", "F", "S"];
+            const names = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
             const day = 86400000;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -1058,7 +1394,8 @@
             /* six weeks around today, starting on the sunday that lands furthest
                back, so both ends of the reachable window show as dimmed. */
             const start = new Date(today.getTime() - (calendarreach + 7) * day);
-            start.setDate(start.getDate() - start.getDay());
+            /* weeks run monday first, so sunday has to fall to the end */
+            start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
             const oldest = today.getTime() - calendarreach * day;
             const newest = today.getTime() + day;
 
@@ -1080,8 +1417,32 @@
             }
         }
 
+        /* six circles on one staggered loop, plus stars that leave from the edge
+           and drift away from the middle, the way UnderDeko places them. */
+        function builddeko() {
+            const deko = document.querySelector(".deko");
+            if (!deko) return;
+            for (let i = 0; i < 6; i++) deko.appendChild(document.createElement("b"));
+            const edges = [[0.5, 0.04], [0.96, 0.5], [0.5, 0.96], [0.04, 0.5]];
+            for (let i = 0; i < 12; i++) {
+                const star = document.createElement("i");
+                const seat = edges[i % 4];
+                const drift = 0.22 + (i % 3) * 0.12;
+                const x = seat[0] + ((i % 5) - 2) * 0.07;
+                const y = seat[1] + ((i % 7) - 3) * 0.05;
+                star.style.left = (x * 100) + "%";
+                star.style.top = (y * 100) + "%";
+                star.style.setProperty("--dx", ((x - 0.5) * drift * 340) + "%");
+                star.style.setProperty("--dy", ((y - 0.5) * drift * 340) + "%");
+                star.style.animationDelay = (-i * 0.283).toFixed(2) + "s";
+                deko.appendChild(star);
+            }
+        }
+
         /*//////////////////////////////////////////////////////////////////////*/
 
+        builddeko();
+        makeprofile();
         buildrings();
         buildcalendar();
         makeidtip();
@@ -1091,9 +1452,12 @@
         const host = document.querySelector(".scroller");
         const list = document.querySelector(".scores");
 
+        document.querySelector(".debugid").addEventListener("click", askforguid);
+
         loadboard().then(function(count) {
             measurelist(host, list);
             paintrows(0, host);
+            showdebugid();
             if (count) document.title = "Daily-Do! (" + count + ")";
         });
         window.addEventListener("resize", function() {
@@ -1101,8 +1465,19 @@
             paintrows(0, host);
         });
 
+        const calwrap = document.querySelector("[data-role=calendar]");
         document.querySelector(".calbutton").addEventListener("click", function() {
-            document.querySelector(".calendar").classList.toggle("open");
+            calwrap.classList.toggle("open");
+            if (calwrap.classList.contains("open")) trimpending(calwrap);
+        });
+        calwrap.addEventListener("click", function(e) {
+            if (e.target === calwrap) calwrap.classList.remove("open");
+        });
+        window.addEventListener("keydown", function(e) {
+            if (e.key !== "Escape") return;
+            document.querySelectorAll(".calwrap.open").forEach(function(w) {
+                w.classList.remove("open");
+            });
         });
 
         document.addEventListener("click", function(e) {
