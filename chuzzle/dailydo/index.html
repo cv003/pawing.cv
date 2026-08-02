@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>Daily-Do!</title>
+        <link rel="icon" type="image/png" href="../assets/images/icons/dailydo.webp">
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="../assets/fonts/blippo.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin
+            href="../assets/fonts/harlowsolidlet.woff2">
+        <link rel="preload" as="image" href="assets/images/star.png">
+        <link rel="preload" as="image" href="assets/images/stars.webp">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+
+        <div class="sky">
+
+            <div class="pillars left">
+                <span class="pillar plorange"></span>
+                <span class="pillar plpink"></span>
+                <span class="pillar plmagenta"></span>
+            </div>
+            <div class="pillars right">
+                <span class="pillar plorange"></span>
+                <span class="pillar plpink"></span>
+                <span class="pillar plmagenta"></span>
+            </div>
+
+            <div class="bigstars"></div>
+
+            <div class="bg"></div>
+            <div class="stripes"></div>
+
+        </div>
+
+        <div class="dailydo">
+            <div class="scroller">
+                <div class="scores"></div>
+            </div>
+        </div>
+
+        <div class="idtip"></div>
+
+        <div class="calwrap profile" data-role="profile">
+            <div class="popup">
+                <button class="closebtn" type="button">
+                    <img src="assets/images/close.png" alt="close">
+                </button>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <defs>
+                            <linearGradient id="lgpop2" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack">Player Info</text>
+                            <text x="30" y="130" class="inner">Player Info</text></g>
+                    </svg>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="vignette over"></div>
+
+        <div class="calwrap" data-role="calendar">
+            <div class="popup">
+                <button class="closebtn" type="button">
+                    <img src="assets/images/close.png" alt="close">
+                </button>
+                <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <defs>
+                            <linearGradient id="lgpop" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack">Pick A Day!</text>
+                            <text x="30" y="130" class="inner">Pick A Day!</text></g>
+                    </svg>
+                    <div><div class="calgrid"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="switcher">
+            <button class="swleft" type="button">
+                <img class="arrow" src="assets/images/arrowright.png" alt="">
+                <span class="line"><span class="lbl"></span></span>
+            </button>
+            <button class="swright" type="button">
+                <img class="arrow" src="assets/images/arrowright.png" alt="">
+                <span class="line"><span class="lbl"></span></span>
+            </button>
+        </div>
+
+        <div class="ui">
+            <div class="dumbcontainer">
+            <svg class="logo" viewBox="0 0 900 170">
+                <defs>
+                    <linearGradient id="lgrgb" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
+                        <stop offset="80%" stop-color="#f8b5c8"/>
+                    </linearGradient>
+                    <linearGradient id="lgfade" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                        <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <filter id="erode">
+                        <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
+                        <feComposite in2="eroded" operator="in"/>
+                    </filter>
+                </defs>
+                <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Today's Scores</text></mask>
+                <g><text x="30" y="130" class="lgblack">Today's Scores</text>
+                    <text x="30" y="130" class="lgouter">Today's Scores</text>
+                    <text x="30" y="130" class="lgmid">Today's Scores</text>
+                    <text x="30" y="130" class="inner">Today's Scores</text>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text>
+                    <text x="30" y="130" class="shine">Today's Scores</text></g>
+            </svg>
+            </div>
+
+            <div class="findbox">
+                <input type="search" placeholder="Find a player" autocomplete="off">
+                <span class="hits"></span>
+            </div>
+
+            <div class="footer">
+                <button class="calbutton">
+                    <img src="assets/images/calendar.png" alt="calendar">
+                </button>
+                <button class="todaybutton">
+                    <img src="assets/images/calendar.png" alt="today">
+                </button>
+                <svg class="logo" viewBox="0 0 900 170">
+                    <defs>
+                        <linearGradient id="lgrgb2" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
+                            <stop offset="80%" stop-color="#f8b5c8"/>
+                        </linearGradient>
+                        <linearGradient id="lgfade2" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                            <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+                        </linearGradient>
+                        <filter id="erode2">
+                            <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
+                            <feComposite in2="eroded" operator="in"/>
+                        </filter>
+                    </defs>
+                    <mask id="lgcrop2"><text x="30" y="130" filter="url(#erode2)">Play!</text></mask>
+                    <g><text x="30" y="130" class="lgblack">Play!</text>
+                        <text x="30" y="130" class="lgouter">Play!</text>
+                        <text x="30" y="130" class="lgmid">Play!</text>
+                        <text x="30" y="130" class="inner">Play!</text>
+                        <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text>
+                    <text x="30" y="130" class="shine">Play!</text></g>
+                </svg>
+            </div>
+        </div>
+
+        <!--div class="codediv">
+            <div class="code">Big text<sup>(small text)</sup></div>
+            <div class="popup">
+                <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <defs>
+                            <linearGradient id="lgrgb" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack">Title!</text>
+                            <text x="30" y="130" class="inner">Title!</text></g>
+                    </svg>
+                    <div>
+                        Hello there!<br>
+                        <button>Hello</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading">
+                <div class="ldglow"><span class="ldul"></span><span class="lddr"></span></div>
+                <div>Loading awesomeness...</div>
+                <img src="../assets/images/celestial.webp" anti chuzzle stealing algorithm i mean draggable="false">
+            </div>
+        </div-->
+
+    </body>
+    <script src="dailydo.js"></script>
+</html>
