@@ -1,33 +1,7 @@
-@font-face {
-    font-family: "blippo";
-    src: url("../assets/fonts/blippo.woff2") format("woff2");
-    font-display: block;
-}
-@font-face {
-    font-family: "nimbus sans becker";
-    src: url("../assets/fonts/nimbussansbeckerpbold.woff2") format("woff2");
-    font-display: swap; font-weight: 300;
-}
-@font-face {
-    font-family: "nimbus sans becker";
-    src: url("../assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
-    font-display: swap; font-weight: 600;
-}
-@font-face {
-    font-family: "harlow solid";
-    src: url("../assets/fonts/harlowsolidlet.woff2") format("woff2");
-    font-display: block;
-}
+/*//////////////////////////////////////////////////////////////////////*/
 
-:root {--u: min(56.25vh, 100vw)}
-body {
-    background-color: #a7723b; padding: 0;
-    color: white; height: 100vh; margin: 0;
-    display: flex; flex-wrap: wrap; gap: 6px;
-    justify-content: center; align-content: flex-start;
-    overflow: hidden;
-}
-
+/* the sky is this page only: codes.html has its own .bg over a flat
+   tile, nothing else uses the pillars, arches or bands. */
 .sky {
     position: fixed; inset: 0;
     z-index: 0; overflow: hidden;
@@ -63,233 +37,6 @@ body {
         #050177 100%);
 }
 
-/*//////////////////////////////////////////////////////////////////////*/
-
-textarea {max-width: 90vw}
-
-canvas, img, p, a {user-select: none}
-a {
-    position: relative;
-    display: inline-block;
-    font-size: 50px;
-    text-shadow: 0 0.175em 0 black; paint-order: stroke fill;
-}
-p {font-size: 0.75em; opacity: 0.5; max-width: 600px}
-
-a, p, span, li, ul, label, button, div {
-    font-weight: 600; color: #babfd8;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-ul {padding-top: 1em; list-style: none; padding-left: 0}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-.logo {
-    display: block; width: 600px; max-width: 90vw;
-    visibility: hidden;
-    margin: 0; overflow: visible; user-select: none;
-    z-index: 999;
-}
-.fontsready .logo {visibility: visible}
-.logo .shine {
-    fill: #fff; stroke: none; opacity: 0;
-    animation: shine 3s infinite;
-}
-@keyframes shine {
-    0%, 50%, 100% {opacity: 0}
-    25% {opacity: 0.35}
-}
-
-.logo text {
-    font-family: "harlow solid", system-ui, sans-serif;
-    font-size: 120px; font-weight: 400; paint-order: stroke fill;
-    dominant-baseline: alphabetic;
-}
-.logo .lgouter, .lgmid, .logo .lgblack {
-    fill: none; stroke-linejoin: round;
-    stroke-linecap: round; stroke-miterlimit: 1;
-}
-.logo .lgouter {stroke: #feff48; stroke-width: 30}
-.logo .lgmid {stroke: #60204a; stroke-width: 17}
-.logo .lgblack {stroke: rgba(96,32,74,0.25); stroke-width: 54}
-.pucontent .logo .lgblack {stroke: #4e4c02; stroke-width: 25; opacity: 1}
-.logo .inner {fill: url(#lgrgb); stroke: none} .logo .lglight {fill: url(#lgfade); stroke: none}
-
-.dumbcontainer {
-    position: relative; z-index: 6;
-    width: 100%; display: flex;
-    justify-content: center; align-items: center;
-    padding-top: 0;
-}
-.dumbcontainer .logo {width: 76cqw !important}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-label {
-    z-index: 999; color: white;
-    padding-left: 25px; margin-bottom: -10px;
-    display: inline-block;
-}
-
-hr {
-    width: calc(100% - 39px); height: 3px;
-    position: absolute; 
-    background-color: #c67228; border: none;
-    left: 50%; transform: translateX(-50%);
-}
-
-button {
-    color: white; font-size: 1em;
-    margin-top: 1.25em; text-transform: uppercase;
-    outline: none; border: none; background: none;
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-.codediv {
-    display: flex;
-    flex-direction: column; overflow: hidden;
-    justify-content: center; align-items: center;
-    width: 100%; max-width: 400px;
-    flex: 1 1 320px; padding-bottom: 1em;
-}
-
-.code {
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-    background-color: #2e0029; color: white;
-    font-size: 1.5em; font-weight: 500;
-    outline: none; border: none; resize: none;
-    width: calc(100% - 20px); height: 1em; border-radius: 1em;
-    padding: 0.25em; margin: 0.5em; user-select: all;
-}
-.code:has(br) {height: auto}
-.code:has(sup) {height: 1.5em}
-
-.code div {
-    display: flex; align-items: center; justify-content: center;
-    color: white; flex-direction: row;
-    font-size: 1em; font-weight: 500; gap: 0.25em;
-}
-.code img {height: 1.25em}
-.code sup {
-    line-height: 0.9; font-size: 0.65em;
-    opacity: 0.25; user-select: none;
-}
-
-.note {
-    position: relative; line-height: 1;
-    padding-left: 0.75em; padding-right: 0.75em;
-    top: -0.35em; padding-bottom: 0.5em; 
-}
-.note a {
-    font-size: 1em; text-decoration: none;
-    color:#a5d1eb;
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-.popup {
-    position: relative; display: flex; flex-direction: column; 
-    justify-content: center; align-items: center;
-    width: calc(100% - 100px); 
-    border-radius: 0.5em; margin: 40px;
-    background: #ffd200;
-    isolation: isolate;
-    /* the rim goes last: shadows paint front to back, so listing it first
-       washed every coloured ring with half black */
-    box-shadow:
-        0 0 0 1px #FFD200, 0 0 0 3px #FFDC0E, 0 0 0 5px #FFE619,
-        0 0 0 7px #FFEF21, 0 0 0 9px #FFF928, 0 0 0 11px #FFD632,
-        0 0 0 13px #FFDD3A, 0 0 0 15px #FFE543, 0 0 0 17px #FFED4C, 
-        0 0 0 19px #FFFF80, 0 0 0 21px #FFFF80, 0 0 0 23px #FFFF80,
-        0 0 0 25px #FFFF80, 0 0 0 27px #FFFF80, 0 0 0 29px #FFFF80, 
-        0 0 0 31px #f0807e, 0 0 0 33px #fd8886, 0 0 0 35px #ff8d89,
-        0 0 0 37px #ff8e8a, 0 0 0 39px #ff908b, 0 0 0 41px #ff918c, 
-        0 0 0 43px #ff918e, 0 0 0 45px #ff928f,
-        0 0 0 63px rgba(0,0,0,0.3);
-}
-.puglows {
-    position: absolute; inset: -45px;
-    border-radius: 1.5em; overflow: hidden;
-    pointer-events: none; z-index: 0;
-}
-.puw, .pur {
-    position: absolute; inset: -40px;
-    opacity: 0.7; filter: blur(5px);
-    mix-blend-mode: screen;
-}
-.puw {background:
-        radial-gradient(circle at 0 0, white 0 75px, transparent 105px),
-        radial-gradient(circle at 100% 100%, white 0 75px, transparent 105px);
-}
-.pur {background:
-        radial-gradient(circle at 100% 0, red 0 75px, transparent 105px),
-        radial-gradient(circle at 0 100%, red 0 75px, transparent 105px);
-}
-
-.pucontent {
-    display: flex; flex-direction: column; 
-    justify-content: center; align-items: center;
-    width: calc(100% + 15px); height: 96%;
-    border-radius: 0.75em; text-align: center;
-    /* outline: 1px solid red; */
-    box-shadow: 0 -8px 12px -8px #e7bd00;
-}
-.pucontent .logo {height: 70px; z-index: 100}
-
-.pucontent div {
-    position: relative; display: flex; top: -5px;
-    width: calc(100% - 30px);
-    padding-top: 0.6em; padding-bottom: 0.6em;
-    background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
-    box-shadow: 0 0 0 10px #03104d; color: white !important;
-    border-radius: 0.25em; flex-direction: column;
-    align-items: center; justify-content: center;
-}
-.pucontent div button {
-    width: calc(100% - 70px); border-radius: 0.25em;
-    padding-top: 5px; padding-bottom: 5px; user-select: none;
-    margin-top: 0.25em; margin-bottom: 0.25em;
-    font-family: "harlow solid", system-ui, sans-serif;
-    text-transform: capitalize; font-size: 2em;
-    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-    font-weight: 100; -webkit-text-stroke: 6px black;
-    paint-order: stroke fill; color: white;
-}
-.pucontent div button:active {
-    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
-    padding-top: 7px; padding-bottom: 3px;
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-.loading {
-    position: relative; display: flex; flex-direction: column; 
-    justify-content: center; align-items: center;
-    width: calc(100% - 80px); gap: 0.5em; user-select: none;
-    border-radius: 0.85em; margin: 40px; 
-    padding: 1.25em 0.75em;
-    isolation: isolate; background-color: #0000fe;
-    box-shadow:
-        0 0 0 1px #050505, 0 1px 4px 0px #000c inset,
-        0 0 0 1px #ccc8b2, 0 0 0 2px #cdc28a, 0 0 0 3px #cfbd68,
-        0 0 0 5px #d6b936, 0 0 0 7px #ddb917, 0 0 0 9px #e5bf12,
-        0 0 0 11px #e98b08, 0 0 0 12px #ed5b00, 0 0 0 13px #f25d00,
-        0 0 0 18px #ff6a0d, 0 0 0 19px #fd491b, 0 0 0 20px #fb332e,
-        0 0 0 21px #fb413d, 0 0 0 22px #fc5652, 0 0 0 23px #fc706d,
-        0 0 0 24px #fd908e, 0 0 0 25px #feb7b5, 0 0 0 26px #fee2e1;
-}
-.loading div {
-    text-align: center; color: white; font-weight: 100;
-    font-family: "blippo"; font-size: 1.55em;
-    -webkit-text-stroke: 8px #0000c7; paint-order: stroke fill;
-}
-.loading img {width: 100px}
-
-/*//////////////////////////////////////////////////////////////////////*/
 
 /* the pillars belong to the game screen, not the browser window, so they
    hug the content column and stay there however wide the monitor is. */
@@ -424,10 +171,19 @@ button {
 
 /* board switching: the outgoing side is timed, the incoming side is dropped
    into place with the transition off before it rides back */
-.sliding {transition: transform 0.19s ease, opacity 0.19s ease}
+/* the board you are leaving greys out and stops taking clicks while the next
+   one is fetched, then the pair slides a whole screen at a flat rate */
+.fetching .dailydo, .fetching .ui, .fetching .switcher, .fetching .boardpick {
+    opacity: 0.5; pointer-events: none;
+}
+.sliding {transition: transform 0.26s linear}
 .sliding.jumping {transition: none}
-@media (prefers-reduced-motion: reduce) {
-    .sliding {transition: none}
+/* out of flow so the copy of the title does not push the real one down a row
+   while the two are passing each other */
+.ghost {
+    pointer-events: none;
+    position: absolute; top: 0;
+    left: 0; right: 0;
 }
 
 .vignette.over {
@@ -469,8 +225,10 @@ button {
         0 0.120em 0 #261b19;
 }
 
+/* the column is only ever as wide as the longest rank the board actually
+   has, so a 40 row day does not sit behind three digits of nothing */
 .scores rank {
-    flex: none; width: 2.4em;
+    flex: none; width: calc(var(--rankcells, 4) * 0.63em);
     text-align: right; font-style: italic;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 0.6em; margin-right: 0.35em;
@@ -511,15 +269,17 @@ button {
    it would sit over whatever row came before it. */
 /* on a phone the band runs off both screen edges, so here the whole strip
    fades out well before the column ends rather than stopping on a cut */
+/* two things had to go for the sliver at the right edge: the strip is held a
+   little off the scroller's clip so a blended layer never lands on it, and
+   the mask ends in a band of flat transparent rather than a gradient stop, so
+   the last column cannot round up to something visible. */
 .scores hilite {
-    position: absolute; left: 0; right: 0;
+    position: absolute; left: 1cqw; right: 1cqw;
     display: none; pointer-events: none;
     -webkit-mask-image: linear-gradient(to right,
-        transparent 0, #000 18%, #000 82%, transparent 100%);
+        transparent 0 5%, #000 20%, #000 80%, transparent 95% 100%);
     mask-image: linear-gradient(to right,
-        transparent 0, #000 18%, #000 82%, transparent 100%);
-    /* repeat-y only: tiling sideways puts a seam of unmasked pixels at the
-       right edge every time the glow crosses it */
+        transparent 0 5%, #000 20%, #000 80%, transparent 95% 100%);
     -webkit-mask-repeat: repeat-y;
     mask-repeat: repeat-y;
 }
@@ -572,13 +332,6 @@ button {
     height: 12.5cqw; margin-top: 0.5cqw;
     display: flex; align-items: center; justify-content: center;
 }
-.footer .logo {
-    width: auto !important;
-    height: calc(12.3cqw * var(--boxratio, 1.2));
-    max-width: 62cqw;
-}
-.footer .logo .inner {fill: url(#lgrgb2)}
-.footer .logo .lglight {fill: url(#lgfade2)}
 [data-role=calendar] .logo .inner {fill: url(#lgpop)}
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 
@@ -700,65 +453,85 @@ button {
 /* both ends of the reachable window run out, so an arrow has to be able to
    leave without the other one moving */
 .switcher button.gone {visibility: hidden; pointer-events: none}
+/* the same drift the claimed row gets, so the two read as one idle motion.
+   cqw is no use out here: the switcher sits at body level, outside the
+   column that carries container-type, so the sway goes through --u. */
+.switcher img.arrow, .switcher .line {
+    animation: ddswayarrow 1.5s ease-in-out infinite alternate;
+}
+.switcher .swleft img.arrow {animation-name: ddswayflip}
+
+@keyframes ddswayarrow {
+    from {transform: translateX(calc(var(--u) * -0.0078))}
+    to {transform: translateX(calc(var(--u) * 0.0078))}
+}
+@keyframes ddswayflip {
+    from {transform: translateX(calc(var(--u) * -0.0078)) scaleX(-1)}
+    to {transform: translateX(calc(var(--u) * 0.0078)) scaleX(-1)}
+}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
 /* the boards live in the empty margin beside the column. sizes go through vh
-   rather than cqw because this sits outside .dailydo entirely. */
+   rather than cqw because this sits outside .dailydo entirely.
+   the bottom corners are square so it can sit straight on the search bar when
+   there is no margin to spare. */
 .boardpick {
     position: fixed; z-index: 6;
     right: 2vh; bottom: 2vh;
     display: flex; overflow: hidden;
-    border-radius: 1.5vh;
-    background: rgba(20,12,26,0.72);
+    border-radius: 1.5vh 1.5vh 0 0;
     box-shadow:
         0 0 0 0.4vh #60204a,
         0 0 0 0.85vh #feff48,
         0 0 0 1.3vh rgba(0,0,0,0.5);
-    font-family: "blippo";
 }
+/* same face the popup buttons wear */
 .boardpick button {
     display: flex; align-items: center; gap: 0.5vh;
-    margin: 0; padding: 0.9vh 1.5vh;
-    background: none; cursor: pointer;
-    font-family: inherit; font-weight: 300;
-    font-size: 2.1vh; letter-spacing: 0.02em;
-    text-transform: uppercase; white-space: nowrap;
-    color: #babfd8;
+    margin: 0; padding: 0.7vh 1.5vh;
+    cursor: pointer; color: white;
+    font-family: "harlow solid", system-ui, sans-serif;
+    font-weight: 100; font-size: 2.4vh;
+    text-transform: capitalize; white-space: nowrap;
+    -webkit-text-stroke: 0.35vh black;
+    paint-order: stroke fill;
+    background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%,
+        #0a1a5e 80%, #5a63a0 100%);
 }
 .boardpick button + button {box-shadow: inset 0.4vh 0 0 rgba(0,0,0,0.5)}
 .boardpick button img {height: 2.4vh; width: auto}
 .boardpick button.on {
-    background: linear-gradient(180deg, #ffef21 0%, #ffd200 55%, #ffa800 100%);
-    color: #5a2a00;
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
+        #1130bf 80%, #a2aee6 100%);
 }
 .boardpick button:active {filter: brightness(1.6)}
 
-/* when the margin beside the column is too narrow to hold it, it moves in
-   over the list and sits above the play row instead. placepicks decides. */
+/* when the margin beside the column is too narrow to hold it, it drops onto
+   the top of the search bar instead. placepicks decides. */
 .boardpick.inline {
     right: auto; left: 50%;
     transform: translateX(-50%);
-    bottom: calc(var(--u) * 0.29);
+    bottom: calc(var(--u) * 0.135);
 }
 
 .findbox {
-    z-index: 7; height: 9.6cqw;
+    z-index: 7; height: 7cqw;
     display: flex; align-items: center;
-    gap: 1cqw; padding: 0 2.6cqw;
-    border-radius: 4.8cqw; background: rgba(20,12,26,0.62);
+    padding: 0 2.6cqw;
+    border-radius: 3cqw; background: #2d0027;
     box-shadow:
         0 0 0 1.2cqw #60204a,
         0 0 0 2cqw #feff48,
-        0 0 0 2.7cqw rgba(0,0,0,0.5);
+        0 0 0 3.2cqw rgba(0,0,0,0.1);
 }
 .findbox input {
-    width: 26cqw; border: none; outline: none;
+    width: 50cqw; border: none; outline: none;
     background: none; color: white;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-weight: 600; font-size: 3cqw; letter-spacing: 0.03em;
+    font-family: "blippo", system-ui, sans-serif;
+    font-weight: 100; font-size: 3cqw; letter-spacing: 0.03em;
 }
-.findbox input::placeholder {color: #8ea2e0}
+.findbox input::placeholder {color: darkgrey} /* the */
 .findbox .hits {
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-weight: 600; font-size: 2.6cqw; color: #ffd200;
@@ -773,7 +546,6 @@ button {
     font-size: 13px; font-weight: 300;
     letter-spacing: 0.05; white-space: nowrap;
     pointer-events: none; opacity: 0;
-    transition: opacity 0.12s;
 }
 .idtip.on {opacity: 1}
 
@@ -794,7 +566,7 @@ button {
    until it has arrived. closing runs the same thing backwards. */
 .calwrap .popup {
     transform: scale(0);
-    transition: transform 0.25s ease-out;
+    transition: transform 0.1s ease-out;
 }
 .calwrap.open .popup {transform: scale(1)}
 /* belt and braces: if the transition never runs the box must still be up */
@@ -802,9 +574,6 @@ button {
 .calwrap.closing .popup {transform: scale(0)}
 .calwrap .pucontent {opacity: 0}
 .calwrap.settled .pucontent {opacity: 1}
-@media (prefers-reduced-motion: reduce) {
-    .calwrap .popup {transition: none}
-}
 
 .calwrap .popup {
     width: calc(var(--u) * 0.78); margin: 0;
@@ -876,6 +645,15 @@ button {
 .pucontent .calgrid button.today {
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
         0 0 0 calc(var(--u) * 0.008) #ffd200;
+}
+/* the golden tournament runs at the weekend, so those two columns are gold */
+.pucontent .calgrid button.weekend {
+    background: linear-gradient(140deg, #fd9c25 0%, #bf7a11 30%,
+        #bf7a11 80%, #e6d9a2 100%);
+}
+.pucontent .calgrid button.weekend.live:active {
+    background: linear-gradient(140deg, #fdcd59 0%, #fd9c25 30%,
+        #cf8a20 80%, #e6d29f 100%);
 }
 /* the day you are actually looking at, which is not always today */
 .pucontent .calgrid button.picked {

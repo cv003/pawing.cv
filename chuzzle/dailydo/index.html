@@ -11,6 +11,7 @@
             href="../assets/fonts/harlowsolidlet.woff2">
         <link rel="preload" as="image" href="assets/images/star.png">
         <link rel="preload" as="image" href="assets/images/stars.webp">
+        <link rel="stylesheet" href="../assets/global.css">
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
@@ -134,36 +135,12 @@
             </div>
 
             <div class="footer">
-                <svg class="logo" viewBox="0 0 900 170">
-                    <defs>
-                        <linearGradient id="lgrgb2" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
-                            <stop offset="80%" stop-color="#f8b5c8"/>
-                        </linearGradient>
-                        <linearGradient id="lgfade2" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
-                            <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
-                        </linearGradient>
-                        <filter id="erode2">
-                            <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
-                            <feComposite in2="eroded" operator="in"/>
-                        </filter>
-                    </defs>
-                    <mask id="lgcrop2"><text x="30" y="130" filter="url(#erode2)">Play!</text></mask>
-                    <g><text x="30" y="130" class="lgblack">Play!</text>
-                        <text x="30" y="130" class="lgouter">Play!</text>
-                        <text x="30" y="130" class="lgmid">Play!</text>
-                        <text x="30" y="130" class="inner">Play!</text>
-                        <text x="30" y="130" class="lglight" mask="url(#lgcrop2)">Play!</text>
-                    <text x="30" y="130" class="shine">Play!</text></g>
-                </svg>
-
                 <div class="footrow">
                     <button class="calbutton">
                         <img src="assets/images/calendar.png" alt="calendar">
                     </button>
                     <div class="findbox">
-                        <input type="search" placeholder="Find a player" autocomplete="off">
+                        <input type="search" placeholder="Find a player..." autocomplete="off">
                         <span class="hits"></span>
                     </div>
                     <button class="todaybutton" title="Play Chuzzle 2">
@@ -205,5 +182,7 @@
         </div-->
 
     </body>
-    <script src="dailydo.js"></script>
+    <script src="../assets/global.js"></script>
+    <script src="board.js"></script>
+    <script src="ui.js"></script>
 </html>
