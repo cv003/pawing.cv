@@ -463,10 +463,6 @@
             padding-left: 9.5cqw; padding-right: 6.7cqw;
         }
 
-        /* the drop has to carry the outline down with it, and text-shadow only
-           ever shadows the unstroked glyph. so the shadow is a ring of copies at
-           the stroke's own radius, recentred on the drop offset - same trick
-           candies.monster uses to fake paint-order on old browsers. */
         .scores rank, .scores name, .scores score {
             -webkit-text-stroke: 0.3em #261b19;
             paint-order: stroke fill; font-weight: 300; /* don't change weight please */
@@ -487,7 +483,6 @@
             font-family: Arial, Helvetica, sans-serif;
             font-size: 0.6em; margin-right: 0.35em;
             letter-spacing: 0; font-weight: 800;
-            /* scaled by 1/0.6 so the outline matches the rest of the row */
             -webkit-text-stroke-width: 0.5em;
             text-shadow:
                 0.250em 0.200em 0 #261b19, 0.217em 0.325em 0 #261b19,
@@ -499,8 +494,15 @@
                 0 0.200em 0 #261b19;
         }
         .scores score {margin-left: auto}
-        /* blippo digits run 0.32em to 0.76em wide, so each gets a fixed cell to
-           sit in - the game columns them the same way. */
+        /* the row you claimed, so it stands out once the list jumps to it */
+        .scores > div.mine rank::before {
+            content: ""; position: absolute;
+            left: 3.4cqw; top: 0.16em;
+            width: 0.42em; height: 0.42em;
+            border-radius: 50%; background: #ffd200;
+            box-shadow: 0 0 0 0.09em #261b19;
+        }
+        .scores > div.mine name {text-decoration: underline 0.06em}
         .scores score d {
             display: inline-block; width: 0.637em;
             text-align: center;
@@ -551,7 +553,7 @@
         /*//////////////////////////////////////////////////////////////////////*/
 
         .profile .popup {max-width: calc(var(--u) * 0.9)}
-        .profile .pucontent .logo {height: calc(var(--u) * 0.075)}
+        .profile .pucontent .logo {height: calc(var(--u) * 0.105)}
         .profile .pucontent > div {
             font-size: calc(var(--u) * 0.03);
             line-height: 1.7; letter-spacing: 0.04em;
@@ -567,23 +569,79 @@
             white-space: nowrap;
         }
         .profile .pucontent > div span i {color: #8ea2e0; font-style: normal}
+        .profile .pucontent > div .claim {
+            font-family: "harlow solid", system-ui, sans-serif;
+            text-transform: capitalize; font-size: 1.5em;
+            width: calc(100% - var(--u) * 0.06);
+            margin: calc(var(--u) * 0.02) 0 0; padding: 0.1em 0;
+            border-radius: 0.25em; color: white; cursor: pointer;
+            background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
+                #1130bf 80%, #a2aee6 100%);
+            font-weight: 100; -webkit-text-stroke: 0.12em black;
+            paint-order: stroke fill;
+        }
+        .profile .pucontent > div .claim:active {
+            background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
+                #6020cf 80%, #ba9fe6 100%);
+        }
+
         .profile .pucontent img {
             height: calc(var(--u) * 0.05);
             border: calc(var(--u) * 0.005) solid #261b19;
             vertical-align: middle;
         }
 
-        /* the id is handed out by the server, not derived on device, so all this
-           can show is whatever has been stored for this browser. */
-        .debugid {
-            position: fixed; top: 0; right: 0;
-            z-index: 10; padding: 0.4em 0.6em;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 12px; font-weight: 400;
-            color: #9fb4ff; background: rgba(0,0,0,0.55);
-            border-bottom-left-radius: 0.6em;
-            letter-spacing: 0; cursor: pointer;
-            white-space: pre;
+        /* narrow enough to live in the list's side margin: arrow over label */
+        /* the labels carry the list's own treatment: same size, same blippo, same
+           dark outline, same ring shadow that drags the outline down with it. */
+        /* body level, not inside .ui: that column sets container-type, which makes
+           it the containing block for fixed children and would pin these to the
+           column edge instead of the window margin. */
+        .switcher {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 4;
+        }
+        .switcher button {
+            position: absolute; top: 50%;
+            pointer-events: auto;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; align-items: center;
+            gap: calc(var(--u) * 0.006);
+            margin: 0; padding: 0; background: none;
+            cursor: pointer; text-transform: uppercase;
+            font-family: "blippo"; font-weight: 300;
+            font-size: calc(var(--u) * 0.049);
+            color: rgb(255, 191, 128);
+            -webkit-text-stroke: 0.3em #261b19;
+            paint-order: stroke fill; white-space: nowrap;
+            text-shadow:
+                0.150em 0.120em 0 #261b19, 0.130em 0.195em 0 #261b19,
+                0.075em 0.250em 0 #261b19, 0.000em 0.270em 0 #261b19,
+                -0.075em 0.250em 0 #261b19, -0.130em 0.195em 0 #261b19,
+                -0.150em 0.120em 0 #261b19, -0.130em 0.045em 0 #261b19,
+                -0.075em -0.010em 0 #261b19, 0.000em -0.030em 0 #261b19,
+                0.075em -0.010em 0 #261b19, 0.130em 0.045em 0 #261b19,
+                0 0.120em 0 #261b19;
+        }
+        .switcher .line {
+            display: flex; align-items: center;
+            gap: 0.2em;
+        }
+        .switcher .swleft {left: calc(var(--u) * 0.01)}
+        .switcher .swright {right: calc(var(--u) * 0.01)}
+        /* the arrow sits above the words on the left, so they need clearance */
+        .switcher .swleft .line {margin-top: 0.14em}
+        .switcher button:active {
+            transform: translateY(-50%) translateY(calc(var(--u) * 0.004));
+        }
+        .switcher img.arrow {
+            height: calc(var(--u) * 0.125); width: auto;
+            filter: drop-shadow(0 calc(var(--u) * 0.006) 0 #261b19);
+        }
+        .switcher .swleft img.arrow {transform: scaleX(-1)}
+        .switcher img.badge {
+            height: 1.15em; width: auto;
+            filter: drop-shadow(0 0.06em 0 #261b19);
         }
 
         .idtip {
@@ -617,11 +675,11 @@
         }
         .calwrap .pucontent {
             width: 100%; height: auto;
-            padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.04);
+            padding: calc(var(--u) * 0.035) 0 calc(var(--u) * 0.05);
         }
         .calwrap .pucontent .logo {
-            width: auto !important; height: calc(var(--u) * 0.062);
-            max-width: calc(var(--u) * 0.52);
+            width: auto !important; height: calc(var(--u) * 0.115);
+            max-width: calc(var(--u) * 0.66);
         }
         .calwrap .pucontent > div {
             width: calc(100% - var(--u) * 0.08);
@@ -636,14 +694,17 @@
             background: none; box-shadow: none;
             border-radius: 0;
         }
+        /* weekday heads use the face the game's dialogs use for body copy */
         .pucontent .calgrid span {
-            color: #8ea2e0; font-size: calc(var(--u) * 0.024);
-            letter-spacing: 0.05em; padding-bottom: calc(var(--u) * 0.006);
+            font-family: "nimbus sans becker", system-ui, sans-serif;
+            font-weight: 600; color: white;
+            font-size: calc(var(--u) * 0.027);
+            letter-spacing: 0.06em; padding-bottom: calc(var(--u) * 0.008);
         }
         /* every day is the same button; the ones out of reach are just faded and
            taken out of the way of the pointer. */
         .pucontent .calgrid button {
-            width: 100%; aspect-ratio: 1; height: auto;
+            width: 100%; aspect-ratio: 0.86; height: auto;
             margin: 0; padding: 0; border-radius: 0.25em;
             font-family: "blippo"; font-size: calc(var(--u) * 0.03);
             text-transform: none; color: white;
@@ -664,66 +725,6 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        /* UnderDeko: built by FunDialog::Initialize, ticked by FunDialog::Update,
-           drawn by FunDialog::Draw. it spawns Anim_RetroCircle every 50 frames at
-           the dialog centre less 25px, colour from a global counter mod 6 (red
-           green blue yellow magenta cyan), starting scale (dialogheight / 386) / 2,
-           alpha 0.5, scale multiplied by 1.005 and alpha dropped 0.00175 a frame -
-           so about 4.8s of life and 4.2x growth, drawn additive. and every 15
-           frames an Anim_UnderStar somewhere on a rect inset 100px from the dialog,
-           travelling straight out from the centre at 0.5px a frame. */
-        /* sits on the backdrop rather than inside the popup: the dialog body is
-           opaque yellow, and screen blending over that shows nothing. */
-        .deko {
-            position: absolute; left: 50%; top: 50%;
-            width: calc(var(--u) * 1.06); height: calc(var(--u) * 1.06);
-            transform: translate(-50%, -50%);
-            overflow: hidden; pointer-events: none;
-            border-radius: 6%; z-index: 0;
-        }
-        .calwrap .popup {position: relative; z-index: 1}
-        .deko b {
-            position: absolute; left: 50%; top: 50%;
-            width: calc(var(--u) * 0.5); height: calc(var(--u) * 0.5);
-            margin: calc(var(--u) * -0.25) 0 0 calc(var(--u) * -0.25);
-            border-radius: 50%; mix-blend-mode: screen;
-            opacity: 0; animation: retrocircle 4.8s linear infinite;
-        }
-        .deko b:nth-child(1) {background: radial-gradient(circle, #f00 60%, rgba(255,0,0,0) 72%)}
-        .deko b:nth-child(2) {background: radial-gradient(circle, #0f0 60%, rgba(0,255,0,0) 72%)}
-        .deko b:nth-child(3) {background: radial-gradient(circle, #00f 60%, rgba(0,0,255,0) 72%)}
-        .deko b:nth-child(4) {background: radial-gradient(circle, #ff0 60%, rgba(255,255,0,0) 72%)}
-        .deko b:nth-child(5) {background: radial-gradient(circle, #f0f 60%, rgba(255,0,255,0) 72%)}
-        .deko b:nth-child(6) {background: radial-gradient(circle, #0ff 60%, rgba(0,255,255,0) 72%)}
-        .deko b:nth-child(2) {animation-delay: -0.8s}
-        .deko b:nth-child(3) {animation-delay: -1.6s}
-        .deko b:nth-child(4) {animation-delay: -2.4s}
-        .deko b:nth-child(5) {animation-delay: -3.2s}
-        .deko b:nth-child(6) {animation-delay: -4.0s}
-
-        /* 1.005^frame over 286 frames, so it only ever reaches about 4.2x */
-        @keyframes retrocircle {
-            0% {transform: translateY(-2.6%) scale(1); opacity: 0.5}
-            25% {transform: translateY(-2.6%) scale(1.43); opacity: 0.375}
-            50% {transform: translateY(-2.6%) scale(2.04); opacity: 0.25}
-            75% {transform: translateY(-2.6%) scale(2.91); opacity: 0.125}
-            100% {transform: translateY(-2.6%) scale(4.2); opacity: 0}
-        }
-
-        .deko i {
-            position: absolute;
-            width: calc(var(--u) * 0.055); height: calc(var(--u) * 0.055);
-            background: url("assets/images/star.png") center/contain no-repeat;
-            opacity: 0; animation: understar 3s linear infinite;
-        }
-        @keyframes understar {
-            0% {opacity: 0; transform: translate(0, 0) scale(0.3) rotate(0deg)}
-            18% {opacity: 0.95}
-            100% {
-                opacity: 0;
-                transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(190deg);
-            }
-        }
 
 
 
@@ -758,7 +759,6 @@
         </div>
 
         <div class="idtip"></div>
-        <div class="debugid"></div>
 
         <div class="calwrap profile" data-role="profile">
             <div class="popup">
@@ -778,7 +778,6 @@
         <div class="vignette over"></div>
 
         <div class="calwrap" data-role="calendar">
-            <div class="deko"></div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -797,6 +796,17 @@
                     <div><div class="calgrid"></div></div>
                 </div>
             </div>
+        </div>
+
+        <div class="switcher">
+            <button class="swleft" type="button">
+                <img class="arrow" src="assets/images/arrowright.png" alt="">
+                <span class="line"><span class="lbl"></span></span>
+            </button>
+            <button class="swright" type="button">
+                <span class="line"><span class="lbl"></span></span>
+                <img class="arrow" src="assets/images/arrowright.png" alt="">
+            </button>
         </div>
 
         <div class="ui">
@@ -827,10 +837,10 @@
             </div>
 
             <div class="footer">
-                <button class="calbutton" title="Older scores">
+                <button class="calbutton">
                     <img src="assets/images/calendar.png" alt="calendar">
                 </button>
-                <button class="todaybutton" title="Back to today">
+                <button class="todaybutton">
                     <img src="assets/images/calendar.png" alt="today">
                 </button>
                 <svg class="logo" viewBox="0 0 900 170">
@@ -961,7 +971,7 @@
         /* only the rows on screen exist as elements; a pool of about fifty gets
            repositioned and refilled as the list moves. 3800 live rows with a flag
            each would blow the compositor apart. */
-        let board = []; let pool = []; let rowheight = 0;
+        let board = []; let pool = []; let rowheight = 0; let claimedat = -1;
         let padtop = 0; let padbottom = 0; let filled = -1;
 
         function poolsize(host) {
@@ -1038,6 +1048,7 @@
                     row.parts.flag.src = "assets/images/flags/" + entry.cc + ".png";
                     row.dataset.id = entry.id;
                     row.dataset.at = index;
+                    row.classList.toggle("mine", index === claimedat);
                 }
                 const top = padtop + index * rowheight - at;
                 row.style.top = top + "px";
@@ -1183,6 +1194,14 @@
             host.addEventListener("pointerup", letgo);
             host.addEventListener("pointercancel", letgo);
             host.addEventListener("lostpointercapture", letgo);
+
+            return {
+                jump: function(to) {
+                    at = Math.max(0, Math.min(limit(), to));
+                    velocity = 0;
+                    place();
+                }
+            };
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -1250,12 +1269,89 @@
             return out;
         }
 
+        /* the three boards the worker exposes: prefix 11, prefix 12 and snap. */
+        const boards = [
+            {key: "main", label: "Daily-Do"},
+            {key: "snap", label: "Snap", badge: "assets/images/snap2.webp"},
+            {key: "chuzzle", label: "Older"}
+        ];
+        const boardhost = "https://dailydo.coolsite.cv";
+        let boardat = 0;
+
+        function todaykey() {
+            const pad = function(n) {return String(n).padStart(2, "0")};
+            const d = new Date();
+            return d.getFullYear() + "-" + pad(d.getDate()) + "-" + pad(d.getMonth() + 1);
+        }
+
         async function loadboard() {
+            const spot = boards[boardat];
+            let text = "";
             try {
-                const reply = await fetch(sampleboard);
-                if (reply.ok) board = readboard(await reply.text());
+                const reply = await fetch(boardhost + "/" + spot.key + "/" + todaykey());
+                if (reply.ok) text = await reply.text();
             } catch (e) {}
+            if (!text || text.indexOf(String.fromCharCode(9)) < 0) {
+                /* offline, or opened straight off disk: fall back to the saved day */
+                try {
+                    const reply = await fetch(sampleboard);
+                    if (reply.ok) text = await reply.text();
+                } catch (e) {}
+            }
+            board = text ? readboard(text) : [];
             return board.length;
+        }
+
+        /* take the colour the list would use at the switcher's own height, so the
+           two arrows sit in the same sweep the rows do. */
+        function tintswitcher() {
+            const stage = document.querySelector(".dailydo");
+            const height = stage.clientHeight * cyclerspan;
+            const last = cyclerstops.length - 1;
+            document.querySelectorAll(".switcher button").forEach(function(seat) {
+                const box = seat.getBoundingClientRect();
+                const middle = box.top + box.height / 2;
+                const t = middle / height * last;
+                seat.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
+            });
+        }
+
+        function drawswitcher() {
+            const prev = boards[(boardat + boards.length - 1) % boards.length];
+            const next = boards[(boardat + 1) % boards.length];
+            [[".swleft", prev], [".swright", next]].forEach(function(pair) {
+                const seat = document.querySelector(pair[0]);
+                const spot = pair[1];
+                seat.querySelector(".lbl").textContent = spot.label;
+                const line = seat.querySelector(".line");
+                let badge = line.querySelector("img.badge");
+                if (spot.badge) {
+                    if (!badge) {
+                        badge = document.createElement("img");
+                        badge.className = "badge";
+                        badge.alt = "";
+                        line.insertBefore(badge, line.querySelector(".lbl"));
+                    }
+                    badge.src = spot.badge;
+                } else if (badge) {
+                    badge.remove();
+                }
+            });
+            tintswitcher();
+        }
+
+        async function switchboard(step) {
+            boardat = (boardat + step + boards.length) % boards.length;
+            drawswitcher();
+            const held = document.querySelector(".scores");
+            held.style.opacity = "0.4";
+            const count = await loadboard();
+            measurelist(host, list);
+            claimedat = findclaimed();
+            paintrows(0, host);
+            jumptoclaimed();
+            held.style.opacity = "";
+            document.title = boards[boardat].label + " (" + count + ")";
         }
 
         function makeidtip() {
@@ -1284,59 +1380,31 @@
             document.querySelector(".scores").addEventListener("scrolled", drop);
         }
 
-        /* ids are handed out, not derived: go.php answers command=getguid with
-           [GUID]9010877[/GUID], and its ping reports the caller's country in
-           [EXE_CCODE], which is the flag the game submits with. dailydo.php has
-           neither command. so there is no formula to mirror - click to be issued
-           one. they run sequentially, and the live counter sits just above the
-           highest id on the boards. */
-        const guidroute = "https://dailydo.coolsite.cv/guid";
-
-        async function askforguid() {
-            const box = document.querySelector(".debugid");
-            box.textContent = "asking the server...";
-            let note = null;
-            try {
-                const reply = await fetch(guidroute);
-                const got = await reply.json();
-                if (got.guid) {
-                    try {localStorage.setItem("chuzzleguid", got.guid)} catch (e) {}
-                }
-                if (got.ccode) {
-                    try {localStorage.setItem("chuzzleccode", got.ccode)} catch (e) {}
-                }
-                if (got.proxyccode) {
-                    try {localStorage.setItem("chuzzleproxycc", got.proxyccode)} catch (e) {}
-                }
-                note = got.guid ? null : "server gave no guid";
-            } catch (e) {
-                note = "request failed";
-            }
-            showdebugid(note);
+        function readclaim() {
+            try {return JSON.parse(localStorage.getItem("chuzzleclaim") || "null")} catch (e) {}
+            return null;
         }
 
-        function showdebugid(note) {
-            const box = document.querySelector(".debugid");
-            if (!box) return;
-            let held = null;
-            /* localStorage throws outright on a file:// origin */
-            try {held = localStorage.getItem("chuzzleguid")} catch (e) {}
-            const seat = held ? board.findIndex(function(e) {return e.id === held}) : -1;
-            let ccode = null; let proxycc = null;
-            try {
-                ccode = localStorage.getItem("chuzzleccode");
-                proxycc = localStorage.getItem("chuzzleproxycc");
-            } catch (e) {}
-            const lines = ["guid " + (held || "none issued - click to ask")];
-            if (held) {
-                lines.push("board " + (seat < 0 ? "no match" : "#" + (seat + 1)));
-                /* your connection as the edge sees it, then what raptisoft
-                   geolocated - that one describes the worker, not you. */
-                if (ccode) lines.push("country " + ccode);
-                if (proxycc && proxycc !== ccode) lines.push("raptisoft saw " + proxycc);
+        /* guid first: a player can rename and still be the same person. */
+        function findclaimed() {
+            const held = readclaim();
+            if (!held || !board.length) return -1;
+            if (held.guid) {
+                const byid = board.findIndex(function(e) {return e.id === held.guid});
+                if (byid >= 0) return byid;
             }
-            if (note) lines.push(note);
-            box.textContent = lines.join(String.fromCharCode(10));
+            if (held.name) {
+                return board.findIndex(function(e) {return e.full === held.name});
+            }
+            return -1;
+        }
+
+        function jumptoclaimed() {
+            const seat = findclaimed();
+            claimedat = seat;
+            if (seat < 0) return;
+            const host = document.querySelector(".scroller");
+            fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
         }
 
         /* clicking a row opens everything known about that player, untrimmed. */
@@ -1361,9 +1429,26 @@
                     ["Player ID", entry.id || "unknown"]
                 ];
                 if (entry.raw !== entry.full) rows.push(["As stored", entry.raw]);
+                const held = readclaim();
+                const mine = held && held.guid && held.guid === entry.id;
                 body.innerHTML = "<b>" + entry.full + "</b>" + rows.map(function(r) {
                     return "<span><i>" + r[0] + "</i>" + r[1] + "</span>";
-                }).join("");
+                }).join("") + "<button class=\"claim\" type=\"button\">"
+                    + (mine ? "Forget me" : "This is me") + "</button>";
+                body.querySelector(".claim").onclick = function() {
+                    try {
+                        if (mine) {localStorage.removeItem("chuzzleclaim")}
+                        else {
+                            localStorage.setItem("chuzzleclaim",
+                                JSON.stringify({guid: entry.id, name: entry.full}));
+                        }
+                    } catch (e) {}
+                    wrap.classList.remove("open");
+                    claimedat = findclaimed();
+                    paintedat = null;
+                    paintrows(0, document.querySelector(".scroller"));
+                    jumptoclaimed();
+                };
                 wrap.classList.add("open");
                 trimpending(wrap);
             });
@@ -1417,52 +1502,33 @@
             }
         }
 
-        /* six circles on one staggered loop, plus stars that leave from the edge
-           and drift away from the middle, the way UnderDeko places them. */
-        function builddeko() {
-            const deko = document.querySelector(".deko");
-            if (!deko) return;
-            for (let i = 0; i < 6; i++) deko.appendChild(document.createElement("b"));
-            const edges = [[0.5, 0.04], [0.96, 0.5], [0.5, 0.96], [0.04, 0.5]];
-            for (let i = 0; i < 12; i++) {
-                const star = document.createElement("i");
-                const seat = edges[i % 4];
-                const drift = 0.22 + (i % 3) * 0.12;
-                const x = seat[0] + ((i % 5) - 2) * 0.07;
-                const y = seat[1] + ((i % 7) - 3) * 0.05;
-                star.style.left = (x * 100) + "%";
-                star.style.top = (y * 100) + "%";
-                star.style.setProperty("--dx", ((x - 0.5) * drift * 340) + "%");
-                star.style.setProperty("--dy", ((y - 0.5) * drift * 340) + "%");
-                star.style.animationDelay = (-i * 0.283).toFixed(2) + "s";
-                deko.appendChild(star);
-            }
-        }
-
         /*//////////////////////////////////////////////////////////////////////*/
 
-        builddeko();
         makeprofile();
         buildrings();
         buildcalendar();
         makeidtip();
-        makefling(document.querySelector(".scroller"), document.querySelector(".scores"));
+        const fling = makefling(document.querySelector(".scroller"), document.querySelector(".scores"));
 
 
         const host = document.querySelector(".scroller");
         const list = document.querySelector(".scores");
 
-        document.querySelector(".debugid").addEventListener("click", askforguid);
+        drawswitcher();
+        document.querySelector(".swleft").addEventListener("click", function() {switchboard(-1)});
+        document.querySelector(".swright").addEventListener("click", function() {switchboard(1)});
 
         loadboard().then(function(count) {
             measurelist(host, list);
+            claimedat = findclaimed();
             paintrows(0, host);
-            showdebugid();
-            if (count) document.title = "Daily-Do! (" + count + ")";
+            jumptoclaimed();
+            if (count) document.title = boards[boardat].label + " (" + count + ")";
         });
         window.addEventListener("resize", function() {
             measurelist(host, list);
             paintrows(0, host);
+            tintswitcher();
         });
 
         const calwrap = document.querySelector("[data-role=calendar]");
