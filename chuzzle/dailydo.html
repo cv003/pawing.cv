@@ -218,6 +218,7 @@
             background: #ffd200;
             isolation: isolate;
             box-shadow:
+                0 0 0 47px rgba(0,0,0,0.5),
                 0 0 0 1px #FFD200, 0 0 0 3px #FFDC0E, 0 0 0 5px #FFE619, 
                 0 0 0 7px #FFEF21, 0 0 0 9px #FFF928, 0 0 0 11px #FFD632,
                 0 0 0 13px #FFDD3A, 0 0 0 15px #FFE543, 0 0 0 17px #FFED4C, 
@@ -436,7 +437,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
         }
-        .ui .dumbcontainer, .ui .footer {pointer-events: auto}
+        .ui .dumbcontainer, .ui .footer, .ui .findbox {pointer-events: auto}
 
         .vignette.over {
             position: fixed; inset: 0;
@@ -494,15 +495,6 @@
                 0 0.200em 0 #261b19;
         }
         .scores score {margin-left: auto}
-        /* the row you claimed, so it stands out once the list jumps to it */
-        .scores > div.mine rank::before {
-            content: ""; position: absolute;
-            left: 3.4cqw; top: 0.16em;
-            width: 0.42em; height: 0.42em;
-            border-radius: 50%; background: #ffd200;
-            box-shadow: 0 0 0 0.09em #261b19;
-        }
-        .scores > div.mine name {text-decoration: underline 0.06em}
         .scores score d {
             display: inline-block; width: 0.637em;
             text-align: center;
@@ -518,6 +510,51 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
+        /* your own row, straight out of DailyDoKit::Draw. the screen is 640 game
+           units wide and rows are 25 apart, so 1 unit is 0.15625cqw: the rainbow
+           is a 40 unit band stretched past both edges at 0.75 alpha, the glow is
+           the 104x44 blob drawn at 2x/1.5x scale sweeping 2 units a frame over a
+           640+400 wrap, and the row itself slides sin(2deg per frame) * 5. */
+        .scores > div.mine {z-index: 0}
+        .scores > div.mine::before,
+        .scores > div.mine::after {
+            content: ""; position: absolute; z-index: -1;
+            top: 50%; margin-top: -0.4cqw;
+            pointer-events: none;
+        }
+        .scores > div.mine::before {
+            left: -15.625cqw; right: -15.625cqw;
+            height: 6.25cqw; transform: translateY(-50%);
+            background: url(assets/images/ddrainbow.png) 0 0 / 100% 100%;
+            opacity: 0.75;
+        }
+        .scores > div.mine::after {
+            left: 0; width: 32.5cqw; height: 10.3125cqw;
+            background: url(assets/images/ddglow.png) 0 0 / 100% 100%;
+            mix-blend-mode: plus-lighter;
+            animation: ddsweep 8.667s linear infinite,
+                ddglowfade 1.5s ease-in-out infinite alternate;
+        }
+        .scores > div.mine rank, .scores > div.mine name,
+        .scores > div.mine img, .scores > div.mine score {
+            animation: ddsway 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes ddsweep {
+            from {transform: translate(-47.5cqw, -50%)}
+            to {transform: translate(115cqw, -50%)}
+        }
+        @keyframes ddglowfade {
+            from {opacity: 0.25}
+            to {opacity: 0.75}
+        }
+        @keyframes ddsway {
+            from {transform: translateX(-0.78125cqw)}
+            to {transform: translateX(0.78125cqw)}
+        }
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
         .footer {
             position: absolute; bottom: 0;
             width: 100%; padding-top: 2cqw;
@@ -526,13 +563,14 @@
             align-items: center;
         }
         .footer .logo {
-            width: auto !important; height: 14cqw;
+            width: auto !important;
+            height: calc(12.3cqw * var(--boxratio, 1.2));
             max-width: 62cqw;
         }
         .footer .logo .inner {fill: url(#lgrgb2)}
         .footer .logo .lglight {fill: url(#lgfade2)}
-        .calwrap .logo .inner {fill: url(#lgrgb3)}
-        .calwrap .logo .lglight {fill: url(#lgfade)}
+        [data-role=calendar] .logo .inner {fill: url(#lgpop)}
+        [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 
         .calbutton, .todaybutton {
             position: absolute; width: 15cqw; height: 15cqw;
@@ -553,22 +591,27 @@
         /*//////////////////////////////////////////////////////////////////////*/
 
         .profile .popup {max-width: calc(var(--u) * 0.9)}
-        .profile .pucontent .logo {height: calc(var(--u) * 0.105)}
+        .profile .pucontent .logo {height: calc(var(--u) * 0.123 * var(--boxratio, 1.2))}
         .profile .pucontent > div {
-            font-size: calc(var(--u) * 0.03);
-            line-height: 1.7; letter-spacing: 0.04em;
-            padding: calc(var(--u) * 0.03) calc(var(--u) * 0.04);
+            padding: calc(var(--u) * 0.03) calc(var(--u) * 0.032);
         }
-        .profile .pucontent > div b {
-            color: #ffd200; font-weight: inherit;
-            display: block; padding-bottom: calc(var(--u) * 0.012);
+        /* labels left, values right, in the face the game's dialogs use */
+        .profile .facts {
+            display: grid; width: 100%;
+            background: none; box-shadow: none;
+            border-radius: 0; padding: 0; top: 0;
+            grid-template-columns: auto 1fr;
+            gap: calc(var(--u) * 0.006) calc(var(--u) * 0.04);
+            font-family: "nimbus sans becker", system-ui, sans-serif;
+            font-weight: 600; font-size: calc(var(--u) * 0.028);
+            letter-spacing: 0.03em; text-align: left;
         }
-        .profile .pucontent > div span {
-            display: flex; justify-content: space-between;
-            gap: calc(var(--u) * 0.05); color: white;
-            white-space: nowrap;
+        .profile .facts i {color: #8ea2e0; font-style: normal; white-space: nowrap}
+        .profile .facts u {
+            color: white; text-decoration: none;
+            text-align: right; white-space: nowrap;
         }
-        .profile .pucontent > div span i {color: #8ea2e0; font-style: normal}
+        .profile .facts .gap {grid-column: 1 / -1; height: calc(var(--u) * 0.022)}
         .profile .pucontent > div .claim {
             font-family: "harlow solid", system-ui, sans-serif;
             text-transform: capitalize; font-size: 1.5em;
@@ -577,18 +620,19 @@
             border-radius: 0.25em; color: white; cursor: pointer;
             background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
                 #1130bf 80%, #a2aee6 100%);
-            font-weight: 100; -webkit-text-stroke: 0.12em black;
+            font-weight: 100; -webkit-text-stroke: 0.16em black;
             paint-order: stroke fill;
+            box-shadow: 0 0 0 0.07em rgba(0,0,0,0.75);
         }
         .profile .pucontent > div .claim:active {
             background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
                 #6020cf 80%, #ba9fe6 100%);
         }
 
-        .profile .pucontent img {
-            height: calc(var(--u) * 0.05);
-            border: calc(var(--u) * 0.005) solid #261b19;
-            vertical-align: middle;
+        .profile .facts img {
+            height: 0.92em; width: auto;
+            border: calc(var(--u) * 0.004) solid #261b19;
+            vertical-align: -0.14em; margin-right: 0.35em;
         }
 
         /* narrow enough to live in the list's side margin: arrow over label */
@@ -644,6 +688,26 @@
             filter: drop-shadow(0 0.06em 0 #261b19);
         }
 
+        .findbox {
+            position: absolute; right: 3cqw; bottom: 20cqw;
+            z-index: 7; display: flex; align-items: center;
+            gap: 1cqw; padding: 1.4cqw 2cqw;
+            border-radius: 3cqw; background: rgba(20,12,26,0.62);
+            box-shadow: 0 0 0 0.5cqw #261b19;
+        }
+        .findbox input {
+            width: 26cqw; border: none; outline: none;
+            background: none; color: white;
+            font-family: "nimbus sans becker", system-ui, sans-serif;
+            font-weight: 600; font-size: 3cqw; letter-spacing: 0.03em;
+        }
+        .findbox input::placeholder {color: #8ea2e0}
+        .findbox .hits {
+            font-family: "nimbus sans becker", system-ui, sans-serif;
+            font-weight: 600; font-size: 2.6cqw; color: #ffd200;
+            min-width: 6cqw; text-align: right;
+        }
+
         .idtip {
             position: fixed; z-index: 9;
             padding: 0.35em 0.7em; border-radius: 1em;
@@ -663,32 +727,60 @@
            column instead of the window. sizes go through --u for the same reason. */
         .calwrap {
             position: fixed; inset: 0; z-index: 8;
-            display: none; align-items: center; justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             background: rgba(0,0,0,0.55);
+            visibility: hidden; opacity: 0; pointer-events: none;
         }
-        .calwrap.open {display: flex}
+        .calwrap.open {visibility: visible; opacity: 1; pointer-events: auto}
+
+        /* dim lands at once, the box grows into place, and nothing inside shows
+           until it has arrived. closing runs the same thing backwards. */
+        .calwrap .popup {
+            transform: scale(0);
+            transition: transform 0.25s ease-out;
+        }
+        .calwrap.open .popup {transform: scale(1)}
+        /* belt and braces: if the transition never runs the box must still be up */
+        .calwrap.settled .popup {transform: scale(1)}
+        .calwrap.closing .popup {transform: scale(0)}
+        .calwrap .pucontent {opacity: 0}
+        .calwrap.settled .pucontent {opacity: 1}
+        @media (prefers-reduced-motion: reduce) {
+            .calwrap .popup {transition: none}
+        }
 
         .calwrap .popup {
             width: calc(var(--u) * 0.78); margin: 0;
             max-width: calc(100vw - var(--u) * 0.16);
             font-family: "blippo";
+            position: relative; z-index: 1;
         }
+        /* stood off the corner so the box's own rings do not crowd it */
+        .closebtn {
+            position: absolute; z-index: 3;
+            top: calc(var(--u) * -0.075); right: calc(var(--u) * -0.075);
+            width: calc(var(--u) * 0.105); height: calc(var(--u) * 0.105);
+            margin: 0; padding: 0; background: none; cursor: pointer;
+        }
+        .closebtn img {width: 100%; height: 100%; object-fit: contain}
+        .closebtn:active img {filter: brightness(1.7)}
         .calwrap .pucontent {
             width: 100%; height: auto;
             padding: calc(var(--u) * 0.035) 0 calc(var(--u) * 0.05);
         }
         .calwrap .pucontent .logo {
-            width: auto !important; height: calc(var(--u) * 0.115);
+            width: auto !important;
+            height: calc(var(--u) * 0.123 * var(--boxratio, 1.2));
             max-width: calc(var(--u) * 0.66);
         }
         .calwrap .pucontent > div {
             width: calc(100% - var(--u) * 0.08);
-            padding: calc(var(--u) * 0.024) calc(var(--u) * 0.024) calc(var(--u) * 0.02);
+            padding: calc(var(--u) * 0.03) calc(var(--u) * 0.026) calc(var(--u) * 0.03);
         }
 
         /* .pucontent div also matches this one, so the panel look has to be undone */
         .pucontent .calgrid {
-            display: grid; gap: calc(var(--u) * 0.008);
+            display: grid; gap: calc(var(--u) * 0.014);
             grid-template-columns: repeat(7, 1fr);
             width: auto; padding: 0; top: 0;
             background: none; box-shadow: none;
@@ -704,24 +796,30 @@
         /* every day is the same button; the ones out of reach are just faded and
            taken out of the way of the pointer. */
         .pucontent .calgrid button {
-            width: 100%; aspect-ratio: 0.86; height: auto;
+            width: 100%; aspect-ratio: 1; height: auto;
             margin: 0; padding: 0; border-radius: 0.25em;
             font-family: "blippo"; font-size: calc(var(--u) * 0.03);
             text-transform: none; color: white;
             cursor: pointer; box-shadow: none;
             background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
                 #1130bf 80%, #a2aee6 100%);
-            -webkit-text-stroke: calc(var(--u) * 0.006) black;
+            -webkit-text-stroke: calc(var(--u) * 0.008) black;
             paint-order: stroke fill;
+            box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75);
         }
         .pucontent .calgrid button:not(.live) {
             opacity: 0.5; pointer-events: none;
         }
+        .pucontent .calgrid button:focus,
+        .pucontent .calgrid button:focus-visible {outline: none}
         .pucontent .calgrid button.live:active {
             background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
                 #6020cf 80%, #ba9fe6 100%);
         }
-        .pucontent .calgrid button.today {box-shadow: 0 0 0 calc(var(--u) * 0.005) #ffd200}
+        .pucontent .calgrid button.today {
+            box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
+                0 0 0 calc(var(--u) * 0.008) #ffd200;
+        }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -762,12 +860,21 @@
 
         <div class="calwrap profile" data-role="profile">
             <div class="popup">
+                <button class="closebtn" type="button">
+                    <img src="assets/images/close.png" alt="close">
+                </button>
                 <div class="pucontent">
                     <svg class="logo" viewBox="0 0 900 170">
-                        <g><text x="30" y="130" class="lgblack">Player</text>
-                            <text x="30" y="130" class="lgouter">Player</text>
-                            <text x="30" y="130" class="lgmid">Player</text>
-                            <text x="30" y="130" class="inner">Player</text></g>
+                        <defs>
+                            <linearGradient id="lgpop2" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack"></text>
+                            <text x="30" y="130" class="inner"></text></g>
                     </svg>
                     <div></div>
                 </div>
@@ -779,18 +886,21 @@
 
         <div class="calwrap" data-role="calendar">
             <div class="popup">
+                <button class="closebtn" type="button">
+                    <img src="assets/images/close.png" alt="close">
+                </button>
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
                     <svg class="logo" viewBox="0 0 900 170">
                         <defs>
-                            <linearGradient id="lgrgb3" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#edfd90"/>
-                                <stop offset="80%" stop-color="#f8b5c8"/>
+                            <linearGradient id="lgpop" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
                             </linearGradient>
                         </defs>
                         <g><text x="30" y="130" class="lgblack">Pick A Day!</text>
-                            <text x="30" y="130" class="lgouter">Pick A Day!</text>
-                            <text x="30" y="130" class="lgmid">Pick A Day!</text>
                             <text x="30" y="130" class="inner">Pick A Day!</text></g>
                     </svg>
                     <div><div class="calgrid"></div></div>
@@ -834,6 +944,11 @@
                     <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Today's Scores</text>
                     <text x="30" y="130" class="shine">Today's Scores</text></g>
             </svg>
+            </div>
+
+            <div class="findbox">
+                <input type="search" placeholder="Find a player" autocomplete="off">
+                <span class="hits"></span>
             </div>
 
             <div class="footer">
@@ -925,6 +1040,8 @@
             const width = Math.max(1, xmax - xmin); const height = Math.max(1, ymax - ymin);
             if (width < 2 || height < 2) return;
             svg.setAttribute("viewBox", `${xmin} ${ymin} ${width} ${height}`);
+            const glyphs = Math.max(1, (ymax - pad) - (ymin + pad));
+            svg.style.setProperty("--boxratio", (height / glyphs).toFixed(4));
             svg.dataset.trimmed = "1";
         }
 
@@ -1089,6 +1206,8 @@
                     star.style.left = "calc(var(--u) * " + (Math.sin(angle) * spec.r).toFixed(4) + ")";
                     star.style.top = "calc(var(--u) * " + (-Math.cos(angle) * spec.r).toFixed(4) + ")";
                     star.style.width = "calc(var(--u) * " + spec.size + ")";
+                    star.style.transform = "translate(-50%, -50%) rotate("
+                        + (angle * 180 / Math.PI).toFixed(1) + "deg)";
                     ring.appendChild(star);
                 }
                 clip.appendChild(ring);
@@ -1196,6 +1315,7 @@
             host.addEventListener("lostpointercapture", letgo);
 
             return {
+                at: function() {return at},
                 jump: function(to) {
                     at = Math.max(0, Math.min(limit(), to));
                     velocity = 0;
@@ -1350,6 +1470,7 @@
             claimedat = findclaimed();
             paintrows(0, host);
             jumptoclaimed();
+            openlinkedplayer();
             held.style.opacity = "";
             document.title = boards[boardat].label + " (" + count + ")";
         }
@@ -1407,33 +1528,73 @@
             fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
         }
 
+        /* ?player=<id> lands straight on that row with the popup up. */
+        function openlinkedplayer() {
+            const want = new URL(location.href).searchParams.get("player");
+            if (!want) return;
+            const seat = board.findIndex(function(e) {return e.id === want});
+            if (seat < 0) return;
+            const host = document.querySelector(".scroller");
+            fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
+            const row = pool.find(function(r) {return r.dataset.at === String(seat)});
+            if (row) row.querySelector("name").dispatchEvent(
+                new PointerEvent("pointerdown", {bubbles: true, clientY: 0}));
+            if (row) row.querySelector("name").dispatchEvent(
+                new PointerEvent("pointerup", {bubbles: true, clientY: 0}));
+        }
+
+        /* jump to the first row whose name or id starts with what was typed. */
+        function makefinder() {
+            const box = document.querySelector(".findbox input");
+            const hits = document.querySelector(".findbox .hits");
+            if (!box) return;
+            box.addEventListener("input", function() {
+                const want = box.value.trim().toUpperCase();
+                if (!want) {hits.textContent = ""; return}
+                const seat = board.findIndex(function(e) {
+                    return e.full.indexOf(want) === 0 || e.id.indexOf(want) === 0;
+                });
+                if (seat < 0) {hits.textContent = "none"; return}
+                hits.textContent = "#" + (seat + 1);
+                const host = document.querySelector(".scroller");
+                fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
+            });
+        }
+
         /* clicking a row opens everything known about that player, untrimmed. */
         function makeprofile() {
             const wrap = document.querySelector("[data-role=profile]");
             const body = wrap.querySelector(".pucontent > div");
             const host = document.querySelector(".scroller");
-            let downat = 0;
+            let downat = 0; let downrow = null;
 
-            host.addEventListener("pointerdown", function(e) {downat = e.clientY});
-            host.addEventListener("click", function(e) {
-                const row = e.target.closest ? e.target.closest("[data-at]") : null;
+            host.addEventListener("pointerdown", function(e) {
+                downat = e.clientY;
+                downrow = e.target.tagName === "NAME" && e.target.closest
+                    ? e.target.closest("[data-at]") : null;
+            }, true);
+            host.addEventListener("pointerup", function(e) {
+                const row = downrow;
+                downrow = null;
                 if (!row || Math.abs(e.clientY - downat) > 6) return;
                 const entry = board[row.dataset.at];
                 if (!entry) return;
                 const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
-                const rows = [
-                    ["Rank", "#" + (Number(row.dataset.at) + 1)],
-                    ["Name", entry.full],
-                    ["Score", Number(entry.score).toLocaleString("en")],
-                    ["Country", flag + " " + (countrynames[entry.country] || entry.country)],
-                    ["Player ID", entry.id || "unknown"]
+                const country = countrynames[entry.country] || entry.country;
+                const facts = [
+                    ["Nickname", entry.full],
+                    ["Country", flag + country],
+                    ["Player ID", entry.id || "unknown"],
+                    null,
+                    ["Today's Rank", "#" + (Number(row.dataset.at) + 1)],
+                    ["Today's Score", Number(entry.score).toLocaleString("en")]
                 ];
-                if (entry.raw !== entry.full) rows.push(["As stored", entry.raw]);
                 const held = readclaim();
                 const mine = held && held.guid && held.guid === entry.id;
-                body.innerHTML = "<b>" + entry.full + "</b>" + rows.map(function(r) {
-                    return "<span><i>" + r[0] + "</i>" + r[1] + "</span>";
-                }).join("") + "<button class=\"claim\" type=\"button\">"
+                body.innerHTML = '<div class="facts">' + facts.map(function(f) {
+                    if (!f) return '<span class="gap"></span>';
+                    return "<i>" + f[0] + "</i><u>" + f[1] + "</u>";
+                }).join("") + "</div><button class=\"claim\" type=\"button\">"
                     + (mine ? "Forget me" : "This is me") + "</button>";
                 body.querySelector(".claim").onclick = function() {
                     try {
@@ -1443,17 +1604,26 @@
                                 JSON.stringify({guid: entry.id, name: entry.full}));
                         }
                     } catch (e) {}
-                    wrap.classList.remove("open");
+                    closepopup(wrap);
                     claimedat = findclaimed();
                     paintedat = null;
                     paintrows(0, document.querySelector(".scroller"));
                     jumptoclaimed();
                 };
-                wrap.classList.add("open");
-                trimpending(wrap);
+                /* the title is the nickname itself, already question marked */
+                wrap.querySelectorAll(".logo text").forEach(function(t) {
+                    t.textContent = entry.full;
+                });
+                delete wrap.querySelector(".logo").dataset.trimmed;
+                if (entry.id) {
+                    const url = new URL(location.href);
+                    url.searchParams.set("player", entry.id);
+                    history.replaceState(null, "", url);
+                }
+                openpopup(wrap);
             });
             wrap.addEventListener("click", function(e) {
-                if (e.target === wrap) wrap.classList.remove("open");
+                if (e.target === wrap) closepopup(wrap);
             });
         }
 
@@ -1505,6 +1675,7 @@
         /*//////////////////////////////////////////////////////////////////////*/
 
         makeprofile();
+        makefinder();
         buildrings();
         buildcalendar();
         makeidtip();
@@ -1523,27 +1694,60 @@
             claimedat = findclaimed();
             paintrows(0, host);
             jumptoclaimed();
+            openlinkedplayer();
             if (count) document.title = boards[boardat].label + " (" + count + ")";
         });
         window.addEventListener("resize", function() {
+            const keep = fling.at();
             measurelist(host, list);
-            paintrows(0, host);
+            paintedat = null;
+            fling.jump(keep);
             tintswitcher();
+        });
+
+        const popupwait = 250;
+
+        function openpopup(wrap) {
+            wrap.classList.remove("closing");
+            wrap.classList.add("open");
+            trimpending(wrap);
+            clearTimeout(wrap.settletimer);
+            wrap.settletimer = setTimeout(function() {wrap.classList.add("settled")}, popupwait);
+        }
+
+        function closepopup(wrap) {
+            if (!wrap.classList.contains("open")) return;
+            clearTimeout(wrap.settletimer);
+            wrap.classList.remove("settled");
+            wrap.classList.add("closing");
+            wrap.settletimer = setTimeout(function () {
+                wrap.classList.remove("open");
+                wrap.classList.remove("closing");
+            }, popupwait);
+            if (wrap.dataset.role === "profile") {
+                const url = new URL(location.href);
+                url.searchParams.delete("player");
+                history.replaceState(null, "", url);
+            }
+        }
+
+        document.querySelectorAll(".closebtn").forEach(function (seat) {
+            seat.addEventListener("click", function () {
+                closepopup(seat.closest(".calwrap"));
+            });
         });
 
         const calwrap = document.querySelector("[data-role=calendar]");
         document.querySelector(".calbutton").addEventListener("click", function() {
-            calwrap.classList.toggle("open");
-            if (calwrap.classList.contains("open")) trimpending(calwrap);
+            if (calwrap.classList.contains("open")) {closepopup(calwrap)}
+            else {openpopup(calwrap)}
         });
         calwrap.addEventListener("click", function(e) {
-            if (e.target === calwrap) calwrap.classList.remove("open");
+            if (e.target === calwrap) closepopup(calwrap);
         });
         window.addEventListener("keydown", function(e) {
             if (e.key !== "Escape") return;
-            document.querySelectorAll(".calwrap.open").forEach(function(w) {
-                w.classList.remove("open");
-            });
+            document.querySelectorAll(".calwrap.open").forEach(closepopup);
         });
 
         document.addEventListener("click", function(e) {
