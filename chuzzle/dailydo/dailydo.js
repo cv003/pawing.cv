@@ -32,6 +32,17 @@ function trimpending(root) {
 function trimall() {
     document.querySelectorAll("svg.logo").forEach(logotrimmer);
     document.documentElement.classList.add("fontsready");
+    placepicks();
+}
+
+/* the logo is the same word stacked six times plus the erode mask, so every
+   copy has to change together and the box has to be measured again. */
+function relabellogo(svg, words) {
+    if (!svg || svg.dataset.words === words) return;
+    svg.dataset.words = words;
+    svg.querySelectorAll("text").forEach(function(t) {t.textContent = words});
+    delete svg.dataset.trimmed;
+    logotrimmer(svg);
 }
 if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(trimall);
@@ -388,24 +399,41 @@ function readboard(text) {
 
 /* the three boards the worker exposes: prefix 11, prefix 12 and snap. */
 const boards = [
-    {key: "main", label: "Daily-Do"},
-    {key: "snap", label: "Snap", badge: "assets/images/snap2.webp"},
-    {key: "chuzzle", label: "Older"}
+    {key: "main", label: "Daily-Do", title: "Today's Scores"},
+    {key: "snap", label: "Snap", title: "Snap Scores", badge: "assets/images/snap2.webp"},
+    {key: "chuzzle", label: "Legacy", title: "Legacy Scores"}
 ];
 const boardhost = "https://dailydo.coolsite.cv";
 let boardat = 0;
+/* days back from today, 0 .. calendarreach */
+let dayat = 0;
 
-function todaykey() {
-    const pad = function(n) {return String(n).padStart(2, "0")};
+function dayback(back) {
     const d = new Date();
-    return d.getFullYear() + "-" + pad(d.getDate()) + "-" + pad(d.getMonth() + 1);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - back);
+    return d;
+}
+
+function daylabel(back) {
+    const d = dayback(back);
+    const pad = function(n) {return String(n).padStart(2, "0")};
+    return pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
+}
+
+/* the game only ever says today or yesterday, so anything older is named by
+   its date instead of inventing a phrase for it. */
+function boardtitle() {
+    if (dayat === 0) return boards[boardat].title;
+    if (dayat === 1) return "Yesterday's Scores";
+    return daylabel(dayat) + " Scores";
 }
 
 async function loadboard() {
     const spot = boards[boardat];
     let text = "";
     try {
-        const reply = await fetch(boardhost + "/" + spot.key + "/" + todaykey());
+        const reply = await fetch(boardhost + "/" + spot.key + "/" + daykey(dayback(dayat)));
         if (reply.ok) text = await reply.text();
     } catch (e) {}
     if (!text || text.indexOf(String.fromCharCode(9)) < 0) {
@@ -433,43 +461,137 @@ function tintswitcher() {
     });
 }
 
-function drawswitcher() {
-    const prev = boards[(boardat + boards.length - 1) % boards.length];
-    const next = boards[(boardat + 1) % boards.length];
-    [[".swleft", prev], [".swright", next]].forEach(function(pair) {
+/* the arrows step through the fourteen days the server keeps; whichever end
+   runs out simply leaves rather than shuffling the other arrow about. */
+function drawsteppers() {
+    [[".swleft", dayat + 1], [".swright", dayat - 1]].forEach(function(pair) {
         const seat = document.querySelector(pair[0]);
-        const spot = pair[1];
-        seat.querySelector(".lbl").textContent = spot.label;
-        const line = seat.querySelector(".line");
-        let badge = line.querySelector("img.badge");
-        if (spot.badge) {
-            if (!badge) {
-                badge = document.createElement("img");
-                badge.className = "badge";
-                badge.alt = "";
-                line.insertBefore(badge, line.querySelector(".lbl"));
-            }
-            badge.src = spot.badge;
-        } else if (badge) {
-            badge.remove();
-        }
+        const back = pair[1];
+        const reachable = back >= 0 && back <= calendarreach;
+        seat.classList.toggle("gone", !reachable);
+        if (reachable) seat.querySelector(".lbl").textContent = daylabel(back);
     });
     tintswitcher();
 }
 
-async function switchboard(step) {
-    boardat = (boardat + step + boards.length) % boards.length;
-    drawswitcher();
-    const held = document.querySelector(".scores");
-    held.style.opacity = "0.4";
-    const count = await loadboard();
+function buildpicks() {
+    const rail = document.querySelector(".boardpick");
+    if (!rail) return;
+    boards.forEach(function(spot, index) {
+        const seat = document.createElement("button");
+        seat.type = "button";
+        if (spot.badge) {
+            const icon = document.createElement("img");
+            icon.src = spot.badge; icon.alt = "";
+            seat.appendChild(icon);
+        }
+        const label = document.createElement("span");
+        label.className = "lbl";
+        label.textContent = spot.label;
+        seat.appendChild(label);
+        seat.addEventListener("click", function() {pickboard(index)});
+        rail.appendChild(seat);
+    });
+    drawpicks();
+    placepicks();
+}
+
+/* the corner only works while the margin beside the column can actually hold
+   the rail, which no phone and few windows can. */
+function placepicks() {
+    const rail = document.querySelector(".boardpick");
+    const column = document.querySelector(".dailydo");
+    if (!rail || !column) return;
+    rail.classList.remove("inline");
+    const margin = (window.innerWidth - column.clientWidth) / 2;
+    if (margin < rail.offsetWidth + window.innerHeight * 0.05) rail.classList.add("inline");
+}
+
+function drawpicks() {
+    document.querySelectorAll(".boardpick button").forEach(function(seat, index) {
+        seat.classList.toggle("on", index === boardat);
+    });
+    document.querySelectorAll(".calgrid button[data-back]").forEach(function(cell) {
+        cell.classList.toggle("picked", Number(cell.dataset.back) === dayat);
+    });
+}
+
+/* the list and the title ride out the way you pushed and the new board rides
+   in from the other side, rather than being swapped underneath you. */
+const slidespan = 190;
+
+function slidemovers() {
+    return [document.querySelector(".scores"), document.querySelector(".dumbcontainer")];
+}
+
+function slideout(dir) {
+    slidemovers().forEach(function(seat) {
+        seat.classList.add("sliding");
+        seat.style.transform = "translateX(" + (dir * 22) + "%)";
+        seat.style.opacity = "0";
+    });
+    return new Promise(function(done) {setTimeout(done, slidespan)});
+}
+
+function slidein(dir) {
+    slidemovers().forEach(function(seat) {
+        seat.classList.add("sliding", "jumping");
+        seat.style.transform = "translateX(" + (dir * -22) + "%)";
+    });
+    requestAnimationFrame(function() {
+        slidemovers().forEach(function(seat) {
+            seat.classList.remove("jumping");
+            seat.style.transform = "";
+            seat.style.opacity = "";
+        });
+    });
+}
+
+async function reload(dir) {
+    drawsteppers();
+    drawpicks();
+    const [count] = await Promise.all([loadboard(), slideout(dir)]);
+    relabellogo(document.querySelector(".dumbcontainer .logo"), boardtitle());
     measurelist(host, list);
     claimedat = findclaimed();
+    paintedat = null; filled = -1;
     paintrows(0, host);
     jumptoclaimed();
     openlinkedplayer();
-    held.style.opacity = "";
-    document.title = boards[boardat].label + " (" + count + ")";
+    showfooter();
+    slidein(dir);
+    document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
+}
+
+/* +1 walks back a day, -1 walks forward */
+function switchday(step) {
+    const want = dayat + step;
+    if (want < 0 || want > calendarreach) return;
+    dayat = want;
+    reload(step);
+}
+
+function pickday(back) {
+    if (back === dayat || back < 0 || back > calendarreach) return;
+    const dir = back > dayat ? 1 : -1;
+    dayat = back;
+    reload(dir);
+}
+
+function pickboard(index) {
+    if (index === boardat) return;
+    const dir = index > boardat ? -1 : 1;
+    boardat = index;
+    reload(dir);
+}
+
+/* the game swaps the play banner for UI_DYNA\AlreadyPlayed once your score is
+   in, so the footer only says Play! while the claimed player still has none. */
+function showfooter() {
+    const played = dayat === 0 && claimedat >= 0 && board[claimedat]
+        && Number(board[claimedat].score) > 0;
+    relabellogo(document.querySelector(".footer .logo"),
+        played ? "Already played today!" : "Play!");
 }
 
 function makeidtip() {
@@ -606,6 +728,7 @@ function makeprofile() {
             paintedat = null; filled = -1;
             paintrows(0, document.querySelector(".scroller"));
             jumptoclaimed();
+            showfooter();
         };
         if (entry.id) {
             const url = new URL(location.href);
@@ -659,9 +782,17 @@ function buildcalendar() {
         if (at.getTime() >= oldest && at.getTime() <= newest) {
             cell.className = "live" + (at.getTime() === today.getTime() ? " today" : "");
             cell.dataset.day = daykey(at);
+            const back = Math.round((today.getTime() - at.getTime()) / day);
+            if (back >= 0 && back <= calendarreach) cell.dataset.back = back;
         }
         grid.appendChild(cell);
     }
+    grid.addEventListener("click", function(e) {
+        const cell = e.target.closest("button[data-back]");
+        if (!cell) return;
+        closepopup(document.querySelector("[data-role=calendar]"));
+        pickday(Number(cell.dataset.back));
+    });
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -677,17 +808,25 @@ const fling = makefling(document.querySelector(".scroller"), document.querySelec
 const host = document.querySelector(".scroller");
 const list = document.querySelector(".scores");
 
-drawswitcher();
-document.querySelector(".swleft").addEventListener("click", function() {switchboard(-1)});
-document.querySelector(".swright").addEventListener("click", function() {switchboard(1)});
+buildpicks();
+drawsteppers();
+document.querySelector(".swleft").addEventListener("click", function() {switchday(1)});
+document.querySelector(".swright").addEventListener("click", function() {switchday(-1)});
 
-loadboard().then(function(count) {
+/* the row height depends on blippo, so measuring before it lands puts the
+   jump to your own row a couple of screens off. */
+const fontsdone = document.fonts && document.fonts.ready
+    ? document.fonts.ready : Promise.resolve();
+
+Promise.all([loadboard(), fontsdone]).then(function(got) {
+    const count = got[0];
     measurelist(host, list);
     claimedat = findclaimed();
     paintrows(0, host);
     jumptoclaimed();
     openlinkedplayer();
-    if (count) document.title = boards[boardat].label + " (" + count + ")";
+    showfooter();
+    if (count) document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
 });
 window.addEventListener("resize", function() {
     const keep = fling.at();
@@ -695,6 +834,7 @@ window.addEventListener("resize", function() {
     paintedat = null;
     fling.jump(keep);
     tintswitcher();
+    placepicks();
 });
 
 const popupwait = 250;
@@ -736,6 +876,21 @@ document.querySelector(".calbutton").addEventListener("click", function() {
 });
 calwrap.addEventListener("click", function(e) {
     if (e.target === calwrap) closepopup(calwrap);
+});
+
+/* android is the only platform that will launch an installed app by package
+   id; ios has no equivalent, an app there can only be opened through a scheme
+   it registered itself or a universal link, neither of which chuzzle 2
+   publishes. everywhere else gets the store page in a new tab. */
+const playpackage = "com.raptisoft.Chuzzle2";
+const playpage = "https://play.google.com/store/apps/details?id=" + playpackage;
+
+document.querySelector(".todaybutton").addEventListener("click", function() {
+    if (/android/i.test(navigator.userAgent)) {
+        location.href = "market://launch?id=" + playpackage;
+        return;
+    }
+    window.open(playpage, "_blank", "noopener");
 });
 window.addEventListener("keydown", function(e) {
     if (e.key !== "Escape") return;

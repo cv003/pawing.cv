@@ -19,10 +19,7 @@
     font-display: block;
 }
 
-/* --u is the in-game screen width every proportion is derived from. the sky
-   spans the whole viewport, the content column is --u wide and centred. */
 :root {--u: min(56.25vh, 100vw)}
-
 body {
     background-color: #a7723b; padding: 0;
     color: white; height: 100vh; margin: 0;
@@ -425,6 +422,14 @@ button {
 }
 .ui .dumbcontainer, .ui .footer, .ui .findbox {pointer-events: auto}
 
+/* board switching: the outgoing side is timed, the incoming side is dropped
+   into place with the transition off before it rides back */
+.sliding {transition: transform 0.19s ease, opacity 0.19s ease}
+.sliding.jumping {transition: none}
+@media (prefers-reduced-motion: reduce) {
+    .sliding {transition: none}
+}
+
 .vignette.over {
     position: fixed; inset: 0;
     z-index: 2; pointer-events: none;
@@ -510,9 +515,13 @@ button {
     position: absolute; left: 0; right: 0;
     display: none; pointer-events: none;
     -webkit-mask-image: linear-gradient(to right,
-        transparent 0, #000 26%, #000 74%, transparent 100%);
+        transparent 0, #000 18%, #000 82%, transparent 100%);
     mask-image: linear-gradient(to right,
-        transparent 0, #000 26%, #000 74%, transparent 100%);
+        transparent 0, #000 18%, #000 82%, transparent 100%);
+    /* repeat-y only: tiling sideways puts a seam of unmasked pixels at the
+       right edge every time the glow crosses it */
+    -webkit-mask-repeat: repeat-y;
+    mask-repeat: repeat-y;
 }
 .scores hilite.on {display: block}
 .scores hilite::before, .scores hilite::after {
@@ -554,9 +563,14 @@ button {
 .footer {
     position: absolute; bottom: 0;
     width: 100%; padding-top: 2cqw;
-    padding-bottom: 0;
-    display: flex; justify-content: center;
-    align-items: center;
+    padding-bottom: 2.6cqw;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+}
+.footrow {
+    position: relative; width: 100%;
+    height: 12.5cqw; margin-top: 0.5cqw;
+    display: flex; align-items: center; justify-content: center;
 }
 .footer .logo {
     width: auto !important;
@@ -569,13 +583,13 @@ button {
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 
 .calbutton, .todaybutton {
-    position: absolute; width: 15cqw; height: 15cqw;
+    position: absolute; width: 12.5cqw; height: 12.5cqw;
     padding: 0; margin: 0; cursor: pointer;
     background: none; box-shadow: none;
     display: flex; align-items: center; justify-content: center;
 }
 .calbutton {left: 4cqw}
-.todaybutton {right: 4cqw; display: none}
+.todaybutton {right: 4cqw}
 .calbutton img, .todaybutton img {
     width: auto; height: 100%;
     max-width: 100%; object-fit: contain;
@@ -683,13 +697,60 @@ button {
     height: 1.15em; width: auto;
     filter: drop-shadow(0 0.06em 0 #261b19);
 }
+/* both ends of the reachable window run out, so an arrow has to be able to
+   leave without the other one moving */
+.switcher button.gone {visibility: hidden; pointer-events: none}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* the boards live in the empty margin beside the column. sizes go through vh
+   rather than cqw because this sits outside .dailydo entirely. */
+.boardpick {
+    position: fixed; z-index: 6;
+    right: 2vh; bottom: 2vh;
+    display: flex; overflow: hidden;
+    border-radius: 1.5vh;
+    background: rgba(20,12,26,0.72);
+    box-shadow:
+        0 0 0 0.4vh #60204a,
+        0 0 0 0.85vh #feff48,
+        0 0 0 1.3vh rgba(0,0,0,0.5);
+    font-family: "blippo";
+}
+.boardpick button {
+    display: flex; align-items: center; gap: 0.5vh;
+    margin: 0; padding: 0.9vh 1.5vh;
+    background: none; cursor: pointer;
+    font-family: inherit; font-weight: 300;
+    font-size: 2.1vh; letter-spacing: 0.02em;
+    text-transform: uppercase; white-space: nowrap;
+    color: #babfd8;
+}
+.boardpick button + button {box-shadow: inset 0.4vh 0 0 rgba(0,0,0,0.5)}
+.boardpick button img {height: 2.4vh; width: auto}
+.boardpick button.on {
+    background: linear-gradient(180deg, #ffef21 0%, #ffd200 55%, #ffa800 100%);
+    color: #5a2a00;
+}
+.boardpick button:active {filter: brightness(1.6)}
+
+/* when the margin beside the column is too narrow to hold it, it moves in
+   over the list and sits above the play row instead. placepicks decides. */
+.boardpick.inline {
+    right: auto; left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(var(--u) * 0.29);
+}
 
 .findbox {
-    position: absolute; right: 3cqw; bottom: 20cqw;
-    z-index: 7; display: flex; align-items: center;
-    gap: 1cqw; padding: 1.4cqw 2cqw;
-    border-radius: 3cqw; background: rgba(20,12,26,0.62);
-    box-shadow: 0 0 0 0.5cqw #261b19;
+    z-index: 7; height: 9.6cqw;
+    display: flex; align-items: center;
+    gap: 1cqw; padding: 0 2.6cqw;
+    border-radius: 4.8cqw; background: rgba(20,12,26,0.62);
+    box-shadow:
+        0 0 0 1.2cqw #60204a,
+        0 0 0 2cqw #feff48,
+        0 0 0 2.7cqw rgba(0,0,0,0.5);
 }
 .findbox input {
     width: 26cqw; border: none; outline: none;
@@ -815,6 +876,13 @@ button {
 .pucontent .calgrid button.today {
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
         0 0 0 calc(var(--u) * 0.008) #ffd200;
+}
+/* the day you are actually looking at, which is not always today */
+.pucontent .calgrid button.picked {
+    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
+        #6020cf 80%, #ba9fe6 100%);
+    box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
+        0 0 0 calc(var(--u) * 0.008) #feff48;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
