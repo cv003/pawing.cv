@@ -68,7 +68,10 @@ function readstore() {
     return {};
 }
 
+// an empty answer is never worth a minute of cache: the day may simply not
+// have been written yet, and the next look should ask again
 function remember(key, text) {
+    if (!text) return;
     const all = readstore();
     all[key] = {text: text, at: Date.now()};
     Object.keys(all).sort(function(a, b) {return all[b].at - all[a].at})
@@ -94,7 +97,9 @@ function useboard(text) {
 async function loadboard() {
     const key = cachekey();
     const held = readstore()[key];
-    if (held && Date.now() - held.at < boardage) return useboard(held.text);
+    if (held && held.text && Date.now() - held.at < boardage) {
+        return useboard(held.text);
+    }
     const text = await fetchtext(key);
     remember(key, text);
     return useboard(text);

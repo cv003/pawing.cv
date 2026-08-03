@@ -482,9 +482,10 @@
     display: flex; align-items: center; gap: 0.4vh;
     margin: 0; padding: 0.5vh 0.65vh; color: white;
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-weight: 100 !important; font-size: 1.85vh;
+    font-weight: 100 !important; font-size: 2.1vh;
     text-transform: capitalize; white-space: nowrap;
-    -webkit-text-stroke: 0.28vh black;
+    /* in em, or a fixed rim on a small label swallows the letterforms */
+    -webkit-text-stroke: 0.07em black;
     paint-order: stroke fill;
     background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%,
         #0a1a5e 80%, #5a63a0 100%);
