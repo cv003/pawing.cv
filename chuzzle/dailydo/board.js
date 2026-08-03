@@ -29,8 +29,11 @@ function cyclerget(t) {
     return "rgb(" + ch[0] + "," + ch[1] + "," + ch[2] + ")";
 }
 
+// one full there-and-back of the claimed row's sway, in milliseconds
+const swaycycle = 3000;
+
 // only show rows on screen because 3000 entries will murder the browser
-let board = []; let fullboard = []; let pool = []; 
+let board = []; let fullboard = []; let pool = [];
 let rowheight = 0; let claimedat = -1;
 let padtop = 0; let padbottom = 0; 
 let filled = -1; let strip = null;
@@ -130,6 +133,15 @@ function paintrows(at, host) {
             row.dataset.id = entry.id;
             row.dataset.at = index;
             row.classList.toggle("mine", index === claimedat);
+            /* the pool recycles, so a row joining mid-cycle is handed the */
+            /* phase the sway is already at rather than starting over */
+            if (index === claimedat) {
+                const phase = (-(Date.now() % swaycycle)) + "ms";
+                row.parts.rank.style.animationDelay = phase;
+                row.parts.name.style.animationDelay = phase;
+                row.parts.flag.style.animationDelay = phase;
+                row.parts.score.style.animationDelay = phase;
+            }
         }
         const top = padtop + index * rowheight - at;
         row.style.top = top + "px";

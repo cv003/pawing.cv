@@ -127,14 +127,24 @@ function tintswitcher() {
         seat.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     });
 }
+/* the next day in that direction the board in play actually has */
+/* the tournament skips the six empty days, so it walks sunday to sunday */
+function nextday(from, step) {
+    const gold = !!boards[boardat].weekly;
+    for (let at = from + step; at >= 0 && at <= calendarreach; at += step) {
+        if (!gold || isgoldday(at)) return at;
+    }
+    return -1;
+}
+
 function drawsteppers() {
-    [[".swleft", dayat + 1], [".swright", dayat - 1]].forEach(function(pair) {
-        const seat = document.querySelector(pair[0]);
-        const back = pair[1];
-        const reachable = back >= 0 && back <= calendarreach;
-        seat.classList.toggle("gone", !reachable);
-        if (reachable) seat.querySelector(".lbl").textContent = daylabel(back);
-    });
+    [[".swleft", nextday(dayat, 1)], [".swright", nextday(dayat, -1)]]
+        .forEach(function(pair) {
+            const seat = document.querySelector(pair[0]);
+            const back = pair[1];
+            seat.classList.toggle("gone", back < 0);
+            if (back >= 0) seat.querySelector(".lbl").textContent = daylabel(back);
+        });
     tintswitcher();
 }
 
@@ -249,12 +259,16 @@ async function reload(dir) {
     openlinkedplayer();
     showfooter();
     slideswap(dir, ghosts);
-    playsound(boards[boardat].weekly ? "gogold" : "shuffle", 0.55);
     markurl();
-    document.title = boards[boardat].label + " for " + daylabel(dayat) + "! (" + count + ")";
+    marktitle(count);
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
+
+function marktitle(count) {
+    document.title = boards[boardat].label + " for " + daylabel(dayat)
+        + "! (" + count + ")";
+}
 
 function markurl() {
     const url = new URL(location.href);
@@ -279,8 +293,8 @@ function readurl() {
 }
 
 function switchday(step) {
-    const want = dayat + step;
-    if (want < 0 || want > calendarreach) return;
+    const want = nextday(dayat, step);
+    if (want < 0) return;
     dayat = want;
     reload(step);
 }
@@ -482,7 +496,6 @@ function makeprofile() {
                         JSON.stringify({guid: entry.id, name: entry.full}));
                 }
             } catch (e) {}
-            playsound("snapinplace", 0.8);
             closepopup(wrap);
             claimedat = findclaimed();
             paintedat = null; filled = -1;
@@ -591,7 +604,7 @@ Promise.all([countriesready.then(loadboard), fontsdone]).then(function(got) {
     openlinkedplayer();
     showfooter();
     markurl();
-    if (count) document.title = boards[boardat].label + " for " + daylabel(dayat) + "! (" + count + ")";
+    if (count) marktitle(count);
     setInterval(refreshboard, boardage);
 });
 
@@ -614,7 +627,6 @@ window.addEventListener("resize", function() {
 // 100ms seems most accurate but idk
 const popupwait = 100;
 function openpopup(wrap) {
-    playsound("popup", 0.6);
     wrap.classList.remove("closing");
     wrap.classList.add("open");
     trimpending(wrap);
@@ -623,7 +635,6 @@ function openpopup(wrap) {
 }
 function closepopup(wrap) {
     if (!wrap.classList.contains("open")) return;
-    playsound("bloop", 0.6);
     clearTimeout(wrap.settletimer);
     wrap.classList.remove("settled");
     wrap.classList.add("closing");
@@ -670,7 +681,7 @@ window.addEventListener("keydown", function(e) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-loadsounds(["click", "popup", "bloop", "shuffle", "gogold", "snapinplace"]);
+loadsounds(["click", "shuffle"]);
 
 document.addEventListener("click", function(e) {
     if (e.target.closest && e.target.closest("button")) playsound("click", 0.7);

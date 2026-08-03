@@ -462,6 +462,7 @@
     right: 2vh; bottom: 4vh;
     display: flex; overflow: hidden;
     border-radius: 1.1vh 1.1vh 0 0;
+    clip-path: inset(-1.2vh -1.2vh 0 -1.2vh);
     box-shadow:
         0 0 0 0.3vh #60204a,
         0 0 0 0.65vh #feff48,
@@ -469,7 +470,7 @@
 }
 .boardpick button {
     display: flex; align-items: center; gap: 0.4vh;
-    margin: 0; padding: 0.5vh 1.1vh; color: white;
+    margin: 0; padding: 0.5vh 0.65vh; color: white;
     font-family: "harlow solid", system-ui, sans-serif;
     font-weight: 100 !important; font-size: 1.85vh;
     text-transform: capitalize; white-space: nowrap;
@@ -490,7 +491,7 @@
 .boardpick.inline {
     right: auto; left: 50%;
     transform: translateX(-50%);
-    bottom: calc(var(--u) * 0.15);
+    bottom: calc(var(--u) * 0.145);
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
