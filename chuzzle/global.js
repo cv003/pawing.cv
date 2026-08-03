@@ -43,25 +43,10 @@ if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(trimall);
 } else {window.addEventListener("load", trimall)}
 
-
 /*//////////////////////////////////////////////////////////////////////*/
 
+// audio urls resolve against this script, not the page that included it
 const sitehome = new URL(".", document.currentScript.src).href;
-function paintcursors() {
-    const glove = function(name, fallback) {
-        return "url(\"" + sitehome + "assets/static/cursor-" + name + ".cur\"), " + fallback;
-    };
-    const sheet = document.createElement("style");
-    sheet.textContent = [
-        "html, body {cursor: " + glove("default", "default") + "}",
-        "a, button, label, summary, [role=button], input, textarea, select," +
-            " .scores name {cursor: " + glove("pointer", "pointer") + "}",
-        ".scroller {cursor: " + glove("grab", "grab") + "}",
-        "img, canvas, svg {-webkit-user-drag: none; user-drag: none}"
-    ].join(String.fromCharCode(10));
-    document.head.appendChild(sheet);
-}
-paintcursors();
 
 /*//////////////////////////////////////////////////////////////////////*/
 

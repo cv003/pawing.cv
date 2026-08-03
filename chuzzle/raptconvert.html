@@ -69,8 +69,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-
-        ul {padding-top: 1em; list-style: none; padding-left: 0}
+        ul {list-style: none; padding-left: 0}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -141,7 +140,8 @@
         }
         
         </style>
-    </head>
+        <link rel="stylesheet" href="cursor.css">
+</head>
     <body>
 
         <div class="bg"></div>
@@ -170,11 +170,9 @@
                 <text x="30" y="130" class="inner">RaptConvert</text>
                 <text x="30" y="130" class="lglight" mask="url(#lgcrop)">RaptConvert</text></g>
         </svg>
-
         <ul>
-            <li><span style="font-size:0.85em">★</span> query string / checksum blob is converted to utf-8, or base 64 decoded if already encoded</li>
-            <li><span style="font-size:0.85em">★</span> each byte is XORd with.. uh.. <span style="color:#ffbfbf">"youcanonlytrustalibertarian"</span>, and if any data byte matches the key byte it's left unchanged</li>
-            <li>result is base64 encoded</li>
+            <li>decryptor for the request parameters for chuzzle 2 and other <img src="assets/images/evil.png" width="20" style="vertical-align:middle;"></li>
+            <li>daily-do seemingly has an anti-cheat so this won't work for fake scores..</li>
         </ul>
 
         <label for="main">url(s) / params</label>
@@ -189,14 +187,6 @@
             <br>
             <span class="status"></span>
         </form>
-
-        <p>these tend to have url encoding at the end - %2B for "+" and %3D for "=". if a copy gives %%2B / %%3D, then something likely went wrong and the tool will attempt to normalize that. raw base 64 only is also fine <br>
-        XOR is from String::Encrypt (skips XOR when data byte equals key byte)</p>
-
-        <p>
-            before encrypting the game runs String::Replace on that template (gRCMakermallChecksumFix) so there might be ! instead of U, it's apparently intentional and isn't faulty decoding. if it is then my bad 
-            <img src="assets/images/evil.png" width="20" style="vertical-align:middle;">
-        </p>
 
         <script>
 

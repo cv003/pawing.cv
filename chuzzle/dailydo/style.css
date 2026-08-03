@@ -160,7 +160,7 @@
     height: 100vh; width: var(--u);
     transform: translateX(-50%);
     container-type: inline-size;
-    font-family: "blippo";
+    font-family: "chuzzle", "blippo";
 }
 .dailydo {z-index: 1; overflow: hidden}
 .ui {
@@ -169,10 +169,6 @@
     align-items: center; justify-content: flex-start;
 }
 .ui .dumbcontainer, .ui .footer, .ui .findbox {pointer-events: auto}
-
-/* pinning the width made short titles render enormous, since the trimmed */
-/* viewBox is only as wide as the word. driving it off height instead */
-/* keeps the glyphs one size whatever the title says */
 .ui .dumbcontainer .logo {
     width: auto !important;
     height: calc(13.2cqw * var(--boxratio, 1.2));
@@ -237,10 +233,10 @@
 
 .scores rank {
     flex: none; width: calc(var(--rankcells, 4) * 0.63em);
-    text-align: right; font-style: italic;
-    font-family: Arial, Helvetica, sans-serif;
+    text-align: right;
+    font-family: "chuzzle italic", Arial, Helvetica, sans-serif;
     font-size: 0.6em; margin-right: 0.35em;
-    letter-spacing: 0; font-weight: 800;
+    letter-spacing: 0;
     -webkit-text-stroke-width: 0.5em;
     text-shadow:
         0.250em 0.200em 0 #261b19, 0.217em 0.325em 0 #261b19,
@@ -251,11 +247,8 @@
         0.125em -0.017em 0 #261b19, 0.217em 0.075em 0 #261b19,
         0 0.200em 0 #261b19;
 }
+/* the game's digits all carry the same advance, so the font spaces them */
 .scores score {margin-left: auto}
-.scores score d {
-    display: inline-block; width: 0.637em;
-    text-align: center;
-}
 
 .scores img {
     flex: none; height: 0.7em;
@@ -333,7 +326,6 @@
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 [data-role=qr] .logo .inner {fill: url(#lgpop3)}
 
-/* every module carries its own rims, so the sheet needs nothing around it */
 .qrwrap .popup {width: calc(var(--u) * 0.62)}
 .qrwrap .pucontent {padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.05)}
 .qrwrap .pucontent > div {
@@ -372,7 +364,7 @@
 }
 .profile .pucontent .logo {height: calc(var(--u) * 0.123 * var(--boxratio, 1.2))}
 .profile .pucontent > div {
-    width: auto;
+    width: auto; 
     padding: calc(var(--u) * 0.028) calc(var(--u) * 0.036);
 }
 .profile .facts {
@@ -392,20 +384,18 @@
 }
 .profile .facts .gap {grid-column: 1 / -1; height: calc(var(--u) * 0.022)}
 .profile .pucontent > div .claim {
-    font-family: "harlow solid", system-ui, sans-serif;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     text-transform: capitalize; font-size: 1.5em;
     width: calc(100% - var(--u) * 0.06);
     margin: calc(var(--u) * 0.02) 0 0; padding: 0.1em 0;
     border-radius: 0.25em; color: white;
-    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
-        #1130bf 80%, #a2aee6 100%);
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
     font-weight: 100; -webkit-text-stroke: 0.16em black;
     paint-order: stroke fill;
     box-shadow: 0 0 0 0.12em rgba(0,0,0,0.75);
 }
 .profile .pucontent > div .claim:active {
-    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
-        #6020cf 80%, #ba9fe6 100%);
+    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
 }
 
 .profile .facts img {
@@ -427,7 +417,7 @@
     display: flex; flex-direction: column; align-items: center;
     gap: calc(var(--u) * 0.006);
     margin: 0; padding: 0; background: none; text-transform: uppercase;
-    font-family: "blippo"; font-weight: 300;
+    font-family: "chuzzle", "blippo"; font-weight: 100;
     font-size: calc(var(--u) * 0.049);
     color: rgb(255, 191, 128);
     -webkit-text-stroke: 0.3em #261b19;
@@ -491,7 +481,7 @@
 .boardpick button {
     display: flex; align-items: center; gap: 0.4vh;
     margin: 0; padding: 0.5vh 0.65vh; color: white;
-    font-family: "harlow solid", system-ui, sans-serif;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     font-weight: 100 !important; font-size: 1.85vh;
     text-transform: capitalize; white-space: nowrap;
     -webkit-text-stroke: 0.28vh black;
@@ -524,7 +514,7 @@
 .findbox input {
     width: 50cqw; border: none; outline: none;
     background: none; color: white;
-    font-family: "blippo", system-ui, sans-serif;
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
     font-weight: 100; font-size: 3cqw; letter-spacing: 0.03em;
 }
 .findbox input::placeholder {color: darkgrey} /* https://en.wikipedia.org/wiki/Grey#Web_colors:~:text=anomaly */
@@ -573,7 +563,7 @@
 .calwrap .popup {
     width: calc(var(--u) * 0.78); margin: 0;
     max-width: calc(100vw - var(--u) * 0.16);
-    font-family: "blippo";
+    font-family: "nimbus sans becker", system-ui, sans-serif;
     position: relative; z-index: 1;
 }
 .closebtn {
@@ -616,13 +606,13 @@
 .pucontent .calgrid button {
     width: 100%; aspect-ratio: 1; height: auto;
     margin: 0; padding: 0; border-radius: 0.25em;
-    font-family: "blippo"; font-size: calc(var(--u) * 0.03);
+    font-family: "chuzzle", "blippo"; font-size: calc(var(--u) * 0.03);
     text-transform: none; color: white; box-shadow: none;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
         #1130bf 80%, #a2aee6 100%);
     -webkit-text-stroke: calc(var(--u) * 0.008) black;
     paint-order: stroke fill;
-    box-shadow: 0 0 0 calc(var(--u) * 0.005) rgba(0,0,0,0.75);
+    box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75);
 }
 .pucontent .calgrid button:not(.live) {
     opacity: 0.5; pointer-events: none;
@@ -633,9 +623,11 @@
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
         #6020cf 80%, #ba9fe6 100%);
 }
-.pucontent .calgrid button.today {
+/* today and the day being viewed wear the same ring, the fill sets them apart */
+.pucontent .calgrid button.today,
+.pucontent .calgrid button.picked {
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
-        0 0 0 calc(var(--u) * 0.008) #ffd200;
+        0 0 0 calc(var(--u) * 0.008) #feff48;
 }
 .pucontent .calgrid button.weekend {
     background: linear-gradient(140deg, #fde84a 0%, #d8b70c 30%,
@@ -650,6 +642,4 @@
 .pucontent .calgrid button.picked {
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
         #6020cf 80%, #ba9fe6 100%);
-    box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
-        0 0 0 calc(var(--u) * 0.008) #feff48;
 }

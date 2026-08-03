@@ -1,0 +1,24 @@
+/* the game's gloves, one .cur each so the hotspot rides inside the file */
+/* a stylesheet rather than something global.js injects: script order means */
+/* the real arrow gets a frame or two on every load before the swap lands */
+
+/* cursor inherits, so naming the interactive elements is enough - a rule on */
+/* * would hand every label inside a button the default glove back */
+html, body {cursor: url("assets/static/cursor-default.cur"), default}
+
+a, button, label, summary, select, option, [role=button], [role=link],
+[role=tab], [role=menuitem], [tabindex], input, textarea,
+.scores name {cursor: url("assets/static/cursor-pointer.cur"), pointer}
+
+/* chrome hands the field's own widgets a text bar and an arrow of their own */
+input::-webkit-search-cancel-button, input::-webkit-search-decoration,
+input::-webkit-calendar-picker-indicator, input::-webkit-inner-spin-button,
+select::-ms-expand {cursor: inherit}
+
+/* a disabled control drops back to the platform arrow unless it is told not */
+:disabled, [aria-disabled=true] {cursor: url("assets/static/cursor-default.cur"), default}
+
+.scroller {cursor: url("assets/static/cursor-grab.cur"), grab}
+
+/* the sprites are part of the scenery, not something to drag out of the page */
+img, canvas, svg {-webkit-user-drag: none; user-drag: none}

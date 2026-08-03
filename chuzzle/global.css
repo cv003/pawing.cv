@@ -3,6 +3,24 @@
     src: url("assets/fonts/blippo.woff2") format("woff2");
     font-display: block;
 }
+/* the game's own cut, traced out of Title.bundle and UI.bundle. it goes */
+/* first so its letterforms win, and blippo covers whatever it never had */
+@font-face {
+    font-family: "chuzzle";
+    src: url("assets/fonts/chuzzleblippo.woff2") format("woff2");
+    font-display: block;
+}
+@font-face {
+    font-family: "chuzzle script";
+    src: url("assets/fonts/chuzzlescript.woff2") format("woff2");
+    font-display: block;
+}
+/* already italic and already bold, so neither gets asked for again */
+@font-face {
+    font-family: "chuzzle italic";
+    src: url("assets/fonts/chuzzleitalic.woff2") format("woff2");
+    font-display: block;
+}
 @font-face {
     font-family: "nimbus sans becker";
     src: url("assets/fonts/nimbussansbeckerpbold.woff2") format("woff2");
@@ -68,7 +86,7 @@ ul {padding-top: 1em; list-style: none; padding-left: 0}
 }
 
 .logo text {
-    font-family: "harlow solid", system-ui, sans-serif;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     font-size: 120px; font-weight: 400; paint-order: stroke fill;
     dominant-baseline: alphabetic;
 }
@@ -216,7 +234,7 @@ button {
     width: calc(100% - 70px); border-radius: 0.25em;
     padding-top: 5px; padding-bottom: 5px; user-select: none;
     margin-top: 0.25em; margin-bottom: 0.25em;
-    font-family: "harlow solid", system-ui, sans-serif;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     text-transform: capitalize; font-size: 2em;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
     font-weight: 100; -webkit-text-stroke: 6px black;
@@ -247,7 +265,7 @@ button {
 }
 .loading div {
     text-align: center; color: white; font-weight: 100;
-    font-family: "blippo"; font-size: 1.55em;
+    font-family: "chuzzle", "blippo"; font-size: 1.55em;
     -webkit-text-stroke: 8px #0000c7; paint-order: stroke fill;
 }
 .loading img {width: 100px}

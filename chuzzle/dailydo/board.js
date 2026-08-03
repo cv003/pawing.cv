@@ -44,14 +44,6 @@ function poolsize(host) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-function setdigits(cell, text) {
-    while (cell.childNodes.length > text.length) cell.lastChild.remove();
-    while (cell.childNodes.length < text.length) {
-        cell.appendChild(document.createElement("d"));
-    }
-    for (let i = 0; i < text.length; i++) cell.childNodes[i].textContent = text[i];
-}
-
 function makerow() {
     const row = document.createElement("div");
     const rank = document.createElement("rank");
@@ -122,7 +114,7 @@ function paintrows(at, host) {
             row.style.display = "";
             row.parts.rank.textContent = entry.rank + ".";
             row.parts.name.textContent = entry.name;
-            setdigits(row.parts.score, entry.score);
+            row.parts.score.textContent = entry.score;
             const flag = row.parts.flag;
             const art = "assets/images/flags/" + entry.cc + ".png";
             if (flag.getAttribute("src") !== art) {
