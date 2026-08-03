@@ -1,16 +1,7 @@
-/*//////////////////////////////////////////////////////////////////////*/
-
-/* row colours, straight out of DailyDoKit::DailyDoKit. the game feeds eight
-   corners through Color::Pastel(0.5) and samples the resulting cycler at
-   (row y / list height) * 7, wrapping past the end. the list is a palindrome
-   around green, which is why the sweep mirrors instead of jumping. */
 const cyclercorners = [
     [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 0.5, 0],
     [0, 1, 0], [1, 0.5, 0], [1, 0, 0], [1, 0, 1]
 ];
-/* the constructor builds a second cycler right after it, at this+0x2a0, and
-   DrawScore picks between the two on its last argument - the golden flag. five
-   corners this time, so the sweep runs 0..4 rather than 0..7. */
 const goldcorners = [
     [1, 0.5, 0], [1, 1, 1], [1, 1, 0], [1, 1, 0.25], [1, 0.5, 0]
 ];
@@ -38,15 +29,17 @@ function cyclerget(t) {
     return "rgb(" + ch[0] + "," + ch[1] + "," + ch[2] + ")";
 }
 
-/* only the rows on screen exist as elements; a pool of about fifty gets
-   repositioned and refilled as the list moves. 3800 live rows with a flag
-   each would blow the compositor apart. */
-let board = []; let fullboard = []; let pool = []; let rowheight = 0; let claimedat = -1;
-let padtop = 0; let padbottom = 0; let filled = -1; let strip = null;
+// only show rows on screen because 3000 entries will murder the browser
+let board = []; let fullboard = []; let pool = []; 
+let rowheight = 0; let claimedat = -1;
+let padtop = 0; let padbottom = 0; 
+let filled = -1; let strip = null;
 
 function poolsize(host) {
     return rowheight ? Math.ceil(host.clientHeight / rowheight) + 4 : 0;
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 function setdigits(cell, text) {
     while (cell.childNodes.length > text.length) cell.lastChild.remove();
@@ -61,14 +54,14 @@ function makerow() {
     const rank = document.createElement("rank");
     const name = document.createElement("name");
     const flag = document.createElement("img");
-    /* the rim and its drop shadow belong to the sprite, so they wait for it -
-       otherwise every scroll paints a row of empty outlined boxes first */
     flag.onload = function() {flag.classList.add("drawn")};
     const score = document.createElement("score");
     row.append(rank, name, flag, score);
     row.parts = {rank: rank, name: name, flag: flag, score: score};
     return row;
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 function measurelist(host, list) {
     const style = getComputedStyle(list);
@@ -89,8 +82,6 @@ function measurelist(host, list) {
     rowheight = probe.offsetHeight;
     probe.remove();
 
-    /* "1." through "3851." plus the stop, so short boards lose the dead
-       column the widest rank would have reserved */
     list.style.setProperty("--rankcells", String(fullboard.length || 1).length + 1);
 
     paintedat = null;
@@ -107,6 +98,8 @@ function measurelist(host, list) {
 function contentheight() {return padtop + board.length * rowheight + padbottom}
 
 let paintedat = null;
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 function paintrows(at, host) {
     if (!rowheight || !pool.length) return;
@@ -132,7 +125,6 @@ function paintrows(at, host) {
             if (flag.getAttribute("src") !== art) {
                 flag.classList.remove("drawn");
                 flag.src = art;
-                /* already in the cache: onload will not fire again */
                 if (flag.complete && flag.naturalWidth) flag.classList.add("drawn");
             }
             row.dataset.id = entry.id;
@@ -142,16 +134,12 @@ function paintrows(at, host) {
         const top = padtop + index * rowheight - at;
         row.style.top = top + "px";
         const t = (top + rowheight / 2) / height * last;
-        /* stop just short of the end: cyclerget wraps, so exactly last is blue again */
         row.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     }
     filled = first;
-
     if (strip) {
         strip.classList.toggle("on", claimedat >= 0);
         if (claimedat >= 0) {
-            /* 40 game units tall on a 25 unit pitch, and its centre sits
-               10 above the text where the row's own centre sits 7.5 */
             const band = rowheight * 1.6;
             strip.style.height = band + "px";
             strip.style.top = (padtop + (claimedat + 0.5) * rowheight - at
@@ -160,9 +148,6 @@ function paintrows(at, host) {
     }
 }
 
-/* three rings of stars turning behind the pillars. only the top of each
-   ring clears the screen, so you see about four sliding along an arch. the
-   stars counter-rotate so they never tip over. */
 const rings = [
     {y: 0.94, r: 0.60, n: 15, size: 0.115, secs: 150},
     {y: 1.22, r: 0.55, n: 14, size: 0.1, secs: 122},
@@ -201,13 +186,13 @@ function buildrings() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* blippo has no glyph for these, and the game shows a question mark
-   wherever a name uses something it cannot draw. */
+// characters blippo doesn't support become question marks, 
+// this isn't quite what the game does as it AGGRESSIVELY trims stuff down
 const drawable = new Set(
     "!\"#$%&'()*+,-.0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]{} ".split("")
 );
-
 const namecap = 15;
+
 function tidyname(text) {
     let out = text.replace(/%%/g, "%").replace(/%(?= )/g, "");
     out = out.replace(/%([0-9a-f]{2})/gi, function(whole, hex) {
@@ -216,7 +201,6 @@ function tidyname(text) {
     });
     return out;
 }
-
 function drawname(text) {
     text = tidyname(text);
     const clean = text.toUpperCase().split("").map(function(c) {
@@ -227,9 +211,6 @@ function drawname(text) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the list is flung rather than scrolled: drag or wheel adds velocity and
-   friction bleeds it off. dragging past either end meets rising resistance
-   and springs back once let go. */
 const overreach = 0.35; const springback = 0.16; const rub = 0.955;
 
 function makefling(host, list) {
@@ -283,7 +264,6 @@ function makefling(host, list) {
         if (!dragging) return;
         const moved = e.clientY - lastY;
         const gap = Math.max(1, e.timeStamp - lastTime);
-        /* outside the ends the list only follows part of the drag */
         at -= past() === 0 ? moved : moved * overreach;
         velocity = -moved / gap * 16;
         lastY = e.clientY; lastTime = e.timeStamp;

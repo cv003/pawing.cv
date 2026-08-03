@@ -1,8 +1,6 @@
 function logotrimmer(svg) {
     const texts = svg.querySelectorAll("text");
     if (!texts.length) return;
-    /* getBBox reads zero inside a display:none subtree, which would collapse
-       the viewBox and blow the logo up. leave it alone until it is on screen. */
     if (!svg.getClientRects().length) return;
     let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
     for (const text of texts) {
@@ -32,12 +30,9 @@ function trimpending(root) {
 function trimall() {
     document.querySelectorAll("svg.logo").forEach(logotrimmer);
     document.documentElement.classList.add("fontsready");
-    /* only the daily-do page has a board rail to reposition */
     if (typeof placepicks === "function") placepicks();
 }
 
-/* the logo is the same word stacked six times plus the erode mask, so every
-   copy has to change together and the box has to be measured again. */
 function relabellogo(svg, words) {
     if (!svg || svg.dataset.words === words) return;
     svg.dataset.words = words;
@@ -52,30 +47,55 @@ if (document.fonts && document.fonts.ready) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the game's own gloves stand in for every cursor on every chuzzle page.
-   they are .cur rather than png, so the hotspot rides inside the file and no
-   page has to remember where the fingertip is: pointing finger at its tip,
-   pinch at the pinch, open palm at its middle.
-
-   the three cover everything on purpose - no text bar in the search box, no
-   scroll glyph over the list - so the pages never show a cursor the game
-   would not have drawn. paths resolve against this script rather than the
-   page, since it is included from two directory depths. */
-const cursorhome = new URL("assets/static/", document.currentScript.src).href;
-
+const sitehome = new URL(".", document.currentScript.src).href;
 function paintcursors() {
     const glove = function(name, fallback) {
-        return "url(\"" + cursorhome + "cursor-" + name + ".cur\"), " + fallback;
+        return "url(\"" + sitehome + "assets/static/cursor-" + name + ".cur\"), " + fallback;
     };
     const sheet = document.createElement("style");
     sheet.textContent = [
-        "*, html, body {cursor: " + glove("default", "default") + "}",
+        "html, body {cursor: " + glove("default", "default") + "}",
         "a, button, label, summary, [role=button], input, textarea, select," +
             " .scores name {cursor: " + glove("pointer", "pointer") + "}",
-        ".scroller, .scroller *, .scroller.dragging {cursor: "
-            + glove("grab", "grab") + "}",
-        ".scroller name {cursor: " + glove("pointer", "pointer") + "}"
+        ".scroller {cursor: " + glove("grab", "grab") + "}",
+        "img, canvas, svg {-webkit-user-drag: none; user-drag: none}"
     ].join(String.fromCharCode(10));
     document.head.appendChild(sheet);
 }
 paintcursors();
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+const soundbank = {};
+let soundgear = null;
+
+function loadsounds(names) {
+    if (!window.AudioContext) return;
+    soundgear = soundgear || new AudioContext();
+    names.forEach(function(name) {
+        fetch(sitehome + "assets/audio/" + name + ".ogg").then(function(reply) {
+            return reply.arrayBuffer();
+        }).then(function(raw) {
+            return soundgear.decodeAudioData(raw);
+        }).then(function(buffer) {
+            soundbank[name] = buffer;
+        }).catch(function() {});
+    });
+}
+
+function playsound(name, level) {
+    const buffer = soundbank[name];
+    if (!buffer || !soundgear) return;
+    const source = soundgear.createBufferSource();
+    const volume = soundgear.createGain();
+    source.buffer = buffer;
+    volume.gain.value = level === undefined ? 1 : level;
+    source.connect(volume).connect(soundgear.destination);
+    source.start();
+}
+
+function wakesound() {
+    if (soundgear && soundgear.state === "suspended") soundgear.resume();
+}
+window.addEventListener("pointerdown", wakesound, true);
+window.addEventListener("keydown", wakesound, true);

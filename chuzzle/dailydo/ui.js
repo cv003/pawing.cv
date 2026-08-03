@@ -1,22 +1,11 @@
-/*//////////////////////////////////////////////////////////////////////*/
-
-/* 137 names, only ever needed once a tooltip or a profile opens, so the page
-   does not wait on them. */
 let countrynames = {};
-fetch("assets/static/countries.json").then(function(r) {
-    return r.ok ? r.json() : {};
-}).then(function(got) {countrynames = got}).catch(function() {});
-
-const sampleboard = "assets/static/dailydo-sample.txt";
-const knownflags = new Set(("AD AE AF AG AI AL AM AN AO AR AS AT AU AW AX AZ BA BB BD BE BF " +
-    "BG BH BI BJ BM BN BO BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CS CU " +
-    "CV CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG " +
-    "GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT " +
-    "JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD " +
-    "ME MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR " +
-    "NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG " +
-    "SH SI SJ SK SL SM SN SO SR ST SV SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ " +
-    "UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(" "));
+let knownflags = new Set();
+const countriesready = fetch("countries.json").then(function(reply) {
+    return reply.ok ? reply.json() : {};
+}).then(function(got) {
+    countrynames = got.names || {};
+    knownflags = new Set(got.flags || []);
+}).catch(function() {});
 
 function readboard(text) {
     const out = [];
@@ -29,8 +18,6 @@ function readboard(text) {
             country: bits[0],
             name: drawname(bits[1]),
             full: clean,
-            /* uppercased once here so filtering never has to case-fold 3800
-               names again on every keystroke */
             hunt: clean.toUpperCase(),
             rank: out.length + 1,
             raw: bits[1],
@@ -41,10 +28,6 @@ function readboard(text) {
     return out;
 }
 
-/* the boards the worker exposes: prefix 12, prefix 11, snap, and chart 1 on
-   top of prefix 12 for the golden tournament. sweeping the whole retention
-   window, golden only ever answers on a sunday plus a trickle on the monday
-   after it, so it is offered but will often come back empty. */
 const boards = [
     {key: "main", label: "Daily-Do", title: "Today's Scores"},
     {key: "gold", label: "Golden", title: "Tournament", weekly: true},
@@ -53,7 +36,6 @@ const boards = [
 ];
 const boardhost = "https://dailydo.coolsite.cv";
 let boardat = 0;
-/* days back from today, 0 .. calendarreach */
 let dayat = 0;
 
 function dayback(back) {
@@ -69,23 +51,13 @@ function daylabel(back) {
     return pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
 }
 
-/* the game only ever says today or yesterday, so anything older is named by
-   its date instead of inventing a phrase for it. */
 function boardtitle() {
-    /* the tournament never runs on a today, so naming it by date would mean
-       its own banner never showed */
     if (boards[boardat].weekly || dayat === 0) return boards[boardat].title;
     if (dayat === 1) return "Yesterday's Scores";
     return daylabel(dayat) + " Scores";
 }
 
-/* a board is only worth asking for again once a minute has gone by. the raw
-   text goes to localStorage rather than memory so a reload counts as the same
-   minute, and only the six most recent boards are kept - a busy day is about
-   a hundred kilobytes of text.
-
-   nothing is ever fetched in the background: a board that has gone stale while
-   you were looking at another one is simply pulled when you come back to it. */
+// due to large amount of players this might store about ~100kb, should be fine
 const boardstore = "chuzzleboards";
 const boardage = 60000;
 
@@ -110,14 +82,7 @@ async function fetchtext(key) {
         const reply = await fetch(boardhost + "/" + key);
         if (reply.ok) text = await reply.text();
     } catch (e) {}
-    if (!text || text.indexOf(String.fromCharCode(9)) < 0) {
-        /* offline, or opened straight off disk: fall back to the saved day */
-        try {
-            const reply = await fetch(sampleboard);
-            if (reply.ok) text = await reply.text();
-        } catch (e) {}
-    }
-    return text;
+    return text.indexOf(String.fromCharCode(9)) < 0 ? "" : text;
 }
 
 function useboard(text) {
@@ -135,8 +100,7 @@ async function loadboard() {
     return useboard(text);
 }
 
-/* the minute tick. the board is swapped underneath the reader: the scroll
-   offset, the search text and the claimed row all survive it. */
+// only refreshes every minute, or postponed if not viewing the leaderboard
 async function refreshboard() {
     if (document.body.classList.contains("fetching")) return;
     const key = cachekey();
@@ -150,8 +114,8 @@ async function refreshboard() {
     showfooter();
 }
 
-/* take the colour the list would use at the switcher's own height, so the
-   two arrows sit in the same sweep the rows do. */
+/*//////////////////////////////////////////////////////////////////////*/
+
 function tintswitcher() {
     const stage = document.querySelector(".dailydo");
     const height = stage.clientHeight * cyclerspan;
@@ -163,9 +127,6 @@ function tintswitcher() {
         seat.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     });
 }
-
-/* the arrows step through the fourteen days the server keeps; whichever end
-   runs out simply leaves rather than shuffling the other arrow about. */
 function drawsteppers() {
     [[".swleft", dayat + 1], [".swright", dayat - 1]].forEach(function(pair) {
         const seat = document.querySelector(pair[0]);
@@ -176,6 +137,8 @@ function drawsteppers() {
     });
     tintswitcher();
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 function buildpicks() {
     const rail = document.querySelector(".boardpick");
@@ -199,8 +162,6 @@ function buildpicks() {
     placepicks();
 }
 
-/* the corner only works while the margin beside the column can actually hold
-   the rail, which no phone and few windows can. */
 function placepicks() {
     const rail = document.querySelector(".boardpick");
     const column = document.querySelector(".dailydo");
@@ -209,18 +170,8 @@ function placepicks() {
     const margin = (window.innerWidth - column.clientWidth) / 2;
     if (margin < rail.offsetWidth + window.innerHeight * 0.05) rail.classList.add("inline");
 }
-
-/* the tournament board only ever fills up on a sunday - the monday rows are
-   players whose own clock had not rolled over yet - so sunday is the only day
-   the tab is offered on. once you are inside it every day stays reachable, so
-   the empty ones can still be poked at. */
 function isgoldday(back) {return dayback(back).getDay() === 0}
 
-/* DailyDoKit::Draw carries the golden flag into everything it paints: the
-   screen clears to (1, 0.5, 0) instead of nothing, both vignette bands swap
-   their (0, 0, 0.5) blue for (1, 1, 0.5), the pillars switch to the third
-   DailyDoPillars sprite under a (1, 1, 0) tint, and DrawScore reads the
-   second colour cycler. the page does the same, on a transition. */
 function paintscene() {
     const gold = !!boards[boardat].weekly;
     activestops = gold ? goldstops : cyclerstops;
@@ -232,7 +183,6 @@ function drawpicks() {
     const gold = !!boards[boardat].weekly;
     document.querySelectorAll(".boardpick button").forEach(function(seat, index) {
         seat.classList.toggle("on", index === boardat);
-        /* offered on a sunday, and kept while you are standing on it */
         if (boards[index].weekly) {
             seat.classList.toggle("away", !isgoldday(dayat) && !gold);
         }
@@ -245,32 +195,18 @@ function drawpicks() {
     placepicks();
 }
 
-/* the board you are leaving greys out while the next one is fetched, then the
-   two ride past each other a whole screen wide. the outgoing copy is a static
-   clone of the pool, so it is about forty rows and it is thrown away the
-   moment it clears the edge. */
-const slidespan = 260;
+/*//////////////////////////////////////////////////////////////////////*/
 
-/* the whole column moves, not the rows inside it: .scroller clips at the
-   column edge, so sliding .scores just made the list vanish a third of the
-   way across. .dailydo is fixed and nothing clips it, so the pair can ride
-   the full width of the window.
-   :not(.ghost) matters: the copy carries the same class and lands first in
-   document order, so a plain querySelector would hand back the copy */
+const slidespan = 260;
 function slidemovers() {
     return [document.querySelector(".dailydo:not(.ghost)"),
         document.querySelector(".dumbcontainer:not(.ghost)")];
 }
-
-/* .dailydo is centred by a transform of its own, so a slide has to be
-   composed onto it rather than replacing it */
 function shove(seat, across) {
     const base = seat.classList.contains("dailydo") ? "translateX(-50%) " : "";
     seat.style.transform = across ? base + "translateX(" + across + "vw)" : "";
 }
 
-/* has to run before the pool is repainted, or the copy shows the board you
-   are moving to rather than the one you are leaving */
 function snapshot() {
     return slidemovers().map(function(seat) {
         const copy = seat.cloneNode(true);
@@ -285,9 +221,6 @@ function slideswap(dir, ghosts) {
     const all = movers.concat(ghosts);
     all.forEach(function(seat) {seat.classList.add("sliding", "jumping")});
     movers.forEach(function(seat) {shove(seat, dir * -100)});
-    /* reading a layout value commits the starting position; going through
-       requestAnimationFrame instead would strand the copies on screen
-       whenever the tab is not painting */
     void document.body.offsetWidth;
     all.forEach(function(seat) {seat.classList.remove("jumping")});
     movers.forEach(function(seat) {shove(seat, 0)});
@@ -297,6 +230,8 @@ function slideswap(dir, ghosts) {
         movers.forEach(function(seat) {seat.classList.remove("sliding")});
     }, slidespan);
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 async function reload(dir) {
     document.body.classList.add("fetching");
@@ -314,13 +249,13 @@ async function reload(dir) {
     openlinkedplayer();
     showfooter();
     slideswap(dir, ghosts);
+    playsound(boards[boardat].weekly ? "gogold" : "shuffle", 0.55);
     markurl();
-    document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
+    document.title = boards[boardat].label + " for " + daylabel(dayat) + "! (" + count + ")";
 }
 
-/* where you are lives in the address bar, but only the parts that are not the
-   default: today's daily-do is the bare url. a bad value falls back rather
-   than erroring, so a hand typed link always lands somewhere. */
+/*//////////////////////////////////////////////////////////////////////*/
+
 function markurl() {
     const url = new URL(location.href);
     if (boardat > 0) {url.searchParams.set("board", boards[boardat].key)}
@@ -343,7 +278,6 @@ function readurl() {
     }
 }
 
-/* +1 walks back a day, -1 walks forward */
 function switchday(step) {
     const want = dayat + step;
     if (want < 0 || want > calendarreach) return;
@@ -365,8 +299,8 @@ function pickboard(index) {
     reload(dir);
 }
 
-/* the button reads as a replay once the claimed player has a score on today's
-   board, and as a plain play button before that. */
+/*//////////////////////////////////////////////////////////////////////*/
+
 function showfooter() {
     const played = dayat === 0 && claimedat >= 0 && board[claimedat]
         && Number(board[claimedat].score) > 0;
@@ -376,6 +310,8 @@ function showfooter() {
         ? "assets/images/redo.png" : "assets/images/play.png";
     seat.title = played ? "Play Chuzzle 2 again" : "Play Chuzzle 2";
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 function makeidtip() {
     const tip = document.querySelector(".idtip");
@@ -403,12 +339,14 @@ function makeidtip() {
     document.querySelector(".scores").addEventListener("scrolled", drop);
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 function readclaim() {
     try {return JSON.parse(localStorage.getItem("chuzzleclaim") || "null")} catch (e) {}
     return null;
 }
 
-/* guid first: a player can rename and still be the same person. */
+// try guid first since it's possible that the person changed their nickname
 function findclaimed() {
     const held = readclaim();
     if (!held || !board.length) return -1;
@@ -430,7 +368,7 @@ function jumptoclaimed() {
     fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
 }
 
-/* ?player=<id> lands straight on that row with the popup up. */
+// ?player=[id] jumps to the player row if it exists in the set leaderboard
 function openlinkedplayer() {
     const want = new URL(location.href).searchParams.get("player");
     if (!want) return;
@@ -445,12 +383,8 @@ function openlinkedplayer() {
         new PointerEvent("pointerup", {bubbles: true, clientY: 0}));
 }
 
-/* jump to the first row whose name or id starts with what was typed. */
-/* typing narrows the list to the rows that carry the text anywhere in the
-   nickname, keeping their real ranks. the scan itself is one indexOf over a
-   pre-uppercased string per row, which is a fraction of a millisecond even at
-   3800 rows; what costs is the repaint, so keystrokes are coalesced into one
-   frame and an unchanged result never repaints at all. */
+/*//////////////////////////////////////////////////////////////////////*/
+
 function filtered(want) {
     if (!want) return fullboard;
     return fullboard.filter(function(e) {
@@ -499,7 +433,8 @@ function makefinder() {
     }
 }
 
-/* clicking a row opens everything known about that player, untrimmed. */
+/*//////////////////////////////////////////////////////////////////////*/
+
 function makeprofile() {
     const wrap = document.querySelector("[data-role=profile]");
     const body = wrap.querySelector(".pucontent > div");
@@ -529,8 +464,7 @@ function makeprofile() {
         ];
         const held = readclaim();
         const mine = held && held.guid && held.guid === entry.id;
-        /* one claim at a time: everybody else loses the button until the one
-           you already hold is given back */
+
         const button = mine || !held
             ? "<button class=\"claim\" type=\"button\">"
                 + (mine ? "Forget me" : "This is me") + "</button>"
@@ -539,6 +473,7 @@ function makeprofile() {
             if (!f) return '<span class="gap"></span>';
             return "<i>" + f[0] + "</i><u>" + f[1] + "</u>";
         }).join("") + "</div>" + button;
+
         if (button) body.querySelector(".claim").onclick = function() {
             try {
                 if (mine) {localStorage.removeItem("chuzzleclaim")}
@@ -547,6 +482,7 @@ function makeprofile() {
                         JSON.stringify({guid: entry.id, name: entry.full}));
                 }
             } catch (e) {}
+            playsound("snapinplace", 0.8);
             closepopup(wrap);
             claimedat = findclaimed();
             paintedat = null; filled = -1;
@@ -568,8 +504,6 @@ function makeprofile() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the game only walks back to yesterday. the server keeps today plus the
-   thirteen days behind it: day-13 still answers, day-14 comes back empty. */
 const calendarreach = 13;
 
 function daykey(date) {
@@ -577,6 +511,7 @@ function daykey(date) {
     return date.getFullYear() + "-" + pad(date.getDate()) + "-" + pad(date.getMonth() + 1);
 }
 
+/* this would "usually" go from sunday, but, like, are you people insane?? sunday as first day of the week?? hell no!!!!! */
 function buildcalendar() {
     const grid = document.querySelector(".calgrid");
     if (!grid) return;
@@ -585,10 +520,7 @@ function buildcalendar() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    /* six weeks around today, starting on the sunday that lands furthest
-       back, so both ends of the reachable window show as dimmed. */
     const start = new Date(today.getTime() - (calendarreach + 7) * day);
-    /* weeks run monday first, so sunday has to fall to the end */
     start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     const oldest = today.getTime() - calendarreach * day;
     const newest = today.getTime() + day;
@@ -603,7 +535,6 @@ function buildcalendar() {
         const cell = document.createElement("button");
         cell.textContent = at.getDate();
         cell.title = daykey(at);
-        /* sunday is the tournament day, so it is the only column in gold */
         const weekend = at.getDay() === 0;
         if (at.getTime() >= oldest && at.getTime() <= newest) {
             cell.className = "live" + (at.getTime() === today.getTime() ? " today" : "")
@@ -626,30 +557,29 @@ function buildcalendar() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+/* ..function slop 😭 */
+
 makeprofile();
 makefinder();
 buildrings();
 buildcalendar();
 makeidtip();
+
 const fling = makefling(document.querySelector(".scroller"), document.querySelector(".scores"));
-
-
 const host = document.querySelector(".scroller");
 const list = document.querySelector(".scores");
 
-/* before anything is drawn, so the first paint is already the right board */
 readurl();
 buildpicks();
 drawsteppers();
+
 document.querySelector(".swleft").addEventListener("click", function() {switchday(1)});
 document.querySelector(".swright").addEventListener("click", function() {switchday(-1)});
 
-/* the row height depends on blippo, so measuring before it lands puts the
-   jump to your own row a couple of screens off. */
 const fontsdone = document.fonts && document.fonts.ready
     ? document.fonts.ready : Promise.resolve();
 
-Promise.all([loadboard(), fontsdone]).then(function(got) {
+Promise.all([countriesready.then(loadboard), fontsdone]).then(function(got) {
     const count = got[0];
     paintscene();
     drawpicks();
@@ -661,12 +591,10 @@ Promise.all([loadboard(), fontsdone]).then(function(got) {
     openlinkedplayer();
     showfooter();
     markurl();
-    if (count) document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
+    if (count) document.title = boards[boardat].label + " for " + daylabel(dayat) + "! (" + count + ")";
     setInterval(refreshboard, boardage);
 });
 
-/* a backgrounded tab gets its timers throttled to a crawl, so coming back
-   checks the clock rather than trusting the interval to have fired */
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) return;
     const held = readstore()[cachekey()];
@@ -681,9 +609,12 @@ window.addEventListener("resize", function() {
     placepicks();
 });
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 // 100ms seems most accurate but idk
 const popupwait = 100;
 function openpopup(wrap) {
+    playsound("popup", 0.6);
     wrap.classList.remove("closing");
     wrap.classList.add("open");
     trimpending(wrap);
@@ -692,6 +623,7 @@ function openpopup(wrap) {
 }
 function closepopup(wrap) {
     if (!wrap.classList.contains("open")) return;
+    playsound("bloop", 0.6);
     clearTimeout(wrap.settletimer);
     wrap.classList.remove("settled");
     wrap.classList.add("closing");
@@ -721,16 +653,12 @@ calwrap.addEventListener("click", function(e) {
     if (e.target === calwrap) closepopup(calwrap);
 });
 
-/* android is the only platform that will launch an installed app by package
-   id; ios has no equivalent, an app there can only be opened through a scheme
-   it registered itself or a universal link, neither of which chuzzle 2
-   publishes. everywhere else gets the store page in a new tab. */
 const playpackage = "com.raptisoft.Chuzzle2";
 const playpage = "https://play.google.com/store/apps/details?id=" + playpackage;
 
 document.querySelector(".todaybutton").addEventListener("click", function() {
     if (/android/i.test(navigator.userAgent)) {
-        location.href = "market://launch?id=" + playpackage;
+        location.href = "market://launch?id=" + playpackage; /* discovered this 4 months ago, i'm not sure if this protocol command is properly documented at all */
         return;
     }
     window.open(playpage, "_blank", "noopener");
@@ -740,8 +668,10 @@ window.addEventListener("keydown", function(e) {
     document.querySelectorAll(".calwrap.open").forEach(closepopup);
 });
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+loadsounds(["click", "popup", "bloop", "shuffle", "gogold", "snapinplace"]);
+
 document.addEventListener("click", function(e) {
-    if (e.target.tagName === "BUTTON") {
-        new Audio("../assets/audio/click.ogg").play();
-    }
+    if (e.target.closest && e.target.closest("button")) playsound("click", 0.7);
 });

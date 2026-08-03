@@ -163,8 +163,6 @@ button {
     border-radius: 0.5em; margin: 40px;
     background: #ffd200;
     isolation: isolate;
-    /* the rim goes last: shadows paint front to back, so listing it first
-       washed every coloured ring with half black */
     box-shadow:
         0 0 0 1px #FFD200, 0 0 0 3px #FFDC0E, 0 0 0 5px #FFE619,
         0 0 0 7px #FFEF21, 0 0 0 9px #FFF928, 0 0 0 11px #FFD632,

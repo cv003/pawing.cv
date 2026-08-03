@@ -35,11 +35,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the tournament repaints the whole screen, straight out of the golden branch
-   of DailyDoKit::Draw: the clear goes from nothing to (1, 0.5, 0), both
-   vignette bands trade (0, 0, 0.5) for (1, 1, 0.5), and the pillars swap to
-   DailyDoPillars[IMG_002] - a #fe9b10 amber - under a (1, 1, 0) tint.
-   a gradient cannot be transitioned, so the golden one rides in on top. */
 .sky, .pillar, body {transition: background-color 0.45s ease}
 .golden body, .golden .sky {background-color: #ff8000}
 
@@ -104,11 +99,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* three rings of stars, each one lower and tighter than the last. only the
-   top of each ring clears the screen, so what you see is an arch of about
-   four stars sliding along it. */
-/* rings live in the game column so their ends run off behind the pillars,
-   and each is masked to its upper half so the lower arc never shows. */
 .bigstars {
     z-index: 1; left: 50%;
     width: var(--u); right: auto;
@@ -137,12 +127,8 @@
     to {transform: rotate(-360deg)}
 }
 
-
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* diagonal light bands, four per cycle (dim, mid, bright, mid), multiplied
-   over the sky so the pillars tint the same way they do in game. hard stops
-   only: an interpolated ramp dithers differently every frame while it moves. */
 .stripes {
     z-index: 5; overflow: hidden;
     mix-blend-mode: multiply; opacity: 0.9;
@@ -169,8 +155,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the list owns the full page height and runs under the vignette; the
-   logo and the footer sit above it. */
 .dailydo, .ui {
     position: fixed; top: 0; left: 50%;
     height: 100vh; width: var(--u);
@@ -186,19 +170,14 @@
 }
 .ui .dumbcontainer, .ui .footer, .ui .findbox {pointer-events: auto}
 
-/* board switching: the outgoing side is timed, the incoming side is dropped
-   into place with the transition off before it rides back */
-/* the board you are leaving greys out and stops taking clicks while the next
-   one is fetched, then the pair slides a whole screen at a flat rate */
 .fetching .dailydo, .fetching .ui, .fetching .switcher, .fetching .boardpick {
     opacity: 0.5; pointer-events: none;
 }
+
 .sliding {transition: transform 0.26s linear}
 .sliding.jumping {transition: none}
 .ghost {pointer-events: none}
-/* out of flow so the copy of the title does not push the real one down a row
-   while the two are passing each other. the column copy keeps its own fixed
-   placement, it is already out of flow. */
+
 .dumbcontainer.ghost {
     position: absolute; top: 0;
     left: 0; right: 0;
@@ -208,6 +187,8 @@
     position: fixed; inset: 0;
     z-index: 2; pointer-events: none;
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 .scroller {
     position: absolute; inset: 0;
@@ -229,9 +210,11 @@
     padding-left: 9.5cqw; padding-right: 6.7cqw;
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 .scores rank, .scores name, .scores score {
     -webkit-text-stroke: 0.3em #261b19;
-    paint-order: stroke fill; font-weight: 300; /* don't change weight please */
+    paint-order: stroke fill; font-weight: 300; /* changing weight demolishes this whole site's prettiness */
     text-transform: uppercase;
     text-shadow:
         0.150em 0.120em 0 #261b19, 0.130em 0.195em 0 #261b19,
@@ -243,8 +226,6 @@
         0 0.120em 0 #261b19;
 }
 
-/* the column is only ever as wide as the longest rank the board actually
-   has, so a 40 row day does not sit behind three digits of nothing */
 .scores rank {
     flex: none; width: calc(var(--rankcells, 4) * 0.63em);
     text-align: right; font-style: italic;
@@ -267,8 +248,6 @@
     text-align: center;
 }
 
-/* the border keeps its width while it is invisible, so nothing reflows when
-   the sprite lands - only the ink appears */
 .scores img {
     flex: none; height: 0.7em;
     align-self: baseline; margin-left: 0.3em;
@@ -282,20 +261,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* your own row, straight out of DailyDoKit::Draw. rows are 25 game units
-   apart, so everything here is measured in row heights: the rainbow is a
-   40 unit band at 0.75 alpha, the glow is the 104x44 blob drawn at 2x/1.5x
-   sweeping 2 units a frame over a 640+400 wrap, and the row itself slides
-   sin(2deg per frame) * 5.
-   the game draws the band before the list loop, so it is one element that
-   lives ahead of the row pool rather than a pseudo on the row - otherwise
-   it would sit over whatever row came before it. */
-/* on a phone the band runs off both screen edges, so here the whole strip
-   fades out well before the column ends rather than stopping on a cut */
-/* two things had to go for the sliver at the right edge: the strip is held a
-   little off the scroller's clip so a blended layer never lands on it, and
-   the mask ends in a band of flat transparent rather than a gradient stop, so
-   the last column cannot round up to something visible. */
 .scores hilite {
     position: absolute; left: 1cqw; right: 1cqw;
     display: none; pointer-events: none;
@@ -358,6 +323,8 @@
 [data-role=calendar] .logo .inner {fill: url(#lgpop)}
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 .calbutton, .todaybutton {
     position: absolute; width: 12.5cqw; height: 12.5cqw;
     padding: 0; margin: 0;
@@ -376,9 +343,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the calendar is a fixed six by seven grid so it can take a fixed width, but
-   a profile is only ever a handful of short rows. sizing this one to its
-   content drops the dead yellow either side of the panel. */
 .profile .popup {
     width: max-content;
     max-width: calc(var(--u) * 0.86);
@@ -392,7 +356,6 @@
     width: auto;
     padding: calc(var(--u) * 0.028) calc(var(--u) * 0.036);
 }
-/* labels left, values right, in the face the game's dialogs use */
 .profile .facts {
     display: grid; width: 100%;
     background: none; box-shadow: none;
@@ -432,12 +395,8 @@
     vertical-align: -0.14em; margin-right: 0.35em;
 }
 
-/* narrow enough to live in the list's side margin: arrow over label */
-/* the labels carry the list's own treatment: same size, same blippo, same
-   dark outline, same ring shadow that drags the outline down with it. */
-/* body level, not inside .ui: that column sets container-type, which makes
-   it the containing block for fixed children and would pin these to the
-   column edge instead of the window margin. */
+/*//////////////////////////////////////////////////////////////////////*/
+
 .switcher {
     position: fixed; inset: 0;
     pointer-events: none; z-index: 4;
@@ -463,15 +422,13 @@
         0.075em -0.010em 0 #261b19, 0.130em 0.045em 0 #261b19,
         0 0.120em 0 #261b19;
 }
-/* the blanket "a, p, span, ..." rule up top paints every span lavender,
-   so the label has to be told to take the row colour off the button */
+
 .switcher .line, .switcher .lbl {
     display: flex; align-items: center;
     gap: 0.2em; color: inherit;
 }
 .switcher .swleft {left: calc(var(--u) * 0.03)}
 .switcher .swright {right: calc(var(--u) * 0.03)}
-/* the arrow sits above the words on both sides, so they need clearance */
 .switcher .line {margin-top: 0.14em}
 .switcher button:active {filter: brightness(1.6)}
 .switcher img.arrow {
@@ -483,12 +440,7 @@
     height: 1.15em; width: auto;
     filter: drop-shadow(0 0.06em 0 #261b19);
 }
-/* both ends of the reachable window run out, so an arrow has to be able to
-   leave without the other one moving */
 .switcher button.gone {visibility: hidden; pointer-events: none}
-/* the same drift the claimed row gets, so the two read as one idle motion.
-   cqw is no use out here: the switcher sits at body level, outside the
-   column that carries container-type, so the sway goes through --u. */
 .switcher img.arrow, .switcher .line {
     animation: ddswayarrow 1.5s ease-in-out infinite alternate;
 }
@@ -505,10 +457,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the boards live in the empty margin beside the column. sizes go through vh
-   rather than cqw because this sits outside .dailydo entirely.
-   the bottom corners are square so it can sit straight on the search bar when
-   there is no margin to spare. */
 .boardpick {
     position: fixed; z-index: 6;
     right: 2vh; bottom: 4vh;
@@ -519,12 +467,11 @@
         0 0 0 0.65vh #feff48,
         0 0 0 1vh rgba(0,0,0,0.5);
 }
-/* same face the popup buttons wear */
 .boardpick button {
     display: flex; align-items: center; gap: 0.4vh;
     margin: 0; padding: 0.5vh 1.1vh; color: white;
     font-family: "harlow solid", system-ui, sans-serif;
-    font-weight: 100; font-size: 1.85vh;
+    font-weight: 100 !important; font-size: 1.85vh;
     text-transform: capitalize; white-space: nowrap;
     -webkit-text-stroke: 0.28vh black;
     paint-order: stroke fill;
@@ -532,10 +479,7 @@
         #0a1a5e 80%, #5a63a0 100%);
 }
 .boardpick button + button {box-shadow: inset 0.3vh 0 0 rgba(0,0,0,0.5)}
-/* the blanket span rule up top would paint the label lavender */
 .boardpick .lbl {color: inherit}
-/* the tournament only exists at the weekend, so the tab leaves the rail on
-   any other day rather than sitting there dead */
 .boardpick button.away {display: none}
 .boardpick button img {height: 1.9vh; width: auto}
 .boardpick button.on {
@@ -543,14 +487,13 @@
         #1130bf 80%, #a2aee6 100%);
 }
 .boardpick button:active {filter: brightness(1.6)}
-
-/* when the margin beside the column is too narrow to hold it, it drops onto
-   the top of the search bar instead. placepicks decides. */
 .boardpick.inline {
     right: auto; left: 50%;
     transform: translateX(-50%);
-    bottom: calc(var(--u) * 0.125);
+    bottom: calc(var(--u) * 0.15);
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 .findbox {
     z-index: 7; height: 7cqw;
@@ -568,8 +511,7 @@
     font-family: "blippo", system-ui, sans-serif;
     font-weight: 100; font-size: 3cqw; letter-spacing: 0.03em;
 }
-.findbox input::placeholder {color: darkgrey} /* the */
-/* only shows once there is something to clear */
+.findbox input::placeholder {color: darkgrey} /* https://en.wikipedia.org/wiki/Grey#Web_colors:~:text=anomaly */
 .findbox .clearfind {
     margin: 0 0 0 1cqw; padding: 0 0.4cqw;
     background: none;
@@ -579,6 +521,8 @@
 }
 .findbox.typed .clearfind {visibility: visible}
 .findbox .clearfind:active {filter: brightness(1.6)}
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 .idtip {
     position: fixed; z-index: 9;
@@ -593,9 +537,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* body level, not inside .ui: that column sets container-type, which makes
-   it the containing block for fixed children and would pin the dim to the
-   column instead of the window. sizes go through --u for the same reason. */
 .calwrap {
     position: fixed; inset: 0; z-index: 8;
     display: flex; align-items: center; justify-content: center;
@@ -603,15 +544,11 @@
     visibility: hidden; opacity: 0; pointer-events: none;
 }
 .calwrap.open {visibility: visible; opacity: 1; pointer-events: auto}
-
-/* dim lands at once, the box grows into place, and nothing inside shows
-   until it has arrived. closing runs the same thing backwards. */
 .calwrap .popup {
     transform: scale(0);
     transition: transform 0.1s ease-out;
 }
 .calwrap.open .popup {transform: scale(1)}
-/* belt and braces: if the transition never runs the box must still be up */
 .calwrap.settled .popup {transform: scale(1)}
 .calwrap.closing .popup {transform: scale(0)}
 .calwrap .pucontent {opacity: 0}
@@ -623,7 +560,6 @@
     font-family: "blippo";
     position: relative; z-index: 1;
 }
-/* stood off the corner so the box's own rings do not crowd it */
 .closebtn {
     position: absolute; z-index: 3;
     top: calc(var(--u) * -0.075); right: calc(var(--u) * -0.075);
@@ -631,7 +567,7 @@
     margin: 0; padding: 0; background: none;
 }
 .closebtn img {width: 100%; height: 100%; object-fit: contain}
-.closebtn:active img {content: url(assets/images/closeactive.png)}
+.closebtn:active img {content: url("assets/images/closeactive.png")}
 .calwrap .pucontent {
     width: 100%; height: auto;
     padding: calc(var(--u) * 0.035) 0 calc(var(--u) * 0.05);
@@ -646,7 +582,8 @@
     padding: calc(var(--u) * 0.03) calc(var(--u) * 0.026) calc(var(--u) * 0.03);
 }
 
-/* .pucontent div also matches this one, so the panel look has to be undone */
+/*//////////////////////////////////////////////////////////////////////*/
+
 .pucontent .calgrid {
     display: grid; gap: calc(var(--u) * 0.014);
     grid-template-columns: repeat(7, 1fr);
@@ -654,15 +591,12 @@
     background: none; box-shadow: none;
     border-radius: 0;
 }
-/* weekday heads use the face the game's dialogs use for body copy */
 .pucontent .calgrid span {
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-weight: 600; color: white;
     font-size: calc(var(--u) * 0.027);
     letter-spacing: 0.06em; padding-bottom: calc(var(--u) * 0.008);
 }
-/* every day is the same button; the ones out of reach are just faded and
-   taken out of the way of the pointer. */
 .pucontent .calgrid button {
     width: 100%; aspect-ratio: 1; height: auto;
     margin: 0; padding: 0; border-radius: 0.25em;
@@ -687,7 +621,6 @@
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
         0 0 0 calc(var(--u) * 0.008) #ffd200;
 }
-/* sunday is the tournament day, so that one column is gold */
 .pucontent .calgrid button.weekend {
     background: linear-gradient(140deg, #fde84a 0%, #d8b70c 30%,
         #d8b70c 80%, #f2ecb4 100%);
@@ -696,15 +629,11 @@
     background: linear-gradient(140deg, #fff59b 0%, #fde84a 30%,
         #e4c515 80%, #f6f1c8 100%);
 }
-/* on the tournament board every other day holds nothing, so it reads as dead
-   without being locked out - an empty board is still worth looking at */
 .calgrid.goldonly button.live:not(.weekend) {opacity: 0.4}
-/* the day you are actually looking at, which is not always today */
+
 .pucontent .calgrid button.picked {
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
         #6020cf 80%, #ba9fe6 100%);
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
         0 0 0 calc(var(--u) * 0.008) #feff48;
 }
-
-/*//////////////////////////////////////////////////////////////////////*/
