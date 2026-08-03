@@ -127,11 +127,14 @@ function tintswitcher() {
         seat.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     });
 }
-/* the next day in that direction the board in play actually has */
-/* the tournament skips the six empty days, so it walks sunday to sunday */
+// the tournament skips the six empty days, so it walks sunday to sunday
+// a url can drop you outside the window, so the walk back in stays open
+// while the walk further out stops at whichever end you came from
 function nextday(from, step) {
     const gold = !!boards[boardat].weekly;
-    for (let at = from + step; at >= 0 && at <= calendarreach; at += step) {
+    const far = Math.max(calendarreach, from);
+    const near = Math.min(0, from);
+    for (let at = from + step; at >= near && at <= far; at += step) {
         if (!gold || isgoldday(at)) return at;
     }
     return -1;
@@ -169,17 +172,8 @@ function buildpicks() {
         rail.appendChild(seat);
     });
     drawpicks();
-    placepicks();
 }
 
-function placepicks() {
-    const rail = document.querySelector(".boardpick");
-    const column = document.querySelector(".dailydo");
-    if (!rail || !column) return;
-    rail.classList.remove("inline");
-    const margin = (window.innerWidth - column.clientWidth) / 2;
-    if (margin < rail.offsetWidth + window.innerHeight * 0.05) rail.classList.add("inline");
-}
 function isgoldday(back) {return dayback(back).getDay() === 0}
 
 function paintscene() {
@@ -202,7 +196,6 @@ function drawpicks() {
     document.querySelectorAll(".calgrid button[data-back]").forEach(function(cell) {
         cell.classList.toggle("picked", Number(cell.dataset.back) === dayat);
     });
-    placepicks();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -274,21 +267,32 @@ function markurl() {
     const url = new URL(location.href);
     if (boardat > 0) {url.searchParams.set("board", boards[boardat].key)}
     else {url.searchParams.delete("board")}
-    if (dayat > 0) {url.searchParams.set("day", daykey(dayback(dayat)))}
+    if (dayat !== 0) {url.searchParams.set("day", daykey(dayback(dayat)))}
     else {url.searchParams.delete("day")}
     history.replaceState(null, "", url);
 }
 
+// any real date is allowed here, not just the fourteen the ui can reach
+// the server answers empty outside its window, which is the point of it
 function readurl() {
     const got = new URL(location.href).searchParams;
     const key = got.get("board");
     const at = boards.findIndex(function(spot) {return spot.key === key});
     if (at > 0) boardat = at;
 
-    const want = got.get("day");
-    if (!want) return;
-    for (let back = 0; back <= calendarreach; back++) {
-        if (daykey(dayback(back)) === want) {dayat = back; return}
+    const want = (got.get("day") || "").replace(/-/g, "");
+    if (/^\d{8}$/.test(want)) {
+        const asked = new Date(Number(want.slice(0, 4)),
+            Number(want.slice(6, 8)) - 1, Number(want.slice(4, 6)));
+        const step = Math.round((dayback(0) - asked) / 86400000);
+        if (asked.getDate() === Number(want.slice(4, 6)) && Math.abs(step) < 3700) {
+            dayat = step;
+        }
+    }
+    // the tournament's own default is the sunday just gone, not today
+    if (boards[boardat].weekly && !isgoldday(dayat)) {
+        const near = nextday(dayat, 1);
+        if (near >= 0) dayat = near;
     }
 }
 
@@ -310,13 +314,13 @@ function pickboard(index) {
     if (index === boardat) return;
     const dir = index > boardat ? -1 : 1;
     boardat = index;
-    reload(dir);
+    reload(dir).then(function() {playsound("shuffle", 0.7)});
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
 
 function showfooter() {
-    const played = dayat === 0 && claimedat >= 0 && board[claimedat]
+    const played = claimedat >= 0 && board[claimedat]
         && Number(board[claimedat].score) > 0;
     const seat = document.querySelector(".todaybutton");
     if (!seat) return;
@@ -466,6 +470,7 @@ function makeprofile() {
         if (!row || Math.abs(e.clientY - downat) > 6) return;
         const entry = board[row.dataset.at];
         if (!entry) return;
+        playsound("click", 0.7);
         const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
         const country = countrynames[entry.country] || entry.country;
         const facts = [
@@ -536,7 +541,7 @@ function buildcalendar() {
     const start = new Date(today.getTime() - (calendarreach + 7) * day);
     start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     const oldest = today.getTime() - calendarreach * day;
-    const newest = today.getTime() + day;
+    const newest = today.getTime();
 
     for (const n of names) {
         const head = document.createElement("span");
@@ -619,7 +624,6 @@ window.addEventListener("resize", function() {
     paintedat = null;
     fling.jump(keep);
     tintswitcher();
-    placepicks();
 });
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -667,12 +671,13 @@ calwrap.addEventListener("click", function(e) {
 const playpackage = "com.raptisoft.Chuzzle2";
 const playpage = "https://play.google.com/store/apps/details?id=" + playpackage;
 
+// a desk has nowhere to send the protocol, so it gets the phone to scan
 document.querySelector(".todaybutton").addEventListener("click", function() {
     if (/android/i.test(navigator.userAgent)) {
         location.href = "market://launch?id=" + playpackage; /* discovered this 4 months ago, i'm not sure if this protocol command is properly documented at all */
         return;
     }
-    window.open(playpage, "_blank", "noopener");
+    openpopup(document.querySelector("[data-role=qr]"));
 });
 window.addEventListener("keydown", function(e) {
     if (e.key !== "Escape") return;
@@ -683,6 +688,9 @@ window.addEventListener("keydown", function(e) {
 
 loadsounds(["click", "shuffle"]);
 
+// closest() rather than target: a press usually lands on a label or an icon
+// the rail stays quiet here, it shuffles once its board has landed instead
 document.addEventListener("click", function(e) {
-    if (e.target.closest && e.target.closest("button")) playsound("click", 0.7);
+    const seat = e.target.closest && e.target.closest("button");
+    if (seat && !seat.closest(".boardpick")) playsound("click", 0.7);
 });

@@ -30,7 +30,6 @@ function trimpending(root) {
 function trimall() {
     document.querySelectorAll("svg.logo").forEach(logotrimmer);
     document.documentElement.classList.add("fontsready");
-    if (typeof placepicks === "function") placepicks();
 }
 
 function relabellogo(svg, words) {

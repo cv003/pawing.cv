@@ -155,7 +155,7 @@ function paintrows(at, host) {
             const band = rowheight * 1.6;
             strip.style.height = band + "px";
             strip.style.top = (padtop + (claimedat + 0.5) * rowheight - at
-                - band / 2 - rowheight * 0.1) + "px";
+                - band / 2 + rowheight * 0.08) + "px";
         }
     }
 }

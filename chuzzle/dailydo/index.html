@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>Daily-Do</title>
         <link rel="icon" type="image/png" href="../assets/images/icons/dailydo.webp">
-        <link rel="preload" as="font" type="font/woff2" crossorigin
-            href="../assets/fonts/blippo.woff2">
-        <link rel="preload" as="font" type="font/woff2" crossorigin
-            href="../assets/fonts/harlowsolidlet.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/blippo.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/harlowsolidlet.woff2">
         <link rel="preload" as="image" href="assets/images/star.png">
         <link rel="preload" as="image" href="assets/images/stars.webp">
         <link rel="stylesheet" href="../global.css">
         <link rel="stylesheet" href="style.css">
+
     </head>
     <body>
 
@@ -94,6 +94,30 @@
             </div>
         </div>
 
+        <div class="calwrap qrwrap" data-role="qr">
+            <div class="popup">
+                <button class="closebtn" type="button">
+                    <img src="assets/images/close.png" alt="close">
+                </button>
+                <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <defs>
+                            <linearGradient id="lgpop3" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                                <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                                <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                                <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                            </linearGradient>
+                        </defs>
+                        <g><text x="30" y="130" class="lgblack">Play On Android!</text>
+                            <text x="30" y="130" class="inner">Play On Android!</text></g>
+                    </svg>
+                    <div><img class="qrsheet" src="assets/images/qrplay.svg" alt="market link"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="switcher">
             <button class="swleft" type="button">
                 <img class="arrow" src="assets/images/arrowright.png" alt="">
@@ -144,7 +168,7 @@
                         <button class="clearfind" type="button">&times;</button>
                     </div>
                     <button class="todaybutton">
-                        <img src="assets/images/redo.png" alt="play">
+                        <img src="assets/images/play.png" alt="play">
                     </button>
                 </div>
             </div>

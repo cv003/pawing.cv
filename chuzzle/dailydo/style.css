@@ -170,6 +170,15 @@
 }
 .ui .dumbcontainer, .ui .footer, .ui .findbox {pointer-events: auto}
 
+/* pinning the width made short titles render enormous, since the trimmed */
+/* viewBox is only as wide as the word. driving it off height instead */
+/* keeps the glyphs one size whatever the title says */
+.ui .dumbcontainer .logo {
+    width: auto !important;
+    height: calc(13.2cqw * var(--boxratio, 1.2));
+    max-width: 88cqw;
+}
+
 .fetching .dailydo, .fetching .ui, .fetching .switcher, .fetching .boardpick {
     opacity: 0.5; pointer-events: none;
 }
@@ -322,6 +331,24 @@
 }
 [data-role=calendar] .logo .inner {fill: url(#lgpop)}
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
+[data-role=qr] .logo .inner {fill: url(#lgpop3)}
+
+/* the sheet fills the box and wears the same triple rim the search bar does */
+.qrwrap .popup {width: calc(var(--u) * 0.62)}
+.qrwrap .pucontent {padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.05)}
+.qrwrap .pucontent > div {
+    width: calc(100% - var(--u) * 0.14);
+    padding: calc(var(--u) * 0.03);
+    background: #2d0027;
+}
+.qrsheet {
+    display: block; width: 100%; height: auto;
+    border-radius: calc(var(--u) * 0.02);
+    box-shadow:
+        0 0 0 calc(var(--u) * 0.008) #60204a,
+        0 0 0 calc(var(--u) * 0.015) #feff48,
+        0 0 0 calc(var(--u) * 0.022) rgba(0,0,0,0.5);
+}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -459,7 +486,8 @@
 
 .boardpick {
     position: fixed; z-index: 6;
-    right: 2vh; bottom: 4vh;
+    left: 50%; transform: translateX(-50%);
+    bottom: calc(var(--u) * 0.145);
     display: flex; overflow: hidden;
     border-radius: 1.1vh 1.1vh 0 0;
     clip-path: inset(-1.2vh -1.2vh 0 -1.2vh);
@@ -488,11 +516,6 @@
         #1130bf 80%, #a2aee6 100%);
 }
 .boardpick button:active {filter: brightness(1.6)}
-.boardpick.inline {
-    right: auto; left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(var(--u) * 0.145);
-}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
