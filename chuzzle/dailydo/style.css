@@ -33,6 +33,30 @@
         #050177 100%);
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* the tournament repaints the whole screen, straight out of the golden branch
+   of DailyDoKit::Draw: the clear goes from nothing to (1, 0.5, 0), both
+   vignette bands trade (0, 0, 0.5) for (1, 1, 0.5), and the pillars swap to
+   DailyDoPillars[IMG_002] - a #fe9b10 amber - under a (1, 1, 0) tint.
+   a gradient cannot be transitioned, so the golden one rides in on top. */
+.sky, .pillar, body {transition: background-color 0.45s ease}
+.golden body, .golden .sky {background-color: #ff8000}
+
+.vignette::after {
+    content: ""; position: absolute; inset: 0;
+    opacity: 0; transition: opacity 0.45s ease;
+    background: linear-gradient(180deg,
+        #ffff80 0%, #ffff80 4%,
+        rgba(255,255,128,0) 16%, rgba(255,255,128,0) 92%,
+        #ffff80 100%);
+}
+.golden .vignette::after {opacity: 1}
+
+.golden .plorange {background: #ffc93a}
+.golden .plpink {background: #ffa714}
+.golden .plmagenta {background: #fe9b00}
+
 .pillars {
     z-index: 2; left: 50%;
     width: var(--u); right: auto;

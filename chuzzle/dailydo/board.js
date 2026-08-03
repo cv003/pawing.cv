@@ -8,20 +8,32 @@ const cyclercorners = [
     [0, 0, 1], [1, 0, 1], [1, 0, 0], [1, 0.5, 0],
     [0, 1, 0], [1, 0.5, 0], [1, 0, 0], [1, 0, 1]
 ];
+/* the constructor builds a second cycler right after it, at this+0x2a0, and
+   DrawScore picks between the two on its last argument - the golden flag. five
+   corners this time, so the sweep runs 0..4 rather than 0..7. */
+const goldcorners = [
+    [1, 0.5, 0], [1, 1, 1], [1, 1, 0], [1, 1, 0.25], [1, 0.5, 0]
+];
 const cyclerspan = 0.875;
 
 function pastel(v, floor) {return Math.max(floor, Math.min(1, v * 1.5))}
 
-const cyclerstops = cyclercorners.map(function(c) {
-    return c.map(function(v) {return pastel(v, 0.5)});
-});
+function stopsof(corners) {
+    return corners.map(function(c) {
+        return c.map(function(v) {return pastel(v, 0.5)});
+    });
+}
+
+const cyclerstops = stopsof(cyclercorners);
+const goldstops = stopsof(goldcorners);
+let activestops = cyclerstops;
 
 function cyclerget(t) {
-    const last = cyclerstops.length - 1;
+    const last = activestops.length - 1;
     let at = t % last;
     if (at < 0) at += last;
     const lo = Math.floor(at); const mix = at - lo;
-    const a = cyclerstops[lo]; const b = cyclerstops[lo + 1];
+    const a = activestops[lo]; const b = activestops[lo + 1];
     const ch = a.map(function(v, i) {return Math.round(255 * (v + (b[i] - v) * mix))});
     return "rgb(" + ch[0] + "," + ch[1] + "," + ch[2] + ")";
 }
@@ -98,7 +110,7 @@ function paintrows(at, host) {
     if (paintedat === at) return;
     paintedat = at;
     const height = host.clientHeight * cyclerspan;
-    const last = cyclerstops.length - 1;
+    const last = activestops.length - 1;
     const first = Math.max(0, Math.min(board.length - pool.length,
         Math.floor((at - padtop) / rowheight) - 2));
 

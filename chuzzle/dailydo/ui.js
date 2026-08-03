@@ -155,7 +155,7 @@ async function refreshboard() {
 function tintswitcher() {
     const stage = document.querySelector(".dailydo");
     const height = stage.clientHeight * cyclerspan;
-    const last = cyclerstops.length - 1;
+    const last = activestops.length - 1;
     document.querySelectorAll(".switcher button").forEach(function(seat) {
         const box = seat.getBoundingClientRect();
         const middle = box.top + box.height / 2;
@@ -215,7 +215,19 @@ function isweekend(back) {
     return at === 0 || at === 6;
 }
 
+/* DailyDoKit::Draw carries the golden flag into everything it paints: the
+   screen clears to (1, 0.5, 0) instead of nothing, both vignette bands swap
+   their (0, 0, 0.5) blue for (1, 1, 0.5), the pillars switch to the third
+   DailyDoPillars sprite under a (1, 1, 0) tint, and DrawScore reads the
+   second colour cycler. the page does the same, on a transition. */
+function paintscene() {
+    const gold = !!boards[boardat].weekly;
+    activestops = gold ? goldstops : cyclerstops;
+    document.documentElement.classList.toggle("golden", gold);
+}
+
 function drawpicks() {
+    paintscene();
     const weekend = isweekend(dayat);
     document.querySelectorAll(".boardpick button").forEach(function(seat, index) {
         seat.classList.toggle("on", index === boardat);
@@ -605,6 +617,7 @@ const fontsdone = document.fonts && document.fonts.ready
 
 Promise.all([loadboard(), fontsdone]).then(function(got) {
     const count = got[0];
+    paintscene();
     measurelist(host, list);
     claimedat = findclaimed();
     paintrows(0, host);
