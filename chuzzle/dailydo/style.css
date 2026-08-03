@@ -380,6 +380,10 @@
     text-align: right; white-space: nowrap;
 }
 .profile .facts .gap {grid-column: 1 / -1; height: calc(var(--u) * 0.022)}
+.profile .facts .noid {
+    font-weight: inherit; font-style: italic;
+    color: #ff9c9c;
+}
 .profile .pucontent > div .claim {
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     text-transform: capitalize; font-size: 1.5em;

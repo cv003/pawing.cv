@@ -406,12 +406,13 @@ function readclaim() {
     try {return JSON.parse(localStorage.getItem("chuzzleclaim") || "null")} catch (e) {}
     return null;
 }
+function realid(id) {return !!id && id !== "0"}
 
 // try guid first since it's possible that the person changed their nickname
 function findclaimed() {
     const held = readclaim();
     if (!held || !board.length) return -1;
-    if (held.guid) {
+    if (realid(held.guid)) {
         const byid = board.findIndex(function(e) {return e.id === held.guid});
         if (byid >= 0) return byid;
     }
@@ -432,7 +433,7 @@ function jumptoclaimed() {
 // ?player=[id] jumps to the player row if it exists in the set leaderboard
 function openlinkedplayer() {
     const want = new URL(location.href).searchParams.get("player");
-    if (!want) return;
+    if (!realid(want)) return;
     const seat = board.findIndex(function(e) {return e.id === want});
     if (seat < 0) return;
     const host = document.querySelector(".scroller");
@@ -516,20 +517,22 @@ function makeprofile() {
         playsound("click", 0.7);
         const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
         const country = countrynames[entry.country] || entry.country;
+
+        const noguid = !realid(entry.id);
         const facts = [
             ["Nickname", entry.full],
             ["Country", flag + country],
-            ["Player ID", entry.id || "unknown"],
+            ["Player ID", noguid ? "<b class=\"noid\">[invalid]</b>" : entry.id],
             null,
-            ["Today's Rank", "#" + entry.rank],
-            ["Today's Score", Number(entry.score).toLocaleString("en")]
+            ["This day's Rank", "#" + entry.rank],
+            ["This day's Score", Number(entry.score).toLocaleString("en")]
         ];
         relabellogo(wrap.querySelector(".logo"),
             /^PLAYER\s*\d*$/.test(entry.full) ? "Guest Info" : "Player Info");
         const held = readclaim();
         const mine = held && held.guid && held.guid === entry.id;
 
-        const button = mine || !held
+        const button = !noguid && (mine || !held)
             ? "<button class=\"claim\" type=\"button\">"
                 + (mine ? "Forget me" : "This is me") + "</button>"
             : "";
@@ -553,7 +556,7 @@ function makeprofile() {
             jumptoclaimed();
             showfooter();
         };
-        if (entry.id) {
+        if (!noguid) {
             const url = new URL(location.href);
             url.searchParams.set("player", entry.id);
             history.replaceState(null, "", url);
