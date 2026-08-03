@@ -61,6 +61,9 @@ function makerow() {
     const rank = document.createElement("rank");
     const name = document.createElement("name");
     const flag = document.createElement("img");
+    /* the rim and its drop shadow belong to the sprite, so they wait for it -
+       otherwise every scroll paints a row of empty outlined boxes first */
+    flag.onload = function() {flag.classList.add("drawn")};
     const score = document.createElement("score");
     row.append(rank, name, flag, score);
     row.parts = {rank: rank, name: name, flag: flag, score: score};
@@ -124,7 +127,14 @@ function paintrows(at, host) {
             row.parts.rank.textContent = entry.rank + ".";
             row.parts.name.textContent = entry.name;
             setdigits(row.parts.score, entry.score);
-            row.parts.flag.src = "assets/images/flags/" + entry.cc + ".png";
+            const flag = row.parts.flag;
+            const art = "assets/images/flags/" + entry.cc + ".png";
+            if (flag.getAttribute("src") !== art) {
+                flag.classList.remove("drawn");
+                flag.src = art;
+                /* already in the cache: onload will not fire again */
+                if (flag.complete && flag.naturalWidth) flag.classList.add("drawn");
+            }
             row.dataset.id = entry.id;
             row.dataset.at = index;
             row.classList.toggle("mine", index === claimedat);

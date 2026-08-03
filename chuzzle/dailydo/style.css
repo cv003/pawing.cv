@@ -195,10 +195,11 @@
 }
 .sliding {transition: transform 0.26s linear}
 .sliding.jumping {transition: none}
+.ghost {pointer-events: none}
 /* out of flow so the copy of the title does not push the real one down a row
-   while the two are passing each other */
-.ghost {
-    pointer-events: none;
+   while the two are passing each other. the column copy keeps its own fixed
+   placement, it is already out of flow. */
+.dumbcontainer.ghost {
     position: absolute; top: 0;
     left: 0; right: 0;
 }
@@ -266,11 +267,16 @@
     text-align: center;
 }
 
+/* the border keeps its width while it is invisible, so nothing reflows when
+   the sprite lands - only the ink appears */
 .scores img {
     flex: none; height: 0.7em;
     align-self: baseline; margin-left: 0.3em;
     position: relative; top: 0.125em;
-    border: 0.15em solid #261b19;
+    border: 0.15em solid transparent;
+}
+.scores img.drawn {
+    border-color: #261b19;
     box-shadow: 0 0.12em 0 #261b19;
 }
 
@@ -681,20 +687,18 @@
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
         0 0 0 calc(var(--u) * 0.008) #ffd200;
 }
-/* the tournament runs at the weekend, so those two columns are gold */
+/* sunday is the tournament day, so that one column is gold */
 .pucontent .calgrid button.weekend {
     background: linear-gradient(140deg, #fde84a 0%, #d8b70c 30%,
         #d8b70c 80%, #f2ecb4 100%);
-    color: #4a3a00;
 }
 .pucontent .calgrid button.weekend.live:active {
     background: linear-gradient(140deg, #fff59b 0%, #fde84a 30%,
         #e4c515 80%, #f6f1c8 100%);
 }
-/* on the tournament board the weekdays hold nothing, so they read as dead */
-.calgrid.goldonly button:not(.weekend) {
-    opacity: 0.35; pointer-events: none;
-}
+/* on the tournament board every other day holds nothing, so it reads as dead
+   without being locked out - an empty board is still worth looking at */
+.calgrid.goldonly button.live:not(.weekend) {opacity: 0.4}
 /* the day you are actually looking at, which is not always today */
 .pucontent .calgrid button.picked {
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,

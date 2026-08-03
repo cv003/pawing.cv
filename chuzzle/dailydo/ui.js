@@ -210,10 +210,11 @@ function placepicks() {
     if (margin < rail.offsetWidth + window.innerHeight * 0.05) rail.classList.add("inline");
 }
 
-function isweekend(back) {
-    const at = dayback(back).getDay();
-    return at === 0 || at === 6;
-}
+/* the tournament board only ever fills up on a sunday - the monday rows are
+   players whose own clock had not rolled over yet - so sunday is the only day
+   the tab is offered on. once you are inside it every day stays reachable, so
+   the empty ones can still be poked at. */
+function isgoldday(back) {return dayback(back).getDay() === 0}
 
 /* DailyDoKit::Draw carries the golden flag into everything it paints: the
    screen clears to (1, 0.5, 0) instead of nothing, both vignette bands swap
@@ -228,15 +229,16 @@ function paintscene() {
 
 function drawpicks() {
     paintscene();
-    const weekend = isweekend(dayat);
+    const gold = !!boards[boardat].weekly;
     document.querySelectorAll(".boardpick button").forEach(function(seat, index) {
         seat.classList.toggle("on", index === boardat);
-        /* the tournament only runs at the weekend, so its tab leaves the rail
-           entirely on the other five days */
-        if (boards[index].weekly) seat.classList.toggle("away", !weekend);
+        /* offered on a sunday, and kept while you are standing on it */
+        if (boards[index].weekly) {
+            seat.classList.toggle("away", !isgoldday(dayat) && !gold);
+        }
     });
     const grid = document.querySelector(".calgrid");
-    if (grid) grid.classList.toggle("goldonly", !!boards[boardat].weekly);
+    if (grid) grid.classList.toggle("goldonly", gold);
     document.querySelectorAll(".calgrid button[data-back]").forEach(function(cell) {
         cell.classList.toggle("picked", Number(cell.dataset.back) === dayat);
     });
@@ -249,11 +251,22 @@ function drawpicks() {
    moment it clears the edge. */
 const slidespan = 260;
 
-/* :not(.ghost) matters: the copy carries the same class and lands first in
+/* the whole column moves, not the rows inside it: .scroller clips at the
+   column edge, so sliding .scores just made the list vanish a third of the
+   way across. .dailydo is fixed and nothing clips it, so the pair can ride
+   the full width of the window.
+   :not(.ghost) matters: the copy carries the same class and lands first in
    document order, so a plain querySelector would hand back the copy */
 function slidemovers() {
-    return [document.querySelector(".scores:not(.ghost)"),
+    return [document.querySelector(".dailydo:not(.ghost)"),
         document.querySelector(".dumbcontainer:not(.ghost)")];
+}
+
+/* .dailydo is centred by a transform of its own, so a slide has to be
+   composed onto it rather than replacing it */
+function shove(seat, across) {
+    const base = seat.classList.contains("dailydo") ? "translateX(-50%) " : "";
+    seat.style.transform = across ? base + "translateX(" + across + "vw)" : "";
 }
 
 /* has to run before the pool is repainted, or the copy shows the board you
@@ -271,18 +284,14 @@ function slideswap(dir, ghosts) {
     const movers = slidemovers();
     const all = movers.concat(ghosts);
     all.forEach(function(seat) {seat.classList.add("sliding", "jumping")});
-    movers.forEach(function(seat) {
-        seat.style.transform = "translateX(" + (dir * -100) + "%)";
-    });
+    movers.forEach(function(seat) {shove(seat, dir * -100)});
     /* reading a layout value commits the starting position; going through
        requestAnimationFrame instead would strand the copies on screen
        whenever the tab is not painting */
     void document.body.offsetWidth;
     all.forEach(function(seat) {seat.classList.remove("jumping")});
-    movers.forEach(function(seat) {seat.style.transform = ""});
-    ghosts.forEach(function(seat) {
-        seat.style.transform = "translateX(" + (dir * 100) + "%)";
-    });
+    movers.forEach(function(seat) {shove(seat, 0)});
+    ghosts.forEach(function(seat) {shove(seat, dir * 100)});
     setTimeout(function() {
         ghosts.forEach(function(seat) {seat.remove()});
         movers.forEach(function(seat) {seat.classList.remove("sliding")});
@@ -290,8 +299,6 @@ function slideswap(dir, ghosts) {
 }
 
 async function reload(dir) {
-    /* stepping off a weekend takes the tournament with it */
-    if (boards[boardat].weekly && !isweekend(dayat)) boardat = 0;
     document.body.classList.add("fetching");
     const count = await loadboard();
     document.body.classList.remove("fetching");
@@ -307,7 +314,33 @@ async function reload(dir) {
     openlinkedplayer();
     showfooter();
     slideswap(dir, ghosts);
+    markurl();
     document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
+}
+
+/* where you are lives in the address bar, but only the parts that are not the
+   default: today's daily-do is the bare url. a bad value falls back rather
+   than erroring, so a hand typed link always lands somewhere. */
+function markurl() {
+    const url = new URL(location.href);
+    if (boardat > 0) {url.searchParams.set("board", boards[boardat].key)}
+    else {url.searchParams.delete("board")}
+    if (dayat > 0) {url.searchParams.set("day", daykey(dayback(dayat)))}
+    else {url.searchParams.delete("day")}
+    history.replaceState(null, "", url);
+}
+
+function readurl() {
+    const got = new URL(location.href).searchParams;
+    const key = got.get("board");
+    const at = boards.findIndex(function(spot) {return spot.key === key});
+    if (at > 0) boardat = at;
+
+    const want = got.get("day");
+    if (!want) return;
+    for (let back = 0; back <= calendarreach; back++) {
+        if (daykey(dayback(back)) === want) {dayat = back; return}
+    }
 }
 
 /* +1 walks back a day, -1 walks forward */
@@ -570,9 +603,8 @@ function buildcalendar() {
         const cell = document.createElement("button");
         cell.textContent = at.getDate();
         cell.title = daykey(at);
-        /* saturday and sunday carry the golden tournament, so they are picked
-           out in gold rather than the usual blue */
-        const weekend = at.getDay() === 0 || at.getDay() === 6;
+        /* sunday is the tournament day, so it is the only column in gold */
+        const weekend = at.getDay() === 0;
         if (at.getTime() >= oldest && at.getTime() <= newest) {
             cell.className = "live" + (at.getTime() === today.getTime() ? " today" : "")
                 + (weekend ? " weekend" : "");
@@ -605,6 +637,8 @@ const fling = makefling(document.querySelector(".scroller"), document.querySelec
 const host = document.querySelector(".scroller");
 const list = document.querySelector(".scores");
 
+/* before anything is drawn, so the first paint is already the right board */
+readurl();
 buildpicks();
 drawsteppers();
 document.querySelector(".swleft").addEventListener("click", function() {switchday(1)});
@@ -618,12 +652,15 @@ const fontsdone = document.fonts && document.fonts.ready
 Promise.all([loadboard(), fontsdone]).then(function(got) {
     const count = got[0];
     paintscene();
+    drawpicks();
+    relabellogo(document.querySelector(".dumbcontainer .logo"), boardtitle());
     measurelist(host, list);
     claimedat = findclaimed();
     paintrows(0, host);
     jumptoclaimed();
     openlinkedplayer();
     showfooter();
+    markurl();
     if (count) document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
     setInterval(refreshboard, boardage);
 });
