@@ -333,22 +333,14 @@
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 [data-role=qr] .logo .inner {fill: url(#lgpop3)}
 
-/* the sheet fills the box and wears the same triple rim the search bar does */
+/* every module carries its own rims, so the sheet needs nothing around it */
 .qrwrap .popup {width: calc(var(--u) * 0.62)}
 .qrwrap .pucontent {padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.05)}
 .qrwrap .pucontent > div {
-    width: calc(100% - var(--u) * 0.14);
-    padding: calc(var(--u) * 0.03);
-    background: #2d0027;
+    width: calc(100% - var(--u) * 0.12);
+    padding: calc(var(--u) * 0.022);
 }
-.qrsheet {
-    display: block; width: 100%; height: auto;
-    border-radius: calc(var(--u) * 0.02);
-    box-shadow:
-        0 0 0 calc(var(--u) * 0.008) #60204a,
-        0 0 0 calc(var(--u) * 0.015) #feff48,
-        0 0 0 calc(var(--u) * 0.022) rgba(0,0,0,0.5);
-}
+.qrsheet {display: block; width: 100%; height: auto}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
