@@ -3,11 +3,11 @@
 /* 137 names, only ever needed once a tooltip or a profile opens, so the page
    does not wait on them. */
 let countrynames = {};
-fetch("assets/data/countries.json").then(function(r) {
+fetch("assets/static/countries.json").then(function(r) {
     return r.ok ? r.json() : {};
 }).then(function(got) {countrynames = got}).catch(function() {});
 
-const sampleboard = "assets/data/dailydo-sample.txt";
+const sampleboard = "assets/static/dailydo-sample.txt";
 const knownflags = new Set(("AD AE AF AG AI AL AM AN AO AR AS AT AU AW AX AZ BA BB BD BE BF " +
     "BG BH BI BJ BM BN BO BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CS CU " +
     "CV CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG " +
@@ -29,6 +29,10 @@ function readboard(text) {
             country: bits[0],
             name: drawname(bits[1]),
             full: clean,
+            /* uppercased once here so filtering never has to case-fold 3800
+               names again on every keystroke */
+            hunt: clean.toUpperCase(),
+            rank: out.length + 1,
             raw: bits[1],
             score: bits[2],
             id: bits[3] || ""
@@ -68,16 +72,42 @@ function daylabel(back) {
 /* the game only ever says today or yesterday, so anything older is named by
    its date instead of inventing a phrase for it. */
 function boardtitle() {
-    if (dayat === 0) return boards[boardat].title;
+    /* the tournament never runs on a today, so naming it by date would mean
+       its own banner never showed */
+    if (boards[boardat].weekly || dayat === 0) return boards[boardat].title;
     if (dayat === 1) return "Yesterday's Scores";
     return daylabel(dayat) + " Scores";
 }
 
-async function loadboard() {
-    const spot = boards[boardat];
+/* a board is only worth asking for again once a minute has gone by. the raw
+   text goes to localStorage rather than memory so a reload counts as the same
+   minute, and only the six most recent boards are kept - a busy day is about
+   a hundred kilobytes of text.
+
+   nothing is ever fetched in the background: a board that has gone stale while
+   you were looking at another one is simply pulled when you come back to it. */
+const boardstore = "chuzzleboards";
+const boardage = 60000;
+
+function cachekey() {return boards[boardat].key + "/" + daykey(dayback(dayat))}
+
+function readstore() {
+    try {return JSON.parse(localStorage.getItem(boardstore) || "{}")} catch (e) {}
+    return {};
+}
+
+function remember(key, text) {
+    const all = readstore();
+    all[key] = {text: text, at: Date.now()};
+    Object.keys(all).sort(function(a, b) {return all[b].at - all[a].at})
+        .slice(6).forEach(function(k) {delete all[k]});
+    try {localStorage.setItem(boardstore, JSON.stringify(all))} catch (e) {}
+}
+
+async function fetchtext(key) {
     let text = "";
     try {
-        const reply = await fetch(boardhost + "/" + spot.key + "/" + daykey(dayback(dayat)));
+        const reply = await fetch(boardhost + "/" + key);
         if (reply.ok) text = await reply.text();
     } catch (e) {}
     if (!text || text.indexOf(String.fromCharCode(9)) < 0) {
@@ -87,8 +117,37 @@ async function loadboard() {
             if (reply.ok) text = await reply.text();
         } catch (e) {}
     }
-    board = text ? readboard(text) : [];
+    return text;
+}
+
+function useboard(text) {
+    fullboard = text ? readboard(text) : [];
+    board = fullboard;
     return board.length;
+}
+
+async function loadboard() {
+    const key = cachekey();
+    const held = readstore()[key];
+    if (held && Date.now() - held.at < boardage) return useboard(held.text);
+    const text = await fetchtext(key);
+    remember(key, text);
+    return useboard(text);
+}
+
+/* the minute tick. the board is swapped underneath the reader: the scroll
+   offset, the search text and the claimed row all survive it. */
+async function refreshboard() {
+    if (document.body.classList.contains("fetching")) return;
+    const key = cachekey();
+    const text = await fetchtext(key);
+    if (key !== cachekey()) return;
+    remember(key, text);
+    const keep = fling.at();
+    useboard(text);
+    board = filtered(findwant());
+    repaint(keep);
+    showfooter();
 }
 
 /* take the colour the list would use at the switcher's own height, so the
@@ -151,13 +210,25 @@ function placepicks() {
     if (margin < rail.offsetWidth + window.innerHeight * 0.05) rail.classList.add("inline");
 }
 
+function isweekend(back) {
+    const at = dayback(back).getDay();
+    return at === 0 || at === 6;
+}
+
 function drawpicks() {
+    const weekend = isweekend(dayat);
     document.querySelectorAll(".boardpick button").forEach(function(seat, index) {
         seat.classList.toggle("on", index === boardat);
+        /* the tournament only runs at the weekend, so its tab leaves the rail
+           entirely on the other five days */
+        if (boards[index].weekly) seat.classList.toggle("away", !weekend);
     });
+    const grid = document.querySelector(".calgrid");
+    if (grid) grid.classList.toggle("goldonly", !!boards[boardat].weekly);
     document.querySelectorAll(".calgrid button[data-back]").forEach(function(cell) {
         cell.classList.toggle("picked", Number(cell.dataset.back) === dayat);
     });
+    placepicks();
 }
 
 /* the board you are leaving greys out while the next one is fetched, then the
@@ -207,6 +278,8 @@ function slideswap(dir, ghosts) {
 }
 
 async function reload(dir) {
+    /* stepping off a weekend takes the tournament with it */
+    if (boards[boardat].weekly && !isweekend(dayat)) boardat = 0;
     document.body.classList.add("fetching");
     const count = await loadboard();
     document.body.classList.remove("fetching");
@@ -328,21 +401,57 @@ function openlinkedplayer() {
 }
 
 /* jump to the first row whose name or id starts with what was typed. */
+/* typing narrows the list to the rows that carry the text anywhere in the
+   nickname, keeping their real ranks. the scan itself is one indexOf over a
+   pre-uppercased string per row, which is a fraction of a millisecond even at
+   3800 rows; what costs is the repaint, so keystrokes are coalesced into one
+   frame and an unchanged result never repaints at all. */
+function filtered(want) {
+    if (!want) return fullboard;
+    return fullboard.filter(function(e) {
+        return e.hunt.indexOf(want) >= 0 || e.id.indexOf(want) >= 0;
+    });
+}
+
+function findwant() {
+    const box = document.querySelector(".findbox input");
+    return box ? box.value.trim().toUpperCase() : "";
+}
+
+function repaint(keepat) {
+    measurelist(host, list);
+    claimedat = findclaimed();
+    paintedat = null; filled = -1;
+    fling.jump(keepat);
+}
+
+function runfind(want) {
+    const next = filtered(want);
+    if (next.length === board.length && next[0] === board[0]) return;
+    board = next;
+    repaint(0);
+}
+
 function makefinder() {
     const box = document.querySelector(".findbox input");
-    const hits = document.querySelector(".findbox .hits");
+    const clear = document.querySelector(".findbox .clearfind");
     if (!box) return;
-    box.addEventListener("input", function() {
-        const want = box.value.trim().toUpperCase();
-        if (!want) {hits.textContent = ""; return}
-        const seat = board.findIndex(function(e) {
-            return e.full.indexOf(want) === 0 || e.id.indexOf(want) === 0;
+    let pending = 0;
+    const settle = function() {
+        clearTimeout(pending);
+        pending = setTimeout(function() {
+            runfind(box.value.trim().toUpperCase());
+        }, 90);
+        document.querySelector(".findbox").classList.toggle("typed", box.value !== "");
+    };
+    box.addEventListener("input", settle);
+    if (clear) {
+        clear.addEventListener("click", function() {
+            box.value = "";
+            settle();
+            box.focus();
         });
-        if (seat < 0) {hits.textContent = "none"; return}
-        hits.textContent = "#" + (seat + 1);
-        const host = document.querySelector(".scroller");
-        fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
-    });
+    }
 }
 
 /* clicking a row opens everything known about that player, untrimmed. */
@@ -370,17 +479,22 @@ function makeprofile() {
             ["Country", flag + country],
             ["Player ID", entry.id || "unknown"],
             null,
-            ["Today's Rank", "#" + (Number(row.dataset.at) + 1)],
+            ["Today's Rank", "#" + entry.rank],
             ["Today's Score", Number(entry.score).toLocaleString("en")]
         ];
         const held = readclaim();
         const mine = held && held.guid && held.guid === entry.id;
+        /* one claim at a time: everybody else loses the button until the one
+           you already hold is given back */
+        const button = mine || !held
+            ? "<button class=\"claim\" type=\"button\">"
+                + (mine ? "Forget me" : "This is me") + "</button>"
+            : "";
         body.innerHTML = '<div class="facts">' + facts.map(function(f) {
             if (!f) return '<span class="gap"></span>';
             return "<i>" + f[0] + "</i><u>" + f[1] + "</u>";
-        }).join("") + "</div><button class=\"claim\" type=\"button\">"
-            + (mine ? "Forget me" : "This is me") + "</button>";
-        body.querySelector(".claim").onclick = function() {
+        }).join("") + "</div>" + button;
+        if (button) body.querySelector(".claim").onclick = function() {
             try {
                 if (mine) {localStorage.removeItem("chuzzleclaim")}
                 else {
@@ -498,6 +612,15 @@ Promise.all([loadboard(), fontsdone]).then(function(got) {
     openlinkedplayer();
     showfooter();
     if (count) document.title = boards[boardat].label + " " + daylabel(dayat) + " (" + count + ")";
+    setInterval(refreshboard, boardage);
+});
+
+/* a backgrounded tab gets its timers throttled to a crawl, so coming back
+   checks the clock rather than trusting the interval to have fired */
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) return;
+    const held = readstore()[cachekey()];
+    if (!held || Date.now() - held.at >= boardage) refreshboard();
 });
 window.addEventListener("resize", function() {
     const keep = fling.at();

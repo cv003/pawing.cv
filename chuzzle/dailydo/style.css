@@ -1,7 +1,3 @@
-/*//////////////////////////////////////////////////////////////////////*/
-
-/* the sky is this page only: codes.html has its own .bg over a flat
-   tile, nothing else uses the pillars, arches or bands. */
 .sky {
     position: fixed; inset: 0;
     z-index: 0; overflow: hidden;
@@ -37,9 +33,6 @@
         #050177 100%);
 }
 
-
-/* the pillars belong to the game screen, not the browser window, so they
-   hug the content column and stay there however wide the monitor is. */
 .pillars {
     z-index: 2; left: 50%;
     width: var(--u); right: auto;
@@ -193,7 +186,7 @@
 
 .scroller {
     position: absolute; inset: 0;
-    overflow: hidden; cursor: scroll;
+    overflow: hidden;
     touch-action: none;
     user-select: none; -webkit-user-select: none;
 }
@@ -337,7 +330,7 @@
 
 .calbutton, .todaybutton {
     position: absolute; width: 12.5cqw; height: 12.5cqw;
-    padding: 0; margin: 0; cursor: pointer;
+    padding: 0; margin: 0;
     background: none; box-shadow: none;
     display: flex; align-items: center; justify-content: center;
 }
@@ -353,10 +346,21 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.profile .popup {max-width: calc(var(--u) * 0.9)}
+/* the calendar is a fixed six by seven grid so it can take a fixed width, but
+   a profile is only ever a handful of short rows. sizing this one to its
+   content drops the dead yellow either side of the panel. */
+.profile .popup {
+    width: max-content;
+    max-width: calc(var(--u) * 0.86);
+}
+.profile .pucontent {
+    width: 100%;
+    padding: calc(var(--u) * 0.03) calc(var(--u) * 0.075) calc(var(--u) * 0.038);
+}
 .profile .pucontent .logo {height: calc(var(--u) * 0.123 * var(--boxratio, 1.2))}
 .profile .pucontent > div {
-    padding: calc(var(--u) * 0.03) calc(var(--u) * 0.032);
+    width: auto;
+    padding: calc(var(--u) * 0.028) calc(var(--u) * 0.036);
 }
 /* labels left, values right, in the face the game's dialogs use */
 .profile .facts {
@@ -380,7 +384,7 @@
     text-transform: capitalize; font-size: 1.5em;
     width: calc(100% - var(--u) * 0.06);
     margin: calc(var(--u) * 0.02) 0 0; padding: 0.1em 0;
-    border-radius: 0.25em; color: white; cursor: pointer;
+    border-radius: 0.25em; color: white;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
         #1130bf 80%, #a2aee6 100%);
     font-weight: 100; -webkit-text-stroke: 0.16em black;
@@ -414,8 +418,7 @@
     transform: translateY(-50%);
     display: flex; flex-direction: column; align-items: center;
     gap: calc(var(--u) * 0.006);
-    margin: 0; padding: 0; background: none;
-    cursor: pointer; text-transform: uppercase;
+    margin: 0; padding: 0; background: none; text-transform: uppercase;
     font-family: "blippo"; font-weight: 300;
     font-size: calc(var(--u) * 0.049);
     color: rgb(255, 191, 128);
@@ -478,29 +481,33 @@
    there is no margin to spare. */
 .boardpick {
     position: fixed; z-index: 6;
-    right: 2vh; bottom: 2vh;
+    right: 2vh; bottom: 4vh;
     display: flex; overflow: hidden;
-    border-radius: 1.5vh 1.5vh 0 0;
+    border-radius: 1.1vh 1.1vh 0 0;
     box-shadow:
-        0 0 0 0.4vh #60204a,
-        0 0 0 0.85vh #feff48,
-        0 0 0 1.3vh rgba(0,0,0,0.5);
+        0 0 0 0.3vh #60204a,
+        0 0 0 0.65vh #feff48,
+        0 0 0 1vh rgba(0,0,0,0.5);
 }
 /* same face the popup buttons wear */
 .boardpick button {
-    display: flex; align-items: center; gap: 0.5vh;
-    margin: 0; padding: 0.7vh 1.5vh;
-    cursor: pointer; color: white;
+    display: flex; align-items: center; gap: 0.4vh;
+    margin: 0; padding: 0.5vh 1.1vh; color: white;
     font-family: "harlow solid", system-ui, sans-serif;
-    font-weight: 100; font-size: 2.4vh;
+    font-weight: 100; font-size: 1.85vh;
     text-transform: capitalize; white-space: nowrap;
-    -webkit-text-stroke: 0.35vh black;
+    -webkit-text-stroke: 0.28vh black;
     paint-order: stroke fill;
     background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%,
         #0a1a5e 80%, #5a63a0 100%);
 }
-.boardpick button + button {box-shadow: inset 0.4vh 0 0 rgba(0,0,0,0.5)}
-.boardpick button img {height: 2.4vh; width: auto}
+.boardpick button + button {box-shadow: inset 0.3vh 0 0 rgba(0,0,0,0.5)}
+/* the blanket span rule up top would paint the label lavender */
+.boardpick .lbl {color: inherit}
+/* the tournament only exists at the weekend, so the tab leaves the rail on
+   any other day rather than sitting there dead */
+.boardpick button.away {display: none}
+.boardpick button img {height: 1.9vh; width: auto}
 .boardpick button.on {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
         #1130bf 80%, #a2aee6 100%);
@@ -512,7 +519,7 @@
 .boardpick.inline {
     right: auto; left: 50%;
     transform: translateX(-50%);
-    bottom: calc(var(--u) * 0.135);
+    bottom: calc(var(--u) * 0.125);
 }
 
 .findbox {
@@ -532,11 +539,16 @@
     font-weight: 100; font-size: 3cqw; letter-spacing: 0.03em;
 }
 .findbox input::placeholder {color: darkgrey} /* the */
-.findbox .hits {
+/* only shows once there is something to clear */
+.findbox .clearfind {
+    margin: 0 0 0 1cqw; padding: 0 0.4cqw;
+    background: none;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-weight: 600; font-size: 2.6cqw; color: #ffd200;
-    min-width: 6cqw; text-align: right;
+    font-weight: 600; font-size: 4.4cqw; line-height: 1;
+    color: #8a7c96; visibility: hidden;
 }
+.findbox.typed .clearfind {visibility: visible}
+.findbox .clearfind:active {filter: brightness(1.6)}
 
 .idtip {
     position: fixed; z-index: 9;
@@ -586,7 +598,7 @@
     position: absolute; z-index: 3;
     top: calc(var(--u) * -0.075); right: calc(var(--u) * -0.075);
     width: calc(var(--u) * 0.105); height: calc(var(--u) * 0.105);
-    margin: 0; padding: 0; background: none; cursor: pointer;
+    margin: 0; padding: 0; background: none;
 }
 .closebtn img {width: 100%; height: 100%; object-fit: contain}
 .closebtn:active img {content: url(assets/images/closeactive.png)}
@@ -625,8 +637,7 @@
     width: 100%; aspect-ratio: 1; height: auto;
     margin: 0; padding: 0; border-radius: 0.25em;
     font-family: "blippo"; font-size: calc(var(--u) * 0.03);
-    text-transform: none; color: white;
-    cursor: pointer; box-shadow: none;
+    text-transform: none; color: white; box-shadow: none;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
         #1130bf 80%, #a2aee6 100%);
     -webkit-text-stroke: calc(var(--u) * 0.008) black;
@@ -646,14 +657,19 @@
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
         0 0 0 calc(var(--u) * 0.008) #ffd200;
 }
-/* the golden tournament runs at the weekend, so those two columns are gold */
+/* the tournament runs at the weekend, so those two columns are gold */
 .pucontent .calgrid button.weekend {
-    background: linear-gradient(140deg, #fd9c25 0%, #bf7a11 30%,
-        #bf7a11 80%, #e6d9a2 100%);
+    background: linear-gradient(140deg, #fde84a 0%, #d8b70c 30%,
+        #d8b70c 80%, #f2ecb4 100%);
+    color: #4a3a00;
 }
 .pucontent .calgrid button.weekend.live:active {
-    background: linear-gradient(140deg, #fdcd59 0%, #fd9c25 30%,
-        #cf8a20 80%, #e6d29f 100%);
+    background: linear-gradient(140deg, #fff59b 0%, #fde84a 30%,
+        #e4c515 80%, #f6f1c8 100%);
+}
+/* on the tournament board the weekdays hold nothing, so they read as dead */
+.calgrid.goldonly button:not(.weekend) {
+    opacity: 0.35; pointer-events: none;
 }
 /* the day you are actually looking at, which is not always today */
 .pucontent .calgrid button.picked {

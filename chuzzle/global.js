@@ -32,7 +32,8 @@ function trimpending(root) {
 function trimall() {
     document.querySelectorAll("svg.logo").forEach(logotrimmer);
     document.documentElement.classList.add("fontsready");
-    placepicks();
+    /* only the daily-do page has a board rail to reposition */
+    if (typeof placepicks === "function") placepicks();
 }
 
 /* the logo is the same word stacked six times plus the erode mask, so every
@@ -47,3 +48,34 @@ function relabellogo(svg, words) {
 if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(trimall);
 } else {window.addEventListener("load", trimall)}
+
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* the game's own gloves stand in for every cursor on every chuzzle page.
+   they are .cur rather than png, so the hotspot rides inside the file and no
+   page has to remember where the fingertip is: pointing finger at its tip,
+   pinch at the pinch, open palm at its middle.
+
+   the three cover everything on purpose - no text bar in the search box, no
+   scroll glyph over the list - so the pages never show a cursor the game
+   would not have drawn. paths resolve against this script rather than the
+   page, since it is included from two directory depths. */
+const cursorhome = new URL("assets/static/", document.currentScript.src).href;
+
+function paintcursors() {
+    const glove = function(name, fallback) {
+        return "url(\"" + cursorhome + "cursor-" + name + ".cur\"), " + fallback;
+    };
+    const sheet = document.createElement("style");
+    sheet.textContent = [
+        "*, html, body {cursor: " + glove("default", "default") + "}",
+        "a, button, label, summary, [role=button], input, textarea, select," +
+            " .scores name {cursor: " + glove("pointer", "pointer") + "}",
+        ".scroller, .scroller *, .scroller.dragging {cursor: "
+            + glove("grab", "grab") + "}",
+        ".scroller name {cursor: " + glove("pointer", "pointer") + "}"
+    ].join(String.fromCharCode(10));
+    document.head.appendChild(sheet);
+}
+paintcursors();

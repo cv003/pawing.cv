@@ -29,7 +29,7 @@ function cyclerget(t) {
 /* only the rows on screen exist as elements; a pool of about fifty gets
    repositioned and refilled as the list moves. 3800 live rows with a flag
    each would blow the compositor apart. */
-let board = []; let pool = []; let rowheight = 0; let claimedat = -1;
+let board = []; let fullboard = []; let pool = []; let rowheight = 0; let claimedat = -1;
 let padtop = 0; let padbottom = 0; let filled = -1; let strip = null;
 
 function poolsize(host) {
@@ -76,7 +76,7 @@ function measurelist(host, list) {
 
     /* "1." through "3851." plus the stop, so short boards lose the dead
        column the widest rank would have reserved */
-    list.style.setProperty("--rankcells", String(board.length).length + 1);
+    list.style.setProperty("--rankcells", String(fullboard.length || 1).length + 1);
 
     paintedat = null;
     const want = poolsize(host);
@@ -109,7 +109,7 @@ function paintrows(at, host) {
         const entry = board[index];
         if (filled !== first) {
             row.style.display = "";
-            row.parts.rank.textContent = (index + 1) + ".";
+            row.parts.rank.textContent = entry.rank + ".";
             row.parts.name.textContent = entry.name;
             setdigits(row.parts.score, entry.score);
             row.parts.flag.src = "assets/images/flags/" + entry.cc + ".png";
