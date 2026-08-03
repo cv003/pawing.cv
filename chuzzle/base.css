@@ -1,0 +1,27 @@
+:root {--vh: 100vh}
+@supports (height: 100svh) {
+    :root {--vh: 100svh}
+}
+:root {
+    --vhu: calc(var(--vh) / 100);
+    --u: min(calc(var(--vh) * 0.5625), 100vw);
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+:root {
+    --r: 0.08em; --ink: #000;
+    --ring:
+        calc(var(--r) *  1.000) 0 0 var(--ink),
+        calc(var(--r) *  0.866) calc(var(--r) *  0.500) 0 var(--ink),
+        calc(var(--r) *  0.500) calc(var(--r) *  0.866) 0 var(--ink),
+        0 calc(var(--r) *  1.000) 0 var(--ink),
+        calc(var(--r) * -0.500) calc(var(--r) *  0.866) 0 var(--ink),
+        calc(var(--r) * -0.866) calc(var(--r) *  0.500) 0 var(--ink),
+        calc(var(--r) * -1.000) 0 0 var(--ink),
+        calc(var(--r) * -0.866) calc(var(--r) * -0.500) 0 var(--ink),
+        calc(var(--r) * -0.500) calc(var(--r) * -0.866) 0 var(--ink),
+        0 calc(var(--r) * -1.000) 0 var(--ink),
+        calc(var(--r) *  0.500) calc(var(--r) * -0.866) 0 var(--ink),
+        calc(var(--r) *  0.866) calc(var(--r) * -0.500) 0 var(--ink);
+}

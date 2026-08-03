@@ -31,7 +31,7 @@
 
         body {
             background-color: black; padding: 1em;
-            color: white; height: 100vh; margin: 0;
+            color: white; height: var(--vh); margin: 0;
             display: flex; flex-wrap: wrap; gap: 6px;
             justify-content: center; align-content: flex-start;
             overflow-x: hidden; overflow-y: auto; scrollbar-width: none;
@@ -40,7 +40,7 @@
 
         .bg {
             position: fixed;
-            inset: 0; width: 100vw; height: 100vh;
+            inset: 0; width: 100vw; height: var(--vh);
             opacity: 0.35; z-index: -1; pointer-events: none;
             left: -8vw; top: -8vh; width: 116vw; height: 116vh;
             background-image: url("assets/images/bg.webp");
@@ -62,7 +62,7 @@
             position: relative;
             display: inline-block;
             font-size: 50px;
-            text-shadow: 0 0.175em 0 black; paint-order: stroke fill;
+            text-shadow: 0 0.175em 0 black;
         }
         p {font-size: 0.75em; opacity: 0.5; max-width: 600px}
 
@@ -230,8 +230,9 @@
             font-family: "harlow solid", system-ui, sans-serif;
             text-transform: capitalize; font-size: 2em;
             background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-            font-weight: 100; -webkit-text-stroke: 6px black;
-            paint-order: stroke fill; color: white;
+            font-weight: 100; color: white;
+            --r: 3px; --ink: #000;
+            text-shadow: var(--ring);
         }
         .pucontent div button:active {
             background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
@@ -259,7 +260,8 @@
         .loading div {
             text-align: center; color: white; font-weight: 100;
             font-family: "blippo"; font-size: 1.55em;
-            -webkit-text-stroke: 8px #0000c7; paint-order: stroke fill;
+            --r: 4px; --ink: #0000c7;
+            text-shadow: var(--ring);
         }
         .loading img {width: 100px}
 
@@ -267,7 +269,7 @@
 
         .restinpeace {
             position: fixed; display: flex; filter: grayscale(1);
-            left: 0; top: 0; width: 100vw; height: 100vh; align-items: center;
+            left: 0; top: 0; width: 100vw; height: var(--vh); align-items: center;
             background-color: black; z-index: 9999; display: none;
         }
         .restinpeace img {display: flex; margin-left: 10%; height: 20%}
@@ -276,6 +278,7 @@
         .restinpeace div {display: flex; flex-direction: column}
         
         </style>
+        <link rel="stylesheet" href="base.css">
         <link rel="stylesheet" href="cursor.css">
 </head>
     <body>
@@ -577,7 +580,7 @@
         </div>
 
         <div class="codediv">
-            <div class="code">TERRIBLEART<sup>(gTerribleArt = 1)</sup></div>
+            <div class="code">TERRIBLEART</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -602,7 +605,7 @@
         </div>
 
         <div class="codediv">
-            <div class="code">TCHECK<sup>(gForceTRecheck = 1)</sup></div>
+            <div class="code">TCHECK</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -735,7 +738,7 @@
         </div>
 
         <div class="codediv">
-            <div class="code"><div>FIXCLOCK <img src="assets/images/snap.webp" title="also available in chuzzle snap"></div><sup>(gFixClock = 1)</sup></div>
+            <div class="code"><div>FIXCLOCK <img src="assets/images/snap.webp" title="also available in chuzzle snap"></div></div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -756,17 +759,6 @@
                         <button>Okay</button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="codediv">
-            <div class="code"><div>(other) <img src="assets/images/snap.webp" title="also available in chuzzle snap"></div></div>
-            <div class="note">if a code not built directly into the game is inputted, <span style="color:#fda0a0">RComm::SendSecretCode()</span> is called, which then requests <span>raptisoft.net/go.php</span> with params: <br><br>
-                <span style="color:#8d90a0">?command=</span>secretcode <br>
-                <span style="color:#8d90a0">&code=</span><span style="color:#e0d3aa;font-style:italic">[your code]</span> <br>
-                <sup style="color:#8d90a0">(encoded)</sup> <br><br>
-
-                if this triggers when inputting a built-in code, then it's likely that your app is outdated! try joining the play store beta for best results.
             </div>
         </div>
 

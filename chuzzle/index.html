@@ -23,14 +23,14 @@
         }
         body {
             background-color: black;
-            color: white; height: 100vh; margin: 0;
+            color: white; height: var(--vh); margin: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
         }
 
         .bg {
             position: fixed;
-            inset: 0; width: 100vw; height: 100vh;
+            inset: 0; width: 100vw; height: var(--vh);
             opacity: 0.35; z-index: -1; pointer-events: none;
             left: -8vw; top: -8vh; width: 116vw; height: 116vh;
             background-image: url("assets/images/bg.webp");
@@ -49,11 +49,12 @@
             display: inline-block;
             font-family: "blippo", system-ui, sans-serif; text-align: center;
             font-size: 50px;
-            -webkit-text-stroke: 16px black;
-            paint-order: stroke fill; filter: drop-shadow(0 0.275em 0 black);
+            --r: 8px; --ink: #000;
+            text-shadow: var(--ring); filter: drop-shadow(0 0.275em 0 black);
         }
         a sup {
-            -webkit-text-stroke: 0.18em black;
+            --r: 0.09em;
+            text-shadow: var(--ring);
             display: inline-block;
             margin: 0 0.12em 0 0.05em;
         }
@@ -62,7 +63,7 @@
             margin-top: 0; max-width: 90%;
             width: auto; object-fit: contain;
         }
-        .small {font-size: 0.9em; -webkit-text-stroke: 1em black}
+        .small {font-size: 0.9em; --r: 0.5em}
 
         svg {position: absolute}
 
@@ -147,7 +148,8 @@
 
     </style>
 
-    <link rel="stylesheet" href="cursor.css">
+    <link rel="stylesheet" href="base.css">
+        <link rel="stylesheet" href="cursor.css">
 </head>
 <body>
 
@@ -158,13 +160,13 @@
     <a class="text small" txt="i highly doubt i'll be making any more chuzzle pages lol">i highly doubt i'll be making any more chuzzle pages lol</a>
 
     <div class="bottom">
-        <a class="button" href="raptconvert" title="decrypt chuzzle 2/snap/hoggy/other endpoint urls">
+        <a class="button" href="raptconvert" title="decode endpoint urls">
             <img src="assets/images/icons/convert.webp">
         </a>
         <a class="button" href="dailydo" title="view the mobile daily do leaderboards online">
             <img src="assets/images/icons/dailydo.webp">
         </a>
-        <a class="button" href="codes" title="a list of local chuzzle 2 cheat codes">
+        <a class="button" href="codes" title="a list of local cheat codes">
             <img src="assets/images/icons/codes.webp">
         </a>
     </div>

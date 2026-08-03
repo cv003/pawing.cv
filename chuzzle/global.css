@@ -35,10 +35,9 @@
     font-display: block;
 }
 
-:root {--u: min(56.25vh, 100vw)}
 body {
     background-color: #a7723b; padding: 0;
-    color: white; height: 100vh; margin: 0;
+    color: white; height: var(--vh); margin: 0;
     display: flex; flex-wrap: wrap; gap: 6px;
     justify-content: center; align-content: flex-start;
     overflow: hidden;
@@ -53,7 +52,7 @@ a {
     position: relative;
     display: inline-block;
     font-size: 50px;
-    text-shadow: 0 0.175em 0 black; paint-order: stroke fill;
+    text-shadow: 0 0.175em 0 black;
 }
 p {font-size: 0.75em; opacity: 0.5; max-width: 600px}
 
@@ -235,8 +234,9 @@ button {
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     text-transform: capitalize; font-size: 2em;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-    font-weight: 100; -webkit-text-stroke: 6px black;
-    paint-order: stroke fill; color: white;
+    font-weight: 100; color: white;
+    --r: 3px; --ink: #000;
+    text-shadow: var(--ring);
 }
 .pucontent div button:active {
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
@@ -264,6 +264,7 @@ button {
 .loading div {
     text-align: center; color: white; font-weight: 100;
     font-family: "chuzzle", "blippo"; font-size: 1.55em;
-    -webkit-text-stroke: 8px #0000c7; paint-order: stroke fill;
+    --r: 4px; --ink: #0000c7;
+    text-shadow: var(--ring);
 }
 .loading img {width: 100px}

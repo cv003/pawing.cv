@@ -31,14 +31,14 @@
 
         body {
             background-color: black; padding: 1em;
-            color: white; height: 100vh; margin: 0;
+            color: white; height: var(--vh); margin: 0;
             display: flex; flex-direction: column;
             overflow: hidden
         }
 
         .bg {
             position: fixed;
-            inset: 0; width: 100vw; height: 100vh;
+            inset: 0; width: 100vw; height: var(--vh);
             opacity: 0.35; z-index: -1; pointer-events: none;
             left: -8vw; top: -8vh; width: 116vw; height: 116vh;
             background-image: url("assets/images/bg.webp");
@@ -60,7 +60,7 @@
             position: relative;
             display: inline-block;
             font-size: 50px;
-            text-shadow: 0 0.175em 0 black; paint-order: stroke fill;
+            text-shadow: 0 0.175em 0 black;
         }
         p {font-size: 0.75em; opacity: 0.5; max-width: 600px}
 
@@ -140,6 +140,7 @@
         }
         
         </style>
+        <link rel="stylesheet" href="base.css">
         <link rel="stylesheet" href="cursor.css">
 </head>
     <body>
@@ -172,7 +173,7 @@
         </svg>
         <ul>
             <li>decoder for the request parameters of chuzzle 2 and other <img src="assets/images/evil.png" width="20" style="vertical-align:middle;"></li>
-            <li>daily-do seemingly has an anti-cheat so this won't work for fake scores..</li>
+            <li>daily-do has an anti-cheat so this won't work for faking scores..</li>
         </ul>
 
         <label for="main">url(s) / params</label>

@@ -1,3 +1,20 @@
+function fitheight() {
+    if (document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+        return;
+    }
+    document.documentElement.style.setProperty("--vh", window.innerHeight + "px");
+}
+
+if (!(window.CSS && CSS.supports && CSS.supports("height", "100svh"))) {
+    fitheight();
+    window.addEventListener("resize", fitheight);
+    window.addEventListener("orientationchange", function() {
+        setTimeout(fitheight, 200);
+    });
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
 function logotrimmer(svg) {
     const texts = svg.querySelectorAll("text");
     if (!texts.length) return;
