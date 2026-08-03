@@ -45,11 +45,7 @@ if (document.fonts && document.fonts.ready) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// audio urls resolve against this script, not the page that included it
 const sitehome = new URL(".", document.currentScript.src).href;
-
-/*//////////////////////////////////////////////////////////////////////*/
-
 const soundbank = {};
 let soundgear = null;
 

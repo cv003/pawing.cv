@@ -28,11 +28,9 @@ function cyclerget(t) {
     const ch = a.map(function(v, i) {return Math.round(255 * (v + (b[i] - v) * mix))});
     return "rgb(" + ch[0] + "," + ch[1] + "," + ch[2] + ")";
 }
-
-// one full there-and-back of the claimed row's sway, in milliseconds
 const swaycycle = 3000;
 
-// only show rows on screen because 3000 entries will murder the browser
+// only show rows on screen because 3000+ entries will murder the browser
 let board = []; let fullboard = []; let pool = [];
 let rowheight = 0; let claimedat = -1;
 let padtop = 0; let padbottom = 0; 
@@ -125,8 +123,6 @@ function paintrows(at, host) {
             row.dataset.id = entry.id;
             row.dataset.at = index;
             row.classList.toggle("mine", index === claimedat);
-            /* the pool recycles, so a row joining mid-cycle is handed the */
-            /* phase the sway is already at rather than starting over */
             if (index === claimedat) {
                 const phase = (-(Date.now() % swaycycle)) + "ms";
                 row.parts.rank.style.animationDelay = phase;

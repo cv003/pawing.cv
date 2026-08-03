@@ -171,7 +171,7 @@
                 <text x="30" y="130" class="lglight" mask="url(#lgcrop)">RaptConvert</text></g>
         </svg>
         <ul>
-            <li>decryptor for the request parameters for chuzzle 2 and other <img src="assets/images/evil.png" width="20" style="vertical-align:middle;"></li>
+            <li>decoder for the request parameters of chuzzle 2 and other <img src="assets/images/evil.png" width="20" style="vertical-align:middle;"></li>
             <li>daily-do seemingly has an anti-cheat so this won't work for fake scores..</li>
         </ul>
 
@@ -191,259 +191,76 @@
         <script>
 
             (function () {
-                function getkeybytes() {
-                    return new TextEncoder().encode("youcanonlytrustalibertarian");
-                }
-
-                function raptisoftstringcrypt(data, keybytes) {
-                    const buf = new Uint8Array(data);
-                    const l = keybytes.length;
-                    let kp = 0;
-                    for (let i = 0; i < buf.length; i++) {
-                        let kidx;
-                        if (kp === l) {kidx = 0; kp = 1}
-                        else {kidx = kp; kp = kidx + 1}
-                        const kb = keybytes[kidx];
-                        if (buf[i] !== kb) buf[i] ^= kb;
-                    }
-                    return buf;
-                }
-
-                function bytestobase64(bytes) {
-                    let s = "";
-                    const chunk = 0x8000;
-                    for (let i = 0; i < bytes.length; i += chunk) {
-                        const sub = bytes.subarray(i, i + chunk);
-                        s += String.fromCharCode.apply(null, sub);
-                    }
-                    return btoa(s);
-                }
-
-                function base64tobytes(b64) {
-                    const clean = b64.replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
-                    const bin = atob(clean);
-                    const out = new Uint8Array(bin.length);
-                    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-                    return out;
-                }
-
-                function decodeexequeryvalue(v) {
-                    v = v.trim().replace(/\s/g, "");
-                    while (v.indexOf("%%") !== -1) v = v.replace(/%%/g, "%");
-                    
-                    let last;
-                    let guard = 0;
-                    do {
-                        last = v;
-                        try {v = decodeURIComponent(last)}
-                        catch (e) {throw e}
-                        guard++;
-                        if (guard > 12) break;
-                    } while (v !== last && /%[0-9A-Fa-f]{2}/i.test(v));
-                    return v;
-                }
-
-                const defaultbase = "https://www.raptisoft.net/go.php";
-
-                function extracturlprefix(raw) {
-                    const line = raw.trim().split(/\r?\n/)[0].trim();
-                    if (!/^https?:\/\//i.test(line)) return null;
-                    try {
-                        const u = new URL(line);
-                        return u.origin + u.pathname;
-                    } catch (e) {return null}
-                }
-
-                function normalizequerystring(qs) {
-                    let s = (qs || "").trim();
-                    if (!s) return s;
-                    while (s.indexOf("%%") !== -1) s = s.replace(/%%/g, "%");
-                    let last;
-                    let guard = 0;
-                    do {
-                        last = s;
-                        try {s = decodeURIComponent(last)}
-                        catch (e) {break}
-                        guard++;
-                        if (guard > 12) break;
-                    } while (s !== last && /%[0-9A-Fa-f]{2}/i.test(s));
-                    return s;
-                }
-
-                function lookslikebase64blob(v) {
-                    const s = (v || "").trim().replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
-                    if (s.length < 16) return false;
-                    if (s.indexOf("&") !== -1) return false;
-                    if (/[=%]/.test(s) && s.indexOf("=") !== -1 && s.indexOf("=") < s.length - 3) return false;
-                    if (/^command=/i.test(s)) return false;
-                    return /^[A-Za-z0-9+/=]+$/.test(s);
-                }
-
-                function extractexeblob(raw) {
-                    let s = raw.trim();
-                    if (!s) return {err: "empty input.."};
-                    const baseurl = extracturlprefix(s);
-                    const lower = s.toLowerCase();
-                    const exeidx = lower.indexOf("exe=");
-                    if (exeidx !== -1) {
-                        let v = s.slice(exeidx + 4);
-                        const amp = v.indexOf("&");
-                        if (amp !== -1) 
-                            v = v.slice(0, amp);
-                        v = v.trim();
-                        try {v = decodeexequeryvalue(v)}
-                        catch (e) {return {err: "bad encoding in value: " + e.message}}
-                        if (!lookslikebase64blob(v)) {
-                            return {err: "exe= is plaintext (eg. exe=command=...). use encode to convert it to a blob."};
-                        }
-                        return {b64: v.replace(/\s/g, ""), baseurl};
-                    }
-                    if (/^[A-Za-z0-9+/=\s]+$/.test(s) && s.length > 8) {
-                        return {
-                            b64: s.replace(/\s/g, ""),
-                            baseurl: null
-                        };
-                    }
-                    return {err: "error, try pasting the full url"};
-                }
-
-                function decodepipeline(text) {
-                    const key = getkeybytes();
-                    const {b64, baseurl, err} = extractexeblob(text);
-                    if (err) return {err};
-                    let raw;
-                    try {raw = base64tobytes(b64)}
-                    catch (e) {
-                        return {err: "Invalid Base64: " + e.message};
-                    }
-                    const plain = raptisoftstringcrypt(raw, key);
-                    let out;
-                    try {out = new TextDecoder("utf-8", {fatal: false}).decode(plain)}
-                    catch (e) {out = new TextDecoder("latin1").decode(plain)}
-                    return {ok: {decoded: sanitizeplaintext(out), baseurl}};
-                }
-                function sanitizeplaintext(str) {
-                    return str.replace(/\0+$/g, "").replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]+$/g, "").replace(/\s+$/g, "");
-                }
-
-                function pipelineencode(text, urlbase) {
-                    const key = getkeybytes();
-                    const plain = text.trim();
-                    if (!plain) 
-                        return {err: "empty plaintext.."};
-                    const bytes = new TextEncoder().encode(plain);
-                    const xored = raptisoftstringcrypt(bytes, key);
-                    const b64 = bytestobase64(xored);
-                    const encoded = encodeURIComponent(b64);
-                    const base = (urlbase || defaultbase).replace(/[?&]$/, "");
-                    const join = base.includes("?") ? "&" : "?";
-                    const full = base + join + "exe=" + encoded;
-                    return {ok: {full}};
-                }
+                const converthost = "https://chuzzle.coolsite.cv/convert";
 
                 const main = document.querySelector(".main");
                 const status = document.querySelector(".status");
+                const buttons = document.querySelectorAll(".mainform button");
 
                 function setstatus(message, ok) {
                     status.textContent = message || "";
                     status.style.color = ok ? "#00ff00" : "red";
                 }
 
-                function decodepipelinemulti(inputtext) {
-                    const lines = inputtext.split(/\r?\n/).map(x=>x.trim()).filter(line=>line.length>0);
-                    if (!lines.length) return {err: "no lines in input.."};
-                    let results = [];
-                    let haserror = false, errormessage = '';
-                    for (let i = 0; i < lines.length; ++i) {
-                        const line = lines[i];
-                        if (/^https?:\/\//i.test(line)) {
-                            try {
-                                const u = new URL(line);
-                                const baseurl = u.origin + u.pathname;
-                                const qs = u.search ? u.search.slice(1) : "";
-                                if (!u.searchParams.has("exe") && u.search && u.search.length > 1) {
-                                    const normalizedqs = normalizequerystring(qs);
-                                    if (lookslikebase64blob(normalizedqs)) {
-                                        const rblob = decodepipeline(baseurl + "?exe=" + normalizedqs);
-                                        if (rblob.err) {
-                                            haserror = true;
-                                            errormessage = "line " + (i+1) + ": " + rblob.err; break;
-                                        }
-                                        results.push(baseurl + "?" + rblob.ok.decoded);
-                                    } else {results.push(line)}
-                                    continue;
-                                }
-                                if (u.searchParams.has("exe")) {
-                                    const exev = normalizequerystring(u.searchParams.get("exe") || "");
-                                    if (!lookslikebase64blob(exev) && qs) {
-                                        const normalized = normalizequerystring(qs).replace(/^exe=/i, "");
-                                        results.push(baseurl + "?" + normalized);
-                                        continue;
-                                    }
-                                }
-                            } catch (e) {}
-                        }
+                /*//////////////////////////////////////////////////////////////////////*/
 
-                        const r = decodepipeline(line);
-                        if (r.err) {
-                            haserror = true;
-                            errormessage = "line " + (i+1) + ": " + r.err; break;
-                        }
-                        if (r.ok.baseurl) {results.push(r.ok.baseurl + "?" + r.ok.decoded)}
-                        else {results.push(r.ok.decoded)}
+                async function convert(way, text) {
+                    const reply = await fetch(converthost + "?do=" + way, {
+                        method: "POST", body: text
+                    });
+                    const kind = reply.headers.get("content-type") || "";
+                    const got = kind.includes("json") ? await reply.json() : await reply.text();
+                    if (!reply.ok) {
+                        return {err: typeof got === "string" ? got : "the converter said no.."};
                     }
-                    if (haserror) return {err: errormessage};
-                    return {ok: results.join('\n')};
+                    return {lines: Array.isArray(got) ? got : [got]};
                 }
 
-                function pipelineencodemulti(inputtext) {
-                    const lines = inputtext.split(/\r?\n/).map(x=>x.trim()).filter(line=>line.length>0);
-                    if (!lines.length) return {err: "no lines in input.."};
-                    let results = [];
-                    let haserror = false, errormessage = '';
-                    for (let i = 0; i < lines.length; ++i) {
-                        let line = lines[i];
-                        let urlbase = null;
-                        let text = line;
+                let busy = false;
 
-                        if (/^https?:\/\//i.test(line)) {
-                            try {
-                                const u = new URL(line);
-                                urlbase = u.origin + u.pathname;
-                                const qs = u.search ? u.search.slice(1) : "";
+                async function run(way) {
+                    if (busy) return;
+                    const text = main.value.trim();
+                    if (!text) {setstatus("nothing to convert..", false); return}
 
-                                if (u.searchParams.has("exe")) {
-                                    const exev = normalizequerystring(u.searchParams.get("exe") || "");
-                                    if (lookslikebase64blob(exev)) {results.push(line); continue}
-                                    text = normalizequerystring(qs).replace(/^exe=/i, "");
-                                } else {text = normalizequerystring(qs)}
-                            } catch (e) {urlbase = null; text = line;}
-                        }
+                    busy = true;
+                    buttons.forEach(function (b) {b.disabled = true});
+                    setstatus("working..", true);
 
-                        const r = pipelineencode(text, urlbase);
-                        if (r.err) {
-                            haserror = true;
-                            errormessage = "line " + (i+1) + ": " + r.err; break;
-                        }
-                        results.push(r.ok.full);
+                    let got;
+                    try {got = await convert(way, text)}
+                    catch (e) {got = {err: "could not reach the converter.."}}
+
+                    busy = false;
+                    buttons.forEach(function (b) {b.disabled = false});
+                    if (got.err) {setstatus(got.err, false); return}
+
+                    const bad = got.lines.findIndex(function (line) {return line.err});
+                    if (bad >= 0) {
+                        setstatus("line " + (bad + 1) + ": " + got.lines[bad].err, false);
+                        return;
                     }
-                    if (haserror) return {err: errormessage};
-                    return {ok: results.join('\n\n')};
+
+                    const out = got.lines.map(function (line) {
+                        return line.output || line.url || line.query || "";
+                    });
+                    const missing = out.findIndex(function (line) {return !line});
+                    if (missing >= 0) {
+                        setstatus("line " + (missing + 1) + ": nothing came back..", false);
+                        return;
+                    }
+                    const gap = String.fromCharCode(10);
+                    main.value = out.join(way === "encode" ? gap + gap : gap);
+                    setstatus("", true);
                 }
 
                 /*//////////////////////////////////////////////////////////////////////*/
 
                 document.querySelector(".btndecode").addEventListener("click", function () {
-                    const r = decodepipelinemulti(main.value);
-                    if (r.err) {setstatus(r.err, false); return}
-                    main.value = r.ok;
-                    // setstatus("decoded!", true);
+                    run("decode");
                 });
                 document.querySelector(".btnencode").addEventListener("click", function () {
-                    const r = pipelineencodemulti(main.value);
-                    if (r.err) {setstatus(r.err, false); return}
-                    main.value = r.ok;
-                    // setstatus("encoded!", true);
+                    run("encode");
                 });
                 document.querySelector(".btnclear").addEventListener("click", function () {
                     main.value = "";

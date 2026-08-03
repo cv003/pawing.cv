@@ -247,7 +247,6 @@
         0.125em -0.017em 0 #261b19, 0.217em 0.075em 0 #261b19,
         0 0.200em 0 #261b19;
 }
-/* the game's digits all carry the same advance, so the font spaces them */
 .scores score {margin-left: auto}
 
 .scores img {
@@ -266,10 +265,8 @@
 .scores hilite {
     position: absolute; left: 1cqw; right: 1cqw;
     display: none; pointer-events: none;
-    -webkit-mask-image: linear-gradient(to right,
-        transparent 0 5%, #000 20%, #000 80%, transparent 95% 100%);
-    mask-image: linear-gradient(to right,
-        transparent 0 5%, #000 20%, #000 80%, transparent 95% 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0 5%, #000 20%, #000 80%, transparent 95% 100%);
+    mask-image: linear-gradient(to right, transparent 0 5%, #000 20%, #000 80%, transparent 95% 100%);
     -webkit-mask-repeat: repeat-y;
     mask-repeat: repeat-y;
 }
@@ -279,16 +276,15 @@
 }
 .scores hilite::before {
     right: 0; top: 0; bottom: 0;
-    background: url(assets/images/ddrainbow.png) 0 0 / 100% 100%;
+    background: url("assets/images/ddrainbow.png") 0 0 / 100% 100%;
     opacity: 0.75;
 }
 .scores hilite::after {
     top: -32.5%; height: 165%;
     aspect-ratio: 208 / 66;
-    background: url(assets/images/ddglow.png) 0 0 / 100% 100%;
+    background: url("assets/images/ddglow.png") 0 0 / 100% 100%;
     mix-blend-mode: plus-lighter;
-    animation: ddsweep 8.667s linear infinite,
-        ddglowfade 1.5s ease-in-out infinite alternate;
+    animation: ddsweep 8.667s linear infinite, ddglowfade 1.5s ease-in-out infinite alternate;
 }
 .scores > div.mine rank, .scores > div.mine name,
 .scores > div.mine img, .scores > div.mine score {
@@ -484,7 +480,6 @@
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     font-weight: 100 !important; font-size: 2.1vh;
     text-transform: capitalize; white-space: nowrap;
-    /* in em, or a fixed rim on a small label swallows the letterforms */
     -webkit-text-stroke: 0.07em black;
     paint-order: stroke fill;
     background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%,
@@ -519,6 +514,10 @@
     font-weight: 100; font-size: 3cqw; letter-spacing: 0.03em;
 }
 .findbox input::placeholder {color: darkgrey} /* https://en.wikipedia.org/wiki/Grey#Web_colors:~:text=anomaly */
+.findbox input::-webkit-search-cancel-button {
+    -webkit-appearance: none; appearance: none;
+    display: none;
+}
 .findbox .clearfind {
     margin: 0 0 0 1cqw; padding: 0 0.4cqw;
     background: none;
@@ -624,7 +623,6 @@
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
         #6020cf 80%, #ba9fe6 100%);
 }
-/* today and the day being viewed wear the same ring, the fill sets them apart */
 .pucontent .calgrid button.today,
 .pucontent .calgrid button.picked {
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75),
@@ -639,6 +637,7 @@
         #e4c515 80%, #f6f1c8 100%);
 }
 .calgrid.goldonly button.live:not(.weekend) {opacity: 0.4}
+.pucontent .calgrid button.thin {opacity: 0.72}
 
 .pucontent .calgrid button.picked {
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,

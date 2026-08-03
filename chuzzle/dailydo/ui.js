@@ -34,7 +34,7 @@ const boards = [
     {key: "snap", label: "Snap", title: "Snap Scores", badge: "assets/images/snap2.webp"},
     {key: "chuzzle", label: "Legacy", title: "Legacy Scores"}
 ];
-const boardhost = "https://dailydo.coolsite.cv";
+const boardhost = "https://chuzzle.coolsite.cv/dailydo";
 let boardat = 0;
 let dayat = 0;
 
@@ -68,8 +68,6 @@ function readstore() {
     return {};
 }
 
-// an empty answer is never worth a minute of cache: the day may simply not
-// have been written yet, and the next look should ask again
 function remember(key, text) {
     if (!text) return;
     const all = readstore();
@@ -79,13 +77,29 @@ function remember(key, text) {
     try {localStorage.setItem(boardstore, JSON.stringify(all))} catch (e) {}
 }
 
+function tabbed(text) {
+    return text.indexOf(String.fromCharCode(9)) < 0 ? "" : text;
+}
+
 async function fetchtext(key) {
-    let text = "";
     try {
         const reply = await fetch(boardhost + "/" + key);
-        if (reply.ok) text = await reply.text();
+        if (reply.ok) return tabbed(await reply.text());
     } catch (e) {}
-    return text.indexOf(String.fromCharCode(9)) < 0 ? "" : text;
+    return "";
+}
+
+async function fetchdays(board, backs) {
+    const days = backs.map(function(b) {return daykey(dayback(b))});
+    const out = {};
+    try {
+        const reply = await fetch(boardhost + "/" + board + "/" + days.join(","));
+        if (reply.ok) {
+            const got = await reply.json();
+            days.forEach(function(day) {out[day] = tabbed(got[day] || "")});
+        }
+    } catch (e) {}
+    return out;
 }
 
 function useboard(text) {
@@ -98,11 +112,40 @@ async function loadboard() {
     const key = cachekey();
     const held = readstore()[key];
     if (held && held.text && Date.now() - held.at < boardage) {
+        prefetchdays();
         return useboard(held.text);
     }
-    const text = await fetchtext(key);
-    remember(key, text);
-    return useboard(text);
+    const board = boards[boardat].key;
+    const wanted = neighbours();
+    const got = await fetchdays(board, wanted);
+    let mine = "";
+    wanted.forEach(function(back) {
+        const day = daykey(dayback(back));
+        const text = got[day] || "";
+        remember(board + "/" + day, text);
+        if (back === dayat) mine = text;
+    });
+    return useboard(mine);
+}
+
+function neighbours() {
+    const near = [dayat];
+    [nextday(dayat, 1), nextday(dayat, -1)].forEach(function(back) {
+        if (back >= 0 && near.indexOf(back) < 0) near.push(back);
+    });
+    return near;
+}
+
+function prefetchdays() {
+    const board = boards[boardat].key;
+    const want = neighbours().filter(function(back) {
+        const held = readstore()[board + "/" + daykey(dayback(back))];
+        return !held || !held.text || Date.now() - held.at >= boardage;
+    });
+    if (!want.length) return;
+    fetchdays(board, want).then(function(got) {
+        Object.keys(got).forEach(function(day) {remember(board + "/" + day, got[day])});
+    });
 }
 
 // only refreshes every minute, or postponed if not viewing the leaderboard
@@ -132,9 +175,6 @@ function tintswitcher() {
         seat.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     });
 }
-// the tournament skips the six empty days, so it walks sunday to sunday
-// a url can drop you outside the window, so the walk back in stays open
-// while the walk further out stops at whichever end you came from
 function nextday(from, step) {
     const gold = !!boards[boardat].weekly;
     const far = Math.max(calendarreach, from);
@@ -264,7 +304,8 @@ async function reload(dir) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 function marktitle(count) {
-    document.title = boards[boardat].label + " for " + daylabel(dayat)
+    document.title = (dayat === calendarreach ? "Partial " : "")
+        + boards[boardat].label + " for " + daylabel(dayat)
         + "! (" + count + ")";
 }
 
@@ -277,8 +318,6 @@ function markurl() {
     history.replaceState(null, "", url);
 }
 
-// any real date is allowed here, not just the fourteen the ui can reach
-// the server answers empty outside its window, which is the point of it
 function readurl() {
     const got = new URL(location.href).searchParams;
     const key = got.get("board");
@@ -294,7 +333,6 @@ function readurl() {
             dayat = step;
         }
     }
-    // the tournament's own default is the sunday just gone, not today
     if (boards[boardat].weekly && !isgoldday(dayat)) {
         const near = nextday(dayat, 1);
         if (near >= 0) dayat = near;
@@ -486,6 +524,8 @@ function makeprofile() {
             ["Today's Rank", "#" + entry.rank],
             ["Today's Score", Number(entry.score).toLocaleString("en")]
         ];
+        relabellogo(wrap.querySelector(".logo"),
+            /^PLAYER\s*\d*$/.test(entry.full) ? "Guest Info" : "Player Info");
         const held = readclaim();
         const mine = held && held.guid && held.guid === entry.id;
 
@@ -519,9 +559,6 @@ function makeprofile() {
             history.replaceState(null, "", url);
         }
         openpopup(wrap);
-    });
-    wrap.addEventListener("click", function(e) {
-        if (e.target === wrap) closepopup(wrap);
     });
 }
 
@@ -565,6 +602,7 @@ function buildcalendar() {
             cell.dataset.day = daykey(at);
             const back = Math.round((today.getTime() - at.getTime()) / day);
             if (back >= 0 && back <= calendarreach) cell.dataset.back = back;
+            if (back === calendarreach) cell.classList.add("thin");
         } else if (weekend) {
             cell.className = "weekend";
         }
@@ -669,14 +707,15 @@ document.querySelector(".calbutton").addEventListener("click", function() {
     if (calwrap.classList.contains("open")) {closepopup(calwrap)}
     else {openpopup(calwrap)}
 });
-calwrap.addEventListener("click", function(e) {
-    if (e.target === calwrap) closepopup(calwrap);
+document.querySelectorAll(".calwrap").forEach(function(wrap) {
+    wrap.addEventListener("click", function(e) {
+        if (e.target === wrap) closepopup(wrap);
+    });
 });
 
 const playpackage = "com.raptisoft.Chuzzle2";
 const playpage = "https://play.google.com/store/apps/details?id=" + playpackage;
 
-// a desk has nowhere to send the protocol, so it gets the phone to scan
 document.querySelector(".todaybutton").addEventListener("click", function() {
     if (/android/i.test(navigator.userAgent)) {
         location.href = "market://launch?id=" + playpackage; /* discovered this 4 months ago, i'm not sure if this protocol command is properly documented at all */
@@ -693,8 +732,6 @@ window.addEventListener("keydown", function(e) {
 
 loadsounds(["click", "shuffle"]);
 
-// closest() rather than target: a press usually lands on a label or an icon
-// the rail stays quiet here, it shuffles once its board has landed instead
 document.addEventListener("click", function(e) {
     const seat = e.target.closest && e.target.closest("button");
     if (seat && !seat.closest(".boardpick")) playsound("click", 0.7);

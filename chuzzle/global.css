@@ -1,11 +1,4 @@
 @font-face {
-    font-family: "blippo";
-    src: url("assets/fonts/blippo.woff2") format("woff2");
-    font-display: block;
-}
-/* the game's own cut, traced out of Title.bundle and UI.bundle. it goes */
-/* first so its letterforms win, and blippo covers whatever it never had */
-@font-face {
     font-family: "chuzzle";
     src: url("assets/fonts/chuzzleblippo.woff2") format("woff2");
     font-display: block;
@@ -15,10 +8,15 @@
     src: url("assets/fonts/chuzzlescript.woff2") format("woff2");
     font-display: block;
 }
-/* already italic and already bold, so neither gets asked for again */
 @font-face {
     font-family: "chuzzle italic";
     src: url("assets/fonts/chuzzleitalic.woff2") format("woff2");
+    font-display: block;
+}
+
+@font-face {
+    font-family: "blippo";
+    src: url("assets/fonts/blippo.woff2") format("woff2");
     font-display: block;
 }
 @font-face {
