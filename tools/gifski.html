@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>gifski</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        body {
+            padding: 0.5em; background: #f7f7f8; color: #222;
+            font-family: sans-serif;
+        }
+        h2 {margin: 0 0 0.4em}
+        .row {margin: 0.4em 0}
+        label {display: inline-flex; gap: 0.4em; align-items: center}
+        input[type=file] {display: inline-block}
+        .hint {font-size: 0.85em; color: rgba(0,0,0,0.45)}
+        .warn {font-size: 0.85em; color: #a15c00}
+        .controls {
+            background: #fff; border: 1px solid #e2e2e2;
+            padding: 0.6em; border-radius: 8px; max-width: 760px;
+        }
+        .preview {
+            margin-top: 0.6em; background: #fff; padding: 0.6em;
+            border-radius: 8px; border: 1px solid #e2e2e2;
+        }
+        video, img {max-width: 100%; display: block}
+        .status {font-size: 0.9em; color: #666}
+        .out {
+            margin-top: 0.6em; font-family: monospace;
+            background: #f0f0f0; padding: 0.5em; border-radius: 6px;
+        }
+        .btn {
+            padding: 0.4em 0.7em; border-radius: 6px;
+            border: 1px solid #cfcfd2; background: #fff; cursor: pointer;
+        }
+        .btn:disabled {opacity: 0.5; cursor: default}
+    </style>
+</head>
+<body>
+    <h2>gifski</h2>
+    <div class="controls">
+        <form id="form">
+            <div class="row">
+                <label>video<input type="file" id="vidfile" accept="video/*"></label>
+                <span class="hint" id="filesize"></span>
+            </div>
+            <div class="row">
+                <label>start <input type="number" id="start" min="0" step="0.1" value="0">s</label>
+                <label>duration <input type="number" id="duration" min="0.1" step="0.1" value="3">s</label>
+                <label>fps <input type="number" id="fps" min="1" max="60" value="15"></label>
+            </div>
+            <div class="row">
+                <label>width <input type="number" id="width" min="8" value="480"></label>
+                <label>quality <input type="range" id="quality" min="1" max="100" value="80"><span id="qval" class="hint">80</span></label>
+            </div>
+            <div class="row">
+                <label><input type="checkbox" id="dither">dither</label>
+                <button class="btn" id="smallpreset" type="button">small size preset</button>
+                <span class="hint">320w, 10fps, no dither</span>
+            </div>
+            <div class="row">
+                <button class="btn" id="convert" type="button">convert</button>
+                <button class="btn" id="stop" type="button" disabled>stop</button>
+                <span class="status" id="status"></span>
+            </div>
+            <div class="row hint" id="estimate"></div>
+        </form>
+        <div class="row preview" id="preview"></div>
+        <div class="row out" id="output"></div>
+    </div>
+
+    <script src="../assets/static/gif.js"></script>
+    <script>
+
+        const vidfile = document.getElementById("vidfile");
+        const filesize = document.getElementById("filesize");
+        const convert = document.getElementById("convert");
+        const stopbtn = document.getElementById("stop");
+        const status = document.getElementById("status");
+        const preview = document.getElementById("preview");
+        const output = document.getElementById("output");
+        const qval = document.getElementById("qval");
+        const estimate = document.getElementById("estimate");
+        const startinput = document.getElementById("start");
+        const durationinput = document.getElementById("duration");
+        const fpsinput = document.getElementById("fps");
+        const widthinput = document.getElementById("width");
+        const qualityinput = document.getElementById("quality");
+        const ditherinput = document.getElementById("dither");
+        const smallpreset = document.getElementById("smallpreset");
+
+        GIF.prototype.workerScript = "../assets/static/gif.worker.js";
+
+        let fileURL = null, encoder = null, running = false;
+
+        vidfile.addEventListener("change", ()=>{
+            const f = vidfile.files[0];
+            if (!f) {filesize.textContent = ""; return}
+            filesize.textContent = ` (${Math.round(f.size / 1024)} KB)`;
+            if (fileURL) URL.revokeObjectURL(fileURL);
+            fileURL = URL.createObjectURL(f);
+            preview.innerHTML = `<video id="vpreview" controls src="${fileURL}"></video>`;
+            updateEstimate();
+        });
+
+        document.getElementById("quality").addEventListener("input", e=>{
+            qval.textContent = e.target.value;
+        });
+
+        smallpreset.addEventListener("click", ()=>{
+            widthinput.value = 320;
+            fpsinput.value = 10;
+            ditherinput.checked = false;
+            updateEstimate();
+        });
+
+        [startinput, durationinput, fpsinput, widthinput].forEach(el=>{
+            el.addEventListener("input", updateEstimate);
+        });
+
+        function updateEstimate(){
+            const dur = parseFloat(durationinput.value) || 0;
+            const fps = parseInt(fpsinput.value) || 0;
+            const w = parseInt(widthinput.value) || 0;
+            const frames = Math.max(0, Math.round(dur * fps));
+            let text = `${frames} frames at ${w}px wide`;
+            if (frames > 300) text += " - large frame count, expect a big file and slow encoding. try the small size preset or lower fps/duration.";
+            estimate.textContent = text;
+        }
+        updateEstimate();
+
+        convert.addEventListener("click", async ()=>{
+            if (running) return;
+            output.textContent = "";
+            status.textContent = "";
+
+            if (!window.GIF) {status.textContent = "gif encoder failed to load.."; return}
+
+            const v = document.getElementById("vpreview");
+            if (!v) {status.textContent = "pick a video first!"; return}
+
+            const start = parseFloat(startinput.value) || 0;
+            const dur = parseFloat(durationinput.value) || 3;
+            const fps = Math.max(1, Math.min(60, parseInt(fpsinput.value) || 15));
+            const w = parseInt(widthinput.value) || 480;
+            const quality = Math.max(1, Math.min(100, parseInt(qualityinput.value) || 80));
+            const dither = ditherinput.checked ? "FloydSteinberg" : false;
+
+            const vid = document.createElement("video");
+            vid.src = fileURL;
+            vid.muted = true;
+            vid.playsInline = true;
+
+            await new Promise(resolve=>{
+                if (vid.readyState >= 1) return resolve();
+                vid.addEventListener("loadedmetadata", resolve, {once: true});
+            });
+
+            const videoWidth = vid.videoWidth || w;
+            const videoHeight = vid.videoHeight || Math.round(w * 9 / 16);
+            const scale = w / videoWidth;
+
+            vid.currentTime = Math.max(0, start);
+            await vid.play().catch(()=>{});
+            vid.pause();
+
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = Math.round(videoHeight * scale);
+            const ctx = canvas.getContext("2d", {willReadFrequently: true});
+
+            const totalFrames = Math.max(1, Math.round(dur * fps));
+
+            encoder = new GIF({
+                quality: Math.round(100 / quality),
+                width: canvas.width,
+                height: canvas.height,
+                workers: 2,
+                workerScript: GIF.prototype.workerScript,
+                dither,
+            });
+
+            let lastProgress = -1;
+            encoder.on("progress", p=>{
+                lastProgress = p;
+                status.textContent = `encoding ${(p * 100).toFixed(0)}%`;
+            });
+
+            const progWatch = setInterval(()=>{
+                if (!running) {clearInterval(progWatch); return}
+                if (lastProgress <= 0) status.textContent = "encoding...";
+            }, 500);
+
+            encoder.on("finished", blob=>{
+                const url = URL.createObjectURL(blob);
+                preview.innerHTML = `<img src="${url}" alt="gif preview">`;
+                const a = document.createElement("a");
+                a.href = url; a.download = "out.gif"; a.textContent = "download gif"; a.className = "btn";
+                output.innerHTML = "";
+                output.appendChild(a);
+                const sizehint = document.createElement("span");
+                sizehint.className = "hint";
+                sizehint.style.marginLeft = "0.6em";
+                sizehint.textContent = `(${Math.round(blob.size / 1024)} KB)`;
+                output.appendChild(sizehint);
+                clearInterval(progWatch);
+                status.textContent = "done";
+                running = false; stopbtn.disabled = true; convert.disabled = false;
+            });
+
+            running = true; stopbtn.disabled = false;
+            convert.disabled = true; status.textContent = "capturing frames..";
+
+            for (let i = 0; i < totalFrames; i++) {
+                if (!running) break;
+                const t = start + i / fps;
+                try {
+                    await seekVideo(vid, t);
+                } catch (e) {break}
+                ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+                encoder.addFrame(ctx, {copy: true, delay: 1000 / fps});
+                status.textContent = `captured ${i + 1}/${totalFrames}`;
+                await new Promise(r=>setTimeout(r, 0));
+            }
+            if (running) {status.textContent = "rendering gif.."; encoder.render()}
+        });
+
+        stopbtn.addEventListener("click", ()=>{
+            if (!running) return;
+            running = false;
+            if (encoder && encoder.abort) encoder.abort();
+            status.textContent = "stopped";
+            stopbtn.disabled = true; convert.disabled = false;
+        });
+
+        function seekVideo(video, time){
+            return new Promise((resolve, reject)=>{
+                const onseek = ()=>{video.removeEventListener("seeked", onseek); resolve()};
+                video.addEventListener("seeked", onseek);
+                video.currentTime = Math.min(time, video.duration || time);
+                setTimeout(()=>{video.removeEventListener("seeked", onseek); resolve()}, 1500);
+            });
+        }
+    </script>
+</body>
+</html>
