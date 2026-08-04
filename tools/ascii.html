@@ -6,21 +6,19 @@
     <title>ascii art maker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2240%22%20font-size%3D%2240%22%20fill%3D%22%23000000%22%20font-family%3D%22monospace%22%20text-anchor%3D%22middle%22%3E%40%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="base.css">
 
     <style>
 
         html, body {height: 100%}
         body {
-            margin: 0; padding: 0.35em 0.6em; box-sizing: border-box;
-            background: #f7f7f8; color: #222;
-            font-family: sans-serif;
+            padding: 0.35em 0.6em; box-sizing: border-box;
             display: flex; flex-direction: column;
             height: 100vh; overflow: hidden;
         }
         h1, h2 {margin: 0}
         .topbar {flex: none; margin-bottom: 0.3em; display: flex; align-items: baseline; gap: 0.6em}
         .topbar .credit {font-size: 0.72em; color: rgba(0,0,0,0.45)}
-        .topbar .credit a {color: inherit}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -40,7 +38,7 @@
             font-family: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
             font-size: 12px; line-height: 12px; letter-spacing: 0;
             white-space: pre; overflow: auto; word-break: keep-all;
-            border: 1px solid #d8d8da; border-radius: 5px;
+            border: 1px solid #d8d8da;
             background: #fff; color: #111; padding: 0.5em; resize: none;
             tab-size: 1;
         }
@@ -53,7 +51,7 @@
         }
         .toolbar .grp {display: flex; align-items: center; gap: 0.3em}
         .progwrap {
-            height: 0.5em; background: #ececef; border-radius: 4px;
+            height: 0.5em; background: #ececef;
             overflow: hidden; flex: 1 1 6em; min-width: 5em;
         }
         .progbar {
@@ -68,23 +66,20 @@
 
         .card {
             background: #fff; border: 1px solid #e2e2e2;
-            border-radius: 10px; padding: 0.45em 0.6em; flex: none;
+            padding: 0.45em 0.6em; flex: none;
         }
         .card h2 {font-size: 0.82em; margin-bottom: 0.3em; color: #444}
         .row {
-            margin: 0.25em 0; display: flex; 
-            align-items: center; gap: 0.4em; 
+            margin: 0.25em 0; display: flex;
+            align-items: center; gap: 0.4em;
             flex-wrap: wrap
         }
         .hint {font-size: 0.72em; color: rgba(0,0,0,0.42)}
-        label {
-            font-size: 0.85em; display: inline-flex; 
-            align-items: center; gap: 0.35em
-        }
+        label {font-size: 0.85em; gap: 0.35em}
 
         .minibtn, button {
             font: inherit; font-size: 0.85em;
-            padding: 0.22em 0.7em; border-radius: 7px;
+            padding: 0.22em 0.7em;
             border: 1px solid #cfcfd2; background: #fff; cursor: pointer;
         }
         .minibtn:hover, button:hover {background: #efefef}
@@ -93,16 +88,16 @@
 
         input[type="number"] {
             width: 4em; font: inherit; font-size: 0.85em;
-            padding: 0.1em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+            padding: 0.1em 0.3em; border: 1px solid #cfcfd2;
         }
         select {
             font: inherit; font-size: 0.85em;
-            padding: 0.12em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+            padding: 0.12em 0.3em; border: 1px solid #cfcfd2;
             background: #fff;
         }
         input[type="text"] {
             font: inherit; font-size: 0.85em; width: 7em;
-            padding: 0.1em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+            padding: 0.1em 0.3em; border: 1px solid #cfcfd2;
         }
         input[type="range"] {vertical-align: middle; width: 8em}
         .seg {display: inline-block; min-width: 2.4em; color: #666; font-size: 0.78em}

@@ -6,15 +6,13 @@
     <title>fake synthid generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2244%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20text-anchor%3D%22middle%22%3E%F0%9F%92%A7%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="base.css">
 
     <style>
 
         body {
             padding-left: 0.25em;
             padding-bottom: 3em;
-            background: #f7f7f8;
-            color: #222;
-            font-family: sans-serif;
             max-width: 56em;
         }
         h1, h2 {margin: 0}
@@ -25,9 +23,10 @@
 
         .drop {
             margin: 0.8em 0; padding: 1.5em 1em;
-            border: 2px dashed #c5c5ca; border-radius: 12px;
-            background: #fff; text-align: center; cursor: pointer;
-            font-size: 0.9em; color: #666; display: block;
+            border: 2px dashed #c5c5ca;
+            background: #fff; text-align: center;
+            cursor: pointer; font-size: 0.9em;
+            color: #666; display: block;
         }
         .drop.over {border-color: #3a6ea5; background: #eef3f9}
         .drop input {display: none}
@@ -36,30 +35,34 @@
         .panel {display: flex; flex-direction: column; gap: 0.3em}
         .panel .cap {font-size: 0.72em; color: #888}
         canvas.view {
-            display: block; max-width: 300px; max-height: 300px;
-            width: auto; height: auto;
-            border: 1px solid #d8d8da; border-radius: 8px; background: #fff;
-            image-rendering: auto;
+            display: block; max-width: 300px;
+            max-height: 300px; width: auto;
+            height: auto; border: 1px solid #ccc;
+            background: #fff; image-rendering: auto;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
         button {
-            margin-top: 0.9em; font: inherit; font-size: 0.9em;
-            padding: 0.45em 1.3em; border-radius: 8px;
-            border: 1px solid #222; background: #222; color: #fff; cursor: pointer;
+            margin-top: 0.9em; font-size: 0.9em;
+            padding: 0.45em 1.3em; border: 1px solid #222;
+            background: #222; color: #fff;
+            cursor: pointer;
         }
         button:hover {background: #000}
         button:disabled {opacity: 0.4; cursor: default}
 
         .readout {
-            margin-top: 0.8em; font-family: monospace; font-size: 0.8em;
-            background: #f0f0f0; border-radius: 8px; padding: 0.5em 0.7em;
-            white-space: pre-wrap; word-break: break-word; max-width: 36em;
+            margin-top: 0.8em; font-family: monospace;
+            font-size: 0.8em; border: 1px solid #ccc;
+            padding: 0.5em 0.7em; white-space: pre-wrap;
+            word-break: break-word; max-width: 36em;
         }
         .bar {
-            display: inline-block; width: 10em; height: 0.55em; vertical-align: middle;
-            margin-left: 0.6em; background: #e2e2e2; border-radius: 4px; overflow: hidden;
+            display: inline-block; width: 10em;
+            height: 0.55em; vertical-align: middle;
+            margin-left: 0.6em; background: #e2e2e2;
+            overflow: hidden;
         }
         .bar > i {display: block; height: 100%; background: #3a9d6a}
 

@@ -6,21 +6,17 @@
     <title>unicode scribble matcher</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2240%22%20fill%3D%22%23000000%22%20font-family%3D%22Times%20New%20Roman%2Cserif%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20dy%3D%220%22%20text-anchor%3D%22middle%22%3E%E2%9C%8F%EF%B8%8F%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="base.css">
 
     <style>
 
-        body {
-            padding-left: 0.25em;
-            background: #f7f7f8;
-            color: #222;
-            font-family: sans-serif;
-        }
-        h1, h2 {margin: 0}
+        body {padding-left: 0.25em}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .row {margin: 0.4em 0}
-        .hint {font-size: 0.75em; color: rgba(0,0,0,0.4)}
+        .hint {
+            font-size: 0.75em; color: rgba(0,0,0,0.4);
+        }
         sup {opacity: 0.5}
 
         .stage {
@@ -29,52 +25,75 @@
         }
         .pad {
             background: #fff; display: block;
-            border: 1px solid #d8d8da; border-radius: 12px;
+            border: 1px solid #d8d8da;
             touch-action: none; cursor: crosshair;
         }
 
-        .tools {display: flex; align-items: center; gap: 0.4em; flex-wrap: wrap}
+        .tools {
+            display: flex; align-items: center;
+            gap: 0.4em; flex-wrap: wrap;
+        }
         .tools button, .minibtn {
-            font: inherit; font-size: 0.85em;
-            padding: 0.2em 0.7em; border-radius: 7px;
-            border: 1px solid #cfcfd2; background: #fff; cursor: pointer;
+            font-size: 0.85em; padding: 0.2em 0.7em;
+            border: 1px solid #cfcfd2; background: #fff;
+            cursor: pointer;
         }
         .tools button:hover, .minibtn:hover {background: #efefef}
-        .tools button.active {background: #222; color: #fff; border-color: #222}
-        .tools label {display: inline-flex; align-items: center; gap: 0.35em}
-        .minibtn:disabled {opacity: 0.45; cursor: default}
+        .tools button.active {
+            background: #222; color: #fff;
+            border-color: #222;
+        }
+        .tools label {gap: 0.35em}
+        .minibtn:disabled {
+            opacity: 0.45; cursor: default;
+        }
         .penclr {
-            width: 2.4em; height: 1.5em; padding: 0; cursor: pointer;
-            border: 1px solid #cfcfd2; border-radius: 5px; background: none;
+            width: 2.4em; height: 1.5em;
+            padding: 0; cursor: pointer;
+            border: 1px solid #cfcfd2; background: none;
         }
 
         .seen {
             display: block; image-rendering: pixelated;
-            border: 1px solid #e2e2e2; border-radius: 8px; background: #fff;
+            border: 1px solid #e2e2e2; background: #fff;
         }
         .status {margin: 0.4em 0}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
         .results {
-            display: flex; flex-wrap: wrap; gap: 0.4em;
-            margin-top: 0.6em; min-height: 4.6em;
+            display: flex; flex-wrap: wrap;
+            gap: 0.4em; margin-top: 0.6em;
+            min-height: 4.6em;
         }
         .res {
-            display: flex; flex-direction: column; align-items: center;
-            border: 1px solid #e2e2e2; border-radius: 8px; background: #fff;
-            padding: 0.25em 0.45em 0.35em; min-width: 3.3em; cursor: pointer;
+            display: flex; flex-direction: column;
+            align-items: center; border: 1px solid #e2e2e2;
+            background: #fff; padding: 0.25em 0.45em 0.35em;
+            min-width: 3.3em; cursor: pointer;
         }
         .res:hover {background: #f0f0f0}
-        .res .ch {display: block; width: 52px; height: 52px}
-        .res .nm {
-            font-size: 9px; color: #666; margin-top: 3px;
-            max-width: 7.4em; text-align: center;
-            line-height: 1.2; overflow-wrap: anywhere;
+        .res .ch {
+            display: block; width: 52px;
+            height: 52px;
         }
-        .res .cp {font-size: 9px; color: #999; font-family: monospace; margin-top: 2px}
-        .res .sc {font-size: 9px; color: #3a9d6a; margin-top: 1px}
-        .res.copied {background: #eafaf0; border-color: #9dd8b6}
+        .res .nm {
+            font-size: 9px; color: #666;
+            margin-top: 3px; max-width: 7.4em;
+            text-align: center; line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+        .res .cp {
+            font-size: 9px; color: #999;
+            font-family: monospace; margin-top: 2px;
+        }
+        .res .sc {
+            font-size: 9px; color: #3a9d6a;
+            margin-top: 1px;
+        }
+        .res.copied {
+            background: #eafaf0; border-color: #9dd8b6;
+        }
 
     </style>
 

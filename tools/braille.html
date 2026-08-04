@@ -6,15 +6,13 @@
     <title>braille art editor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2244%22%20fill%3D%22%23000000%22%20font-family%3D%22Times%20New%20Roman%2Cserif%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20dy%3D%220%22%20text-anchor%3D%22middle%22%3E%E2%A0%BF%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="base.css">
 
     <style>
 
         html, body {height: 100%}
         body {
-            margin: 0; padding: 0.35em 0.6em; box-sizing: border-box;
-            background: #f7f7f8;
-            color: #222;
-            font-family: sans-serif;
+            padding: 0.35em 0.6em; box-sizing: border-box;
             display: flex; flex-direction: column;
             height: 100vh; overflow: hidden;
         }
@@ -23,19 +21,21 @@
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .row {margin: 0.45em 0}
         .hint {font-size: 0.75em; color: rgba(0,0,0,0.4)}
         .stage {
-            display: flex; flex-direction: column; gap: 0.4em;
-            flex: 1; min-height: 0;
+            display: flex; flex-direction: column;
+            gap: 0.4em; flex: 1;
+            min-height: 0;
         }
         .padwrap {
-            flex: 1; min-height: 0; overflow: hidden;
-            display: flex; align-items: flex-start; justify-content: center;
+            flex: 1; min-height: 0;
+            overflow: hidden; display: flex;
+            align-items: flex-start; justify-content: center;
         }
         .controls {
-            flex: none; display: flex; flex-wrap: wrap;
-            gap: 0.55em; align-items: flex-start;
+            flex: none; display: flex;
+            flex-wrap: wrap; gap: 0.55em;
+            align-items: flex-start;
         }
         .toolgroup {flex: 0 0 auto; align-self: flex-start}
         .toolgroup .row {margin: 0.2em 0}
@@ -51,52 +51,74 @@
 
         .pad {
             background: #fff; display: block;
-            border: 1px solid #d8d8da; border-radius: 12px;
+            border: 1px solid #d8d8da;
             touch-action: none; cursor: crosshair;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
-        .tools {display: flex; align-items: center; gap: 0.4em; flex-wrap: wrap}
+        .tools {
+            display: flex; align-items: center;
+            gap: 0.4em; flex-wrap: wrap;
+        }
         .tools button, .minibtn {
             font: inherit; font-size: 0.85em;
-            padding: 0.2em 0.7em; border-radius: 7px;
-            border: 1px solid #cfcfd2; background: #fff; cursor: pointer;
+            padding: 0.2em 0.7em;
+            border: 1px solid #cfcfd2; background: #fff;
+            cursor: pointer;
         }
         .tools button:hover, .minibtn:hover {background: #efefef}
-        .tools button.active {background: #222; color: #fff; border-color: #222}
-        .tools label {display: inline-flex; align-items: center; gap: 0.35em}
+        .tools button.active {
+            background: #222; color: #fff;
+            border-color: #222;
+        }
+        .tools label {
+            display: inline-flex; align-items: center;
+            gap: 0.35em;
+        }
         .minibtn:disabled {opacity: 0.4; cursor: default}
 
         input[type="number"] {
-            width: 4em; font: inherit; font-size: 0.85em;
-            padding: 0.1em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
+            width: 4em; font: inherit;
+            font-size: 0.85em; padding: 0.1em 0.3em;
+            border: 1px solid #cfcfd2;
         }
         select {
             font: inherit; font-size: 0.85em;
-            padding: 0.12em 0.3em; border: 1px solid #cfcfd2; border-radius: 5px;
-            background: #fff;
+            padding: 0.12em 0.3em;
+            border: 1px solid #cfcfd2; background: #fff;
         }
         input[type="range"] {vertical-align: middle; width: 8.5em}
-        .seg {display: inline-block; min-width: 2.2em; color: #666; font-size: 0.8em}
+        .seg {
+            display: inline-block; min-width: 2.2em;
+            color: #666; font-size: 0.8em;
+        }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
         .card {
-            background: #fff; border: 1px solid #e2e2e2;
-            border-radius: 10px; padding: 0.4em 0.6em; flex: none;
+            border: 1px solid #e2e2e2;
+            padding: 0.4em 0.6em; flex: none;
         }
-        .card h2 {font-size: 0.85em; margin-bottom: 0.2em; color: #444}
-        .card .row {margin: 0.22em 0; display: flex; align-items: center; gap: 0.4em; flex-wrap: wrap}
+        .card h2 {
+            font-size: 0.85em; margin-bottom: 0.2em;
+            color: #444;
+        }
+        .card .row {
+            margin: 0.22em 0; display: flex;
+            align-items: center; gap: 0.4em;
+            flex-wrap: wrap;
+        }
 
         textarea.out {
             width: 100%; box-sizing: border-box;
             height: 7.5em; min-height: 3em;
             font-family: "Segoe UI Symbol", "Segoe UI", "Noto Sans", system-ui, sans-serif;
-            font-size: 12px; line-height: 1.05; letter-spacing: 0;
-            white-space: pre; overflow: auto;
-            border: 1px solid #d8d8da; border-radius: 8px;
-            background: #fff; color: #111; padding: 0.45em; resize: vertical;
+            font-size: 12px; line-height: 1.05;
+            letter-spacing: 0; white-space: pre;
+            overflow: auto; border: 1px solid #d8d8da;
+            background: #fff; color: #111;
+            padding: 0.45em; resize: vertical;
             tab-size: 1;
         }
         .count {color: #999; font-size: 0.75em}
@@ -110,14 +132,22 @@
         .inverted .card {background: #242427; border-color: #3a3a40}
         .inverted .card h2 {color: #bbb}
         .inverted .tools button, .inverted .minibtn {
-            background: #2a2a2e; color: #ddd; border-color: #46464c;
+            background: #2a2a2e; color: #ddd;
+            border-color: #46464c;
         }
         .inverted .tools button:hover, .inverted .minibtn:hover {background: #34343a}
-        .inverted .tools button.active {background: #eee; color: #111; border-color: #eee}
-        .inverted input[type="number"], .inverted select {
-            background: #2a2a2e; color: #ddd; border-color: #46464c;
+        .inverted .tools button.active {
+            background: #eee; color: #111;
+            border-color: #eee;
         }
-        .inverted textarea.out {background: #1f1f22; color: #eee; border-color: #46464c}
+        .inverted input[type="number"], .inverted select {
+            background: #2a2a2e; color: #ddd;
+            border-color: #46464c;
+        }
+        .inverted textarea.out {
+            background: #1f1f22; color: #eee;
+            border-color: #46464c;
+        }
 
     </style>
 

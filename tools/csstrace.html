@@ -4,28 +4,27 @@
     <meta charset="UTF-8"/>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2252%22%20fill%3D%22%23000000%22%20font-family%3D%22serif%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20dy%3D%220%22%20text-anchor%3D%22middle%22%3E%F0%9F%96%B1%EF%B8%8F%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
     <title>css tracer</title>
+    <link rel="stylesheet" href="base.css">
     <style>
 
         body {
-            margin: 0; padding: 0; 
-            font-family: sans-serif; height: 100vh; 
-            color: black; background: white; 
+            padding: 0; height: 100vh;
             display: flex; overflow: hidden;
             justify-content: center; align-items: center;
         }
 
         .app, .appmain {
-            width: 800px; height: 800px; 
+            width: 800px; height: 800px;
             min-width: 0; min-height: 0;
-            margin: 0 auto; display: grid; 
-            grid-template-columns: 1fr; gap: 8px; 
-            padding: 8px; box-sizing: border-box; 
+            margin: 0 auto; display: grid;
+            grid-template-columns: 1fr; gap: 8px;
+            padding: 8px; box-sizing: border-box;
             transform-origin: center center;
         }
         .panel, .panelmain {
-            padding: 18px 8px; background: #f9f9f9; 
-            overflow: hidden;  display: flex; 
-            flex-direction: column; border-radius: 10px;
+            padding: 18px 8px; background: #fff;
+            overflow: hidden; display: flex;
+            flex-direction: column; border: 1px solid #ccc;
         }
 
         /*//////////////////////////////////////////////////////////////////////*/
@@ -101,7 +100,7 @@
         /*//////////////////////////////////////////////////////////////////////*/
 
         .handle {
-            position: absolute; border-radius: 50%;
+            position: absolute;
             width: 14px; height: 14px; cursor: pointer;
             background: #fff; border: 1px solid #000;
             display: flex; align-items: center; justify-content: center;
@@ -146,29 +145,28 @@
 
         .trimtrack {position: relative; height: 16px}
         .trimbg {
-            position: absolute; 
-            left: 0; right: 0; top: 50%; 
-            transform: translateY(-50%); 
-            height: 6px; border-radius: 3px;
-            background: #e0e0e0;
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            transform: translateY(-50%);
+            height: 6px; background: #e0e0e0;
         }
         .trimwindow {
-            position: absolute; top: 50%; 
+            position: absolute; top: 50%;
             transform: translateY(-50%);
-            height: 6px; background: #b0b0b0; 
-            border-radius: 3px; pointer-events: none;
+            height: 6px; background: #b0b0b0;
+            pointer-events: none;
         }
         .trimprogress {
-            position: absolute; top: 50%; 
+            position: absolute; top: 50%;
             transform: translateY(-50%);
             height: 2px; background: #000;
-            border-radius: 1px; pointer-events: none;
+            pointer-events: none;
         }
         .trimhandle {
             position: absolute;
             top: 50%; transform: translateY(-50%);
-            width: 6px; height: 16px; border-radius: 3px;
-            background: #fff; border: 1px solid #000; 
+            width: 6px; height: 16px;
+            background: #fff; border: 1px solid #000;
             cursor: ew-resize;
         }
 
