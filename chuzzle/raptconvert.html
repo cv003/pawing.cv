@@ -236,23 +236,21 @@
                     buttons.forEach(function (b) {b.disabled = false});
                     if (got.err) {setstatus(got.err, false); return}
 
-                    const bad = got.lines.findIndex(function (line) {return line.err});
-                    if (bad >= 0) {
-                        setstatus("line " + (bad + 1) + ": " + got.lines[bad].err, false);
-                        return;
-                    }
-
-                    const out = got.lines.map(function (line) {
-                        return line.output || line.url || line.query || "";
+                    const troubled = [];
+                    const out = got.lines.map(function (line, i) {
+                        const value = line.output || line.url || line.query || "";
+                        if (value) return value;
+                        troubled.push((i + 1) + ": " + (line.err || "nothing came back.."));
+                        return line.input || "";
                     });
-                    const missing = out.findIndex(function (line) {return !line});
-                    if (missing >= 0) {
-                        setstatus("line " + (missing + 1) + ": nothing came back..", false);
-                        return;
-                    }
+
                     const gap = String.fromCharCode(10);
                     main.value = out.join(way === "encode" ? gap + gap : gap);
-                    setstatus("", true);
+                    if (troubled.length) {
+                        setstatus("line " + troubled.join(", line "), false);
+                    } else {
+                        setstatus("", true);
+                    }
                 }
 
                 /*//////////////////////////////////////////////////////////////////////*/
