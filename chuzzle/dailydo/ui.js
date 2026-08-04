@@ -7,6 +7,55 @@ const countriesready = fetch("countries.json").then(function(reply) {
     knownflags = new Set(got.flags || []);
 }).catch(function() {});
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+const joincrossings = [
+    ["2018-12-18",       0], // launch
+    ["2019-01-26",  145348], // ~100k  ~2019-03-07
+    ["2019-03-27",  726738], // ~500k  ~2019-03-07 - 2019-04-17
+    ["2019-04-20", 1453477], // ~1m    ~04-17 - 04-24
+    ["2021-12-11", 7267384], // ~5m    ~10-27-2021 - 01-26-2022
+];
+const joindecaystart = joincrossings[joincrossings.length - 1];
+const joindecayrate = 1878.86;
+const joindecayk = 0.0007997261626550334; // Gulp
+
+function estimatejoin(id) {
+    const guid = Number(id);
+    if (!guid || guid <= 0) return null;
+    const [startkey, startguid] = joindecaystart;
+    const start = new Date(startkey);
+    const day = 86400000;
+
+    if (guid >= startguid) {
+        const frac = (guid - startguid) * joindecayk / joindecayrate;
+        if (frac >= 1) return null;
+        const days = -Math.log(1 - frac) / joindecayk;
+        const at = new Date(start.getTime() + days * day);
+        return at > new Date() ? null : {at: at, spread: 30};
+    }
+    for (let i = 0; i < joincrossings.length - 1; i++) {
+        const [d0key, g0] = joincrossings[i];
+        const [d1key, g1] = joincrossings[i + 1];
+        if (guid < g0 || guid > g1) continue;
+        const d0 = new Date(d0key), d1 = new Date(d1key);
+        const frac = g0 === 0 ? guid / g1 : Math.log(guid / g0) / Math.log(g1 / g0);
+        const at = new Date(d0.getTime() + frac * (d1.getTime() - d0.getTime()));
+        const spread = i === joincrossings.length - 2 ? 320 : 20;
+        return {at: at, spread: spread};
+    }
+    return null;
+}
+function joinlabel(id) {
+    const got = estimatejoin(id);
+    if (!got) return null;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const tight = got.spread <= 45;
+    return "~" + (tight ? months[got.at.getMonth()] + " " : "") + got.at.getFullYear();
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
 function readboard(text) {
     const out = [];
     for (const line of text.split(String.fromCharCode(10))) {
@@ -519,14 +568,16 @@ function makeprofile() {
         const country = countrynames[entry.country] || entry.country;
 
         const noguid = !realid(entry.id);
+        const joined = noguid ? null : joinlabel(entry.id);
         const facts = [
             ["Nickname", entry.full],
             ["Country", flag + country],
             ["Player ID", noguid ? "<b class=\"noid\">[invalid]</b>" : entry.id],
-            null,
-            ["This day's Rank", "#" + entry.rank],
-            ["This day's Score", Number(entry.score).toLocaleString("en")]
         ];
+        if (joined) facts.push(["Joined about", joined]);
+        facts.push(null,
+            ["This day's Rank", "#" + entry.rank],
+            ["This day's Score", Number(entry.score).toLocaleString("en")]);
         relabellogo(wrap.querySelector(".logo"),
             /^PLAYER\s*\d*$/.test(entry.full) ? "Guest Info" : "Player Info");
         const held = readclaim();
