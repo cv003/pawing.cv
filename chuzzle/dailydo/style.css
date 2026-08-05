@@ -552,7 +552,7 @@
 .calwrap {
     position: fixed; inset: 0; z-index: 8;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.55);
+    background: rgba(26,26,64,0.85);
     visibility: hidden; opacity: 0; pointer-events: none;
 }
 .calwrap.open {visibility: visible; opacity: 1; pointer-events: auto}
@@ -565,6 +565,46 @@
 .calwrap.closing .popup {transform: scale(0)}
 .calwrap .pucontent {opacity: 0}
 .calwrap.settled .pucontent {opacity: 1}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.burstlayer {
+    position: absolute; inset: 0;
+    overflow: hidden; pointer-events: none; z-index: 0;
+}
+.burststar {
+    position: absolute; top: 0; left: 0;
+    width: 5.5em; height: 5.5em; margin: -2.75em;
+    will-change: transform, opacity;
+    /* two independent animations: the flight path, and a plain 0.5s fade-in
+       that runs alongside it without touching the transform at all */
+    animation: burststarfly 2.6s cubic-bezier(0.55,0,1,0.45) forwards,
+        burstfadein 0.5s linear forwards;
+}
+.burststar img {width: 100%; height: 100%}
+@keyframes burststarfly {
+    from {transform: translate(0, 0) scale(var(--sz, 1))}
+    to {transform: translate(var(--dx), var(--dy)) scale(var(--sz, 1))}
+}
+@keyframes burstfadein {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+.burstcircle {
+    position: absolute; top: 0; left: 0;
+    border-radius: 50%; mix-blend-mode: plus-lighter;
+    background: currentColor;
+    will-change: transform, opacity;
+    animation: burstcirclepop 1.6s linear forwards;
+}
+@keyframes burstcirclepop {
+    0%      {transform: translate(-50%, -50%) scale(1.00); opacity: 0}
+    31.25%  {transform: translate(-50%, -50%) scale(1.36); opacity: 0.16}
+    50%     {transform: translate(-50%, -50%) scale(1.64); opacity: 0.09}
+    75%     {transform: translate(-50%, -50%) scale(2.11); opacity: 0.03}
+    100%    {transform: translate(-50%, -50%) scale(2.70); opacity: 0}
+}
 
 .calwrap .popup {
     width: calc(var(--u) * 0.78); margin: 0;

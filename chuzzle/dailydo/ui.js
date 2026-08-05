@@ -339,6 +339,7 @@ async function reload(dir) {
     drawpicks();
     relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
     measurelist(host, list);
+    board = filtered(findwant());
     claimedat = findclaimed();
     paintedat = null; filled = -1;
     paintrows(0, host);
@@ -625,7 +626,7 @@ function daykey(date) {
     return date.getFullYear() + "-" + pad(date.getDate()) + "-" + pad(date.getMonth() + 1);
 }
 
-/* this would "usually" go from sunday, but, like, are you people insane?? sunday as first day of the week?? hell no!!!!! */
+// this would "usually" go from sunday, but, like, are you people insane?? sunday as first day of the week?? hell no!!!!!
 function buildcalendar() {
     const grid = document.querySelector(".calgrid");
     if (!grid) return;
@@ -672,8 +673,7 @@ function buildcalendar() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* ..function slop 😭 */
-
+// ..function slop 😭
 makeprofile();
 makefinder();
 buildrings();
@@ -733,6 +733,7 @@ function openpopup(wrap) {
     trimpending(wrap);
     clearTimeout(wrap.settletimer);
     wrap.settletimer = setTimeout(function() {wrap.classList.add("settled")}, popupwait);
+    startburst(wrap);
 }
 function closepopup(wrap) {
     if (!wrap.classList.contains("open")) return;
@@ -743,11 +744,119 @@ function closepopup(wrap) {
         wrap.classList.remove("open");
         wrap.classList.remove("closing");
     }, popupwait);
+    stopburst(wrap);
     if (wrap.dataset.role === "profile") {
         const url = new URL(location.href);
         url.searchParams.delete("player");
         history.replaceState(null, "", url);
     }
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+// MLBoxEX::Update spawns one star and one saturated circle roughly every 25
+// frames for as long as the box stays open, not just once when it appears -
+// see datainfo/README.md for the decompiled spawn math this is drawn from
+
+const burstcolors = ["#ff3b30", "#34d139", "#3478ff", "#ffe600", "#ff33f6", "#33e8ff"];
+let burstcolorat = 0;
+const burstinterval = 420; // ~25 frames at a plausible 60fps
+
+function burstlayerof(wrap) {
+    let layer = wrap.querySelector(".burstlayer");
+    if (!layer) {
+        layer = document.createElement("div");
+        layer.className = "burstlayer";
+        wrap.insertBefore(layer, wrap.querySelector(".popup"));
+    }
+    return layer;
+}
+
+// spawns on the box's top or bottom edge at one of six slots across its
+// width, then flies straight outward from the box's centre through that
+// spawn point - accelerating, never fading, until it drifts off-screen
+function spawnburststar(wrap, elapsed) {
+    const box = wrap.querySelector(".popup").getBoundingClientRect();
+    const slot = Math.floor(Math.random() * 6);
+    const x = box.left + slot * (box.width / 5);
+    const y = Math.random() < 0.5 ? box.top - 16 : box.bottom + 16;
+    const cx = box.left + box.width / 2;
+    const cy = box.top + box.height / 2;
+    let dx = x - cx, dy = y - cy - 12;
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len; dy /= len;
+
+    const reach = Math.hypot(window.innerWidth, window.innerHeight) * 0.9;
+    const seat = document.createElement("div");
+    seat.className = "burststar";
+    seat.style.left = x + "px";
+    seat.style.top = y + "px";
+    seat.style.setProperty("--sz", (0.75 + Math.random() * 0.35).toFixed(2));
+    seat.style.setProperty("--dx", (dx * reach).toFixed(1) + "px");
+    seat.style.setProperty("--dy", (dy * reach).toFixed(1) + "px");
+    // a negative delay starts the animation already partway through, so a
+    // batch spawned all at once on open can look like it has been flying the
+    // whole time the box has been up, matching the game's own effect never
+    // visibly starting from nothing
+    if (elapsed) seat.style.animationDelay = "-" + elapsed + "s";
+    seat.innerHTML = "<img src=\"assets/images/star.png\" alt=\"\">";
+    seat.addEventListener("animationend", function() {seat.remove()});
+    burstlayerof(wrap).appendChild(seat);
+}
+
+// spawns dead centre on the box and just grows and fades in place, cycling
+// through six saturated colours round-robin like the game does. its starting
+// size already scales with the box (MLBoxEX::Update sizes it off the box's
+// own height), so from frame one it is bursting out past the box's edges
+// rather than hiding as a speck behind it
+function spawnburstcircle(wrap, elapsed) {
+    const box = wrap.querySelector(".popup").getBoundingClientRect();
+    const seat = document.createElement("div");
+    seat.className = "burstcircle";
+    seat.style.left = (box.left + box.width / 2) + "px";
+    seat.style.top = (box.top + box.height / 2) + "px";
+    // the decompile only gives a scale FACTOR against the sprite's own native
+    // size, which is unknown here - this layer sits behind the box (matching
+    // the game's own draw order), so most of a circle's area is hidden the
+    // whole time and only the growing edge past it ever shows. .popup's own
+    // box-shadow border adds another ~52px past its layout box on every
+    // side on top of that, so the growth has to clear box height + ~100px
+    // before there is anything to see at all, not just the box itself
+    seat.style.width = seat.style.height = (box.height * 1.3) + "px";
+    seat.style.color = burstcolors[burstcolorat % burstcolors.length];
+    burstcolorat++;
+    if (elapsed) seat.style.animationDelay = "-" + elapsed + "s";
+    seat.addEventListener("animationend", function() {seat.remove()});
+    burstlayerof(wrap).appendChild(seat);
+}
+
+const starlife = 2.6;
+const circlelife = 1.6;
+
+function startburst(wrap) {
+    stopburst(wrap);
+    // delayed rather than spawned this same tick: the box is still mid
+    // scale-in transition right now, so its rect would measure 0x0 this early
+    wrap.burstseed = setTimeout(function() {
+        // one full lifetime's worth of each, backdated to a random point in
+        // their flight, so the very first frame already looks mid-effect
+        // instead of visibly starting from a blank box
+        for (let t = 0; t < starlife; t += burstinterval / 1000) {
+            spawnburststar(wrap, Math.random() * starlife);
+        }
+        for (let t = 0; t < circlelife; t += burstinterval / 1000) {
+            spawnburstcircle(wrap, Math.random() * circlelife);
+        }
+    }, popupwait);
+    wrap.burststimer = setInterval(function() {spawnburststar(wrap)}, burstinterval);
+    wrap.burstctimer = setInterval(function() {spawnburstcircle(wrap)}, burstinterval);
+}
+function stopburst(wrap) {
+    clearTimeout(wrap.burstseed);
+    clearInterval(wrap.burststimer);
+    clearInterval(wrap.burstctimer);
+    const layer = wrap.querySelector(".burstlayer");
+    if (layer) layer.innerHTML = "";
 }
 
 document.querySelectorAll(".closebtn").forEach(function (seat) {
@@ -761,18 +870,35 @@ document.querySelector(".calbutton").addEventListener("click", function() {
     if (calwrap.classList.contains("open")) {closepopup(calwrap)}
     else {openpopup(calwrap)}
 });
+
 document.querySelectorAll(".calwrap").forEach(function(wrap) {
-    wrap.addEventListener("click", function(e) {
-        if (e.target === wrap) closepopup(wrap);
+    let downat = null;
+    wrap.addEventListener("pointerdown", function(e) {
+        downat = e.target === wrap ? {x: e.clientX, y: e.clientY} : null;
+    });
+    wrap.addEventListener("pointerup", function(e) {
+        if (!downat) return;
+        const moved = Math.abs(e.clientX - downat.x) > 6 || Math.abs(e.clientY - downat.y) > 6;
+        downat = null;
+        if (e.target === wrap && !moved) closepopup(wrap);
     });
 });
 
 const playpackage = "com.raptisoft.Chuzzle2";
 const playpage = "https://play.google.com/store/apps/details?id=" + playpackage;
+const applepage = "https://apps.apple.com/app/id1367469846";
 
+function onios() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent)
+        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
 document.querySelector(".todaybutton").addEventListener("click", function() {
     if (/android/i.test(navigator.userAgent)) {
-        location.href = "market://launch?id=" + playpackage; /* discovered this 4 months ago, i'm not sure if this protocol command is properly documented at all */
+        location.href = "market://launch?id=" + playpackage; // discovered this 4 months ago, i'm not sure if this protocol command is properly documented at all
+        return;
+    }
+    if (onios()) {
+        location.href = applepage;
         return;
     }
     openpopup(document.querySelector("[data-role=qr]"));
