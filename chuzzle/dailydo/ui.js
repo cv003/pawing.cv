@@ -1,6 +1,6 @@
 let countrynames = {};
 let knownflags = new Set();
-const countriesready = fetch("countries.json").then(function(reply) {
+const countriesready = fetch("assets/static/countries.json").then(function(reply) {
     return reply.ok ? reply.json() : {};
 }).then(function(got) {
     countrynames = got.names || {};
