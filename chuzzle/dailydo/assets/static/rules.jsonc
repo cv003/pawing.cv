@@ -1,0 +1,176 @@
+// reverse engineered from DailyDoKit::SetRules in the ARM64 decompile
+// (datainfo/decomp/ghidra, function at 0x00469e60, 2540 decompiled lines).
+// see datainfo/README.md for the full writeup - this file is the data,
+// that is the story of how it was pulled out
+//
+// confirmed mechanism: a RaptRandom prng is seeded once with MonthlySeed(0),
+// so its output is identical for every player for the whole calendar month.
+// gametype.id is chosen as pool[App::GetNowDay(0) % 35], where pool is a
+// 35-slot array filled from that same monthly-seeded stream - so which of
+// the 5 tournament modes plays on a given day shifts across the month but
+// is exactly the same for everyone. the individual rule modifiers below are
+// each rolled independently off the same RNG stream (RaptRandom::Get calls
+// scattered through SetRules, e.g. "if (RaptRandom::Get(gRandom,2)==1)"),
+// so the day's full rule set is deterministic but not literally one index
+// into one list - more like a sequence of coin flips everyone gets in the
+// same order that day
+//
+// MonthlySeed(0) and App::GetNowDay(0) are now both fully decompiled
+// (App::MonthlySeed at 0x004be204, App::GetNowDay at 0x004c16e0), closing
+// the one gap that used to block computing today's actual gametype:
+//   seed = parseInt(`${year}${String(month).padStart(2,"0")}`)   // e.g. 202608
+//   day  = the plain day-of-month, 1-31, read off the same OS_Core::GetTime
+// both read off "now" (the App::*(0) call), same year/month/day a player's
+// device clock reports - no server involved
+//
+// the 35-slot gametype pool itself is now fully decompiled too: a weighted
+// bag [0,0,0,1,1,2,3,3,4,4] (ids 0/1/4 appear twice as often as 2, 3 twice
+// as often as 2 too) is drawn from with RaptRandom::Get, with anti-repeat
+// rejection - ids 2/3 redraw if they'd repeat the immediately-previous
+// slot, ids 0/1/4 redraw if they'd repeat either of the previous two -
+// verified violation-free by simulating every month 2019-2027. today's
+// gametype is simply pool[dayOfMonth] (GetNowDay's realistic 1-31 range
+// never exceeds the pool's own GuaranteeSize(35), so the code's modulo
+// fallback path never actually triggers - direct indexing it is)
+//
+// the modifiers, bonus, and difficulty rolls draw from gRandom, a SEPARATE
+// RaptRandom instance - App::Go seeds it once at launch with OS_Core::Tick(),
+// which looked like the whole story at first, but Game::GoDailyDo reseeds
+// it again right before SetRules runs, this time with App::DailySeed(0)
+// (year+month+day as one int, e.g. 20260805) - deterministic and shared
+// by every player that day, same as the gametype pick. confirmed by the
+// player-visible evidence too: rebooting the game repeatedly reproduces
+// the same rules, and screenshots from different players match on the
+// same day
+//
+// everything from modifier id5 onward is drawn from a weighted candidate
+// deck (~20 rule objects, gated by today's gametype id, one duplicated
+// for extra draw-weight), shuffled in place with gRandom's own draws
+// (PointerList::Shuffle's own algorithm - a full-range draw per slot,
+// rerolled on self-match, not textbook Fisher-Yates), then 1-3 cards
+// drawn off the front and IsRuleOK-checked. modifier count is itself a
+// gRandom roll (1/12 chance of 3, else ~11/240 of 1, else 2), and bonus
+// odds depend on that count: 3 modifiers means no bonus, 1 always grants
+// one, 2 is a reroll gamble. difficulty (Easiest/Medium/Hard) is a final
+// Get(5) roll, skipped entirely on chuzzle-in-ten (gametype 3), which
+// also has its own extra conflict-resolution pass for rules 6/7 sharing
+// board space. full algorithm implemented in chuzzle/dailydo/rules.js -
+// two known gaps: the id27 colour-name array is only confirmed at index
+// 0 ("Red"), the other five are a plausible guess; and IsRuleOK's generic
+// per-category exclusivity tags beyond the one documented id23 special
+// case weren't recovered, so very rare edge-case rule conflicts might
+// slip through unfiltered
+//
+// confidence per rule: "confirmed" means the id-to-icon link was read
+// directly off a code path (id 20's icon draw, or the icon filename itself
+// for 28/29). "inferred" means matched by reading the icon's artwork
+// against the rule text - the exact numeric id for those is a best guess,
+// not something pulled from a pointer offset
+//
+// icons live in ../images/ruleicons/{gametype,rule,bonus}/, copied and
+// renamed from datainfo/apk/assets/images/UI_DYNA/DD{GameType,Rules,Bonus}_Icon[...].png
+//
+// confirmed custom markup tags used in these panels, defined once per panel
+// via <define>:
+//   <color r,g,b>  or  <color name>   - e.g. <color 0,1,0>, <color gold>
+//   <_tc>     default readable text colour (rgba .8,.8,1,.85)
+//   <blinky>  colour-cycling emphasis for the key phrase in a rule
+//   <_stinky> red/yellow blinking warning variant, seen on stinky-lock text
+//   <img ddgt_icon%d>, <img ddrule_icon%d>, <img ddbonus_icon%d>
+
+{
+    // the tournament's weekly headline mode, chosen as pool[GetNowDay()%35]
+    "gametype": [
+        {"id": 0, "icon": "gametype/0classic", "name": "Classic Chuzzle",
+            "color": "0,1,0",
+            "text": "Plays like Classic Chuzzle!  Pop Chuzzles for as long as you can!"},
+        {"id": 1, "icon": "gametype/1sunchuzzle", "name": "SunChuzzle",
+            "color": "gold",
+            "text": "Plays like SunChuzzle!  Double score when you make gold!"},
+        {"id": 2, "icon": "gametype/2speed", "name": "Speed Chuzzle",
+            "color": "orange",
+            "text": "Plays like Speed Chuzzle!  Watch out, the lock bar gets faster with each move!"},
+        {"id": 3, "icon": "gametype/3ten", "name": "Chuzzle In Ten",
+            "color": "cyan",
+            "text": "Plays like Chuzzle In Ten!  Choose carefully, you only get ten moves!"},
+        {"id": 4, "icon": "gametype/4chains", "name": "Chuzzles in Chains",
+            "color": "grey",
+            "text": "Plays like Chuzzles in Chains, but every time you break a lock, TWO LOCKS will fall in!"}
+    ],
+
+    // optional modifiers layered on top of the day's gametype
+    "rules": [
+        {"id": 5, "icon": "rule/5fat", "confidence": "inferred",
+            "text": "There will be LOTS of Fat Chuzzles in play!"},
+        {"id": 6, "icon": "rule/6fourplus", "confidence": "inferred",
+            "text": "You only score points with matches of FOUR OR MORE!"},
+        {"id": 7, "icon": "rule/7fiveplus", "confidence": "inferred",
+            "text": "Matching five or more Chuzzles in one group will grant you an extra move!"},
+        {"id": 8, "icon": "rule/8lastrow", "confidence": "inferred",
+            "text": "Locks tend to appear on the row you last moved!"},
+        {"id": 9, "icon": "rule/9gacha", "confidence": "inferred",
+            "text": "Some Chuzzles will start in a Gacha ball!"},
+        {"id": 10, "icon": "rule/10eachmove", "confidence": "inferred",
+            "text": "A lock will fall in at the end of each move!"},
+        {"id": 11, "icon": "rule/11mystery", "confidence": "inferred",
+            "text": "Sometimes a Mystery Chuzzle will fall in!"},
+        {"id": 12, "icon": "rule/12combolock", "confidence": "inferred",
+            "text": "Any time you make a combo, a lock will fall in!"},
+        {"id": 13, "icon": "rule/13fourlock", "confidence": "inferred",
+            "text": "Matches of four or more Chuzzles bring in a lock!"},
+        {"id": 14, "icon": "rule/14chainlock", "confidence": "inferred",
+            "text": "Any time you make a chain reaction, a lock will fall in!"},
+        {"id": 15, "icon": "rule/15tintbase", "confidence": "confirmed", "text": null,
+            "note": "small accent shape layered on top of icon 20 for rule id 20's render - not its own rule"},
+        {"id": 16, "icon": "rule/16tintframe", "confidence": "confirmed", "text": null,
+            "note": "drawn together with icon 15 on top of icon 20 for rule id 20 (see below)"},
+        {"id": 17, "icon": "rule/17timeslocks", "confidence": "inferred",
+            "text": "All scores are multiplied by the number of locks on the board!"},
+        {"id": 18, "icon": "rule/18comboscore", "confidence": "inferred",
+            "text": "You only score points if you make a COMBO!"},
+        {"id": 19, "icon": "rule/19chainnobonus", "confidence": "inferred",
+            "text": "Chain reactions don't give any bonus!"},
+        {"id": 20, "icon": "rule/20chuzzle", "confidence": "confirmed",
+            "text": "Rainbow Chuzzles are in play!  Match them for a big bonus that grows each time!",
+            "note": "the only rule with a directly-traced id: code checks 'if (ruleId == 0x14)', tints this base chuzzle silhouette with a random gChuzzleColors entry via <color %s>, then layers icons 16 and 15 on top before the text"},
+        {"id": 21, "icon": "rule/21comborainbow", "confidence": "inferred",
+            "text": "Combo matches create a Rainbow Chuzzle!"},
+        {"id": 22, "icon": "rule/22chainrainbow", "confidence": "inferred",
+            "text": "Chain reactions create a Rainbow Chuzzle!"},
+        {"id": 23, "icon": "rule/23colormulti", "confidence": "inferred",
+            "text": "Pop the same color over and over for a HUGE score multiplier!"},
+        {"id": 24, "icon": "rule/24stinky", "confidence": "inferred",
+            "text": "But wait a minute!  ALL LOCKS are actually STINKY CHUZZLE!  And Stinky won't match!",
+            "note": "rendered with the <_stinky> red/yellow blink tag instead of <_tc>, always paired with a lock-related rule above it"},
+        {"id": 25, "icon": "rule/25foursuper", "confidence": "inferred",
+            "text": "Matching FOUR chuzzles creates a super Chuzzle too!"},
+        {"id": 26, "icon": "rule/26combosuper", "confidence": "inferred",
+            "text": "Combo matches create a Super Chuzzle!"},
+        {"id": 27, "icon": "rule/27colortemplate", "confidence": "inferred",
+            "text": "Matching %s CHUZZLES will %s scores for the turn!",
+            "note": "templated: %s slots are filled with a colour name and a multiplier word (double/triple/quadruple), chosen elsewhere in SetRules"},
+        {"id": 28, "icon": "rule/28bigger", "confidence": "confirmed",
+            "text": "The board is bigger'd!  More space for more Chuzzle action!"},
+        {"id": 29, "icon": "rule/29smaller", "confidence": "confirmed",
+            "text": "The board is squished!  Less space means a tighter squeeze!"}
+    ],
+
+    // the free power-up handed out for the day, one of these four
+    "bonus": [
+        {"id": 0, "icon": "bonus/0splode", "name": "Splode",
+            "text": "You get a Splode bonus to use!"},
+        {"id": 1, "icon": "bonus/1lockbreak", "name": "Lockbreaker",
+            "text": "You get a Lockbreaker bonus to use!"},
+        {"id": 2, "icon": "bonus/2colorcrush", "name": "Color Crusher",
+            "text": "You get a Color Crusher bonus to use!"},
+        {"id": 3, "icon": "bonus/3superchuzzle", "name": "Super Chuzzle",
+            "text": "You get a Super Chuzzle bonus to use!"}
+    ],
+
+    // the custom markup defined at the top of every Today's Rules panel
+    "tags": {
+        "_tc": "color .8,.8,1,.85 - the default readable body text colour",
+        "blinky": "blink color=.8,1,1;color=.8,.8,1,.75;time=30; - cyan/blue pulse for emphasis",
+        "_stinky": "blink color=1,1,.5;color=1,.5,.5,.75;time=30; - yellow/red pulse for warnings"
+    }
+}

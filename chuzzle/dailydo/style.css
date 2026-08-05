@@ -689,3 +689,60 @@
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
         #6020cf 80%, #ba9fe6 100%);
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+[data-role=rules] .logo .inner {fill: url(#lgpop4)}
+.rulewrap .popup {width: calc(var(--u) * 0.86)}
+
+.rulesaside {
+    display: none; position: fixed; z-index: 3;
+    top: 3vh; left: calc(50% + var(--u) / 2 + 1.6vw);
+    width: min(22vw, 260px);
+    padding: 0.8em; border-radius: 0.6em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+}
+.showaside .rulesaside {display: block}
+.rulesheader {
+    font-family: "chuzzle", "blippo"; text-transform: uppercase;
+    font-size: 1.1em; letter-spacing: 0.02em;
+    text-align: center; margin-bottom: 0.5em; color: #ffe066;
+    text-shadow: 0 0.08em 0.16em rgba(0,0,0,0.6);
+}
+
+.rulesbutton {
+    display: none; position: fixed; z-index: 5;
+    top: 1.6vh; right: calc(50% - var(--u) / 2 - 3.2vh);
+    width: 8vh; height: 8vh; max-width: 56px; max-height: 56px;
+    padding: 0.2em; margin: 0; border-radius: 50%;
+    background: #03104d;
+    box-shadow: 0 0 0 0.12em #ffd200, 0 0.2em 0.5em rgba(0,0,0,0.5);
+}
+.rulesbutton img {width: 100%; height: 100%; object-fit: contain}
+.rulesbutton:active {filter: brightness(1.4)}
+.showaside .rulesbutton {display: none}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* matches the real popup's dark navy card: one icon+text row per active
+   rule - only the day's gametype is ever rendered here for now, see rules.js */
+.rulesitem {
+    display: flex; align-items: center; gap: 0.7em;
+    text-align: left;
+}
+.rulescontent {display: flex; flex-direction: column; gap: 0.6em}
+.rulesitem img {width: 2.4em; height: 2.4em; flex: none}
+.rulesitem span {font-size: 0.85em; line-height: 1.25; color: #d8daff}
+
+.rulesdivider {height: 1px; background: rgba(255,255,255,0.25); margin: 0 0.2em}
+.rulesdifficulty {
+    text-align: center; font-size: 0.9em; color: #d8daff;
+    padding-top: 0.2em;
+}
+.rulesdifficulty span {font-weight: 700}
+
+.rulesaside .rulescontent {
+    padding: 0.7em 0.6em; border-radius: 0.5em;
+    background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
+    box-shadow: 0 0 0 0.2em #03104d;
+}

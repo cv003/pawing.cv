@@ -1,11 +1,12 @@
-let countrynames = {};
-let knownflags = new Set();
+let countries = {};
 const countriesready = fetch("assets/static/countries.json").then(function(reply) {
     return reply.ok ? reply.json() : {};
-}).then(function(got) {
-    countrynames = got.names || {};
-    knownflags = new Set(got.flags || []);
-}).catch(function() {});
+}).then(function(got) {countries = got}).catch(function() {});
+
+function countryname(cc) {return countries[cc] || ""}
+// every code has a flag asset except "--", the placeholder for a country
+// the server itself didn't recognise - that one falls back to --.png
+function hasflag(cc) {return cc !== "--" && cc in countries}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -63,7 +64,7 @@ function readboard(text) {
         if (bits.length < 3) continue;
         const clean = tidyname(bits[1]);
         out.push({
-            cc: knownflags.has(bits[0]) ? bits[0] : "--",
+            cc: hasflag(bits[0]) ? bits[0] : "--",
             country: bits[0],
             name: drawname(bits[1]),
             full: clean,
@@ -438,7 +439,7 @@ function makeidtip() {
             return;
         }
         const entry = board[row.dataset.at];
-        tip.textContent = countrynames[entry.country] || entry.country;
+        tip.textContent = countryname(entry.country) || entry.country;
         tip.style.left = (e.clientX + 14) + "px";
         tip.style.top = (e.clientY + 16) + "px";
         tip.classList.add("on");
@@ -566,7 +567,7 @@ function makeprofile() {
         if (!entry) return;
         playsound("click", 0.7);
         const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
-        const country = countrynames[entry.country] || entry.country;
+        const country = countryname(entry.country) || entry.country;
 
         const noguid = !realid(entry.id);
         const joined = noguid ? null : joinlabel(entry.id);
@@ -800,7 +801,12 @@ function spawnburststar(wrap, elapsed) {
     // visibly starting from nothing
     if (elapsed) seat.style.animationDelay = "-" + elapsed + "s";
     seat.innerHTML = "<img src=\"assets/images/star.png\" alt=\"\">";
-    seat.addEventListener("animationend", function() {seat.remove()});
+    // burststar carries two animations (fly + a short fade-in), so
+    // animationend fires twice - only remove once the flight itself ends,
+    // else the fade-in's earlier end deletes the star mid-flight
+    seat.addEventListener("animationend", function(e) {
+        if (e.animationName === "burststarfly") seat.remove();
+    });
     burstlayerof(wrap).appendChild(seat);
 }
 
