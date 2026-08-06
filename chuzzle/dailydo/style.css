@@ -1,3 +1,8 @@
+/* a permanent, never-overridden copy of base.css's own --u formula - lets
+   .qrsheet opt out of the popup mobile-scale-up below (see .calwrap's
+   --u override) while everything else keeps reading the real var(--u) */
+:root {--baseu: min(var(--vh) * 0.5625, 100vw)}
+
 .sky {
     position: fixed; inset: 0;
     z-index: 0; overflow: hidden;
@@ -355,7 +360,13 @@
     width: calc(100% - var(--u) * 0.12);
     padding: calc(var(--u) * 0.022);
 }
-.qrsheet {display: block; width: 100%; height: auto}
+/* sized off --baseu (the real, unscaled --u) instead of 100% of its
+   container, so the QR code stays the same real-world size even inside
+   the enlarged mobile popup - only the surrounding chrome grows */
+.qrsheet {
+    display: block; height: auto;
+    width: calc(var(--baseu) * 0.456); max-width: 100%;
+}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -501,7 +512,7 @@
    everywhere (which made them annoyingly small to tap on desktop, where
    they never overlapped anything to begin with), just drop them below a
    phone-width breakpoint. the calendar picker still reaches every day */
-@media (max-width: 520px) {
+@media (max-width: 660px) {
     .switcher {display: none}
 }
 
@@ -645,6 +656,19 @@
     100%    {transform: translate(-50%, -50%) scale(2.70); opacity: 0}
 }
 
+/* every popup's content is sized off var(--u), which already shrinks on
+   narrow phones since --u caps at 100vw there - the result reads too
+   small on mobile even though it's "correct" by the same math that looks
+   right on desktop. redefining --u locally, scoped to .calwrap, scales
+   every var(--u) calc() inside a popup (box, text, buttons, spacing) up
+   together without touching the real --u used by the game board or
+   anything outside a popup. --baseu never gets this override - it's what
+   .qrsheet sizes off instead, so the QR code stays the same real size
+   rather than blowing up along with everything else around it */
+@media (max-width: 660px) {
+    .calwrap {--u: calc(var(--baseu) * 1.22)}
+}
+
 .calwrap .popup {
     width: calc(var(--u) * 0.78); margin: 0;
     max-width: calc(100vw - var(--u) * 0.16);
@@ -653,7 +677,7 @@
 }
 .closebtn {
     position: absolute; z-index: 3;
-    top: calc(var(--u) * -0.05); right: calc(var(--u) * -0.095);
+    top: calc(var(--u) * -0.05); right: calc(var(--u) * -0.065);
     width: calc(var(--u) * 0.105); height: calc(var(--u) * 0.105);
     margin: 0; padding: 0; background: none;
 }
@@ -754,6 +778,9 @@
    version, just without the "Today's Rules!" title - display:none on the
    logo drops it from the flex column entirely so .pucontent doesn't leave
    a gap where it used to sit */
+/* no outer black ring here (unlike the mobile popup) - just the coloured
+   rings, since the small aside card made the shared black ring look like
+   a heavy, disconnected border rather than a subtle edge */
 .rulesaside .popup {
     width: 100%; margin: 0; border-radius: 0.4em;
     box-shadow:
@@ -764,11 +791,27 @@
         0 0 0 13px #FFFF80, 0 0 0 14px #FFFF80, 0 0 0 15px #FFFF80,
         0 0 0 16px #f0807e, 0 0 0 17px #fd8886, 0 0 0 18px #ff8d89,
         0 0 0 19px #ff8e8a, 0 0 0 20px #ff908b, 0 0 0 21px #ff918c,
-        0 0 0 22px #ff918e, 0 0 0 23px #ff928f,
-        0 0 0 28px rgba(0,0,0,0.34);
+        0 0 0 22px #ff918e, 0 0 0 23px #ff928f;
 }
-.rulesaside .puglows {inset: -22px; opacity: 0.55}
+.rulesaside .puglows {inset: -22px}
+/* global.css's .puw/.pur glow blobs use fixed-px radii (75-105px) sized
+   for a full-width popup - on this ~260px card they read as oversized,
+   washed-out blotches instead of corner accents. smaller radii plus the
+   base (not dimmed) opacity gets them back to looking like a proper glow
+   at this scale */
 .rulesaside .puw, .rulesaside .pur {inset: -20px}
+.rulesaside .puw {
+    opacity: 0.7;
+    background:
+        radial-gradient(circle at 0 0, white 0 26px, transparent 38px),
+        radial-gradient(circle at 100% 100%, white 0 26px, transparent 38px);
+}
+.rulesaside .pur {
+    opacity: 0.95;
+    background:
+        radial-gradient(circle at 100% 0, red 0 30px, transparent 38px),
+        radial-gradient(circle at 0 100%, red 0 30px, transparent 38px);
+}
 .rulesaside .logo {display: none}
 .rulesaside .pucontent {width: calc(100% + 8px)}
 /* fills the whole ring now that the title isn't reserving space up top -
@@ -778,6 +821,11 @@
     width: calc(100% - 16px); box-shadow: 0 0 0 5px #03104d;
     padding-top: 0.8em; padding-bottom: 0.8em;
 }
+/* scaled back down from the mobile popup's bigger sizing - the desktop
+   aside has its own compact-by-design footprint and the enlarged text/
+   icons didn't fit the same way there */
+.rulesaside .rulesitem > span {font-size: 1em}
+.rulesaside .rulesdifficulty {font-size: 0.95em}
 
 /* the glow was scaled for a full popup, not this small a box - dial it
    back so it doesn't wash out the content next to it */
@@ -832,7 +880,7 @@
    a class - that's what was silently overriding the icon-left/text-right
    layout below. ".pucontent .rulesitem" outranks it back */
 .pucontent .rulesitem {
-    display: flex; flex-direction: row; align-items: flex-start;
+    display: flex; flex-direction: row; align-items: center;
     justify-content: flex-start; gap: 0.4em;
     text-align: left;
 }
@@ -843,9 +891,9 @@
     --r: 0.05em; text-shadow: var(--ring);
 }
 
-/* the compact desktop layout - bigger icons since there's no popup chrome
-   competing for space anymore */
-.rulesaside .rulesitem img {width: 4.65em; height: 4.65em}
+/* the compact desktop layout - back down from the mobile popup's enlarged
+   sizing, it needs to stay small enough for the narrow aside column */
+.rulesaside .rulesitem img {width: 2.8em; height: 2.8em}
 
 /* the two emphasis colours the game's own markup defines - blinky is a
    cyan/blue pulse used for the key phrase in a rule, stinky is a
@@ -900,7 +948,7 @@
    the value onto their own stacked anonymous flex items instead of one
    line, and out-ranking the colour override despite !important */
 .pucontent .rulesdifficulty {
-    display: block; text-align: center; font-size: 0.9em;
+    display: block; text-align: center; font-size: 1.15em;
     color: rgba(204,204,255,0.85) !important;
     padding-top: 0.2em; white-space: nowrap; width: auto;
 }
