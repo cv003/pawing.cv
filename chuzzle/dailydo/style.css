@@ -209,14 +209,10 @@
 }
 .scores > div {position: absolute; left: 0; right: 0}
 
-/* left/right padding has to clear the fixed .swleft/.swright arrows
-   (positioned at 0.03u, ~0.125u wide - reaching to ~0.155u) or their
-   vertical-center placement lands them on top of whichever row happens to
-   scroll to mid-viewport, not just the list's very top/bottom edge */
 .scores > div {
     display: flex; align-items: baseline;
     line-height: 0.8; white-space: nowrap;
-    padding-left: 17.5cqw; padding-right: 17.5cqw;
+    padding-left: 4cqw; padding-right: 5cqw;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -254,9 +250,17 @@
 /* shrinkable instead of a fixed character cap - only clips exactly as much
    as the row's actual width demands, so it stays correct at any viewport
    size and doesn't overlap the flag/score next to it */
+/* flex-grow:0 (not 1) - name should hug its own text and sit right against
+   the flag, only ever shrinking (never stretching) when the row is too
+   tight for rank+name+flag+score together. the padding+negative-margin
+   pair gives the multi-directional --ring text-shadow room to paint before
+   overflow:hidden's clip box cuts it off - without it the ring around the
+   first glyph's top/left gets clipped flush against the box edge */
 .scores name {
-    flex: 1 1 auto; min-width: 0; overflow: hidden;
+    flex: 0 1 auto; min-width: 0; overflow: hidden;
     text-overflow: ellipsis;
+    padding-left: 0.3em; padding-top: 0.3em;
+    margin-left: -0.3em; margin-top: -0.3em;
 }
 .scores score {margin-left: auto; flex: none}
 
@@ -431,7 +435,7 @@
     gap: calc(var(--u) * 0.006);
     margin: 0; padding: 0; background: none; text-transform: uppercase;
     font-family: "chuzzle", "blippo"; font-weight: 100;
-    font-size: calc(var(--u) * 0.049);
+    font-size: calc(var(--u) * 0.028);
     color: rgb(255, 191, 128);
     --r: 0.15em; --ink: #261b19;
     white-space: nowrap;
@@ -449,12 +453,16 @@
     display: flex; align-items: center;
     gap: 0.2em; color: inherit;
 }
-.switcher .swleft {left: calc(var(--u) * 0.03)}
-.switcher .swright {right: calc(var(--u) * 0.03)}
+.switcher .swleft {left: calc(var(--u) * 0.02)}
+.switcher .swright {right: calc(var(--u) * 0.02)}
 .switcher .line {margin-top: 0.14em}
 .switcher button:active {filter: brightness(1.6)}
+/* smaller than before (was 0.125u) - shrinking the arrow's own footprint
+   is what keeps it clear of the list text now, since the row padding was
+   deliberately kept tight for looks rather than sized to the old, bigger
+   arrow */
 .switcher img.arrow {
-    height: calc(var(--u) * 0.125); width: auto;
+    height: calc(var(--u) * 0.07); width: auto;
     filter: drop-shadow(0 calc(var(--u) * 0.006) 0 #261b19);
 }
 .switcher .swleft img.arrow {transform: scaleX(-1)}
@@ -779,8 +787,13 @@
 
 /* align-items: flex-start (not center) matches the real popup - the icon
    anchors to the first line instead of centering against wrapped text */
-.rulesitem {
-    display: flex; align-items: flex-start; gap: 0.7em;
+/* global.css's ".pucontent div" (icon-on-top, centered) outranks a bare
+   ".rulesitem" by specificity, since it's a class+element selector vs just
+   a class - that's what was silently overriding the icon-left/text-right
+   layout below. ".pucontent .rulesitem" outranks it back */
+.pucontent .rulesitem {
+    display: flex; flex-direction: row; align-items: flex-start;
+    justify-content: flex-start; gap: 0.7em;
     text-align: left;
 }
 .rulesitem img {width: 2.6em; height: 2.6em; flex: none}
