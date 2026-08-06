@@ -187,7 +187,7 @@ button {
         0 0 0 31px #f0807e, 0 0 0 33px #fd8886, 0 0 0 35px #ff8d89,
         0 0 0 37px #ff8e8a, 0 0 0 39px #ff908b, 0 0 0 41px #ff918c, 
         0 0 0 43px #ff918e, 0 0 0 45px #ff928f,
-        0 0 0 55px rgba(0,0,0,0.34);
+        0 0 0 55px rgba(0,0,0,0.25);
 }
 .puglows {
     position: absolute; inset: -45px;
@@ -204,7 +204,7 @@ button {
         radial-gradient(circle at 100% 100%, white 0 75px, transparent 105px);
 }
 .pur {
-    opacity: 0.95; filter: blur(3px);
+    opacity: 0.7; filter: blur(3px);
     background:
         radial-gradient(circle at 100% 0, red 0 85px, transparent 105px),
         radial-gradient(circle at 0 100%, red 0 85px, transparent 105px);
@@ -219,9 +219,6 @@ button {
     box-shadow: 0 -8px 12px -8px #e7bd00;
 }
 .pucontent .logo {height: 70px; z-index: 100}
-
-/* padding is big enough to keep content clear of the background's top/
-   bottom gradient bands (the 20%/80% stops below), not just look nice */
 .pucontent div {
     position: relative; display: flex; top: -5px;
     width: calc(100% - 30px);

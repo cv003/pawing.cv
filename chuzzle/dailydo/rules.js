@@ -8,8 +8,15 @@ const rulesready = fetch("assets/static/rules.jsonc").then(function(reply) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+// legacy: true picks RaptRandom::GetLegacy (pre-2.70 - power-of-2 mask then
+// a true modulo, which has the classic modulo-bias problem for non-power-
+// of-2 n) instead of GetNew (2.70+ - multiply-shift, no bias). both share
+// the same ring/seed - only the draw math differs
 class RaptRandom {
-    constructor() {this.ring = new Array(55).fill(0); this.j = 0; this.k = 31}
+    constructor(legacy) {
+        this.ring = new Array(55).fill(0); this.j = 0; this.k = 31;
+        this.legacy = !!legacy;
+    }
     seed(s) {
         const mask = 0x3fffffff;
         s = s & mask;
@@ -21,15 +28,32 @@ class RaptRandom {
             this.ring[3 + i] = carry;
         }
     }
-    get(n) {
-        if (n <= 0) return 0;
+    // advances the ring and returns the raw 24-bit fraction shared by both
+    // get() variants below
+    draw() {
         const mask = 0x3fffffff;
         const sum = (this.ring[this.k] + this.ring[this.j]) & mask;
         this.ring[this.j] = sum;
         this.j = (this.j === 54) ? 0 : this.j + 1;
         this.k = (this.k === 54) ? 0 : this.k + 1;
-        const frac = (sum >>> 6) & 0xffffff;
-        return Math.floor(frac * n / 0x1000000);
+        return (sum >>> 6) & 0xffffff;
+    }
+    get(n) {
+        return this.legacy ? this.getlegacy(n) : this.getnew(n);
+    }
+    getnew(n) {
+        if (n <= 0) return 0;
+        return Math.floor(this.draw() * n / 0x1000000);
+    }
+    getlegacy(n) {
+        if (n === 0) return 0;
+        const frac = this.draw();
+        // smallest power of two >= n, matching the decompile's own
+        // do/while doubling loop exactly (not just 1 << ceil(log2(n)))
+        let b = 2, a;
+        do {a = b; b = a << 1} while (a < n);
+        const masked = frac & (a - 1);
+        return masked % n;
     }
 }
 
@@ -43,8 +67,8 @@ function dailyseed(year, month, day) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 const gametypebag = [0, 0, 0, 1, 1, 2, 3, 3, 4, 4];
-function buildgametypepool(seed) {
-    const rng = new RaptRandom();
+function buildgametypepool(seed, legacy) {
+    const rng = new RaptRandom(legacy);
     rng.seed(seed);
     const pool = [];
     for (let slot = 0; slot < 35; slot++) {
@@ -95,9 +119,11 @@ function builddeck(gametype, day, rng, extra) {
     push(11);
     if (gametype === 3) push(17);
     push(18);
-    if ((gametype === 0 || gametype === 1) && day % 3 === 1) push(19);
+    // pre-2.70 (rng.legacy), rule 19 has no day-of-month gate at all - that
+    // condition was added in 2.70 alongside rules 30/31 below, which don't
+    // exist pre-2.70 and never get pushed onto the deck in legacy mode
+    if ((gametype === 0 || gametype === 1) && (rng.legacy || day % 3 === 1)) push(19);
 
-    // colour order traced from gChuzzleColors's own RGB literals
     extra.colour = ["Red", "Green", "Blue", "Orange", "Yellow", "Purple"][rng.get(6)];
     extra.multiplier = ["double", "triple"][rng.get(2)];
     push(20);
@@ -108,8 +134,10 @@ function builddeck(gametype, day, rng, extra) {
     push(27);
     push(28);
     push(29);
-    if (gametype !== 2) push(30);
-    if (day % 3 === 0) push(31);
+    if (!rng.legacy) {
+        if (gametype !== 2) push(30);
+        if (day % 3 === 0) push(31);
+    }
     return deck;
 }
 
@@ -174,13 +202,13 @@ function drawdifficulty(rng, gametype) {
     return {name: "Hard!", color: "1,0,0"};
 }
 
-function computerulesfordate(date) {
+function computerulesfordate(date, legacy) {
     const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
 
-    const pool = buildgametypepool(monthlyseed(year, month));
+    const pool = buildgametypepool(monthlyseed(year, month), legacy);
     const gametype = pool[day];
 
-    const rng = new RaptRandom();
+    const rng = new RaptRandom(legacy);
     rng.seed(dailyseed(year, month, day));
     const extra = {};
     const deck = shuffledeck(builddeck(gametype, day, rng, extra), rng);
@@ -236,13 +264,29 @@ function ruletext(entry, extra) {
     if (entry.id !== 20) return entry.text;
     return entry.text.replace("%s", extra.colour).replace("%s", extra.multiplier);
 }
+// persisted so a visitor whose app isn't on the beta track doesn't have to
+// re-pick "normal" every visit - see report_rulevariants_270.md for what
+// this does and doesn't cover (RNG formula + rules 19/30/31, not the
+// second gRandom reseed, which is a no-op for a from-scratch reimplementation either way)
+let legacymode = localStorage.getItem("chuzzlerulesmode") === "legacy";
+function togglerulesmode() {
+    legacymode = !legacymode;
+    try {localStorage.setItem("chuzzlerulesmode", legacymode ? "legacy" : "new")} catch (e) {}
+    paintrulescontent();
+}
+document.addEventListener("click", function(e) {
+    if (e.target.closest(".rulesmode")) togglerulesmode();
+});
+
 function rulescontenthtml(date) {
     if (!rules) return "";
-    const today = computerulesfordate(date);
+    const today = computerulesfordate(date, legacymode);
     const gt = rules.gametype[today.gametype];
     if (!gt) return "";
 
-    let html = itemrow(gt.icon, gt.name, gt.text);
+    let html = "<button type=\"button\" class=\"rulesmode\">"
+        + (legacymode ? "Normal (2.69)" : "Beta (2.70)") + "</button>";
+    html += itemrow(gt.icon, gt.name, gt.text);
     if (today.ruleids.length) html += "<div class=\"rulesdivider\"></div>";
     html += today.ruleids.map(function(id) {
         const entry = rules.rules.find(function(r) {return r.id === id});
@@ -269,10 +313,14 @@ function paintrulescontent(back) {
     const html = rulescontenthtml(date);
     if (!html) return;
 
-    document.querySelectorAll(".rulescontent").forEach(function(seat) {seat.innerHTML = html});
+    document.querySelectorAll(".rulescontent").forEach(function(seat) {
+        if (!seat.closest(".ghost")) seat.innerHTML = html;
+    });
 
     const title = rulestitlefor(back);
-    document.querySelectorAll(".rulestitle").forEach(function(el) {el.textContent = title});
+    document.querySelectorAll(".rulestitle").forEach(function(el) {
+        if (!el.closest(".ghost")) el.textContent = title;
+    });
 }
 
 /*//////////////////////////////////////////////////////////////////////*/

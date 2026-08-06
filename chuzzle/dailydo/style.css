@@ -1,6 +1,3 @@
-/* a permanent, never-overridden copy of base.css's own --u formula - lets
-   .qrsheet opt out of the popup mobile-scale-up below (see .calwrap's
-   --u override) while everything else keeps reading the real var(--u) */
 :root {--baseu: min(var(--vh) * 0.5625, 100vw)}
 
 .sky {
@@ -14,8 +11,10 @@
     position: absolute; inset: 0;
     pointer-events: none;
 }
-
-.bg {z-index: 4; opacity: 0.45; mix-blend-mode: screen; overflow: hidden}
+.bg {
+    z-index: 4; opacity: 0.45; 
+    mix-blend-mode: screen; overflow: hidden
+}
 .bg::before {
     content: ""; position: absolute;
     left: 0; right: 0;
@@ -215,10 +214,7 @@
 }
 .scores > div {position: absolute; left: 0; right: 0}
 
-/* stays hidden until board.js's first paintrows() call sets a real "top"
-   (see .positioned) - without this it briefly renders at top:0 (the top
-   of .scroller, in plain view) before JS can move it into its actual
-   parked spot above rank #1, which read as a stray one-second jump */
+/* shh! */
 .celestial {
     position: absolute; left: 50%; top: 0;
     width: 20cqw; height: auto;
@@ -239,7 +235,7 @@
 
 .scores rank, .scores name, .scores score {
     --r: 0.15em; --ink: #261b19;
-    font-weight: 300; /* changing weight demolishes this whole site's visuals */
+    font-weight: 300; /* changing weight demolishes this whole site's visuals, it's best kept at 100-400 */
     text-transform: uppercase;
     text-shadow: var(--ring),
         0.150em 0.120em 0 #261b19, 0.130em 0.195em 0 #261b19,
@@ -258,9 +254,6 @@
     font-size: 0.6em; margin-right: 0.35em;
     letter-spacing: 0;
     --r: 0.25em;
-    /* the 12-point ring + one offset centre point approximates a solid
-       blob under normal glyphs, but a tiny round "." falls mostly inside
-       the ring's empty middle - the extra 0,0 copy plugs that gap */
     text-shadow: var(--ring),
         0.250em 0.200em 0 #261b19, 0.217em 0.325em 0 #261b19,
         0.125em 0.417em 0 #261b19, 0.000em 0.450em 0 #261b19,
@@ -270,22 +263,6 @@
         0.125em -0.017em 0 #261b19, 0.217em 0.075em 0 #261b19,
         0 0.200em 0 #261b19, 0 0 0 #261b19;
 }
-/* shrinkable instead of a fixed character cap - only clips exactly as much
-   as the row's actual width demands, so it stays correct at any viewport
-   size and doesn't overlap the flag/score next to it */
-/* flex-grow:0 (not 1) - name should hug its own text and sit right against
-   the flag, only ever shrinking (never stretching) when the row is too
-   tight for rank+name+flag+score together. the padding+negative-margin
-   pair gives the multi-directional --ring text-shadow room to paint before
-   overflow:hidden's clip box cuts it off - without it the ring around the
-   first glyph's top/left gets clipped flush against the box edge */
-/* bumped from 0.3em - the claimed ("mine") row's ddsway animation shifts
-   the text sideways up to 0.78cqw on top of the shadow's own ~0.27em
-   reach, so 0.3em wasn't quite enough clearance on that row specifically */
-/* all four sides now, not just top/left/right - the shadow list's
-   downward-most point reaches ~0.27em below the baseline, and this box's
-   own bottom edge sits right at that baseline (align-items:baseline), so
-   the solid shadow was still getting clipped flush along the bottom */
 .scores name {
     flex: 0 1 auto; min-width: 0; overflow: hidden;
     text-overflow: ellipsis;
@@ -374,9 +351,6 @@
     width: calc(100% - var(--u) * 0.12);
     padding: calc(var(--u) * 0.022);
 }
-/* sized off --baseu (the real, unscaled --u) instead of 100% of its
-   container, so the QR code stays the same real-world size even inside
-   the enlarged mobile popup - only the surrounding chrome grows */
 .qrsheet {
     display: block; height: auto;
     width: calc(var(--baseu) * 0.456); max-width: 100%;
@@ -493,10 +467,6 @@
 .switcher .swright {right: calc(var(--u) * 0.03)}
 .switcher .line {margin-top: 0.14em}
 .switcher button:active {filter: brightness(1.6)}
-/* back to full size - shrinking these made them harder to tap on desktop,
-   where they already fit fine at their normal size. narrow phones hide
-   them outright below instead (see the max-width query) rather than
-   living with a smaller, harder-to-hit arrow everywhere */
 .switcher img.arrow {
     height: calc(var(--u) * 0.125); width: auto;
     filter: drop-shadow(0 calc(var(--u) * 0.006) 0 #261b19);
@@ -511,6 +481,7 @@
     animation: ddswayarrow 1.5s ease-in-out infinite alternate;
 }
 .switcher .swleft img.arrow {animation-name: ddswayflip}
+@media (max-width: 660px) {.switcher {display: none}}
 
 @keyframes ddswayarrow {
     from {transform: translateX(calc(var(--u) * -0.0078))}
@@ -519,15 +490,6 @@
 @keyframes ddswayflip {
     from {transform: translateX(calc(var(--u) * -0.0078)) scaleX(-1)}
     to {transform: translateX(calc(var(--u) * 0.0078)) scaleX(-1)}
-}
-
-/* full-size arrows overlap the score list on narrow phones no matter how
-   little the row padding gives up for them - rather than shrinking them
-   everywhere (which made them annoyingly small to tap on desktop, where
-   they never overlapped anything to begin with), just drop them below a
-   phone-width breakpoint. the calendar picker still reaches every day */
-@media (max-width: 660px) {
-    .switcher {display: none}
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -640,10 +602,7 @@
     position: absolute; top: 0; left: 0;
     width: 5.5em; height: 5.5em; margin: -2.75em;
     will-change: transform, opacity;
-    /* two independent animations: the flight path, and a plain 0.5s fade-in
-       that runs alongside it without touching the transform at all */
-    animation: burststarfly 2.6s cubic-bezier(0.55,0,1,0.45) forwards,
-        burstfadein 0.5s linear forwards;
+    animation: burststarfly 2.6s cubic-bezier(0.55,0,1,0.45) forwards, burstfadein 0.5s linear forwards;
 }
 .burststar img {width: 100%; height: 100%}
 @keyframes burststarfly {
@@ -670,19 +629,9 @@
     100%    {transform: translate(-50%, -50%) scale(2.70); opacity: 0}
 }
 
-/* every popup's content is sized off var(--u), which already shrinks on
-   narrow phones since --u caps at 100vw there - the result reads too
-   small on mobile even though it's "correct" by the same math that looks
-   right on desktop. redefining --u locally, scoped to .calwrap, scales
-   every var(--u) calc() inside a popup (box, text, buttons, spacing) up
-   together without touching the real --u used by the game board or
-   anything outside a popup. --baseu never gets this override - it's what
-   .qrsheet sizes off instead, so the QR code stays the same real size
-   rather than blowing up along with everything else around it */
 @media (max-width: 660px) {
     .calwrap {--u: calc(var(--baseu) * 1.22)}
 }
-
 .calwrap .popup {
     width: calc(var(--u) * 0.78); margin: 0;
     max-width: calc(100vw - var(--u) * 0.16);
@@ -771,19 +720,8 @@
 
 [data-role=rules] .logo .inner {fill: url(#lgpop4)}
 .rulewrap .popup {width: calc(var(--u) * 0.86)}
-/* the close button's "right" offset is tuned against the default
-   ".popup" width formula - this popup is deliberately wider
-   (0.86u instead of "100% - 100px"), which shifts where the popup's own
-   right edge lands relative to the corner glow, so the button needs its
-   own right offset to still hang off that corner correctly */
 .rulewrap .closebtn {right: calc(var(--u) * -0.04)}
 
-/* same .popup chrome the other popups use, just parked inline instead of
-   dimmed/centred - scaled down since the ring border sizes in global.css
-   are tuned for a full-width popup, not a ~260px aside */
-/* rooted to the bottom edge instead of floating - square bottom corners
-   (on both the ring and the glow clip below) make it read as a sign
-   growing up out of the screen edge rather than a card sitting near it */
 .rulesaside {
     display: none; position: fixed; z-index: 3;
     bottom: 0; left: calc(50% + var(--u) / 2 + 1.6vw);
@@ -791,13 +729,6 @@
     font-family: "nimbus sans becker", system-ui, sans-serif;
 }
 .showaside .rulesaside {display: block}
-/* desktop keeps the same yellow/pink/black popup ring as the mobile
-   version, just without the "Today's Rules!" title - display:none on the
-   logo drops it from the flex column entirely so .pucontent doesn't leave
-   a gap where it used to sit */
-/* no outer black ring here (unlike the mobile popup) - just the coloured
-   rings, since the small aside card made the shared black ring look like
-   a heavy, disconnected border rather than a subtle edge */
 .rulesaside .popup {
     width: 100%; margin: 0; border-radius: 0.4em 0.4em 0 0;
     box-shadow:
@@ -811,62 +742,25 @@
         0 0 0 22px #ff918e, 0 0 0 23px #ff928f;
 }
 .rulesaside .puglows {inset: -22px; border-radius: 1.5em 1.5em 0 0}
-/* global.css's .puw/.pur glow blobs use fixed-px radii (75-105px) sized
-   for a full-width popup - on this ~260px card they read as oversized,
-   washed-out blotches instead of corner accents. smaller radii plus the
-   base (not dimmed) opacity gets them back to looking like a proper glow
-   at this scale. puw/pur's inset is relative to .puglows (their own
-   containing block, since they're its children), not to .popup - at the
-   old -20px it put the gradient's bright centre entirely in the margin
-   .puglows clips away, leaving only a sliver of the fade past 26px
-   visible. inset:0 lines the gradient's corner anchor up with .puglows's
-   own visible corner instead, so the glow actually shows */
 .rulesaside .puw, .rulesaside .pur {inset: 0}
 .rulesaside .puw {
     opacity: 0.7;
-    background:
-        radial-gradient(circle at 0 0, white 0 26px, transparent 38px),
-        radial-gradient(circle at 100% 100%, white 0 26px, transparent 38px);
+    background: radial-gradient(circle at 0 0, white 0 26px, transparent 38px);
 }
 .rulesaside .pur {
-    opacity: 0.95;
-    background:
-        radial-gradient(circle at 100% 0, red 0 30px, transparent 38px),
-        radial-gradient(circle at 0 100%, red 0 30px, transparent 38px);
+    opacity: 0.7;
+    background: radial-gradient(circle at 100% 0, red 0 30px, transparent 38px);
 }
 .rulesaside .logo {display: none}
 .rulesaside .pucontent {width: calc(100% + 8px)}
-/* fills the whole ring now that the title isn't reserving space up top -
-   the "weird empty space" was .pucontent's own centering leaving slack
-   above/below a shorter box, not a size limit on .rulescontent itself */
-/* global.css's ".pucontent div" nudges every popup's content box up 5px
-   (top:-5px) to balance against the title logo above it - the aside has
-   no title anymore, so that nudge just reads as miscentered here */
 .rulesaside .pucontent > div {
     width: calc(100% - 16px); box-shadow: 0 0 0 5px #03104d;
     padding-top: 0.8em; padding-bottom: 0.8em;
     top: 0;
 }
-/* scaled back down from the mobile popup's bigger sizing - the desktop
-   aside has its own compact-by-design footprint and the enlarged text/
-   icons didn't fit the same way there */
 .rulesaside .rulesitem > span {font-size: 1em}
 .rulesaside .rulesdifficulty {font-size: 0.95em}
-
-/* the glow was scaled for a full popup, not this small a box - dial it
-   back so it doesn't wash out the content next to it */
 .rulewrap .puglows {opacity: 0.6}
-
-/* positioned via rules.js (measured against .todaybutton's own rect,
-   since this button lives outside .ui's cqw-based layout) - two separate
-   bugs meant it never showed before at any width: there was no rule ever
-   setting display back on (only a redundant "hide when showaside" rule),
-   and right was a bare calc() off var(--u) that goes negative once --u
-   caps out at 100vw on narrow viewports, pushing it off the right edge */
-/* texture only - no plate/ring, just the icon with a soft drop shadow so it
-   still reads against any background. stays invisible until rules.js has
-   positioned it once (see .positioned below), instead of flashing at its
-   unset top-left default position for a frame */
 .rulesbutton {
     display: flex; position: fixed; z-index: 5;
     width: 6.5vh; height: 6.5vh; max-width: 44px; max-height: 44px;
@@ -883,73 +777,58 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the box: everything else in .pucontent gets auto-boxed by global.css's
-   ".pucontent div" rule (a decision from long before this page existed),
-   so this class is the one deliberate box and everything nested inside
-   it (.rulesitem etc) gets that undone again right below */
 .rulescontent {
     display: flex; flex-direction: column; gap: 0.6em;
+    position: relative;
 }
 .pucontent .rulescontent {
     background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
     box-shadow: 0 0 0 10px #03104d; border-radius: 0.25em;
     width: calc(100% - 30px); padding: 1.1em 0.6em;
 }
+/* lets a visitor whose app isn't on the beta track match the site's rules
+   to what they actually see - picks between RaptRandom::GetNew (2.70+)
+   and GetLegacy (pre-2.70) for the whole computation, see rules.js.
+   global.css's ".pucontent div button" (font-size:2em, full-width, blue
+   gradient) outranks a bare ".rulesmode" by specificity - needs the same
+   kind of override as .rulesitem/.rulesdifficulty above */
+.pucontent .rulescontent .rulesmode {
+    position: absolute; top: 0.3em; right: 0.5em;
+    width: auto; margin: 0; padding: 0.2em 0.6em; border-radius: 1em;
+    background: rgba(255,255,255,0.12);
+    color: rgba(204,204,255,0.85);
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.6em; font-weight: 600; letter-spacing: 0.02em;
+    text-transform: none; text-shadow: none; cursor: pointer;
+}
+.pucontent .rulescontent .rulesmode:active {background: rgba(255,255,255,0.25)}
 .pucontent .rulescontent div {
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
 }
-
-/* align-items: flex-start (not center) matches the real popup - the icon
-   anchors to the first line instead of centering against wrapped text */
-/* global.css's ".pucontent div" (icon-on-top, centered) outranks a bare
-   ".rulesitem" by specificity, since it's a class+element selector vs just
-   a class - that's what was silently overriding the icon-left/text-right
-   layout below. ".pucontent .rulesitem" outranks it back */
 .pucontent .rulesitem {
     display: flex; flex-direction: row; align-items: center;
     justify-content: flex-start; gap: 0.4em;
     text-align: left;
 }
 .rulesitem img {width: 3.9em; height: 3.9em; flex: none}
-/* no outline here - the real popup's body text isn't stroked, only the
-   cursive title logo is (that's a separate svg fill/stroke, not this) */
 .rulesitem > span {
     font-size: 1.2em; line-height: 1.3;
     color: rgba(204,204,255,0.85);
 }
-
-/* the compact desktop layout - back down from the mobile popup's enlarged
-   sizing, it needs to stay small enough for the narrow aside column */
 .rulesaside .rulesitem img {width: 2.8em; height: 2.8em}
 
-/* the two emphasis colours the game's own markup defines - blinky is a
-   cyan/blue pulse used for the key phrase in a rule, stinky is a
-   yellow/red pulse reserved for the one lock-related warning line.
-   MLBlink::Draw (0x005826cc) confirms this is a hard square-wave colour
-   swap, not a crossfade: color1 for `time` ticks, color2 for the next
-   `time` ticks, no interpolation - <define>'s "time=30" sets that field
-   directly (constructor default is also 0x1e=30, a match). tick rate
-   itself wasn't pinned down, so the 1s full cycle here assumes a common
-   ~60fps tick - timing, not colour, is the soft part of this */
-.blinky {
-    animation: rulesblink 0.6s steps(1) infinite;
-}
+/* if anyone wants to make chuzzle rap you could rhyme these two.. just saying.. */
+.blinky {animation: rulesblink 0.6s steps(1) infinite}
 @keyframes rulesblink {
     0%, 50% {color: rgba(204,255,255,1)}
     50.01%, 100% {color: rgba(204,204,255,0.75)}
 }
-.stinky {
-    animation: rulesstink 1s steps(1) infinite;
-}
+.stinky {animation: rulesstink 1s steps(1) infinite}
 @keyframes rulesstink {
     0%, 50% {color: rgba(255,255,127,1)}
     50.01%, 100% {color: rgba(255,127,127,0.75)}
 }
 
-/* the real sprite (UI/sprite-14-12.png, a dark-edged silver shine bar,
-   95x9) - not dashed at all, that was a guess made before finding it.
-   tiled and scrolled sideways for the shimmer-sweep motion, since a still
-   screenshot can only ever catch one frame of that */
 .rulesdivider {
     height: 0.25em; margin: 0 -0.4em;
     overflow: hidden;
@@ -958,22 +837,11 @@
     background-repeat: repeat-x;
     animation: rulesdividerscroll 1.6s linear infinite;
 }
-/* tile width = height(0.25em) * the sprite's own 95:9 aspect ratio, so the
-   loop point lines up seamlessly with the next tile */
 @keyframes rulesdividerscroll {
     from {background-position-x: 0}
     to {background-position-x: -2.64em}
 }
 
-/* global.css's ".pucontent div" forces color:white !important on every div
-   in here, difficulty included - override back to the same "normal" text
-   colour the rest of the box uses. no outline here (unlike .rulesitem) -
-   the real popup doesn't stroke this line, and nowrap keeps the value on
-   the same line as the label instead of wrapping under it */
-/* same ".pucontent div" specificity collision as .rulesitem (see above) -
-   it was forcing display:flex/column here too, splitting the label and
-   the value onto their own stacked anonymous flex items instead of one
-   line, and out-ranking the colour override despite !important */
 .pucontent .rulesdifficulty {
     display: block; text-align: center; font-size: 1.15em;
     color: rgba(204,204,255,0.85) !important;

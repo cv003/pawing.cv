@@ -196,7 +196,12 @@ function prefetchdays() {
     });
 }
 
-// only refreshes every minute, or postponed if not viewing the leaderboard
+// only refreshes every minute, or postponed if not viewing the leaderboard.
+// cachekey()/dayback() both re-read the real clock on every call, so this
+// already silently catches up the leaderboard when the calendar day rolls
+// over while the tab is left open - it just never told the rules panel,
+// which stayed frozen on whatever day it was last painted (still correct
+// for dayat!==0, a specific past day, since those never change)
 async function refreshboard() {
     if (document.body.classList.contains("fetching")) return;
     const key = cachekey();
@@ -207,6 +212,7 @@ async function refreshboard() {
     useboard(text);
     board = filtered(findwant());
     repaint(keep);
+    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     showfooter();
 }
 
@@ -293,11 +299,13 @@ function drawpicks() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-const slidespan = 260;
+const slidespan = 260; // ms
+let includerulesslide = false;
 function slidemovers() {
-    return [document.querySelector(".dailydo:not(.ghost)"),
-        document.querySelector(".dumbcontainer:not(.ghost)"),
-        document.querySelector(".rulesaside:not(.ghost)")];
+    const movers = [document.querySelector(".dailydo:not(.ghost)"),
+        document.querySelector(".dumbcontainer:not(.ghost)")];
+    if (includerulesslide) movers.push(document.querySelector(".rulesaside:not(.ghost)"));
+    return movers;
 }
 function shove(seat, across) {
     const base = seat.classList.contains("dailydo") ? "translateX(-50%) " : "";
@@ -330,12 +338,13 @@ function slideswap(dir, ghosts) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-async function reload(dir) {
+async function reload(dir, dayChanged) {
     document.body.classList.add("fetching");
     const count = await loadboard();
     document.body.classList.remove("fetching");
+    includerulesslide = !!dayChanged;
     const ghosts = snapshot();
-    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
+    if (dayChanged && typeof paintrulescontent === "function") paintrulescontent(dayat);
     drawsteppers();
     drawpicks();
     relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
@@ -394,20 +403,15 @@ function switchday(step) {
     const want = nextday(dayat, step);
     if (want < 0) return;
     dayat = want;
-    reload(step);
+    reload(step, true);
 }
-
 function pickday(back) {
     if (back === dayat || back < 0 || back > calendarreach) return;
     const dir = back > dayat ? 1 : -1;
     dayat = back;
-    reload(dir);
+    reload(dir, true);
 }
 
-// each board keeps its own scroll position instead of carrying over
-// whatever pixel offset the previous board happened to be at - reload()'s
-// own jumptoclaimed() runs first (for a board visited for the first time),
-// then this overrides it if we've been here before
 const boardscrolls = {};
 function pickboard(index) {
     if (index === boardat) return;
@@ -416,9 +420,6 @@ function pickboard(index) {
     boardat = index;
     reload(dir).then(function() {
         const saved = boardscrolls[boards[boardat].key];
-        // a first-ever visit to a board with nobody claimed on it has
-        // nothing for jumptoclaimed() to do either, so without this it
-        // just silently kept whichever board's offset was already active
         if (saved !== undefined) fling.jump(saved);
         else if (claimedat < 0) fling.jump(0);
         playsound("shuffle", 0.7);
