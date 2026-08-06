@@ -209,6 +209,14 @@
 }
 .scores > div {position: absolute; left: 0; right: 0}
 
+.hiddenegg {
+    position: absolute; left: 50%; top: 0;
+    width: 20cqw; height: auto;
+    transform: translateX(-50%);
+    pointer-events: none; z-index: 1;
+    filter: drop-shadow(0 0.05em 0.15em rgba(0,0,0,0.6));
+}
+
 .scores > div {
     display: flex; align-items: baseline;
     line-height: 0.8; white-space: nowrap;
@@ -238,6 +246,9 @@
     font-size: 0.6em; margin-right: 0.35em;
     letter-spacing: 0;
     --r: 0.25em;
+    /* the 12-point ring + one offset centre point approximates a solid
+       blob under normal glyphs, but a tiny round "." falls mostly inside
+       the ring's empty middle - the extra 0,0 copy plugs that gap */
     text-shadow: var(--ring),
         0.250em 0.200em 0 #261b19, 0.217em 0.325em 0 #261b19,
         0.125em 0.417em 0 #261b19, 0.000em 0.450em 0 #261b19,
@@ -245,7 +256,7 @@
         -0.250em 0.200em 0 #261b19, -0.217em 0.075em 0 #261b19,
         -0.125em -0.017em 0 #261b19, 0.000em -0.050em 0 #261b19,
         0.125em -0.017em 0 #261b19, 0.217em 0.075em 0 #261b19,
-        0 0.200em 0 #261b19;
+        0 0.200em 0 #261b19, 0 0 0 #261b19;
 }
 /* shrinkable instead of a fixed character cap - only clips exactly as much
    as the row's actual width demands, so it stays correct at any viewport
@@ -259,8 +270,8 @@
 .scores name {
     flex: 0 1 auto; min-width: 0; overflow: hidden;
     text-overflow: ellipsis;
-    padding-left: 0.3em; padding-top: 0.3em;
-    margin-left: -0.3em; margin-top: -0.3em;
+    padding: 0.3em 0.3em 0 0.3em;
+    margin: -0.3em -0.3em 0 -0.3em;
 }
 .scores score {margin-left: auto; flex: none}
 
@@ -435,7 +446,7 @@
     gap: calc(var(--u) * 0.006);
     margin: 0; padding: 0; background: none; text-transform: uppercase;
     font-family: "chuzzle", "blippo"; font-weight: 100;
-    font-size: calc(var(--u) * 0.028);
+    font-size: calc(var(--u) * 0.049);
     color: rgb(255, 191, 128);
     --r: 0.15em; --ink: #261b19;
     white-space: nowrap;
@@ -453,16 +464,16 @@
     display: flex; align-items: center;
     gap: 0.2em; color: inherit;
 }
-.switcher .swleft {left: calc(var(--u) * 0.02)}
-.switcher .swright {right: calc(var(--u) * 0.02)}
+.switcher .swleft {left: calc(var(--u) * 0.03)}
+.switcher .swright {right: calc(var(--u) * 0.03)}
 .switcher .line {margin-top: 0.14em}
 .switcher button:active {filter: brightness(1.6)}
-/* smaller than before (was 0.125u) - shrinking the arrow's own footprint
-   is what keeps it clear of the list text now, since the row padding was
-   deliberately kept tight for looks rather than sized to the old, bigger
-   arrow */
+/* back to full size - shrinking these made them harder to tap on desktop,
+   where they already fit fine at their normal size. narrow phones hide
+   them outright below instead (see the max-width query) rather than
+   living with a smaller, harder-to-hit arrow everywhere */
 .switcher img.arrow {
-    height: calc(var(--u) * 0.07); width: auto;
+    height: calc(var(--u) * 0.125); width: auto;
     filter: drop-shadow(0 calc(var(--u) * 0.006) 0 #261b19);
 }
 .switcher .swleft img.arrow {transform: scaleX(-1)}
@@ -483,6 +494,15 @@
 @keyframes ddswayflip {
     from {transform: translateX(calc(var(--u) * -0.0078)) scaleX(-1)}
     to {transform: translateX(calc(var(--u) * 0.0078)) scaleX(-1)}
+}
+
+/* full-size arrows overlap the score list on narrow phones no matter how
+   little the row padding gives up for them - rather than shrinking them
+   everywhere (which made them annoyingly small to tap on desktop, where
+   they never overlapped anything to begin with), just drop them below a
+   phone-width breakpoint. the calendar picker still reaches every day */
+@media (max-width: 520px) {
+    .switcher {display: none}
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -713,6 +733,12 @@
 
 [data-role=rules] .logo .inner {fill: url(#lgpop4)}
 .rulewrap .popup {width: calc(var(--u) * 0.86)}
+/* the close button's "right" offset is tuned against the default
+   ".popup" width formula - this popup is deliberately wider
+   (0.86u instead of "100% - 100px"), which shifts where the popup's own
+   right edge lands relative to the corner glow, so the button needs its
+   own right offset to still hang off that corner correctly */
+.rulewrap .closebtn {right: calc(var(--u) * -0.04)}
 
 /* same .popup chrome the other popups use, just parked inline instead of
    dimmed/centred - scaled down since the ring border sizes in global.css
@@ -724,19 +750,33 @@
     font-family: "nimbus sans becker", system-ui, sans-serif;
 }
 .showaside .rulesaside {display: block}
-/* desktop wants just the blue box - no yellow/pink popup ring, no glow,
-   no "Today's Rules!" title, matching the in-game aside layout instead of
-   the mobile popup one */
+/* desktop keeps the same yellow/pink/black popup ring as the mobile
+   version, just without the "Today's Rules!" title - display:none on the
+   logo drops it from the flex column entirely so .pucontent doesn't leave
+   a gap where it used to sit */
 .rulesaside .popup {
-    width: 100%; margin: 0; border-radius: 0.25em;
-    background: none; box-shadow: none;
+    width: 100%; margin: 0; border-radius: 0.4em;
+    box-shadow:
+        0 0 0 1px #FFD200, 0 0 0 2px #FFDC0E, 0 0 0 3px #FFE619,
+        0 0 0 4px #FFEF21, 0 0 0 5px #FFF928, 0 0 0 6px #FFD632,
+        0 0 0 7px #FFDD3A, 0 0 0 8px #FFE543, 0 0 0 9px #FFED4C,
+        0 0 0 10px #FFFF80, 0 0 0 11px #FFFF80, 0 0 0 12px #FFFF80,
+        0 0 0 13px #FFFF80, 0 0 0 14px #FFFF80, 0 0 0 15px #FFFF80,
+        0 0 0 16px #f0807e, 0 0 0 17px #fd8886, 0 0 0 18px #ff8d89,
+        0 0 0 19px #ff8e8a, 0 0 0 20px #ff908b, 0 0 0 21px #ff918c,
+        0 0 0 22px #ff918e, 0 0 0 23px #ff928f,
+        0 0 0 28px rgba(0,0,0,0.34);
 }
-.rulesaside .puglows {display: none}
+.rulesaside .puglows {inset: -22px; opacity: 0.55}
+.rulesaside .puw, .rulesaside .pur {inset: -20px}
 .rulesaside .logo {display: none}
-.rulesaside .pucontent {width: 100%; height: auto; box-shadow: none}
+.rulesaside .pucontent {width: calc(100% + 8px)}
+/* fills the whole ring now that the title isn't reserving space up top -
+   the "weird empty space" was .pucontent's own centering leaving slack
+   above/below a shorter box, not a size limit on .rulescontent itself */
 .rulesaside .pucontent > div {
-    width: 100%; box-shadow: 0 0 0 5px #03104d;
-    padding-top: 0.5em; padding-bottom: 0.5em;
+    width: calc(100% - 16px); box-shadow: 0 0 0 5px #03104d;
+    padding-top: 0.8em; padding-bottom: 0.8em;
 }
 
 /* the glow was scaled for a full popup, not this small a box - dial it
@@ -793,20 +833,19 @@
    layout below. ".pucontent .rulesitem" outranks it back */
 .pucontent .rulesitem {
     display: flex; flex-direction: row; align-items: flex-start;
-    justify-content: flex-start; gap: 0.7em;
+    justify-content: flex-start; gap: 0.4em;
     text-align: left;
 }
-.rulesitem img {width: 2.6em; height: 2.6em; flex: none}
+.rulesitem img {width: 3.9em; height: 3.9em; flex: none}
 .rulesitem > span {
-    font-size: 1.02em; line-height: 1.3;
+    font-size: 1.2em; line-height: 1.3;
     color: rgba(204,204,255,0.85);
-    padding-left: 0.3em;
     --r: 0.05em; text-shadow: var(--ring);
 }
 
 /* the compact desktop layout - bigger icons since there's no popup chrome
    competing for space anymore */
-.rulesaside .rulesitem img {width: 3.1em; height: 3.1em}
+.rulesaside .rulesitem img {width: 4.65em; height: 4.65em}
 
 /* the two emphasis colours the game's own markup defines - blinky is a
    cyan/blue pulse used for the key phrase in a rule, stinky is a
@@ -818,7 +857,7 @@
    itself wasn't pinned down, so the 1s full cycle here assumes a common
    ~60fps tick - timing, not colour, is the soft part of this */
 .blinky {
-    animation: rulesblink 1s steps(1) infinite;
+    animation: rulesblink 0.6s steps(1) infinite;
 }
 @keyframes rulesblink {
     0%, 50% {color: rgba(204,255,255,1)}
@@ -832,25 +871,37 @@
     50.01%, 100% {color: rgba(255,127,127,0.75)}
 }
 
-/* best-effort recreation, not a confirmed sprite: a thin wavy dashed
-   line, tiled and scrolling infinitely, clipped (not faded) at the
-   edges - the real in-game divider still needs to be found in the
-   extracted assets to replace this properly */
+/* the real sprite (UI/sprite-14-12.png, a dark-edged silver shine bar,
+   95x9) - not dashed at all, that was a guess made before finding it.
+   tiled and scrolled sideways for the shimmer-sweep motion, since a still
+   screenshot can only ever catch one frame of that */
 .rulesdivider {
-    height: 0.3em; margin: 0 -0.4em;
-    overflow: hidden; opacity: 0.8;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 Q5 0 10 4 T20 4 T30 4 T40 4' fill='none' stroke='%23ffe066' stroke-width='2'/%3E%3C/svg%3E");
-    background-size: 40px 100%;
-    animation: rulesdividerscroll 1.4s linear infinite;
+    height: 0.25em; margin: 0 -0.4em;
+    overflow: hidden;
+    background-image: url("assets/images/rulesdivider.png");
+    background-size: auto 100%;
+    background-repeat: repeat-x;
+    animation: rulesdividerscroll 1.6s linear infinite;
 }
+/* tile width = height(0.25em) * the sprite's own 95:9 aspect ratio, so the
+   loop point lines up seamlessly with the next tile */
 @keyframes rulesdividerscroll {
     from {background-position-x: 0}
-    to {background-position-x: -40px}
+    to {background-position-x: -2.64em}
 }
 
-.rulesdifficulty {
-    text-align: center; font-size: 0.9em; color: #d8daff;
-    padding-top: 0.2em;
-    --r: 0.05em; text-shadow: var(--ring);
+/* global.css's ".pucontent div" forces color:white !important on every div
+   in here, difficulty included - override back to the same "normal" text
+   colour the rest of the box uses. no outline here (unlike .rulesitem) -
+   the real popup doesn't stroke this line, and nowrap keeps the value on
+   the same line as the label instead of wrapping under it */
+/* same ".pucontent div" specificity collision as .rulesitem (see above) -
+   it was forcing display:flex/column here too, splitting the label and
+   the value onto their own stacked anonymous flex items instead of one
+   line, and out-ranking the colour override despite !important */
+.pucontent .rulesdifficulty {
+    display: block; text-align: center; font-size: 0.9em;
+    color: rgba(204,204,255,0.85) !important;
+    padding-top: 0.2em; white-space: nowrap; width: auto;
 }
 .rulesdifficulty span {font-weight: 700}

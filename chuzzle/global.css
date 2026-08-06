@@ -187,7 +187,7 @@ button {
         0 0 0 31px #f0807e, 0 0 0 33px #fd8886, 0 0 0 35px #ff8d89,
         0 0 0 37px #ff8e8a, 0 0 0 39px #ff908b, 0 0 0 41px #ff918c, 
         0 0 0 43px #ff918e, 0 0 0 45px #ff928f,
-        0 0 0 52px rgba(0,0,0,0.22);
+        0 0 0 55px rgba(0,0,0,0.34);
 }
 .puglows {
     position: absolute; inset: -45px;

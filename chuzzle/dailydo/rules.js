@@ -1,10 +1,3 @@
-// today's rules panel. desktop tucks it beside the phone frame with no
-// dim/popup treatment; on narrow/mobile it falls back to a floating
-// button opening the same content in the standard calwrap popup used by
-// calendar/profile/qr. fully deterministic and shared by every player:
-// Game::GoDailyDo reseeds gRandom with DailySeed(0) right before
-// SetRules runs, so every roll below draws off the same per-day stream
-
 let rules = null;
 const rulesready = fetch("assets/static/rules.jsonc").then(function(reply) {
     return reply.ok ? reply.text() : "";
@@ -15,9 +8,6 @@ const rulesready = fetch("assets/static/rules.jsonc").then(function(reply) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// RaptRandom: 55-slot additive/lagged-fibonacci ring, mod 2^30. get()
-// mirrors RaptRandom::GetNew (2.70+) - a multiply-shift map to [0,n),
-// not the older GetLegacy's power-of-2-mask-and-modulo
 class RaptRandom {
     constructor() {this.ring = new Array(55).fill(0); this.j = 0; this.k = 31}
     seed(s) {
@@ -43,8 +33,6 @@ class RaptRandom {
     }
 }
 
-// year+month, shared all month - year+day+month (not calendar order,
-// matches OS_Core::GetTime's own param order), shared for one day
 function monthlyseed(year, month) {
     return parseInt(String(year) + String(month).padStart(2, "0"));
 }
@@ -54,9 +42,6 @@ function dailyseed(year, month, day) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// weighted bag SetRules draws the day's gametype from, plus anti-repeat:
-// ids 2/3 reject a repeat of the previous slot, ids 0/1/4 reject a
-// repeat of both of the previous two
 const gametypebag = [0, 0, 0, 1, 1, 2, 3, 3, 4, 4];
 function buildgametypepool(seed) {
     const rng = new RaptRandom();
@@ -79,23 +64,14 @@ function buildgametypepool(seed) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// each rule's conflict bitmask (its object's +0x40 field) - IsRuleOK
-// rejects a candidate sharing any bit with an already-selected rule,
-// which also rejects re-drawing the same id (every nonzero mask
-// conflicts with itself)
-const RULEMASKS = {
+const rulemasks = {
     5: 0x40001, 6: 0x0010, 7: 0x1000, 8: 0x0010, 9: 0x0300, 10: 0x0c80,
     12: 0x0020, 13: 0x0040, 14: 0x2c00, 17: 0x0000, 18: 0x4000, 19: 0x43000,
     20: 0x0300, 21: 0x0010, 22: 0x0000, 23: 0x8000, 24: 0x0000, 25: 0xc000,
     26: 0x4000, 27: 0x4000, 28: 0x10000, 29: 0x10000, 30: 0x20000, 31: 0x42001,
 };
-// gametype 2/3 each carry a silent, textless rule (15/16) active from
-// the moment the gametype is picked - masks still apply
-const GAMETYPE_INHERENT_MASK = {2: 0x0400, 3: 0x0800};
+const gametypeinhmask = {2: 0x0400, 3: 0x0800};
 
-// the candidate deck SetRules builds before shuffling, in push order.
-// ids are the real ids (each rule object's own +0x38 field) - see
-// rules.jsonc's header for how those were confirmed
 function builddeck(gametype, day, rng, extra) {
     const deck = [];
     const push = function(id, times) {for (let i = 0; i < (times || 1); i++) deck.push(id)};
@@ -103,7 +79,7 @@ function builddeck(gametype, day, rng, extra) {
     if (gametype !== 4) push(5);
 
     const picked = [6];
-    const comboroll = rng.get(2); // always drawn, even when discarded below
+    const comboroll = rng.get(2);
     if (comboroll === 1 && gametype !== 3) picked.push(21);
     picked.push(22);
     picked.push(24);
@@ -137,8 +113,6 @@ function builddeck(gametype, day, rng, extra) {
     return deck;
 }
 
-// PointerList::Shuffle: full-range draw per slot, rerolled if it lands
-// on itself, then swapped in - not textbook Fisher-Yates
 function shuffledeck(deck, rng) {
     const n = deck.length;
     for (let i = 0; i < n; i++) {
@@ -149,29 +123,25 @@ function shuffledeck(deck, rng) {
     return deck;
 }
 
-// modifier count: 1/12 chance of 3, else 11/240 chance of 1, else 2
 function drawtarget(rng) {
     if (rng.get(12) === 1) return 3;
     return rng.get(20) === 1 ? 1 : 2;
 }
 
-// draws off the shuffled deck, rejecting on mask conflict (IsRuleOK)
-// plus id22's extra clause: needs id19 or id10 already active, gametype
-// 0/1 only
 function drawrules(deck, target, gametype) {
     const selected = []; let idx = 0;
-    let usedmask = GAMETYPE_INHERENT_MASK[gametype] || 0;
+    let usedmask = gametypeinhmask[gametype] || 0;
     function tryadd(id) {
-        let ok = (RULEMASKS[id] & usedmask) === 0;
+        let ok = (rulemasks[id] & usedmask) === 0;
         if (ok && id === 22 && (gametype === 0 || gametype === 1)) {
             ok = selected.includes(19) || selected.includes(10);
         }
-        if (ok) {selected.push(id); usedmask |= RULEMASKS[id]}
+        if (ok) {selected.push(id); usedmask |= rulemasks[id]}
         return ok;
     }
     function remove(id) {
         selected.splice(selected.indexOf(id), 1);
-        usedmask = selected.reduce(function(m, sid) {return m | RULEMASKS[sid]}, GAMETYPE_INHERENT_MASK[gametype] || 0);
+        usedmask = selected.reduce(function(m, sid) {return m | rulemasks[sid]}, gametypeinhmask[gametype] || 0);
     }
     while (selected.length < target && idx < deck.length) tryadd(deck[idx++]);
     if (gametype === 3) {
@@ -182,9 +152,6 @@ function drawrules(deck, target, gametype) {
     return selected;
 }
 
-// bonus odds depend on modifier count: 3 = none, 1 = always, 2 = reroll
-// gamble off a roll that's always drawn first regardless of target.
-// lockbreaker (id1) excluded on chuzzle-in-ten and alongside stinky (id19)
 function drawbonus(rng, target, gametype, selectedrules) {
     const pre = rng.get(2);
     let granted;
@@ -199,7 +166,6 @@ function drawbonus(rng, target, gametype, selectedrules) {
     return id;
 }
 
-// chuzzle in ten skips the difficulty roll entirely
 function drawdifficulty(rng, gametype) {
     if (gametype === 3) return null;
     const roll = rng.get(5);
@@ -208,10 +174,6 @@ function drawdifficulty(rng, gametype) {
     return {name: "Hard!", color: "1,0,0"};
 }
 
-// generalized off "today" so the panel can also show a scrolled-to day's
-// rules (see paintrulescontent) - only handles the "normal" daily-do track,
-// see chuzzle/datainfo/net/report_rulevariants_270.md for why golden
-// tournament isn't modeled here yet
 function computerulesfordate(date) {
     const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
 
@@ -235,22 +197,16 @@ function computerulesfordate(date) {
 function iconimg(path, alt) {
     return "<img src=\"assets/images/ruleicons/" + path + ".png\" alt=\"" + alt + "\">";
 }
-
 function escapehtml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// gametype.color and <color ...> are either a css keyword or a raw 0-1
-// float rgb triplet from the game's own data, which needs scaling to 0-255
 function csscolor(raw) {
     if (!/^[\d.]+,[\d.]+,[\d.]+$/.test(raw)) return raw;
     const [r, g, b] = raw.split(",").map(function(n) {return Math.round(n * 255)});
     return "rgb(" + r + "," + g + "," + b + ")";
 }
 
-// the game's inline markup: <_tc> is the default colour, <blinky>/
-// <_stinky>/<color X> switch to an emphasis colour until the next tag -
-// state switches, not nested/closing tags
 function markuptext(raw) {
     const re = /<_tc>|<blinky>|<_stinky>|<color ([^>]+)>/g;
     let mode = {type: "tc"}, last = 0, html = "", m;
@@ -279,7 +235,6 @@ function ruletext(entry, extra) {
     if (entry.id !== 20) return entry.text;
     return entry.text.replace("%s", extra.colour).replace("%s", extra.multiplier);
 }
-
 function rulescontenthtml(date) {
     if (!rules) return "";
     const today = computerulesfordate(date);
@@ -302,16 +257,11 @@ function rulescontenthtml(date) {
     }
     return html;
 }
-
-// back: days before today, matching ui.js's dayat/dayback - falls back to
-// dayat itself (the leaderboard's currently viewed day) when omitted, so
-// scrolling the scores also scrolls the rules panel to match
 function rulestitlefor(back) {
     if (back === 0) return "Today's Rules!";
     if (back === 1) return "Yesterday's Rules!";
     return (typeof daylabel === "function" ? daylabel(back) : "") + " Rules!";
 }
-
 function paintrulescontent(back) {
     if (back === undefined) back = typeof dayat !== "undefined" ? dayat : 0;
     const date = typeof dayback === "function" ? dayback(back) : new Date();
@@ -324,23 +274,17 @@ function paintrulescontent(back) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// enough side space beside the phone frame for the aside to fit without
-// crowding it - measured live since --u is capped by viewport height too
 const asideneeds = 300;
 const rulesbutton = document.querySelector(".rulesbutton");
 function updateruleslayout() {
     const uibox = document.querySelector(".ui").getBoundingClientRect();
     document.body.classList.toggle("showaside", uibox.left >= asideneeds);
 
-    // parked above the play/redo button - .todaybutton lives inside .ui's
-    // cqw layout, unreachable from here with CSS alone
     const play = document.querySelector(".todaybutton").getBoundingClientRect();
     const size = rulesbutton.getBoundingClientRect().height;
+
     rulesbutton.style.left = (play.left + play.width / 2 - size / 2) + "px";
     rulesbutton.style.top = (play.top - size - 8) + "px";
-    // .todaybutton isn't laid out yet on the very first call (still 0x0 at
-    // parse time) - reveal only once we have a real rect, instead of
-    // flashing the button at its garbage top-left position for a frame
     if (play.width > 0) rulesbutton.classList.add("positioned");
 }
 

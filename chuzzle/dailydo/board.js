@@ -33,8 +33,9 @@ const swaycycle = 3000;
 // only show rows on screen because 3000+ entries will murder the browser
 let board = []; let fullboard = []; let pool = [];
 let rowheight = 0; let claimedat = -1;
-let padtop = 0; let padbottom = 0; 
+let padtop = 0; let padbottom = 0;
 let filled = -1; let strip = null;
+const egg = document.querySelector(".hiddenegg");
 
 function poolsize(host) {
     return rowheight ? Math.ceil(host.clientHeight / rowheight) + 4 : 0;
@@ -146,6 +147,7 @@ function paintrows(at, host) {
                 - band / 2 + rowheight * 0.08) + "px";
         }
     }
+    if (egg) egg.style.top = (padtop - egg.offsetHeight - peekmax - at) + "px";
 }
 
 const rings = [
@@ -199,9 +201,6 @@ function tidyname(text) {
     });
     return out;
 }
-// no fixed character cap here - .scores name is a shrinkable flex child
-// with CSS ellipsis, so it only ever cuts off exactly as much as needed to
-// keep clear of the flag/score next to it, at whatever width the row has
 function drawname(text) {
     text = tidyname(text);
     return text.toUpperCase().split("").map(function(c) {
@@ -211,10 +210,11 @@ function drawname(text) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-const overreach = 0.35; const springback = 0.16; const rub = 0.955;
+const overreach = 0.35; const springback = 0.16; 
+const rub = 0.955; const peekmax = 200;
 
 function makefling(host, list) {
-    let at = 0; let velocity = 0; let dragging = false;
+    let at = 0; let velocity = 0; let dragging = false; let mouseheld = false;
     let lastY = 0; let lastTime = 0; let running = false;
 
     function limit() {return Math.max(0, contentheight() - host.clientHeight)}
@@ -249,12 +249,18 @@ function makefling(host, list) {
 
     host.addEventListener("wheel", function(e) {
         e.preventDefault();
+        if (mouseheld && at <= 0) {
+            at = Math.max(-peekmax, Math.min(0, at + e.deltaY * 0.22));
+            place();
+            return;
+        }
         velocity += e.deltaY * 0.22;
         kick();
     }, {passive: false});
 
     host.addEventListener("pointerdown", function(e) {
         dragging = true; velocity = 0;
+        mouseheld = e.pointerType === "mouse" && e.button === 0;
         lastY = e.clientY; lastTime = e.timeStamp;
         host.setPointerCapture(e.pointerId);
         host.classList.add("dragging");
@@ -270,7 +276,7 @@ function makefling(host, list) {
     });
     function letgo() {
         if (!dragging) return;
-        dragging = false;
+        dragging = false; mouseheld = false;
         host.classList.remove("dragging");
         kick();
     }
