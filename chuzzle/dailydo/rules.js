@@ -202,6 +202,7 @@ function escapehtml(s) {
 }
 
 function csscolor(raw) {
+    if (/^gr[ae]y$/i.test(raw)) return "#e8e8f0";
     if (!/^[\d.]+,[\d.]+,[\d.]+$/.test(raw)) return raw;
     const [r, g, b] = raw.split(",").map(function(n) {return Math.round(n * 255)});
     return "rgb(" + r + "," + g + "," + b + ")";
@@ -267,7 +268,9 @@ function paintrulescontent(back) {
     const date = typeof dayback === "function" ? dayback(back) : new Date();
     const html = rulescontenthtml(date);
     if (!html) return;
+
     document.querySelectorAll(".rulescontent").forEach(function(seat) {seat.innerHTML = html});
+
     const title = rulestitlefor(back);
     document.querySelectorAll(".rulestitle").forEach(function(el) {el.textContent = title});
 }

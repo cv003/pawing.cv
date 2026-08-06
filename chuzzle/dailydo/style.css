@@ -180,7 +180,8 @@
     max-width: 88cqw;
 }
 
-.fetching .dailydo, .fetching .ui, .fetching .switcher, .fetching .boardpick {
+.fetching .dailydo, .fetching .ui, .fetching .switcher, .fetching .boardpick,
+.fetching .rulesaside {
     opacity: 0.5; pointer-events: none;
 }
 
@@ -214,13 +215,19 @@
 }
 .scores > div {position: absolute; left: 0; right: 0}
 
-.hiddenegg {
+/* stays hidden until board.js's first paintrows() call sets a real "top"
+   (see .positioned) - without this it briefly renders at top:0 (the top
+   of .scroller, in plain view) before JS can move it into its actual
+   parked spot above rank #1, which read as a stray one-second jump */
+.celestial {
     position: absolute; left: 50%; top: 0;
     width: 20cqw; height: auto;
     transform: translateX(-50%);
     pointer-events: none; z-index: 1;
     filter: drop-shadow(0 0.05em 0.15em rgba(0,0,0,0.6));
+    visibility: hidden;
 }
+.celestial.positioned {visibility: visible}
 
 .scores > div {
     display: flex; align-items: baseline;
@@ -272,11 +279,18 @@
    pair gives the multi-directional --ring text-shadow room to paint before
    overflow:hidden's clip box cuts it off - without it the ring around the
    first glyph's top/left gets clipped flush against the box edge */
+/* bumped from 0.3em - the claimed ("mine") row's ddsway animation shifts
+   the text sideways up to 0.78cqw on top of the shadow's own ~0.27em
+   reach, so 0.3em wasn't quite enough clearance on that row specifically */
+/* all four sides now, not just top/left/right - the shadow list's
+   downward-most point reaches ~0.27em below the baseline, and this box's
+   own bottom edge sits right at that baseline (align-items:baseline), so
+   the solid shadow was still getting clipped flush along the bottom */
 .scores name {
     flex: 0 1 auto; min-width: 0; overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0.3em 0.3em 0 0.3em;
-    margin: -0.3em -0.3em 0 -0.3em;
+    padding: 0.45em;
+    margin: -0.45em;
 }
 .scores score {margin-left: auto; flex: none}
 
@@ -767,9 +781,12 @@
 /* same .popup chrome the other popups use, just parked inline instead of
    dimmed/centred - scaled down since the ring border sizes in global.css
    are tuned for a full-width popup, not a ~260px aside */
+/* rooted to the bottom edge instead of floating - square bottom corners
+   (on both the ring and the glow clip below) make it read as a sign
+   growing up out of the screen edge rather than a card sitting near it */
 .rulesaside {
     display: none; position: fixed; z-index: 3;
-    top: 3vh; left: calc(50% + var(--u) / 2 + 1.6vw);
+    bottom: 0; left: calc(50% + var(--u) / 2 + 1.6vw);
     width: min(22vw, 260px);
     font-family: "nimbus sans becker", system-ui, sans-serif;
 }
@@ -782,7 +799,7 @@
    rings, since the small aside card made the shared black ring look like
    a heavy, disconnected border rather than a subtle edge */
 .rulesaside .popup {
-    width: 100%; margin: 0; border-radius: 0.4em;
+    width: 100%; margin: 0; border-radius: 0.4em 0.4em 0 0;
     box-shadow:
         0 0 0 1px #FFD200, 0 0 0 2px #FFDC0E, 0 0 0 3px #FFE619,
         0 0 0 4px #FFEF21, 0 0 0 5px #FFF928, 0 0 0 6px #FFD632,
@@ -793,13 +810,18 @@
         0 0 0 19px #ff8e8a, 0 0 0 20px #ff908b, 0 0 0 21px #ff918c,
         0 0 0 22px #ff918e, 0 0 0 23px #ff928f;
 }
-.rulesaside .puglows {inset: -22px}
+.rulesaside .puglows {inset: -22px; border-radius: 1.5em 1.5em 0 0}
 /* global.css's .puw/.pur glow blobs use fixed-px radii (75-105px) sized
    for a full-width popup - on this ~260px card they read as oversized,
    washed-out blotches instead of corner accents. smaller radii plus the
    base (not dimmed) opacity gets them back to looking like a proper glow
-   at this scale */
-.rulesaside .puw, .rulesaside .pur {inset: -20px}
+   at this scale. puw/pur's inset is relative to .puglows (their own
+   containing block, since they're its children), not to .popup - at the
+   old -20px it put the gradient's bright centre entirely in the margin
+   .puglows clips away, leaving only a sliver of the fade past 26px
+   visible. inset:0 lines the gradient's corner anchor up with .puglows's
+   own visible corner instead, so the glow actually shows */
+.rulesaside .puw, .rulesaside .pur {inset: 0}
 .rulesaside .puw {
     opacity: 0.7;
     background:
@@ -817,9 +839,13 @@
 /* fills the whole ring now that the title isn't reserving space up top -
    the "weird empty space" was .pucontent's own centering leaving slack
    above/below a shorter box, not a size limit on .rulescontent itself */
+/* global.css's ".pucontent div" nudges every popup's content box up 5px
+   (top:-5px) to balance against the title logo above it - the aside has
+   no title anymore, so that nudge just reads as miscentered here */
 .rulesaside .pucontent > div {
     width: calc(100% - 16px); box-shadow: 0 0 0 5px #03104d;
     padding-top: 0.8em; padding-bottom: 0.8em;
+    top: 0;
 }
 /* scaled back down from the mobile popup's bigger sizing - the desktop
    aside has its own compact-by-design footprint and the enlarged text/
@@ -867,7 +893,7 @@
 .pucontent .rulescontent {
     background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
     box-shadow: 0 0 0 10px #03104d; border-radius: 0.25em;
-    width: calc(100% - 30px); padding: 0.6em 0;
+    width: calc(100% - 30px); padding: 1.1em 0.6em;
 }
 .pucontent .rulescontent div {
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
@@ -885,10 +911,11 @@
     text-align: left;
 }
 .rulesitem img {width: 3.9em; height: 3.9em; flex: none}
+/* no outline here - the real popup's body text isn't stroked, only the
+   cursive title logo is (that's a separate svg fill/stroke, not this) */
 .rulesitem > span {
     font-size: 1.2em; line-height: 1.3;
     color: rgba(204,204,255,0.85);
-    --r: 0.05em; text-shadow: var(--ring);
 }
 
 /* the compact desktop layout - back down from the mobile popup's enlarged

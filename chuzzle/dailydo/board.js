@@ -35,7 +35,7 @@ let board = []; let fullboard = []; let pool = [];
 let rowheight = 0; let claimedat = -1;
 let padtop = 0; let padbottom = 0;
 let filled = -1; let strip = null;
-const egg = document.querySelector(".hiddenegg");
+const egg = document.querySelector(".celestial");
 
 function poolsize(host) {
     return rowheight ? Math.ceil(host.clientHeight / rowheight) + 4 : 0;
@@ -147,7 +147,10 @@ function paintrows(at, host) {
                 - band / 2 + rowheight * 0.08) + "px";
         }
     }
-    if (egg) egg.style.top = (padtop - egg.offsetHeight - peekmax - at) + "px";
+    if (egg) {
+        egg.style.top = (padtop - egg.offsetHeight - peekmax - at) + "px";
+        egg.classList.add("positioned");
+    }
 }
 
 const rings = [

@@ -220,10 +220,12 @@ button {
 }
 .pucontent .logo {height: 70px; z-index: 100}
 
+/* padding is big enough to keep content clear of the background's top/
+   bottom gradient bands (the 20%/80% stops below), not just look nice */
 .pucontent div {
     position: relative; display: flex; top: -5px;
     width: calc(100% - 30px);
-    padding-top: 0.6em; padding-bottom: 0.6em;
+    padding-top: 1.1em; padding-bottom: 1.1em;
     background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
     box-shadow: 0 0 0 10px #03104d; color: white !important;
     border-radius: 0.25em; flex-direction: column;

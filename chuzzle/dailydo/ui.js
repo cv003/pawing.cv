@@ -296,7 +296,8 @@ function drawpicks() {
 const slidespan = 260;
 function slidemovers() {
     return [document.querySelector(".dailydo:not(.ghost)"),
-        document.querySelector(".dumbcontainer:not(.ghost)")];
+        document.querySelector(".dumbcontainer:not(.ghost)"),
+        document.querySelector(".rulesaside:not(.ghost)")];
 }
 function shove(seat, across) {
     const base = seat.classList.contains("dailydo") ? "translateX(-50%) " : "";
@@ -334,6 +335,7 @@ async function reload(dir) {
     const count = await loadboard();
     document.body.classList.remove("fetching");
     const ghosts = snapshot();
+    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     drawsteppers();
     drawpicks();
     relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
@@ -392,7 +394,6 @@ function switchday(step) {
     const want = nextday(dayat, step);
     if (want < 0) return;
     dayat = want;
-    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     reload(step);
 }
 
@@ -400,15 +401,28 @@ function pickday(back) {
     if (back === dayat || back < 0 || back > calendarreach) return;
     const dir = back > dayat ? 1 : -1;
     dayat = back;
-    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     reload(dir);
 }
 
+// each board keeps its own scroll position instead of carrying over
+// whatever pixel offset the previous board happened to be at - reload()'s
+// own jumptoclaimed() runs first (for a board visited for the first time),
+// then this overrides it if we've been here before
+const boardscrolls = {};
 function pickboard(index) {
     if (index === boardat) return;
+    boardscrolls[boards[boardat].key] = fling.at();
     const dir = index > boardat ? -1 : 1;
     boardat = index;
-    reload(dir).then(function() {playsound("shuffle", 0.7)});
+    reload(dir).then(function() {
+        const saved = boardscrolls[boards[boardat].key];
+        // a first-ever visit to a board with nobody claimed on it has
+        // nothing for jumptoclaimed() to do either, so without this it
+        // just silently kept whichever board's offset was already active
+        if (saved !== undefined) fling.jump(saved);
+        else if (claimedat < 0) fling.jump(0);
+        playsound("shuffle", 0.7);
+    });
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
