@@ -614,7 +614,7 @@
 }
 .closebtn {
     position: absolute; z-index: 3;
-    top: calc(var(--u) * -0.075); right: calc(var(--u) * -0.075);
+    top: calc(var(--u) * -0.05); right: calc(var(--u) * -0.095);
     width: calc(var(--u) * 0.105); height: calc(var(--u) * 0.105);
     margin: 0; padding: 0; background: none;
 }
@@ -695,25 +695,52 @@
 [data-role=rules] .logo .inner {fill: url(#lgpop4)}
 .rulewrap .popup {width: calc(var(--u) * 0.86)}
 
+/* same .popup chrome the other popups use, just parked inline instead of
+   dimmed/centred - scaled down since the ring border sizes in global.css
+   are tuned for a full-width popup, not a ~260px aside */
 .rulesaside {
     display: none; position: fixed; z-index: 3;
     top: 3vh; left: calc(50% + var(--u) / 2 + 1.6vw);
     width: min(22vw, 260px);
-    padding: 0.8em; border-radius: 0.6em;
     font-family: "nimbus sans becker", system-ui, sans-serif;
 }
 .showaside .rulesaside {display: block}
-.rulesheader {
-    font-family: "chuzzle", "blippo"; text-transform: uppercase;
-    font-size: 1.1em; letter-spacing: 0.02em;
-    text-align: center; margin-bottom: 0.5em; color: #ffe066;
-    text-shadow: 0 0.08em 0.16em rgba(0,0,0,0.6);
+.rulesaside .logo .inner {fill: url(#lgpop5)}
+.rulesaside .popup {
+    width: 100%; margin: 0; border-radius: 0.4em;
+    box-shadow:
+        0 0 0 1px #FFD200, 0 0 0 2px #FFDC0E, 0 0 0 3px #FFE619,
+        0 0 0 4px #FFEF21, 0 0 0 5px #FFF928, 0 0 0 6px #FFD632,
+        0 0 0 7px #FFDD3A, 0 0 0 8px #FFE543, 0 0 0 9px #FFED4C,
+        0 0 0 10px #FFFF80, 0 0 0 11px #FFFF80, 0 0 0 12px #FFFF80,
+        0 0 0 13px #FFFF80, 0 0 0 14px #FFFF80, 0 0 0 15px #FFFF80,
+        0 0 0 16px #f0807e, 0 0 0 17px #fd8886, 0 0 0 18px #ff8d89,
+        0 0 0 19px #ff8e8a, 0 0 0 20px #ff908b, 0 0 0 21px #ff918c,
+        0 0 0 22px #ff918e, 0 0 0 23px #ff928f,
+        0 0 0 26px rgba(0,0,0,0.22);
+}
+.rulesaside .puglows {inset: -22px; opacity: 0.55}
+.rulesaside .puw, .rulesaside .pur {inset: -20px}
+.rulesaside .pucontent {width: calc(100% + 8px)}
+.rulesaside .pucontent .logo {height: 38px}
+.rulesaside .pucontent > div {
+    width: calc(100% - 16px); box-shadow: 0 0 0 5px #03104d;
+    padding-top: 0.5em; padding-bottom: 0.5em;
 }
 
+/* the glow was scaled for a full popup, not this small a box - dial it
+   back so it doesn't wash out the content next to it */
+.rulewrap .puglows {opacity: 0.6}
+
+/* positioned via rules.js (measured against .todaybutton's own rect,
+   since this button lives outside .ui's cqw-based layout) - two separate
+   bugs meant it never showed before at any width: there was no rule ever
+   setting display back on (only a redundant "hide when showaside" rule),
+   and right was a bare calc() off var(--u) that goes negative once --u
+   caps out at 100vw on narrow viewports, pushing it off the right edge */
 .rulesbutton {
-    display: none; position: fixed; z-index: 5;
-    top: 1.6vh; right: calc(50% - var(--u) / 2 - 3.2vh);
-    width: 8vh; height: 8vh; max-width: 56px; max-height: 56px;
+    display: flex; position: fixed; z-index: 5;
+    width: 6.5vh; height: 6.5vh; max-width: 44px; max-height: 44px;
     padding: 0.2em; margin: 0; border-radius: 50%;
     background: #03104d;
     box-shadow: 0 0 0 0.12em #ffd200, 0 0.2em 0.5em rgba(0,0,0,0.5);
@@ -724,25 +751,75 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* matches the real popup's dark navy card: one icon+text row per active
-   rule - only the day's gametype is ever rendered here for now, see rules.js */
+/* the box: everything else in .pucontent gets auto-boxed by global.css's
+   ".pucontent div" rule (a decision from long before this page existed),
+   so this class is the one deliberate box and everything nested inside
+   it (.rulesitem etc) gets that undone again right below */
+.rulescontent {
+    display: flex; flex-direction: column; gap: 0.6em;
+}
+.pucontent .rulescontent {
+    background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
+    box-shadow: 0 0 0 10px #03104d; border-radius: 0.25em;
+    width: calc(100% - 30px); padding: 0.6em 0;
+}
+.pucontent .rulescontent div {
+    background: none; box-shadow: none; padding: 0; width: auto; top: 0;
+}
+
 .rulesitem {
     display: flex; align-items: center; gap: 0.7em;
     text-align: left;
 }
-.rulescontent {display: flex; flex-direction: column; gap: 0.6em}
-.rulesitem img {width: 2.4em; height: 2.4em; flex: none}
-.rulesitem span {font-size: 0.85em; line-height: 1.25; color: #d8daff}
+.rulesitem img {width: 2.6em; height: 2.6em; flex: none}
+.rulesitem > span {
+    font-size: 1.02em; line-height: 1.3;
+    color: rgba(204,204,255,0.85);
+    padding-left: 0.3em;
+}
 
-.rulesdivider {height: 1px; background: rgba(255,255,255,0.25); margin: 0 0.2em}
+/* the two emphasis colours the game's own markup defines - blinky is a
+   cyan/blue pulse used for the key phrase in a rule, stinky is a
+   yellow/red pulse reserved for the one lock-related warning line.
+   MLBlink::Draw (0x005826cc) confirms this is a hard square-wave colour
+   swap, not a crossfade: color1 for `time` ticks, color2 for the next
+   `time` ticks, no interpolation - <define>'s "time=30" sets that field
+   directly (constructor default is also 0x1e=30, a match). tick rate
+   itself wasn't pinned down, so the 1s full cycle here assumes a common
+   ~60fps tick - timing, not colour, is the soft part of this */
+.blinky {
+    animation: rulesblink 1s steps(1) infinite;
+}
+@keyframes rulesblink {
+    0%, 50% {color: rgba(204,255,255,1)}
+    50.01%, 100% {color: rgba(204,204,255,0.75)}
+}
+.stinky {
+    animation: rulesstink 1s steps(1) infinite;
+}
+@keyframes rulesstink {
+    0%, 50% {color: rgba(255,255,127,1)}
+    50.01%, 100% {color: rgba(255,127,127,0.75)}
+}
+
+/* best-effort recreation, not a confirmed sprite: a thin wavy dashed
+   line, tiled and scrolling infinitely, clipped (not faded) at the
+   edges - the real in-game divider still needs to be found in the
+   extracted assets to replace this properly */
+.rulesdivider {
+    height: 0.3em; margin: 0 -0.4em;
+    overflow: hidden; opacity: 0.8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 Q5 0 10 4 T20 4 T30 4 T40 4' fill='none' stroke='%23ffe066' stroke-width='2'/%3E%3C/svg%3E");
+    background-size: 40px 100%;
+    animation: rulesdividerscroll 1.4s linear infinite;
+}
+@keyframes rulesdividerscroll {
+    from {background-position-x: 0}
+    to {background-position-x: -40px}
+}
+
 .rulesdifficulty {
     text-align: center; font-size: 0.9em; color: #d8daff;
     padding-top: 0.2em;
 }
 .rulesdifficulty span {font-weight: 700}
-
-.rulesaside .rulescontent {
-    padding: 0.7em 0.6em; border-radius: 0.5em;
-    background: linear-gradient(to bottom, #353e72 0%, #03104d 20%, #03104d 80%, #353e72 100%);
-    box-shadow: 0 0 0 0.2em #03104d;
-}

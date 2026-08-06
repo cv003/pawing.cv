@@ -203,9 +203,11 @@ button {
         radial-gradient(circle at 0 0, white 0 75px, transparent 105px),
         radial-gradient(circle at 100% 100%, white 0 75px, transparent 105px);
 }
-.pur {background:
-        radial-gradient(circle at 100% 0, red 0 75px, transparent 105px),
-        radial-gradient(circle at 0 100%, red 0 75px, transparent 105px);
+.pur {
+    opacity: 0.95; filter: blur(3px);
+    background:
+        radial-gradient(circle at 100% 0, red 0 85px, transparent 105px),
+        radial-gradient(circle at 0 100%, red 0 85px, transparent 105px);
 }
 
 .pucontent {

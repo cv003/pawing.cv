@@ -4,8 +4,6 @@ const countriesready = fetch("assets/static/countries.json").then(function(reply
 }).then(function(got) {countries = got}).catch(function() {});
 
 function countryname(cc) {return countries[cc] || ""}
-// every code has a flag asset except "--", the placeholder for a country
-// the server itself didn't recognise - that one falls back to --.png
 function hasflag(cc) {return cc !== "--" && cc in countries}
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -755,13 +753,13 @@ function closepopup(wrap) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// MLBoxEX::Update spawns one star and one saturated circle roughly every 25
-// frames for as long as the box stays open, not just once when it appears -
-// see datainfo/README.md for the decompiled spawn math this is drawn from
-
-const burstcolors = ["#ff3b30", "#34d139", "#3478ff", "#ffe600", "#ff33f6", "#33e8ff"];
+// yay!! colorful!!
+const burstcolors = [
+    "#ff3b30", "#34d139", "#3478ff", 
+    "#ffe600", "#ff33f6", "#33e8ff"
+];
 let burstcolorat = 0;
-const burstinterval = 420; // ~25 frames at a plausible 60fps
+const burstinterval = 420; // ~25 frames at plausible 60fps
 
 function burstlayerof(wrap) {
     let layer = wrap.querySelector(".burstlayer");
@@ -773,9 +771,6 @@ function burstlayerof(wrap) {
     return layer;
 }
 
-// spawns on the box's top or bottom edge at one of six slots across its
-// width, then flies straight outward from the box's centre through that
-// spawn point - accelerating, never fading, until it drifts off-screen
 function spawnburststar(wrap, elapsed) {
     const box = wrap.querySelector(".popup").getBoundingClientRect();
     const slot = Math.floor(Math.random() * 6);
@@ -795,39 +790,21 @@ function spawnburststar(wrap, elapsed) {
     seat.style.setProperty("--sz", (0.75 + Math.random() * 0.35).toFixed(2));
     seat.style.setProperty("--dx", (dx * reach).toFixed(1) + "px");
     seat.style.setProperty("--dy", (dy * reach).toFixed(1) + "px");
-    // a negative delay starts the animation already partway through, so a
-    // batch spawned all at once on open can look like it has been flying the
-    // whole time the box has been up, matching the game's own effect never
-    // visibly starting from nothing
+
     if (elapsed) seat.style.animationDelay = "-" + elapsed + "s";
     seat.innerHTML = "<img src=\"assets/images/star.png\" alt=\"\">";
-    // burststar carries two animations (fly + a short fade-in), so
-    // animationend fires twice - only remove once the flight itself ends,
-    // else the fade-in's earlier end deletes the star mid-flight
+
     seat.addEventListener("animationend", function(e) {
         if (e.animationName === "burststarfly") seat.remove();
     });
     burstlayerof(wrap).appendChild(seat);
 }
-
-// spawns dead centre on the box and just grows and fades in place, cycling
-// through six saturated colours round-robin like the game does. its starting
-// size already scales with the box (MLBoxEX::Update sizes it off the box's
-// own height), so from frame one it is bursting out past the box's edges
-// rather than hiding as a speck behind it
 function spawnburstcircle(wrap, elapsed) {
     const box = wrap.querySelector(".popup").getBoundingClientRect();
     const seat = document.createElement("div");
     seat.className = "burstcircle";
     seat.style.left = (box.left + box.width / 2) + "px";
     seat.style.top = (box.top + box.height / 2) + "px";
-    // the decompile only gives a scale FACTOR against the sprite's own native
-    // size, which is unknown here - this layer sits behind the box (matching
-    // the game's own draw order), so most of a circle's area is hidden the
-    // whole time and only the growing edge past it ever shows. .popup's own
-    // box-shadow border adds another ~52px past its layout box on every
-    // side on top of that, so the growth has to clear box height + ~100px
-    // before there is anything to see at all, not just the box itself
     seat.style.width = seat.style.height = (box.height * 1.3) + "px";
     seat.style.color = burstcolors[burstcolorat % burstcolors.length];
     burstcolorat++;
@@ -841,12 +818,7 @@ const circlelife = 1.6;
 
 function startburst(wrap) {
     stopburst(wrap);
-    // delayed rather than spawned this same tick: the box is still mid
-    // scale-in transition right now, so its rect would measure 0x0 this early
     wrap.burstseed = setTimeout(function() {
-        // one full lifetime's worth of each, backdated to a random point in
-        // their flight, so the very first frame already looks mid-effect
-        // instead of visibly starting from a blank box
         for (let t = 0; t < starlife; t += burstinterval / 1000) {
             spawnburststar(wrap, Math.random() * starlife);
         }
