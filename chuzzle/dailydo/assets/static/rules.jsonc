@@ -104,11 +104,5 @@
             "text": "You get a <blinky>Color Crusher<_tc> bonus to use!"},
         {"id": 3, "icon": "bonus/3superchuzzle", "name": "Super Chuzzle",
             "text": "You get a <blinky>Super Chuzzle<_tc> bonus to use!"}
-    ],
-
-    "tags": {
-        "_tc": "color .8,.8,1,.85 - the default readable body text colour",
-        "blinky": "blink color=.8,1,1;color=.8,.8,1,.75;time=30; - hard cyan/blue swap for emphasis",
-        "_stinky": "blink color=1,1,.5;color=1,.5,.5,.75;time=30; - hard yellow/red swap for warnings"
-    }
+    ]
 }

@@ -209,10 +209,14 @@
 }
 .scores > div {position: absolute; left: 0; right: 0}
 
+/* left/right padding has to clear the fixed .swleft/.swright arrows
+   (positioned at 0.03u, ~0.125u wide - reaching to ~0.155u) or their
+   vertical-center placement lands them on top of whichever row happens to
+   scroll to mid-viewport, not just the list's very top/bottom edge */
 .scores > div {
     display: flex; align-items: baseline;
     line-height: 0.8; white-space: nowrap;
-    padding-left: 9.5cqw; padding-right: 6.7cqw;
+    padding-left: 17.5cqw; padding-right: 17.5cqw;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -247,7 +251,14 @@
         0.125em -0.017em 0 #261b19, 0.217em 0.075em 0 #261b19,
         0 0.200em 0 #261b19;
 }
-.scores score {margin-left: auto}
+/* shrinkable instead of a fixed character cap - only clips exactly as much
+   as the row's actual width demands, so it stays correct at any viewport
+   size and doesn't overlap the flag/score next to it */
+.scores name {
+    flex: 1 1 auto; min-width: 0; overflow: hidden;
+    text-overflow: ellipsis;
+}
+.scores score {margin-left: auto; flex: none}
 
 
 .scores img {
@@ -705,26 +716,18 @@
     font-family: "nimbus sans becker", system-ui, sans-serif;
 }
 .showaside .rulesaside {display: block}
-.rulesaside .logo .inner {fill: url(#lgpop5)}
+/* desktop wants just the blue box - no yellow/pink popup ring, no glow,
+   no "Today's Rules!" title, matching the in-game aside layout instead of
+   the mobile popup one */
 .rulesaside .popup {
-    width: 100%; margin: 0; border-radius: 0.4em;
-    box-shadow:
-        0 0 0 1px #FFD200, 0 0 0 2px #FFDC0E, 0 0 0 3px #FFE619,
-        0 0 0 4px #FFEF21, 0 0 0 5px #FFF928, 0 0 0 6px #FFD632,
-        0 0 0 7px #FFDD3A, 0 0 0 8px #FFE543, 0 0 0 9px #FFED4C,
-        0 0 0 10px #FFFF80, 0 0 0 11px #FFFF80, 0 0 0 12px #FFFF80,
-        0 0 0 13px #FFFF80, 0 0 0 14px #FFFF80, 0 0 0 15px #FFFF80,
-        0 0 0 16px #f0807e, 0 0 0 17px #fd8886, 0 0 0 18px #ff8d89,
-        0 0 0 19px #ff8e8a, 0 0 0 20px #ff908b, 0 0 0 21px #ff918c,
-        0 0 0 22px #ff918e, 0 0 0 23px #ff928f,
-        0 0 0 26px rgba(0,0,0,0.22);
+    width: 100%; margin: 0; border-radius: 0.25em;
+    background: none; box-shadow: none;
 }
-.rulesaside .puglows {inset: -22px; opacity: 0.55}
-.rulesaside .puw, .rulesaside .pur {inset: -20px}
-.rulesaside .pucontent {width: calc(100% + 8px)}
-.rulesaside .pucontent .logo {height: 38px}
+.rulesaside .puglows {display: none}
+.rulesaside .logo {display: none}
+.rulesaside .pucontent {width: 100%; height: auto; box-shadow: none}
 .rulesaside .pucontent > div {
-    width: calc(100% - 16px); box-shadow: 0 0 0 5px #03104d;
+    width: 100%; box-shadow: 0 0 0 5px #03104d;
     padding-top: 0.5em; padding-bottom: 0.5em;
 }
 
@@ -738,15 +741,22 @@
    setting display back on (only a redundant "hide when showaside" rule),
    and right was a bare calc() off var(--u) that goes negative once --u
    caps out at 100vw on narrow viewports, pushing it off the right edge */
+/* texture only - no plate/ring, just the icon with a soft drop shadow so it
+   still reads against any background. stays invisible until rules.js has
+   positioned it once (see .positioned below), instead of flashing at its
+   unset top-left default position for a frame */
 .rulesbutton {
     display: flex; position: fixed; z-index: 5;
     width: 6.5vh; height: 6.5vh; max-width: 44px; max-height: 44px;
-    padding: 0.2em; margin: 0; border-radius: 50%;
-    background: #03104d;
-    box-shadow: 0 0 0 0.12em #ffd200, 0 0.2em 0.5em rgba(0,0,0,0.5);
+    padding: 0; margin: 0; background: none; border: none;
+    visibility: hidden;
 }
-.rulesbutton img {width: 100%; height: 100%; object-fit: contain}
-.rulesbutton:active {filter: brightness(1.4)}
+.rulesbutton.positioned {visibility: visible}
+.rulesbutton img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 0.08em 0.1em rgba(0,0,0,0.6));
+}
+.rulesbutton:active img {filter: drop-shadow(0 0.08em 0.1em rgba(0,0,0,0.6)) brightness(1.4)}
 .showaside .rulesbutton {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -767,8 +777,10 @@
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
 }
 
+/* align-items: flex-start (not center) matches the real popup - the icon
+   anchors to the first line instead of centering against wrapped text */
 .rulesitem {
-    display: flex; align-items: center; gap: 0.7em;
+    display: flex; align-items: flex-start; gap: 0.7em;
     text-align: left;
 }
 .rulesitem img {width: 2.6em; height: 2.6em; flex: none}
@@ -776,7 +788,12 @@
     font-size: 1.02em; line-height: 1.3;
     color: rgba(204,204,255,0.85);
     padding-left: 0.3em;
+    --r: 0.05em; text-shadow: var(--ring);
 }
+
+/* the compact desktop layout - bigger icons since there's no popup chrome
+   competing for space anymore */
+.rulesaside .rulesitem img {width: 3.1em; height: 3.1em}
 
 /* the two emphasis colours the game's own markup defines - blinky is a
    cyan/blue pulse used for the key phrase in a rule, stinky is a
@@ -821,5 +838,6 @@
 .rulesdifficulty {
     text-align: center; font-size: 0.9em; color: #d8daff;
     padding-top: 0.2em;
+    --r: 0.05em; text-shadow: var(--ring);
 }
 .rulesdifficulty span {font-weight: 700}

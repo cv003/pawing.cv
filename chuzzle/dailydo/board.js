@@ -75,7 +75,7 @@ function measurelist(host, list) {
     rowheight = probe.offsetHeight;
     probe.remove();
 
-    list.style.setProperty("--rankcells", String(fullboard.length || 1).length + 1);
+    list.style.setProperty("--rankcells", String(fullboard.length || 1).length);
 
     paintedat = null;
     const want = poolsize(host);
@@ -191,8 +191,6 @@ function buildrings() {
 const drawable = new Set(
     "!\"#$%&'()*+,-.0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]{} ".split("")
 );
-const namecap = 15;
-
 function tidyname(text) {
     let out = text.replace(/%%/g, "%").replace(/%(?= )/g, "");
     out = out.replace(/%([0-9a-f]{2})/gi, function(whole, hex) {
@@ -201,12 +199,14 @@ function tidyname(text) {
     });
     return out;
 }
+// no fixed character cap here - .scores name is a shrinkable flex child
+// with CSS ellipsis, so it only ever cuts off exactly as much as needed to
+// keep clear of the flag/score next to it, at whatever width the row has
 function drawname(text) {
     text = tidyname(text);
-    const clean = text.toUpperCase().split("").map(function(c) {
+    return text.toUpperCase().split("").map(function(c) {
         return drawable.has(c) ? c : "?";
     }).join("");
-    return clean.length > namecap ? clean.slice(0, namecap) + " ..." : clean;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/

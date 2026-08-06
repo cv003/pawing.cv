@@ -392,6 +392,7 @@ function switchday(step) {
     const want = nextday(dayat, step);
     if (want < 0) return;
     dayat = want;
+    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     reload(step);
 }
 
@@ -399,6 +400,7 @@ function pickday(back) {
     if (back === dayat || back < 0 || back > calendarreach) return;
     const dir = back > dayat ? 1 : -1;
     dayat = back;
+    if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     reload(dir);
 }
 
