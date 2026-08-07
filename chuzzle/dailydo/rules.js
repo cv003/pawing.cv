@@ -249,7 +249,9 @@ function upcominghtml(date) {
         if (!gt) continue;
         const label = at.toLocaleDateString(undefined, {weekday: "short", month: "short", day: "numeric"});
         rows.push("<div class=\"previewrow\">" + iconimg(gt.icon, gt.name)
-            + "<span><b>" + escapehtml(label) + "</b> " + escapehtml(gt.name) + "</span></div>");
+            + "<span><b class=\"previewdate\">" + escapehtml(label) + "</b>"
+            + "<b class=\"previewgametype\" style=\"color:" + csscolor(gt.color) + "\">"
+            + escapehtml(gt.name) + "</b></span></div>");
     }
     return rows.join("");
 }
@@ -284,16 +286,16 @@ const ruleswrap = document.querySelector("[data-role=rules]");
 const upcomingwrap = document.querySelector("[data-role=upcoming]");
 const glossarywrap = document.querySelector("[data-role=glossary]");
 function openextra(wrap) {
-    function launch() {
-        openpopup(wrap);
+    function scrolltop() {
         const content = wrap.querySelector(".upcomingcontent, .glossarycontent");
         if (content) content.scrollTop = 0;
     }
     if (ruleswrap.classList.contains("open")) {
-        closepopup(ruleswrap);
-        setTimeout(launch, popupwait);
+        swappopup(ruleswrap, wrap);
+        setTimeout(scrolltop, popupwait);
     } else {
-        launch();
+        openpopup(wrap);
+        scrolltop();
     }
 }
 document.addEventListener("click", function(e) {

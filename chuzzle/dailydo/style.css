@@ -348,6 +348,8 @@
 [data-role=calendar] .logo .inner {fill: url(#lgpop)}
 [data-role=profile] .logo .inner {fill: url(#lgpop2)}
 [data-role=qr] .logo .inner {fill: url(#lgpop3)}
+[data-role=upcoming] .logo .inner {fill: url(#lgpop6)}
+[data-role=glossary] .logo .inner {fill: url(#lgpop7)}
 
 .qrwrap .popup {width: calc(var(--u) * 0.62)}
 .qrwrap .pucontent {padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.05)}
@@ -804,7 +806,7 @@
 .rulesaside .rulescontent {max-height: 45vh}
 .pucontent .rulesitem {
     display: flex; flex-direction: row; align-items: center;
-    justify-content: flex-start; gap: 0.4em;
+    justify-content: flex-start; align-self: stretch; gap: 0.4em;
     text-align: left;
 }
 .rulesitem img {width: 3.9em; height: 3.9em; flex: none}
@@ -814,7 +816,7 @@
 }
 .rulesaside .rulesitem img {width: 2.8em; height: 2.8em}
 .glossarycontent .rulesitem img {width: 2.6em; height: 2.6em}
-.glossarycontent .rulesitem > span {font-size: 0.85em}
+.glossarycontent .rulesitem > span {font-size: calc(var(--u, 16px) * 0.024)}
 
 /* if anyone wants to make chuzzle rap you could rhyme these two.. just saying.. */
 .blinky, .stinky {animation: rulesblink 1.2s steps(1) infinite}
@@ -850,17 +852,22 @@
 
 .pucontent .previewrow {
     display: flex; flex-direction: row; align-items: center;
-    justify-content: flex-start; gap: 0.4em;
+    justify-content: flex-start; align-self: stretch; gap: 0.4em;
     background: none; box-shadow: none; padding: 0.3em 0 0; width: auto;
     text-align: left;
 }
-.previewrow img {width: 1.6em; height: 1.6em; flex: none}
-.previewrow span {font-size: 0.9em; color: #a9aee6}
+.previewrow img {width: 2.2em; height: 2.2em; flex: none}
+.previewrow span {
+    display: flex; flex-direction: column;
+    font-size: calc(var(--u, 16px) * 0.024); line-height: 1.4;
+}
+.previewdate {color: #a9aee6; font-weight: 400}
+.previewgametype {font-weight: 700}
 
 .pucontent .glossaryhead {
     width: 100%; text-align: center; font-weight: 700;
     background: none; box-shadow: none; padding: 0;
-    color: rgba(255,255,255,0.9); font-size: 1.3em; margin-top: 0.6em;
+    color: rgba(255,255,255,0.9); font-size: calc(var(--u, 16px) * 0.034); margin-top: 0.6em;
 }
 
 .rulesextrarow {
@@ -871,7 +878,7 @@
     flex: 1 1 0; min-width: 0;
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     text-transform: capitalize; font-size: 1.15em;
-    margin: 0; padding: 0.15em 0;
+    margin: 0; padding: 7px 0 3px;
     border-radius: 0.25em; color: white;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
     font-weight: 100;
@@ -881,5 +888,6 @@
     cursor: pointer;
 }
 .pucontent .upcominglink:active, .pucontent .glossarylink:active {
+    padding: 7px 0 3px;
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
 }
