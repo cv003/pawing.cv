@@ -240,7 +240,7 @@ function ruletext(entry, extra) {
 }
 
 const previewdays = 6;
-function previewhtml(date) {
+function upcominghtml(date) {
     const rows = [];
     for (let i = 1; i <= previewdays; i++) {
         const at = new Date(date.getFullYear(), date.getMonth(), date.getDate() + i);
@@ -251,8 +251,7 @@ function previewhtml(date) {
         rows.push("<div class=\"previewrow\">" + iconimg(gt.icon, gt.name)
             + "<span><b>" + escapehtml(label) + "</b> " + escapehtml(gt.name) + "</span></div>");
     }
-    if (!rows.length) return "";
-    return "<details class=\"rulespreview\"><summary>Upcoming days</summary>" + rows.join("") + "</details>";
+    return rows.join("");
 }
 
 function glossaryhtml() {
@@ -266,23 +265,44 @@ function glossaryhtml() {
     }).join("");
     html += "<div class=\"glossaryhead\">Bonuses</div>";
     html += rules.bonus.map(function(bonus) {return itemrow(bonus.icon, bonus.name, bonus.text)}).join("");
-    html += "<button type=\"button\" class=\"glossaryback\">Back to today's rules</button>";
     return html;
 }
 
-let glossarymode = false;
-function toggleglossary() {
-    glossarymode = !glossarymode;
-    paintrulescontent();
+function paintextras() {
+    if (!rules) return;
+    document.querySelectorAll(".upcomingcontent").forEach(function(seat) {
+        seat.innerHTML = upcominghtml(typeof dayback === "function" ? dayback(0) : new Date());
+        seat.scrollTop = 0;
+    });
+    document.querySelectorAll(".glossarycontent").forEach(function(seat) {
+        seat.innerHTML = glossaryhtml();
+        seat.scrollTop = 0;
+    });
+}
+
+const ruleswrap = document.querySelector("[data-role=rules]");
+const upcomingwrap = document.querySelector("[data-role=upcoming]");
+const glossarywrap = document.querySelector("[data-role=glossary]");
+function openextra(wrap) {
+    function launch() {
+        openpopup(wrap);
+        const content = wrap.querySelector(".upcomingcontent, .glossarycontent");
+        if (content) content.scrollTop = 0;
+    }
+    if (ruleswrap.classList.contains("open")) {
+        closepopup(ruleswrap);
+        setTimeout(launch, popupwait);
+    } else {
+        launch();
+    }
 }
 document.addEventListener("click", function(e) {
-    if (e.target.closest(".glossarylink, .glossaryback")) toggleglossary();
+    if (e.target.closest(".upcominglink")) openextra(upcomingwrap);
+    if (e.target.closest(".glossarylink")) openextra(glossarywrap);
 });
 
 function rulescontenthtml(date) {
     if (!rules) return "";
-    if (glossarymode) return glossaryhtml();
-
     const today = computerulesfordate(date);
     const gt = rules.gametype[today.gametype];
     if (!gt) return "";
@@ -301,12 +321,13 @@ function rulescontenthtml(date) {
         html += "<div class=\"rulesdifficulty\">Difficulty: <span style=\"color:"
             + csscolor(today.difficulty.color) + "\">" + today.difficulty.name + "</span></div>";
     }
-    html += previewhtml(date);
-    html += "<button type=\"button\" class=\"glossarylink\">Rules glossary</button>";
+    html += "<div class=\"rulesextrarow\">"
+        + "<button type=\"button\" class=\"upcominglink\">Upcoming</button>"
+        + "<button type=\"button\" class=\"glossarylink\">Glossary</button>"
+        + "</div>";
     return html;
 }
 function rulestitlefor(back) {
-    if (glossarymode) return "Rules Glossary";
     if (back === 0) return "Today's Rules!";
     if (back === 1) return "Yesterday's Rules!";
     return (typeof daylabel === "function" ? daylabel(back) : "") + " Rules!";
@@ -325,6 +346,7 @@ function paintrulescontent(back) {
     document.querySelectorAll(".rulestitle").forEach(function(el) {
         if (!el.closest(".ghost")) el.textContent = title;
     });
+    paintextras();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -348,7 +370,6 @@ window.addEventListener("resize", updateruleslayout);
 window.addEventListener("load", updateruleslayout);
 updateruleslayout();
 
-const ruleswrap = document.querySelector("[data-role=rules]");
 document.querySelector(".rulesbutton").addEventListener("click", function() {
     if (ruleswrap.classList.contains("open")) {closepopup(ruleswrap)}
     else {openpopup(ruleswrap)}

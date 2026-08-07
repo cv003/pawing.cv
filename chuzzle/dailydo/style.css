@@ -790,14 +790,17 @@
     box-shadow: 0 0 0 10px #03104d; border-radius: 0.25em;
     width: calc(100% - 30px); padding: 1.1em 0.6em;
 }
-.pucontent .rulescontent div {
+.pucontent .rulescontent div, .pucontent .upcomingcontent div, .pucontent .glossarycontent div {
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
 }
-.rulescontent {
-    max-height: 65vh; overflow-y: auto;
+.rulescontent, .upcomingcontent, .glossarycontent {
+    max-height: 45vh; overflow-y: auto; overflow-anchor: none;
+    flex-shrink: 0; justify-content: flex-start !important;
     scrollbar-width: none; -ms-overflow-style: none;
 }
-.rulescontent::-webkit-scrollbar {display: none}
+.rulescontent::-webkit-scrollbar, .upcomingcontent::-webkit-scrollbar, .glossarycontent::-webkit-scrollbar {
+    display: none;
+}
 .rulesaside .rulescontent {max-height: 45vh}
 .pucontent .rulesitem {
     display: flex; flex-direction: row; align-items: center;
@@ -807,20 +810,20 @@
 .rulesitem img {width: 3.9em; height: 3.9em; flex: none}
 .rulesitem > span {
     font-size: 1.2em; line-height: 1.3;
-    color: rgba(204,204,255,0.85);
+    color: #a9aee6;
 }
 .rulesaside .rulesitem img {width: 2.8em; height: 2.8em}
 
 /* if anyone wants to make chuzzle rap you could rhyme these two.. just saying.. */
-.blinky {animation: rulesblink 0.6s steps(1) infinite}
+.blinky, .stinky {animation: rulesblink 1.2s steps(1) infinite}
 @keyframes rulesblink {
-    0%, 50% {color: rgba(204,255,255,1)}
-    50.01%, 100% {color: rgba(204,204,255,0.75)}
+    0%, 50% {color: #ccffff}
+    50.01%, 100% {color: #a9aee6}
 }
-.stinky {animation: rulesstink 1s steps(1) infinite}
+.stinky {animation-name: rulesstink}
 @keyframes rulesstink {
-    0%, 50% {color: rgba(255,255,127,1)}
-    50.01%, 100% {color: rgba(255,127,127,0.75)}
+    0%, 50% {color: #ffff00}
+    50.01%, 100% {color: #ff0000}
 }
 
 .rulesdivider {
@@ -838,38 +841,37 @@
 
 .pucontent .rulesdifficulty {
     display: block; text-align: center; font-size: 1.15em;
-    color: rgba(204,204,255,0.85) !important;
+    color: #a9aee6 !important;
     padding-top: 0.2em; white-space: nowrap; width: auto;
 }
 .rulesdifficulty span {font-weight: 700}
 
-.rulespreview {
-    width: 100%; margin-top: 0.5em;
-    color: rgba(204,204,255,0.85);
-}
-.rulespreview summary {
-    cursor: pointer; font-size: 0.95em;
-    text-align: center; opacity: 0.75;
-}
-.previewrow {
+.pucontent .previewrow {
     display: flex; flex-direction: row; align-items: center;
     justify-content: flex-start; gap: 0.4em;
-    text-align: left; padding-top: 0.3em;
+    background: none; box-shadow: none; padding: 0.3em 0 0; width: auto;
+    text-align: left;
 }
 .previewrow img {width: 1.6em; height: 1.6em; flex: none}
-.previewrow span {font-size: 0.9em}
+.previewrow span {font-size: 0.9em; color: #a9aee6}
 
-.glossaryhead {
+.pucontent .glossaryhead {
     width: 100%; text-align: center; font-weight: 700;
+    background: none; box-shadow: none; padding: 0;
     color: rgba(255,255,255,0.9); margin-top: 0.6em;
 }
-.pucontent .glossarylink, .pucontent .glossaryback {
-    display: block; width: 100%; margin-top: 0.6em; padding: 0;
-    background: none; border: none; outline: none; border-radius: 0;
-    color: rgba(204,204,255,0.85); text-decoration: underline;
-    font-size: 0.9em; font-family: inherit; font-weight: 400;
-    cursor: pointer; text-transform: none;
+
+.rulesextrarow {
+    display: flex !important; flex-direction: row !important; gap: 0.5em;
+    width: 100% !important; margin-top: 0.6em;
 }
-.pucontent .glossarylink:active, .pucontent .glossaryback:active {
-    background: none; padding: 0;
+.pucontent .upcominglink, .pucontent .glossarylink {
+    flex: 1 1 0; margin: 0; padding: 0.35em 0;
+    background: rgba(169,174,230,0.15);
+    border: 1px solid rgba(169,174,230,0.5); border-radius: 0.4em;
+    color: #a9aee6; font-size: 0.85em; font-family: inherit;
+    font-weight: 400; text-transform: none; cursor: pointer;
+}
+.pucontent .upcominglink:active, .pucontent .glossarylink:active {
+    background: rgba(169,174,230,0.3);
 }
