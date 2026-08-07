@@ -793,6 +793,12 @@
 .pucontent .rulescontent div {
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
 }
+.rulescontent {
+    max-height: 65vh; overflow-y: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.rulescontent::-webkit-scrollbar {display: none}
+.rulesaside .rulescontent {max-height: 45vh}
 .pucontent .rulesitem {
     display: flex; flex-direction: row; align-items: center;
     justify-content: flex-start; gap: 0.4em;
@@ -836,3 +842,34 @@
     padding-top: 0.2em; white-space: nowrap; width: auto;
 }
 .rulesdifficulty span {font-weight: 700}
+
+.rulespreview {
+    width: 100%; margin-top: 0.5em;
+    color: rgba(204,204,255,0.85);
+}
+.rulespreview summary {
+    cursor: pointer; font-size: 0.95em;
+    text-align: center; opacity: 0.75;
+}
+.previewrow {
+    display: flex; flex-direction: row; align-items: center;
+    justify-content: flex-start; gap: 0.4em;
+    text-align: left; padding-top: 0.3em;
+}
+.previewrow img {width: 1.6em; height: 1.6em; flex: none}
+.previewrow span {font-size: 0.9em}
+
+.glossaryhead {
+    width: 100%; text-align: center; font-weight: 700;
+    color: rgba(255,255,255,0.9); margin-top: 0.6em;
+}
+.pucontent .glossarylink, .pucontent .glossaryback {
+    display: block; width: 100%; margin-top: 0.6em; padding: 0;
+    background: none; border: none; outline: none; border-radius: 0;
+    color: rgba(204,204,255,0.85); text-decoration: underline;
+    font-size: 0.9em; font-family: inherit; font-weight: 400;
+    cursor: pointer; text-transform: none;
+}
+.pucontent .glossarylink:active, .pucontent .glossaryback:active {
+    background: none; padding: 0;
+}

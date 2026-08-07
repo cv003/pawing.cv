@@ -238,8 +238,51 @@ function ruletext(entry, extra) {
     if (entry.id !== 20) return entry.text;
     return entry.text.replace("%s", extra.colour).replace("%s", extra.multiplier);
 }
+
+const previewdays = 6;
+function previewhtml(date) {
+    const rows = [];
+    for (let i = 1; i <= previewdays; i++) {
+        const at = new Date(date.getFullYear(), date.getMonth(), date.getDate() + i);
+        const out = computerulesfordate(at);
+        const gt = rules.gametype[out.gametype];
+        if (!gt) continue;
+        const label = at.toLocaleDateString(undefined, {weekday: "short", month: "short", day: "numeric"});
+        rows.push("<div class=\"previewrow\">" + iconimg(gt.icon, gt.name)
+            + "<span><b>" + escapehtml(label) + "</b> " + escapehtml(gt.name) + "</span></div>");
+    }
+    if (!rows.length) return "";
+    return "<details class=\"rulespreview\"><summary>Upcoming days</summary>" + rows.join("") + "</details>";
+}
+
+function glossaryhtml() {
+    let html = "<div class=\"glossaryhead\">Gametypes</div>";
+    html += rules.gametype.map(function(gt) {return itemrow(gt.icon, gt.name, gt.text)}).join("");
+    html += "<div class=\"glossaryhead\">Rules</div>";
+    html += rules.rules.map(function(entry) {
+        const text = entry.id === 20 ? entry.text.replace("%s", "a colour").replace("%s", "double/triple")
+            : entry.text;
+        return itemrow(entry.icon, "", text);
+    }).join("");
+    html += "<div class=\"glossaryhead\">Bonuses</div>";
+    html += rules.bonus.map(function(bonus) {return itemrow(bonus.icon, bonus.name, bonus.text)}).join("");
+    html += "<button type=\"button\" class=\"glossaryback\">Back to today's rules</button>";
+    return html;
+}
+
+let glossarymode = false;
+function toggleglossary() {
+    glossarymode = !glossarymode;
+    paintrulescontent();
+}
+document.addEventListener("click", function(e) {
+    if (e.target.closest(".glossarylink, .glossaryback")) toggleglossary();
+});
+
 function rulescontenthtml(date) {
     if (!rules) return "";
+    if (glossarymode) return glossaryhtml();
+
     const today = computerulesfordate(date);
     const gt = rules.gametype[today.gametype];
     if (!gt) return "";
@@ -258,9 +301,12 @@ function rulescontenthtml(date) {
         html += "<div class=\"rulesdifficulty\">Difficulty: <span style=\"color:"
             + csscolor(today.difficulty.color) + "\">" + today.difficulty.name + "</span></div>";
     }
+    html += previewhtml(date);
+    html += "<button type=\"button\" class=\"glossarylink\">Rules glossary</button>";
     return html;
 }
 function rulestitlefor(back) {
+    if (glossarymode) return "Rules Glossary";
     if (back === 0) return "Today's Rules!";
     if (back === 1) return "Yesterday's Rules!";
     return (typeof daylabel === "function" ? daylabel(back) : "") + " Rules!";
