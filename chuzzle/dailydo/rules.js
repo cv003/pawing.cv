@@ -8,14 +8,9 @@ const rulesready = fetch("assets/static/rules.jsonc").then(function(reply) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// legacy: true picks RaptRandom::GetLegacy (pre-2.70 - power-of-2 mask then
-// a true modulo, which has the classic modulo-bias problem for non-power-
-// of-2 n) instead of GetNew (2.70+ - multiply-shift, no bias). both share
-// the same ring/seed - only the draw math differs
 class RaptRandom {
-    constructor(legacy) {
+    constructor() {
         this.ring = new Array(55).fill(0); this.j = 0; this.k = 31;
-        this.legacy = !!legacy;
     }
     seed(s) {
         const mask = 0x3fffffff;
@@ -28,32 +23,14 @@ class RaptRandom {
             this.ring[3 + i] = carry;
         }
     }
-    // advances the ring and returns the raw 24-bit fraction shared by both
-    // get() variants below
-    draw() {
+    get(n) {
+        if (n <= 0) return 0;
         const mask = 0x3fffffff;
         const sum = (this.ring[this.k] + this.ring[this.j]) & mask;
         this.ring[this.j] = sum;
         this.j = (this.j === 54) ? 0 : this.j + 1;
         this.k = (this.k === 54) ? 0 : this.k + 1;
-        return (sum >>> 6) & 0xffffff;
-    }
-    get(n) {
-        return this.legacy ? this.getlegacy(n) : this.getnew(n);
-    }
-    getnew(n) {
-        if (n <= 0) return 0;
-        return Math.floor(this.draw() * n / 0x1000000);
-    }
-    getlegacy(n) {
-        if (n === 0) return 0;
-        const frac = this.draw();
-        // smallest power of two >= n, matching the decompile's own
-        // do/while doubling loop exactly (not just 1 << ceil(log2(n)))
-        let b = 2, a;
-        do {a = b; b = a << 1} while (a < n);
-        const masked = frac & (a - 1);
-        return masked % n;
+        return Math.floor(((sum >>> 6) & 0xffffff) * n / 0x1000000);
     }
 }
 
@@ -67,14 +44,8 @@ function dailyseed(year, month, day) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 const gametypebag = [0, 0, 0, 1, 1, 2, 3, 3, 4, 4];
-// golden: during an active Golden Tournament (DAT_007e5092 in the
-// decompile), gametypes 2/3 (Speed/Ten) get force-rejected unconditionally,
-// checked before and independent of the normal anti-repeat rules below -
-// always false here for now since we haven't traced where the tournament's
-// own schedule/seed comes from (see report_rulevariants_270.md), so this
-// only matters once/if that gets modeled
-function buildgametypepool(seed, legacy, golden) {
-    const rng = new RaptRandom(legacy);
+function buildgametypepool(seed, golden) {
+    const rng = new RaptRandom();
     rng.seed(seed);
     const pool = [];
     for (let slot = 0; slot < 35; slot++) {
@@ -86,7 +57,7 @@ function buildgametypepool(seed, legacy, golden) {
             } else if (slot !== 0 && (id | 1) === 3) {
                 if (id === pool[slot - 1]) id = -1;
             } else if (slot > 1 && id < 5 && ((1 << id) & 0x13) !== 0) {
-                if (id === pool[slot - 1] || id === pool[slot - 2]) id = -1;
+                if (id === pool[slot - 1] && id === pool[slot - 2]) id = -1;
             }
         } while (id === -1);
         pool.push(id);
@@ -127,10 +98,7 @@ function builddeck(gametype, day, rng, extra) {
     push(11);
     if (gametype === 3) push(17);
     push(18);
-    // pre-2.70 (rng.legacy), rule 19 has no day-of-month gate at all - that
-    // condition was added in 2.70 alongside rules 30/31 below, which don't
-    // exist pre-2.70 and never get pushed onto the deck in legacy mode
-    if ((gametype === 0 || gametype === 1) && (rng.legacy || day % 3 === 1)) push(19);
+    if ((gametype === 0 || gametype === 1) && day % 3 === 1) push(19);
 
     extra.colour = ["Red", "Green", "Blue", "Orange", "Yellow", "Purple"][rng.get(6)];
     extra.multiplier = ["double", "triple"][rng.get(2)];
@@ -142,10 +110,8 @@ function builddeck(gametype, day, rng, extra) {
     push(27);
     push(28);
     push(29);
-    if (!rng.legacy) {
-        if (gametype !== 2) push(30);
-        if (day % 3 === 0) push(31);
-    }
+    if (gametype !== 2) push(30);
+    if (day % 3 === 0) push(31);
     return deck;
 }
 
@@ -210,13 +176,13 @@ function drawdifficulty(rng, gametype) {
     return {name: "Hard!", color: "1,0,0"};
 }
 
-function computerulesfordate(date, legacy) {
+function computerulesfordate(date) {
     const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
 
-    const pool = buildgametypepool(monthlyseed(year, month), legacy);
+    const pool = buildgametypepool(monthlyseed(year, month));
     const gametype = pool[day];
 
-    const rng = new RaptRandom(legacy);
+    const rng = new RaptRandom();
     rng.seed(dailyseed(year, month, day));
     const extra = {};
     const deck = shuffledeck(builddeck(gametype, day, rng, extra), rng);
@@ -272,25 +238,9 @@ function ruletext(entry, extra) {
     if (entry.id !== 20) return entry.text;
     return entry.text.replace("%s", extra.colour).replace("%s", extra.multiplier);
 }
-// persisted so a visitor whose app is on the older track doesn't have to
-// re-pick "old" every visit - see report_rulevariants_270.md for what this
-// does and doesn't cover (RNG formula + rules 19/30/31, not the second
-// gRandom reseed, which is a no-op for a from-scratch reimplementation
-// either way). 2.70 is main now (it left beta), so "legacy" here means
-// "old"/pre-2.70, not "beta" - matches switchmain.png/switchold.png
-let legacymode = localStorage.getItem("chuzzlerulesmode") === "legacy";
-function togglerulesmode() {
-    legacymode = !legacymode;
-    try {localStorage.setItem("chuzzlerulesmode", legacymode ? "legacy" : "new")} catch (e) {}
-    paintrulescontent();
-}
-document.addEventListener("click", function(e) {
-    if (e.target.closest(".rulesmode")) togglerulesmode();
-});
-
 function rulescontenthtml(date) {
     if (!rules) return "";
-    const today = computerulesfordate(date, legacymode);
+    const today = computerulesfordate(date);
     const gt = rules.gametype[today.gametype];
     if (!gt) return "";
 
@@ -308,8 +258,6 @@ function rulescontenthtml(date) {
         html += "<div class=\"rulesdifficulty\">Difficulty: <span style=\"color:"
             + csscolor(today.difficulty.color) + "\">" + today.difficulty.name + "</span></div>";
     }
-    html += "<img class=\"rulesmode\" src=\"assets/images/switch"
-        + (legacymode ? "old" : "main") + ".png\" alt=\"switch to " + (legacymode ? "main" : "old") + "\">";
     return html;
 }
 function rulestitlefor(back) {

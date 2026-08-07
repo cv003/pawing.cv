@@ -790,10 +790,6 @@
     box-shadow: 0 0 0 10px #03104d; border-radius: 0.25em;
     width: calc(100% - 30px); padding: 1.1em 0.6em;
 }
-/* lets a visitor whose app is on the older track match the site's rules to
-   what they actually see - picks between RaptRandom::GetNew (2.70+) and
-   GetLegacy (pre-2.70) for the whole computation, see rules.js */
-.rulesmode {height: 1.6em; width: auto; margin-top: 0.2em; cursor: pointer}
 .pucontent .rulescontent div {
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
 }
