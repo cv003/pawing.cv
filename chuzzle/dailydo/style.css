@@ -247,10 +247,6 @@
         0 0.120em 0 #261b19;
 }
 
-/* --rankcells is a pure digit count (from board.js) - the box needs a bit
-   more than that many 0.63em cells since the rendered text is "N digits +
-   a dot", and a too-tight box was overflowing (and getting clipped) right
-   where the dot sits instead of comfortably containing it */
 .scores rank {
     flex: none; width: calc((var(--rankcells, 4) + 0.6) * 0.63em);
     text-align: right;
@@ -816,7 +812,7 @@
 }
 .rulesaside .rulesitem img {width: 2.8em; height: 2.8em}
 .glossarycontent .rulesitem img {width: 2.6em; height: 2.6em}
-.glossarycontent .rulesitem > span {font-size: calc(var(--u, 16px) * 0.024)}
+.glossarycontent .rulesitem > span {font-size: calc(var(--u, 16px) * 0.036)}
 
 /* if anyone wants to make chuzzle rap you could rhyme these two.. just saying.. */
 .blinky, .stinky {animation: rulesblink 1.2s steps(1) infinite}
@@ -859,7 +855,7 @@
 .previewrow img {width: 2.2em; height: 2.2em; flex: none}
 .previewrow span {
     display: flex; flex-direction: column;
-    font-size: calc(var(--u, 16px) * 0.024); line-height: 1.4;
+    font-size: calc(var(--u, 16px) * 0.036); line-height: 1.4;
 }
 .previewdate {color: #a9aee6; font-weight: 400}
 .previewgametype {font-weight: 700}
@@ -867,7 +863,7 @@
 .pucontent .glossaryhead {
     width: 100%; text-align: center; font-weight: 700;
     background: none; box-shadow: none; padding: 0;
-    color: rgba(255,255,255,0.9); font-size: calc(var(--u, 16px) * 0.034); margin-top: 0.6em;
+    color: rgba(255,255,255,0.9); font-size: calc(var(--u, 16px) * 0.048); margin-top: 0.6em;
 }
 
 .rulesextrarow {

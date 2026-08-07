@@ -286,16 +286,16 @@ const ruleswrap = document.querySelector("[data-role=rules]");
 const upcomingwrap = document.querySelector("[data-role=upcoming]");
 const glossarywrap = document.querySelector("[data-role=glossary]");
 function openextra(wrap) {
-    function scrolltop() {
+    function launch() {
+        openpopup(wrap);
         const content = wrap.querySelector(".upcomingcontent, .glossarycontent");
         if (content) content.scrollTop = 0;
     }
     if (ruleswrap.classList.contains("open")) {
-        swappopup(ruleswrap, wrap);
-        setTimeout(scrolltop, popupwait);
+        closepopup(ruleswrap);
+        setTimeout(launch, popupwait);
     } else {
-        openpopup(wrap);
-        scrolltop();
+        launch();
     }
 }
 document.addEventListener("click", function(e) {

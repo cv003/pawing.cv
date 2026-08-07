@@ -196,12 +196,6 @@ function prefetchdays() {
     });
 }
 
-// only refreshes every minute, or postponed if not viewing the leaderboard.
-// cachekey()/dayback() both re-read the real clock on every call, so this
-// already silently catches up the leaderboard when the calendar day rolls
-// over while the tab is left open - it just never told the rules panel,
-// which stayed frozen on whatever day it was last painted (still correct
-// for dayat!==0, a specific past day, since those never change)
 async function refreshboard() {
     if (document.body.classList.contains("fetching")) return;
     const key = cachekey();
@@ -743,20 +737,16 @@ window.addEventListener("resize", function() {
 
 // 100ms seems most accurate but idk
 const popupwait = 100;
-function openpopup(wrap, keepchildren) {
+function openpopup(wrap) {
     wrap.classList.remove("closing");
     wrap.classList.add("open");
     trimpending(wrap);
     clearTimeout(wrap.settletimer);
     wrap.settletimer = setTimeout(function() {wrap.classList.add("settled")}, popupwait);
-    startburst(wrap, keepchildren);
+    startburst(wrap);
 }
 function closepopup(wrap) {
     if (!wrap.classList.contains("open")) return;
-    if (wrap.dataset.returnTo && !document.body.classList.contains("showaside")) {
-        const target = document.querySelector("[data-role=" + wrap.dataset.returnTo + "]");
-        if (target) {swappopup(wrap, target); return}
-    }
     clearTimeout(wrap.settletimer);
     wrap.classList.remove("settled");
     wrap.classList.add("closing");
@@ -769,6 +759,10 @@ function closepopup(wrap) {
         const url = new URL(location.href);
         url.searchParams.delete("player");
         history.replaceState(null, "", url);
+    }
+    if (wrap.dataset.returnTo && !document.body.classList.contains("showaside")) {
+        const target = document.querySelector("[data-role=" + wrap.dataset.returnTo + "]");
+        if (target) setTimeout(function() {openpopup(target)}, popupwait);
     }
 }
 
@@ -837,54 +831,25 @@ function spawnburstcircle(wrap, elapsed) {
 const starlife = 2.6;
 const circlelife = 1.6;
 
-// swapping: true means a wrap that just inherited a live .burstlayer from
-// swappopup() below - skips both the innerHTML wipe AND the initial seed
-// batch, so the stars/circles already flying just keep going untouched
-// instead of resetting or getting a duplicate batch dropped on top
-function startburst(wrap, swapping) {
-    stopburst(wrap, swapping);
-    if (!swapping) {
-        wrap.burstseed = setTimeout(function() {
-            for (let t = 0; t < starlife; t += burstinterval / 1000) {
-                spawnburststar(wrap, Math.random() * starlife);
-            }
-            for (let t = 0; t < circlelife; t += burstinterval / 1000) {
-                spawnburstcircle(wrap, Math.random() * circlelife);
-            }
-        }, popupwait);
-    }
+function startburst(wrap) {
+    stopburst(wrap);
+    wrap.burstseed = setTimeout(function() {
+        for (let t = 0; t < starlife; t += burstinterval / 1000) {
+            spawnburststar(wrap, Math.random() * starlife);
+        }
+        for (let t = 0; t < circlelife; t += burstinterval / 1000) {
+            spawnburstcircle(wrap, Math.random() * circlelife);
+        }
+    }, popupwait);
     wrap.burststimer = setInterval(function() {spawnburststar(wrap)}, burstinterval);
     wrap.burstctimer = setInterval(function() {spawnburstcircle(wrap)}, burstinterval);
 }
-function stopburst(wrap, keepchildren) {
+function stopburst(wrap) {
     clearTimeout(wrap.burstseed);
     clearInterval(wrap.burststimer);
     clearInterval(wrap.burstctimer);
-    if (keepchildren) return;
     const layer = wrap.querySelector(".burstlayer");
     if (layer) layer.innerHTML = "";
-}
-
-// swaps one popup for another (rules <-> upcoming/glossary) without the
-// stars/circles resetting - they look the same regardless of which popup
-// they're decorating, so just hand the live .burstlayer over
-function swappopup(fromwrap, towrap) {
-    const layer = fromwrap.querySelector(".burstlayer");
-    if (layer) towrap.insertBefore(layer, towrap.querySelector(".popup"));
-    stopburst(fromwrap, true);
-    clearTimeout(fromwrap.settletimer);
-    fromwrap.classList.remove("settled");
-    fromwrap.classList.add("closing");
-    fromwrap.settletimer = setTimeout(function() {
-        fromwrap.classList.remove("open");
-        fromwrap.classList.remove("closing");
-    }, popupwait);
-    if (fromwrap.dataset.role === "profile") {
-        const url = new URL(location.href);
-        url.searchParams.delete("player");
-        history.replaceState(null, "", url);
-    }
-    setTimeout(function() {openpopup(towrap, true)}, popupwait);
 }
 
 document.querySelectorAll(".closebtn").forEach(function (seat) {
