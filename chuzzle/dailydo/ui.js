@@ -766,6 +766,10 @@ function closepopup(wrap) {
         url.searchParams.delete("player");
         history.replaceState(null, "", url);
     }
+    if (wrap.dataset.returnTo && !document.body.classList.contains("showaside")) {
+        const target = document.querySelector("[data-role=" + wrap.dataset.returnTo + "]");
+        if (target) setTimeout(function() {openpopup(target)}, popupwait);
+    }
 }
 
 /*//////////////////////////////////////////////////////////////////////*/

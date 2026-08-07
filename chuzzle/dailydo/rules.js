@@ -354,8 +354,15 @@ function paintrulescontent(back) {
 const asideneeds = 300;
 const rulesbutton = document.querySelector(".rulesbutton");
 function updateruleslayout() {
+    const wasaside = document.body.classList.contains("showaside");
     const uibox = document.querySelector(".ui").getBoundingClientRect();
-    document.body.classList.toggle("showaside", uibox.left >= asideneeds);
+    const isaside = uibox.left >= asideneeds;
+    document.body.classList.toggle("showaside", isaside);
+    if (isaside && !wasaside) {
+        [ruleswrap, upcomingwrap, glossarywrap].forEach(function(wrap) {
+            if (wrap.classList.contains("open")) closepopup(wrap);
+        });
+    }
 
     const play = document.querySelector(".todaybutton").getBoundingClientRect();
     const size = rulesbutton.getBoundingClientRect().height;

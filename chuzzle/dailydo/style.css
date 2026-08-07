@@ -813,6 +813,8 @@
     color: #a9aee6;
 }
 .rulesaside .rulesitem img {width: 2.8em; height: 2.8em}
+.glossarycontent .rulesitem img {width: 2.6em; height: 2.6em}
+.glossarycontent .rulesitem > span {font-size: 0.85em}
 
 /* if anyone wants to make chuzzle rap you could rhyme these two.. just saying.. */
 .blinky, .stinky {animation: rulesblink 1.2s steps(1) infinite}
@@ -858,7 +860,7 @@
 .pucontent .glossaryhead {
     width: 100%; text-align: center; font-weight: 700;
     background: none; box-shadow: none; padding: 0;
-    color: rgba(255,255,255,0.9); margin-top: 0.6em;
+    color: rgba(255,255,255,0.9); font-size: 1.3em; margin-top: 0.6em;
 }
 
 .rulesextrarow {
@@ -866,12 +868,18 @@
     width: 100% !important; margin-top: 0.6em;
 }
 .pucontent .upcominglink, .pucontent .glossarylink {
-    flex: 1 1 0; margin: 0; padding: 0.35em 0;
-    background: rgba(169,174,230,0.15);
-    border: 1px solid rgba(169,174,230,0.5); border-radius: 0.4em;
-    color: #a9aee6; font-size: 0.85em; font-family: inherit;
-    font-weight: 400; text-transform: none; cursor: pointer;
+    flex: 1 1 0; min-width: 0;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    text-transform: capitalize; font-size: 1.15em;
+    margin: 0; padding: 0.15em 0;
+    border-radius: 0.25em; color: white;
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    font-weight: 100;
+    --r: 0.08em; --ink: #000;
+    text-shadow: var(--ring);
+    box-shadow: 0 0 0 0.12em rgba(0,0,0,0.75);
+    cursor: pointer;
 }
 .pucontent .upcominglink:active, .pucontent .glossarylink:active {
-    background: rgba(169,174,230,0.3);
+    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
 }
