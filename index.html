@@ -140,7 +140,11 @@
             align-items: flex-end
         }
 
-        .links {font-size: 0.75em; opacity: 0.75}
+        .links {
+            display: block;
+            font-size: 0.75em; opacity: 0.75; 
+            padding: 0.25em
+        }
 
         .status {
             display: flex; position: fixed; white-space: pre-line !important;
@@ -235,6 +239,25 @@
 
         img[src="/utdr/icon.png"] {filter: invert(1) brightness(2)}
 
+        .kofi {
+            position: fixed; left: 0; bottom: 34px;
+            z-index: 99999; padding: 4px 10px; border-radius: 0 16px 16px 0;
+            background: rgba(0,0,0,0.1); cursor: pointer;
+            font-size: 12px; transition: filter 0.15s ease;
+        }
+        .kofi:hover {filter: brightness(1.15)}
+
+        .kofipanel { 
+            display: none; position: fixed; left: 6px; bottom: 66px;
+            z-index: 99999; width: 320px; max-width: calc(100vw - 12px);
+            height: 450px; max-height: 70vh;
+            border-radius: 16px; overflow: hidden; background: #fff;
+        }
+        .kofipanel.open {display: block}
+        .kofipanel iframe {
+            width: 100%; height: 100%;
+            border: none; display: block
+        }
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -315,6 +338,9 @@
         <a href="/chuzzle/" title="chuzzle pages"><img draggable="false" src="/chuzzle/icon.png"></a>
     </div>
 
+    <div class="kofi">support!</div>
+    <div class="kofipanel"></div>
+
     <div class="bottom">
         <span class="bigtext">middle click to copy!</span>
         <div class="buttons">
@@ -360,7 +386,7 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
     <div class="status"><span>loading..</span><span class="midtext">(if nothing appears, try refreshing)</span></div>
 
     <script src="/assets/static/soggy.exe.js"></script>
-    
+
     <script>
 
         fetch("https://status.cafe/users/meow/status.json")
@@ -408,6 +434,24 @@ pride flag i made for people who just don't know" class="button" src="/assets/im
         })();
 
         /*//////////////////////////////////////////////////////////////////////*/
+
+        (function() {
+            const kofi = document.querySelector(".kofi");
+            const kofipanel = document.querySelector(".kofipanel");
+            let loaded = false;
+            kofi.addEventListener("click", function () {
+                if (!loaded) {
+                    kofipanel.innerHTML = '<iframe src="https://ko-fi.com/sogful/?hidefeed=true&widget=true&embed=true"></iframe>';
+                    loaded = true;
+                }
+                kofipanel.classList.toggle("open");
+            });
+            document.addEventListener("click", function (e) {
+                if (!kofipanel.classList.contains("open")) return;
+                if (kofipanel.contains(e.target) || kofi.contains(e.target)) return;
+                kofipanel.classList.remove("open");
+            });
+        })();
 
         (function() {
             let loaded = false;

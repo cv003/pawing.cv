@@ -247,8 +247,12 @@
         0 0.120em 0 #261b19;
 }
 
+/* --rankcells is a pure digit count (from board.js) - the box needs a bit
+   more than that many 0.63em cells since the rendered text is "N digits +
+   a dot", and a too-tight box was overflowing (and getting clipped) right
+   where the dot sits instead of comfortably containing it */
 .scores rank {
-    flex: none; width: calc(var(--rankcells, 4) * 0.63em);
+    flex: none; width: calc((var(--rankcells, 4) + 0.6) * 0.63em);
     text-align: right;
     font-family: "chuzzle italic", Arial, Helvetica, sans-serif;
     font-size: 0.6em; margin-right: 0.35em;
@@ -786,22 +790,10 @@
     box-shadow: 0 0 0 10px #03104d; border-radius: 0.25em;
     width: calc(100% - 30px); padding: 1.1em 0.6em;
 }
-/* lets a visitor whose app isn't on the beta track match the site's rules
-   to what they actually see - picks between RaptRandom::GetNew (2.70+)
-   and GetLegacy (pre-2.70) for the whole computation, see rules.js.
-   global.css's ".pucontent div button" (font-size:2em, full-width, blue
-   gradient) outranks a bare ".rulesmode" by specificity - needs the same
-   kind of override as .rulesitem/.rulesdifficulty above */
-.pucontent .rulescontent .rulesmode {
-    position: absolute; top: 0.3em; right: 0.5em;
-    width: auto; margin: 0; padding: 0.2em 0.6em; border-radius: 1em;
-    background: rgba(255,255,255,0.12);
-    color: rgba(204,204,255,0.85);
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.6em; font-weight: 600; letter-spacing: 0.02em;
-    text-transform: none; text-shadow: none; cursor: pointer;
-}
-.pucontent .rulescontent .rulesmode:active {background: rgba(255,255,255,0.25)}
+/* lets a visitor whose app is on the older track match the site's rules to
+   what they actually see - picks between RaptRandom::GetNew (2.70+) and
+   GetLegacy (pre-2.70) for the whole computation, see rules.js */
+.rulesmode {height: 1.6em; width: auto; margin-top: 0.2em; cursor: pointer}
 .pucontent .rulescontent div {
     background: none; box-shadow: none; padding: 0; width: auto; top: 0;
 }

@@ -67,7 +67,13 @@ function dailyseed(year, month, day) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 const gametypebag = [0, 0, 0, 1, 1, 2, 3, 3, 4, 4];
-function buildgametypepool(seed, legacy) {
+// golden: during an active Golden Tournament (DAT_007e5092 in the
+// decompile), gametypes 2/3 (Speed/Ten) get force-rejected unconditionally,
+// checked before and independent of the normal anti-repeat rules below -
+// always false here for now since we haven't traced where the tournament's
+// own schedule/seed comes from (see report_rulevariants_270.md), so this
+// only matters once/if that gets modeled
+function buildgametypepool(seed, legacy, golden) {
     const rng = new RaptRandom(legacy);
     rng.seed(seed);
     const pool = [];
@@ -75,7 +81,9 @@ function buildgametypepool(seed, legacy) {
         let id;
         do {
             id = gametypebag[rng.get(gametypebag.length)];
-            if (slot !== 0 && (id | 1) === 3) {
+            if (golden && (id | 1) === 3) {
+                id = -1;
+            } else if (slot !== 0 && (id | 1) === 3) {
                 if (id === pool[slot - 1]) id = -1;
             } else if (slot > 1 && id < 5 && ((1 << id) & 0x13) !== 0) {
                 if (id === pool[slot - 1] || id === pool[slot - 2]) id = -1;
@@ -264,10 +272,12 @@ function ruletext(entry, extra) {
     if (entry.id !== 20) return entry.text;
     return entry.text.replace("%s", extra.colour).replace("%s", extra.multiplier);
 }
-// persisted so a visitor whose app isn't on the beta track doesn't have to
-// re-pick "normal" every visit - see report_rulevariants_270.md for what
-// this does and doesn't cover (RNG formula + rules 19/30/31, not the
-// second gRandom reseed, which is a no-op for a from-scratch reimplementation either way)
+// persisted so a visitor whose app is on the older track doesn't have to
+// re-pick "old" every visit - see report_rulevariants_270.md for what this
+// does and doesn't cover (RNG formula + rules 19/30/31, not the second
+// gRandom reseed, which is a no-op for a from-scratch reimplementation
+// either way). 2.70 is main now (it left beta), so "legacy" here means
+// "old"/pre-2.70, not "beta" - matches switchmain.png/switchold.png
 let legacymode = localStorage.getItem("chuzzlerulesmode") === "legacy";
 function togglerulesmode() {
     legacymode = !legacymode;
@@ -284,9 +294,7 @@ function rulescontenthtml(date) {
     const gt = rules.gametype[today.gametype];
     if (!gt) return "";
 
-    let html = "<button type=\"button\" class=\"rulesmode\">"
-        + (legacymode ? "Normal (2.69)" : "Beta (2.70)") + "</button>";
-    html += itemrow(gt.icon, gt.name, gt.text);
+    let html = itemrow(gt.icon, gt.name, gt.text);
     if (today.ruleids.length) html += "<div class=\"rulesdivider\"></div>";
     html += today.ruleids.map(function(id) {
         const entry = rules.rules.find(function(r) {return r.id === id});
@@ -300,6 +308,8 @@ function rulescontenthtml(date) {
         html += "<div class=\"rulesdifficulty\">Difficulty: <span style=\"color:"
             + csscolor(today.difficulty.color) + "\">" + today.difficulty.name + "</span></div>";
     }
+    html += "<img class=\"rulesmode\" src=\"assets/images/switch"
+        + (legacymode ? "old" : "main") + ".png\" alt=\"switch to " + (legacymode ? "main" : "old") + "\">";
     return html;
 }
 function rulestitlefor(back) {
