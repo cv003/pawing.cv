@@ -1,5 +1,10 @@
 :root {--baseu: min(var(--vh) * 0.5625, 100vw)}
 
+/* one game unit. MyApp::Initialize calls SetPageSize(414, 414 / w * h) on
+   anything that isn't a tablet, so the page is exactly 414 units across and
+   decomp measurements can be written out as-is instead of pre-divided */
+:root {--gu: calc(var(--u) / 414)}
+
 .sky {
     position: fixed; inset: 0;
     z-index: 0; overflow: hidden;
@@ -29,8 +34,9 @@
     to {transform: translate3d(0, calc(var(--u) * -0.44), 0)}
 }
 
+/* the vignette bands go down before the star rings and the pillars do */
 .vignette {
-    z-index: 5;
+    z-index: 3;
     background: linear-gradient(180deg,
         #050177 0%, #050177 4%,
         rgba(5,1,119,0) 16%, rgba(5,1,119,0) 92%,
@@ -52,59 +58,69 @@
 }
 .golden .vignette::after {opacity: 1}
 
-.golden .plorange {background: #ffc93a}
-.golden .plpink {background: #ffa714}
-.golden .plmagenta {background: #fe9b00}
+/* golden draws the amber sprite for all three, under SetColor(1, 1, 0), so
+   its highlight loses the blue channel along with the base */
+.golden .plred, .golden .plamber, .golden .plmagenta {
+    background: #fe9b00;
+    --pltop: #fec800; --plmid: #feb200;
+}
 
 .pillars {
-    z-index: 4; left: 50%;
+    z-index: 5; left: 50%;
     width: var(--u); right: auto;
     transform: translateX(-50%);
 }
 .pillars.right {transform: translateX(-50%) scaleX(-1)}
 
+/* DailyDoKit::Draw stretches three DailyDoPillars sprites down from the top
+   with DrawMagicBorderV, mirrored on both edges. each is a 67 unit wide body
+   with a semicircular cap and a 6 unit black rim at 20% alpha, centres 20/50/90
+   units in, tops at 200/300/400. they land on top of the background because
+   the kit draws long after Game::DrawGameBackground has laid the stripes. */
 .pillar {
-    position: absolute;
-    bottom: 0; border-radius: 999px 999px 0 0;
-    overflow: hidden;
+    position: absolute; bottom: 0;
+    width: calc(var(--gu) * 67);
+    border-radius: 999px 999px 0 0;
+    box-shadow: 0 0 0 calc(var(--gu) * 6) rgba(0,0,0,0.2);
 }
 
+/* every sprite carries the same soft highlight, a circle of radius 55 centred
+   20 across and 14 down from the body's top left corner, reaching the flat
+   base colour at its edge. MagicBorderV only stretches a 5% slice off the
+   sprite's bottom, which is already flat, so the glow never smears */
 .pillar::before {
     content: ""; position: absolute;
     inset: 0; border-radius: inherit;
-    background: linear-gradient(180deg,
-        rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 20%,
-        rgba(0,0,0,0) 60%, rgba(0,0,0,0.18) 100%);
-}
-.pillar::after {
-    content: ""; position: absolute;
-    top: calc(var(--u) * 0.022); left: calc(var(--u) * 0.022);
-    width: calc(var(--u) * 0.05); height: calc(var(--u) * 0.05);
-    border-radius: 50%;
-    background: rgba(255,255,255,0.5);
-    filter: blur(calc(var(--u) * 0.018));
+    background: radial-gradient(circle calc(var(--gu) * 55)
+        at calc(var(--gu) * 20) calc(var(--gu) * 14),
+        var(--pltop) 0%, var(--plmid) 42%, transparent 100%);
 }
 
-.plorange {
-    height: 75%; width: calc(var(--u) * 0.15);
-    left: calc(var(--u) * -0.075);
-    background: #ffb040; z-index: 1;
+/* left is the 20/50/90 centre less the 33.5 half-width, and the draw order
+   below is the z-order the three DrawMagicBorderV calls end up with */
+.plred {
+    top: calc(var(--gu) * 200);
+    left: calc(var(--gu) * -13.5);
+    background: #fe4203; z-index: 1;
+    --pltop: #fe9876; --plmid: #fe6d3c;
 }
-.plpink {
-    height: 49%; width: calc(var(--u) * 0.11);
-    left: calc(var(--u) * 0.01);
-    background: #ff7aa8; z-index: 2;
+.plamber {
+    top: calc(var(--gu) * 300);
+    left: calc(var(--gu) * 56.5);
+    background: #fe9b0f; z-index: 2;
+    --pltop: #fec87c; --plmid: #feb246;
 }
 .plmagenta {
-    height: 22%; width: calc(var(--u) * 0.25);
-    left: calc(var(--u) * -0.06);
-    background: #fd77c0; z-index: 3;
+    top: calc(var(--gu) * 400);
+    left: calc(var(--gu) * 16.5);
+    background: #c009c6; z-index: 3;
+    --pltop: #dd79e0; --plmid: #ce41d3;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
 
 .bigstars {
-    z-index: 3; left: 50%;
+    z-index: 4; left: 50%;
     width: var(--u); right: auto;
     transform: translateX(-50%);
     overflow: hidden;
@@ -134,9 +150,9 @@
 /*//////////////////////////////////////////////////////////////////////*/
 
 /* Game::DrawGameBackground tiles a near-black starfield, then lays eight
-   45deg quads over it, 150 game units wide each (screen is 640 wide), cycling
-   through a palindrome palette and scrolling ticks/5 units a frame - so one
-   1200 unit loop takes 100s. alpha is 0.65 above the board, 0.5 below it. */
+   45deg quads over it, 150 game units wide each, cycling through a palindrome
+   palette and scrolling ticks/5 units a frame - so one 1200 unit loop takes
+   100s. alpha is 0.65 above the board, 0.5 below it. */
 .stripes {
     z-index: 1; overflow: hidden;
     opacity: 0.85;
@@ -146,20 +162,22 @@
     content: ""; position: absolute;
     top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.8);
     left: calc(var(--u) * -0.05); right: calc(var(--u) * -1.95);
+    /* 150 units a band, but measured perpendicular to a 45deg gradient, so
+       each stop is 150 / sqrt(2) = 106.066 units further along */
     background-image: repeating-linear-gradient(-45deg,
-        #feaa3a 0 calc(var(--u) * 0.16573),
-        #ea5e47 calc(var(--u) * 0.16573) calc(var(--u) * 0.33146),
-        #b6554e calc(var(--u) * 0.33146) calc(var(--u) * 0.49718),
-        #713e4f calc(var(--u) * 0.49718) calc(var(--u) * 0.66291),
-        #524b8f calc(var(--u) * 0.66291) calc(var(--u) * 0.82864),
-        #713e4f calc(var(--u) * 0.82864) calc(var(--u) * 0.99437),
-        #b6554e calc(var(--u) * 0.99437) calc(var(--u) * 1.16010),
-        #ea5e47 calc(var(--u) * 1.16010) calc(var(--u) * 1.32583));
+        #feaa3a 0 calc(var(--gu) * 106.066),
+        #ea5e47 calc(var(--gu) * 106.066) calc(var(--gu) * 212.132),
+        #b6554e calc(var(--gu) * 212.132) calc(var(--gu) * 318.198),
+        #713e4f calc(var(--gu) * 318.198) calc(var(--gu) * 424.264),
+        #524b8f calc(var(--gu) * 424.264) calc(var(--gu) * 530.330),
+        #713e4f calc(var(--gu) * 530.330) calc(var(--gu) * 636.396),
+        #b6554e calc(var(--gu) * 636.396) calc(var(--gu) * 742.462),
+        #ea5e47 calc(var(--gu) * 742.462) calc(var(--gu) * 848.528));
     animation: stripescroll 100s linear infinite;
 }
 @keyframes stripescroll {
     from {transform: translate3d(0, 0, 0)}
-    to {transform: translate3d(calc(var(--u) * -1.875), 0, 0)}
+    to {transform: translate3d(calc(var(--gu) * -1200), 0, 0)}
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
