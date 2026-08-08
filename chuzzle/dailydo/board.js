@@ -49,6 +49,11 @@ function makerow() {
     const name = document.createElement("name");
     const flag = document.createElement("img");
     flag.onload = function() {flag.classList.add("drawn")};
+    // a lot of countries (GG, AQ, BQ, BL, CW, IM, JE, MF, SS, SX..) don't have art yet in-game,
+    // on the site it'll show the country name on hover but won't have a texture
+    flag.onerror = function() {
+        if (!flag.src.endsWith("/--.png")) flag.src = "assets/images/flags/--.png";
+    };
     const score = document.createElement("score");
     row.append(rank, name, flag, score);
     row.parts = {rank: rank, name: name, flag: flag, score: score};
@@ -114,6 +119,7 @@ function paintrows(at, host) {
             row.parts.rank.textContent = entry.rank + ".";
             row.parts.name.textContent = entry.name;
             row.parts.score.textContent = entry.score;
+            row.classList.toggle("guest", isguest(entry.full));
             const flag = row.parts.flag;
             const art = "assets/images/flags/" + entry.cc + ".png";
             if (flag.getAttribute("src") !== art) {
@@ -209,6 +215,19 @@ function drawname(text) {
     return text.toUpperCase().split("").map(function(c) {
         return drawable.has(c) ? c : "?";
     }).join("");
+}
+
+// pre-2.70 default guest names were digit-style ("Player 1"), 2.70+ switched
+// to word-style ("Player One") - both mean "never set a nickname"
+const guestwords = "one two three four five six seven eight nine ten eleven "
+    + "twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty";
+const guestdigit = /^player\s*\d*$/i;
+const guestword = new RegExp("^player\\s+(" + guestwords.split(" ").join("|") + ")$", "i");
+function isguest(name) {return guestdigit.test(name) || guestword.test(name)}
+function guestera(name) {
+    if (guestword.test(name)) return "new";
+    if (guestdigit.test(name)) return "old";
+    return null;
 }
 
 /*//////////////////////////////////////////////////////////////////////*/

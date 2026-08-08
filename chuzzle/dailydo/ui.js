@@ -578,19 +578,24 @@ function makeprofile() {
         const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
         const country = countryname(entry.country) || entry.country;
 
+        const guest = isguest(entry.full);
         const noguid = !realid(entry.id);
         const joined = noguid ? null : joinlabel(entry.id);
-        const facts = [
-            ["Nickname", entry.full],
+        const facts = [];
+        if (!guest) facts.push(["Nickname", entry.full]);
+        facts.push(
             ["Country", flag + country],
             ["Player ID", noguid ? "<b class=\"noid\">[invalid]</b>" : entry.id],
-        ];
-        if (joined) facts.push(["Joined about", joined]);
+        );
+        if (joined) {
+            const era = guest && guestera(entry.full) === "new" ? " (≥2.70)"
+                : guest && guestera(entry.full) === "old" ? " (≤2.69)" : "";
+            facts.push(["Joined about", joined + era]);
+        }
         facts.push(null,
             ["This day's Rank", "#" + entry.rank],
             ["This day's Score", Number(entry.score).toLocaleString("en")]);
-        relabellogo(wrap.querySelector(".logo"),
-            /^PLAYER\s*\d*$/.test(entry.full) ? "Guest Info" : "Player Info");
+        relabellogo(wrap.querySelector(".logo"), guest ? "Guest Info" : "Player Info");
         const held = readclaim();
         const mine = held && held.guid && held.guid === entry.id;
 

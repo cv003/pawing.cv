@@ -313,6 +313,7 @@
 .scores > div.mine img, .scores > div.mine score {
     animation: ddsway 1.5s ease-in-out infinite alternate;
 }
+.scores > div.guest {opacity: 0.55}
 
 @keyframes ddsweep {
     from {transform: translateX(-100%)}
