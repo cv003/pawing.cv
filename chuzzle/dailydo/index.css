@@ -133,11 +133,11 @@
 
 .stripes {
     z-index: 1; overflow: hidden;
-    opacity: 0.85;
+    opacity: 0.8; 
 }
 .stripes.front {
     z-index: 6;
-    opacity: 0.42;
+    opacity: 0.5;
 }
 .golden .stripes {opacity: 0.4}
 .golden .stripes.front {opacity: 0.22}
