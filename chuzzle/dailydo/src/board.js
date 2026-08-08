@@ -49,7 +49,7 @@ function makerow() {
     const name = document.createElement("name");
     const flag = document.createElement("img");
     flag.onload = function() {flag.classList.add("drawn")};
-    // a lot of countries (GG, AQ, BQ, BL, CW, IM, JE, MF, SS, SX..) don't have art yet in-game,
+    // some country codes (GG, AQ, BQ, BL, CW, IM, JE, MF, SS, SX..) have missing art in-game so they aren't recognizable..
     // on the site it'll show the country name on hover but won't have a texture
     flag.onerror = function() {
         if (!flag.src.endsWith("/--.png")) flag.src = "assets/images/flags/--.png";
@@ -217,10 +217,8 @@ function drawname(text) {
     }).join("");
 }
 
-// pre-2.70 default guest names were digit-style ("Player 1"), 2.70+ switched
-// to word-style ("Player One") - both mean "never set a nickname"
-const guestwords = "one two three four five six seven eight nine ten eleven "
-    + "twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty";
+// https://youtu.be/JN-PJN7tzmc?t=1934
+const guestwords = "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty";
 const guestdigit = /^player\s*\d*$/i;
 const guestword = new RegExp("^player\\s+(" + guestwords.split(" ").join("|") + ")$", "i");
 function isguest(name) {return guestdigit.test(name) || guestword.test(name)}

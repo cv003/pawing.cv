@@ -62,7 +62,7 @@ if (document.fonts && document.fonts.ready) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-const sitehome = new URL(".", document.currentScript.src).href;
+const sitehome = new URL("..", document.currentScript.src).href;
 const soundbank = {};
 let soundgear = null;
 

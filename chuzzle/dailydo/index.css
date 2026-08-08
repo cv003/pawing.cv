@@ -313,7 +313,7 @@
 .scores > div.mine img, .scores > div.mine score {
     animation: ddsway 1.5s ease-in-out infinite alternate;
 }
-.scores > div.guest {opacity: 0.55}
+.scores > div.guest {filter: saturate(0.25)}
 
 @keyframes ddsweep {
     from {transform: translateX(-100%)}
@@ -408,6 +408,7 @@
     text-align: right; white-space: nowrap;
 }
 .profile .facts .gap {grid-column: 1 / -1; height: calc(var(--u) * 0.022)}
+.profile .facts .eratag {color: #8ea2e0; font-weight: inherit}
 .profile .facts .noid {
     font-weight: inherit; font-style: italic;
     color: #ff9c9c;

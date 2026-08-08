@@ -1,37 +1,37 @@
 @font-face {
     font-family: "chuzzle";
-    src: url("assets/fonts/chuzzleblippo.woff2") format("woff2");
+    src: url("../assets/fonts/chuzzleblippo.woff2") format("woff2");
     font-display: block;
 }
 @font-face {
     font-family: "chuzzle script";
-    src: url("assets/fonts/chuzzlescript.woff2") format("woff2");
+    src: url("../assets/fonts/chuzzlescript.woff2") format("woff2");
     font-display: block;
 }
 @font-face {
     font-family: "chuzzle italic";
-    src: url("assets/fonts/chuzzleitalic.woff2") format("woff2");
+    src: url("../assets/fonts/chuzzleitalic.woff2") format("woff2");
     font-display: block;
 }
 
 @font-face {
     font-family: "blippo";
-    src: url("assets/fonts/blippo.woff2") format("woff2");
+    src: url("../assets/fonts/blippo.woff2") format("woff2");
     font-display: block;
 }
 @font-face {
     font-family: "nimbus sans becker";
-    src: url("assets/fonts/nimbussansbeckerpbold.woff2") format("woff2");
+    src: url("../assets/fonts/nimbussansbeckerpbold.woff2") format("woff2");
     font-display: swap; font-weight: 300;
 }
 @font-face {
     font-family: "nimbus sans becker";
-    src: url("assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
+    src: url("../assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
     font-display: swap; font-weight: 600;
 }
 @font-face {
     font-family: "harlow solid";
-    src: url("assets/fonts/harlowsolidlet.woff2") format("woff2");
+    src: url("../assets/fonts/harlowsolidlet.woff2") format("woff2");
     font-display: block;
 }
 

@@ -1,15 +1,15 @@
-html, body {cursor: url("assets/static/cursor-default.cur"), default}
+html, body {cursor: url("../assets/static/cursor-default.cur"), default}
 
 a, button, label, summary, select, option, [role=button], [role=link],
 [role=tab], [role=menuitem], [tabindex], input, textarea,
-.scores name {cursor: url("assets/static/cursor-pointer.cur"), pointer}
+.scores > div {cursor: url("../assets/static/cursor-pointer.cur"), pointer}
 
 input::-webkit-search-cancel-button, input::-webkit-search-decoration,
 input::-webkit-calendar-picker-indicator, input::-webkit-inner-spin-button,
 select::-ms-expand {cursor: inherit}
 
-:disabled, [aria-disabled=true] {cursor: url("assets/static/cursor-default.cur"), default}
+:disabled, [aria-disabled=true] {cursor: url("../assets/static/cursor-default.cur"), default}
 
-.scroller {cursor: url("assets/static/cursor-grab.cur"), grab}
+.scroller {cursor: url("../assets/static/cursor-grab.cur"), grab}
 
 img, canvas, svg {-webkit-user-drag: none; user-drag: none}

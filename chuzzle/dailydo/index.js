@@ -509,14 +509,18 @@ function openlinkedplayer() {
 
 function filtered(want) {
     if (!want) return fullboard;
+    const parsed = parsesearch(want);
+    const rest = parsed.rest.toUpperCase();
     return fullboard.filter(function(e) {
-        return e.hunt.indexOf(want) >= 0 || e.id.indexOf(want) >= 0;
+        if (!matchesfilters(e, parsed.filters)) return false;
+        if (!rest) return true;
+        return e.hunt.indexOf(rest) >= 0 || e.id.indexOf(rest) >= 0;
     });
 }
 
 function findwant() {
     const box = document.querySelector(".findbox input");
-    return box ? box.value.trim().toUpperCase() : "";
+    return box ? box.value.trim() : "";
 }
 
 function repaint(keepat) {
@@ -541,7 +545,7 @@ function makefinder() {
     const settle = function() {
         clearTimeout(pending);
         pending = setTimeout(function() {
-            runfind(box.value.trim().toUpperCase());
+            runfind(box.value.trim());
         }, 90);
         document.querySelector(".findbox").classList.toggle("typed", box.value !== "");
     };
@@ -565,8 +569,7 @@ function makeprofile() {
 
     host.addEventListener("pointerdown", function(e) {
         downat = e.clientY;
-        downrow = e.target.tagName === "NAME" && e.target.closest
-            ? e.target.closest("[data-at]") : null;
+        downrow = e.target.closest ? e.target.closest("[data-at]") : null;
     }, true);
     host.addEventListener("pointerup", function(e) {
         const row = downrow;
@@ -588,8 +591,9 @@ function makeprofile() {
             ["Player ID", noguid ? "<b class=\"noid\">[invalid]</b>" : entry.id],
         );
         if (joined) {
-            const era = guest && guestera(entry.full) === "new" ? " (≥2.70)"
-                : guest && guestera(entry.full) === "old" ? " (≤2.69)" : "";
+            const tag = guest && guestera(entry.full) === "new" ? "(≥2.70)"
+                : guest && guestera(entry.full) === "old" ? "(≤2.69)" : "";
+            const era = tag ? " <b class=\"eratag\">" + tag + "</b>" : "";
             facts.push(["Joined about", joined + era]);
         }
         facts.push(null,
