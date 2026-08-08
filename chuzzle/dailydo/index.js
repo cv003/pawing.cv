@@ -218,7 +218,7 @@ function tintswitcher() {
     const stage = document.querySelector(".dailydo");
     const height = stage.clientHeight * cyclerspan;
     const last = activestops.length - 1;
-    document.querySelectorAll(".switcher button").forEach(function(seat) {
+    document.querySelectorAll(".switcher button, .jumplink").forEach(function(seat) {
         const box = seat.getBoundingClientRect();
         const middle = box.top + box.height / 2;
         const t = middle / height * last;

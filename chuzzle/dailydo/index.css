@@ -1,9 +1,7 @@
-:root {--baseu: min(var(--vh) * 0.5625, 100vw)}
-
-/* one game unit. MyApp::Initialize calls SetPageSize(414, 414 / w * h) on
-   anything that isn't a tablet, so the page is exactly 414 units across and
-   decomp measurements can be written out as-is instead of pre-divided */
-:root {--gu: calc(var(--u) / 414)}
+:root {
+    --baseu: min(var(--vh) * 0.5625, 100vw); 
+    --gu: calc(var(--u) / 414)
+}
 
 .sky {
     position: fixed; inset: 0;
@@ -34,7 +32,6 @@
     to {transform: translate3d(0, calc(var(--u) * -0.44), 0)}
 }
 
-/* the vignette bands go down before the star rings and the pillars do */
 .vignette {
     z-index: 3;
     background: linear-gradient(180deg,
@@ -57,9 +54,6 @@
         #ffff80 100%);
 }
 .golden .vignette::after {opacity: 1}
-
-/* golden draws the amber sprite for all three, under SetColor(1, 1, 0), so
-   its highlight loses the blue channel along with the base */
 .golden .plred, .golden .plamber, .golden .plmagenta {
     background: #fe9b00;
     --pltop: #fec800; --plmid: #feb200;
@@ -72,22 +66,12 @@
 }
 .pillars.right {transform: translateX(-50%) scaleX(-1)}
 
-/* DailyDoKit::Draw stretches three DailyDoPillars sprites down from the top
-   with DrawMagicBorderV, mirrored on both edges. each is a 67 unit wide body
-   with a semicircular cap and a 6 unit black rim at 20% alpha, centres 20/50/90
-   units in, tops at 200/300/400. they land on top of the background because
-   the kit draws long after Game::DrawGameBackground has laid the stripes. */
 .pillar {
     position: absolute; bottom: 0;
     width: calc(var(--gu) * 67);
     border-radius: 999px 999px 0 0;
-    box-shadow: 0 0 0 calc(var(--gu) * 6) rgba(0,0,0,0.2);
+    box-shadow: 0 0 0 calc(var(--gu) * 5) rgba(0,0,0,0.2);
 }
-
-/* every sprite carries the same soft highlight, a circle of radius 55 centred
-   20 across and 14 down from the body's top left corner, reaching the flat
-   base colour at its edge. MagicBorderV only stretches a 5% slice off the
-   sprite's bottom, which is already flat, so the glow never smears */
 .pillar::before {
     content: ""; position: absolute;
     inset: 0; border-radius: inherit;
@@ -96,22 +80,20 @@
         var(--pltop) 0%, var(--plmid) 42%, transparent 100%);
 }
 
-/* left is the 20/50/90 centre less the 33.5 half-width, and the draw order
-   below is the z-order the three DrawMagicBorderV calls end up with */
 .plred {
-    top: calc(var(--gu) * 200);
+    top: calc(var(--gu) * 206);
     left: calc(var(--gu) * -13.5);
     background: #fe4203; z-index: 1;
     --pltop: #fe9876; --plmid: #fe6d3c;
 }
 .plamber {
-    top: calc(var(--gu) * 300);
+    top: calc(var(--gu) * 306);
     left: calc(var(--gu) * 56.5);
     background: #fe9b0f; z-index: 2;
     --pltop: #fec87c; --plmid: #feb246;
 }
 .plmagenta {
-    top: calc(var(--gu) * 400);
+    top: calc(var(--gu) * 406);
     left: calc(var(--gu) * 16.5);
     background: #c009c6; z-index: 3;
     --pltop: #dd79e0; --plmid: #ce41d3;
@@ -149,21 +131,20 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* Game::DrawGameBackground tiles a near-black starfield, then lays eight
-   45deg quads over it, 150 game units wide each, cycling through a palindrome
-   palette and scrolling ticks/5 units a frame - so one 1200 unit loop takes
-   100s. alpha is 0.65 above the board, 0.5 below it. */
 .stripes {
     z-index: 1; overflow: hidden;
     opacity: 0.85;
 }
+.stripes.front {
+    z-index: 6;
+    opacity: 0.42;
+}
 .golden .stripes {opacity: 0.4}
+.golden .stripes.front {opacity: 0.22}
 .stripes::before {
     content: ""; position: absolute;
-    top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.8);
-    left: calc(var(--u) * -0.05); right: calc(var(--u) * -1.95);
-    /* 150 units a band, but measured perpendicular to a 45deg gradient, so
-       each stop is 150 / sqrt(2) = 106.066 units further along */
+    top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.05);
+    left: calc(var(--u) * -0.05); right: calc(var(--gu) * -1260);
     background-image: repeating-linear-gradient(-45deg,
         #feaa3a 0 calc(var(--gu) * 106.066),
         #ea5e47 calc(var(--gu) * 106.066) calc(var(--gu) * 212.132),
@@ -375,23 +356,6 @@
 [data-role=upcoming] .logo .inner {fill: url(#lgpop6)}
 [data-role=glossary] .logo .inner {fill: url(#lgpop7)}
 
-.jumplink {
-    position: absolute; left: 50%;
-    transform: translateX(-50%); z-index: 7;
-    background: rgba(3,16,77,0.85); color: #d5d9f0;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-weight: 600; font-size: calc(var(--u) * 0.022);
-    padding: 0.45em 1em; margin: 0; border: none;
-    border-radius: 999px; text-transform: none;
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.15), 0 0.15em 0.4em rgba(0,0,0,0.5);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-.jumplink.show {opacity: 1; pointer-events: auto}
-.jumplink:active {filter: brightness(1.3)}
-.jumptop {top: calc(var(--u) * 0.19)}
-.jumpbottom {bottom: calc(var(--u) * 0.26)}
-
 .qrwrap .popup {width: calc(var(--u) * 0.62)}
 .qrwrap .pucontent {padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.05)}
 .qrwrap .pucontent > div {
@@ -491,6 +455,8 @@
     transform: translateY(-50%);
     display: flex; flex-direction: column; align-items: center;
     gap: calc(var(--u) * 0.006);
+}
+.switcher button, .jumplink {
     margin: 0; padding: 0; background: none; text-transform: uppercase;
     font-family: "chuzzle", "blippo"; font-weight: 100;
     font-size: calc(var(--u) * 0.049);
@@ -514,7 +480,7 @@
 .switcher .swleft {left: calc(var(--u) * 0.03)}
 .switcher .swright {right: calc(var(--u) * 0.03)}
 .switcher .line {margin-top: 0.14em}
-.switcher button:active {filter: brightness(1.6)}
+.switcher button:active, .jumplink:active {filter: brightness(1.6)}
 .switcher img.arrow {
     height: calc(var(--u) * 0.125); width: auto;
     filter: drop-shadow(0 calc(var(--u) * 0.006) 0 #261b19);
@@ -530,6 +496,33 @@
 }
 .switcher .swleft img.arrow {animation-name: ddswayflip}
 .switcher.clipped {visibility: hidden; pointer-events: none}
+
+.jumplink {
+    position: absolute; left: 50%;
+    transform: translateX(-50%); z-index: 7;
+    border: none; font-size: calc(var(--u) * 0.036);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.jumplink.show {opacity: 1; pointer-events: auto}
+.jumptop {top: calc(var(--u) * 0.19)}
+.jumpbottom {bottom: calc(var(--u) * 0.24)}
+.jumplink .caret {
+    display: inline-block;
+    color: inherit; font-weight: inherit;
+}
+.jumpbottom .caret {
+    transform: translateY(0.301em) scaleY(-1);
+    transform-origin: 50% 27.2%;
+    text-shadow: var(--ring),
+        0.150em -0.120em 0 #261b19, 0.130em -0.195em 0 #261b19,
+        0.075em -0.250em 0 #261b19, 0.000em -0.270em 0 #261b19,
+        -0.075em -0.250em 0 #261b19, -0.130em -0.195em 0 #261b19,
+        -0.150em -0.120em 0 #261b19, -0.130em -0.045em 0 #261b19,
+        -0.075em 0.010em 0 #261b19, 0.000em 0.030em 0 #261b19,
+        0.075em 0.010em 0 #261b19, 0.130em -0.045em 0 #261b19,
+        0 -0.120em 0 #261b19;
+}
 
 @keyframes ddswayarrow {
     from {transform: translateX(calc(var(--u) * -0.0078))}
