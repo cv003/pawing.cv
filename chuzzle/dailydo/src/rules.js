@@ -203,12 +203,7 @@ function escapehtml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function csscolor(raw) {
-    if (/^gr[ae]y$/i.test(raw)) return "#e8e8f0";
-    if (!/^[\d.]+,[\d.]+,[\d.]+$/.test(raw)) return raw;
-    const [r, g, b] = raw.split(",").map(function(n) {return Math.round(n * 255)});
-    return "rgb(" + r + "," + g + "," + b + ")";
-}
+// csscolor lives in src/global.js now, the news markup wants the same parser
 
 function markuptext(raw) {
     const re = /<_tc>|<blinky>|<_stinky>|<color ([^>]+)>/g;

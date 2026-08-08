@@ -62,6 +62,32 @@ if (document.fonts && document.fonts.ready) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+/* MLRender's <color> argument, shared by the daily-do rule text and the news.
+   it takes "r,g,b" or "r,g,b,a" as 0..1 floats (a bare ".5" is legal, and the
+   engine tolerates a trailing f), a single number for grey, "#rrggbb", or one
+   of the names below. grey is nudged off pure 50% so it stays readable. */
+const colornames = {
+    white: "#ffffff", black: "#000000", red: "#ff0000", green: "#00ff00",
+    blue: "#0000ff", cyan: "#00ffff", magenta: "#ff00ff", yellow: "#ffff00",
+    orange: "#ff8000", gold: "#ffd700", pink: "#ff80c0", purple: "#8000ff",
+    grey: "#e8e8f0", gray: "#e8e8f0",
+};
+
+function csscolor(raw) {
+    const want = String(raw).trim();
+    const named = colornames[want.toLowerCase()];
+    if (named) return named;
+    if (want.charAt(0) === "#") return want;
+    const bits = want.split(",").map(parseFloat);
+    if (!bits.length || bits.some(Number.isNaN)) return want;
+    const eight = function(v) {return Math.round(Math.max(0, Math.min(1, v)) * 255)};
+    const trio = bits.length === 1 ? [bits[0], bits[0], bits[0]] : bits;
+    const rgb = eight(trio[0]) + "," + eight(trio[1]) + "," + eight(trio[2]);
+    return bits.length >= 4 ? "rgba(" + rgb + "," + bits[3] + ")" : "rgb(" + rgb + ")";
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
 const sitehome = new URL("..", document.currentScript.src).href;
 const soundbank = {};
 let soundgear = null;

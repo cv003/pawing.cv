@@ -149,15 +149,28 @@
     </style>
 
     <link rel="stylesheet" href="src/base.css">
+        <link rel="stylesheet" href="src/news.css">
         <link rel="stylesheet" href="src/cursor.css">
 </head>
 <body>
 
     <div class="bg"></div>
 
+    <button class="newschuzzle" type="button" title="read the in-game news">
+        <img src="assets/images/pinkchuzzle.webp" draggable="false" alt="news">
+        <img class="newsbadge" src="assets/images/newstapme.webp" draggable="false" alt="">
+    </button>
+
+    <div class="newswrap">
+        <div class="newspopup">
+            <button class="newsclose" type="button" title="close">&times;</button>
+            <div class="newstitle">News</div>
+            <div class="newsbody"></div>
+        </div>
+    </div>
+
     <img class="chuzz" src="assets/images/bluechuzzle2.webp" draggable="false">
     <a class="text">uhh.. hello bro<sup>3</sup>?</a>
-    <a class="text small" txt="i highly doubt i'll be making any more chuzzle pages lol">i highly doubt i'll be making any more chuzzle pages lol</a>
 
     <div class="bottom">
         <a class="button" href="raptconvert" title="decode endpoint urls">
@@ -178,7 +191,7 @@
             const chuzz = document.querySelector(".chuzz");
             const shrieks = [];
             for (let i = 1; i <= 5; i++) {
-                const audio = new Audio(`assets/audio/shriek${i}.ogg`);
+                const audio = new Audio(`assets/audio/shrieks/shriek${i}.ogg`);
                 audio.preload = "auto";
                 shrieks.push(audio);
             }
@@ -207,4 +220,5 @@
 
     </script>
     <script src="src/global.js"></script>
+    <script src="src/news.js"></script>
 </body>

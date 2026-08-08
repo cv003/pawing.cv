@@ -1,0 +1,131 @@
+@font-face {
+    font-family: "chuzzle script";
+    src: url("../assets/fonts/chuzzlescript.woff2") format("woff2");
+    font-display: block;
+}
+/* the frontpage does not pull in global.css, so the news body brings its own */
+@font-face {
+    font-family: "nimbus sans becker";
+    src: url("../assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
+    font-display: swap; font-weight: 600;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.newschuzzle {
+    position: fixed; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 150px; max-width: 34vw;
+    padding: 0; margin: 0; border: none;
+    background: none; cursor: pointer;
+    z-index: 5; line-height: 0;
+    animation: newsbob 3.2s ease-in-out infinite;
+}
+.newschuzzle img {width: 100%; height: auto; display: block}
+.newschuzzle:active {filter: brightness(1.15)}
+
+/* the sprite is cut off flat along the bottom because it peeks out from behind
+   something in game, so it hangs from the top edge here and bobs a little */
+@keyframes newsbob {
+    0%, 100% {transform: translateX(-50%) translateY(0)}
+    50% {transform: translateX(-50%) translateY(7%)}
+}
+
+/* clear of the eyes, which sit low and centre on the sprite. needs to beat
+   the .newschuzzle img width above, which is the more specific selector */
+.newschuzzle .newsbadge {
+    position: absolute; right: -30%; top: 2%;
+    width: 52%; height: auto;
+    opacity: 0; pointer-events: none;
+    transform: rotate(-8deg);
+    transition: opacity 0.25s ease;
+    animation: newsbadgepulse 0.9s ease-in-out infinite alternate;
+}
+.newschuzzle .newsbadge.on {opacity: 1}
+@keyframes newsbadgepulse {
+    from {transform: rotate(-8deg) scale(1)}
+    to {transform: rotate(-8deg) scale(1.09)}
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.newswrap {
+    position: fixed; inset: 0; z-index: 20;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(26,26,64,0.6);
+    padding: 3.5em 1em;
+}
+.newswrap.on {display: flex}
+
+/* the same stacked ring the in-game popups use, see .popup in global.css */
+.newspopup {
+    position: relative; display: flex;
+    flex-direction: column; align-items: center;
+    width: 100%; max-width: 430px;
+    max-height: 100%; border-radius: 0.5em;
+    background: #ffd200; isolation: isolate;
+    padding: 0.7em 0.9em 1em;
+    box-shadow:
+        0 0 0 1px #FFD200, 0 0 0 3px #FFDC0E, 0 0 0 5px #FFE619,
+        0 0 0 7px #FFEF21, 0 0 0 9px #FFF928, 0 0 0 11px #FFD632,
+        0 0 0 13px #FFDD3A, 0 0 0 15px #FFE543, 0 0 0 17px #FFED4C,
+        0 0 0 19px #FFFF80, 0 0 0 21px #FFFF80, 0 0 0 23px #FFFF80,
+        0 0 0 25px #f0807e, 0 0 0 27px #fd8886, 0 0 0 29px #ff8d89,
+        0 0 0 31px #ff918c, 0 0 0 33px #ff928f,
+        0 0 0 42px rgba(0,0,0,0.25);
+}
+
+.newstitle {
+    font-family: "chuzzle script", "blippo", cursive;
+    font-size: 2.6em; line-height: 1; font-weight: 400;
+    color: #b6ffb0; margin: 0 0 0.15em;
+    -webkit-text-stroke: 0.055em #4e4c02;
+    paint-order: stroke fill;
+}
+
+.newsclose {
+    position: absolute; top: -0.5em; right: -0.5em;
+    width: 2em; height: 2em; padding: 0; margin: 0;
+    border: none; border-radius: 50%; cursor: pointer;
+    background: radial-gradient(circle at 35% 30%, #b98cff 0%, #6a2bd0 70%, #3d1580 100%);
+    box-shadow: 0 0 0 3px #d9b3ff, 0 0.15em 0.3em rgba(0,0,0,0.5);
+    color: #cfe6ff; font-size: 1em; font-weight: 700;
+    font-family: system-ui, sans-serif; line-height: 1;
+}
+.newsclose:active {filter: brightness(1.3)}
+
+/* MLBoxEX::SetBox paints the panel Color(0.1, 0.1, 0.25, 0.85). in game that
+   lands over the dark scene behind the box, not over the yellow frame, so it
+   needs a dark backing here or the yellow bleeds through and turns it brown */
+.newsbody {
+    width: 100%; overflow-y: auto;
+    border-radius: 0.25em;
+    background: linear-gradient(rgba(26,26,64,0.85), rgba(26,26,64,0.85)) #071033;
+    font-family: "nimbus sans becker", Arial, Helvetica, sans-serif;
+    font-weight: 700; font-size: 0.95em; line-height: 1.25;
+    color: #fff; text-align: left;
+    scrollbar-width: thin;
+}
+.newsloading {padding: 1.5em; text-align: center; opacity: 0.75}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.newspage {position: relative; box-sizing: border-box}
+.newsgap {display: block; width: 100%}
+.newsimg {max-width: 100%; height: auto}
+.newslink {color: #7ec8ff; text-decoration: underline}
+
+.newsfontarial {font-family: Arial, Helvetica, sans-serif}
+.newsfontsmall {font-size: 0.82em}
+
+.newsblink {
+    color: var(--blinka);
+    animation: newsblink var(--blinktime, 1s) steps(1) infinite;
+}
+@keyframes newsblink {
+    0%, 49.99% {color: var(--blinka)}
+    50%, 100% {color: var(--blinkb)}
+}
+@media (prefers-reduced-motion: reduce) {
+    .newsblink, .newschuzzle, .newsbadge {animation: none}
+}
