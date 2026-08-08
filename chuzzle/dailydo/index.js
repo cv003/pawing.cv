@@ -606,7 +606,7 @@ function makeprofile() {
         const entry = board[row.dataset.at];
         if (!entry) return;
         playsound("click", 0.7);
-        const flag = entry.placeholder ? "" : "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\""
+        const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\""
             + " onerror=\"this.onerror=null;this.src='assets/images/flags/--.png'\">";
         const country = countryname(entry.country) || entry.country;
 
@@ -615,8 +615,8 @@ function makeprofile() {
         const joined = noguid || issnap() ? null : joinlabel(entry.id);
         const facts = [];
         if (!guest) facts.push(["Nickname", entry.full]);
+        if (!entry.placeholder) facts.push(["Country", flag + country]);
         facts.push(
-            ["Country", flag + country],
             ["Player ID", noguid ? "<b class=\"noid\">[invalid]</b>" : entry.id],
         );
         if (joined) {
@@ -661,6 +661,12 @@ function makeprofile() {
         if (!noguid) {
             const url = new URL(location.href);
             url.searchParams.set("player", entry.id);
+            // pin board/day explicitly even at their defaults, so a link opened
+            // on "today" still points at the same day once today has moved on
+            if (!allmode) {
+                url.searchParams.set("board", boards[boardat].key);
+                url.searchParams.set("day", daykey(dayback(dayat)));
+            }
             history.replaceState(null, "", url);
         }
         openpopup(wrap);
@@ -814,6 +820,61 @@ function updateswitcherclip() {
     switcher.classList.toggle("clipped", leftClip > clipneeds || rightClip > clipneeds);
 }
 updateswitcherclip();
+
+const jumpslack = 4;
+function updatejumplinks() {
+    const top = document.querySelector(".jumptop");
+    const bottom = document.querySelector(".jumpbottom");
+    if (!top || !bottom) return;
+    const at = fling.at();
+    top.classList.toggle("show", at > jumpslack);
+    bottom.classList.toggle("show", at < contentheight() - host.clientHeight - jumpslack);
+}
+
+// fling only exposes at()/jump(), both instant - this animates jump() over
+// several frames and blurs .scores vertically while it's moving fast, to
+// fake the look of a quick motion-blurred scroll instead of a hard cut
+function smoothjump(to) {
+    const scores = document.querySelector(".scores");
+    const blur = document.querySelector("#vblur feGaussianBlur");
+    const from = fling.at();
+    const distance = to - from;
+    if (Math.abs(distance) < 1) return;
+    const duration = 500;
+    const start = performance.now();
+    scores.classList.add("blurring");
+    function step(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        fling.jump(from + distance * eased);
+        updatejumplinks();
+        if (blur) {
+            const speed = Math.abs(distance) * 3 * (1 - t) * (1 - t) / duration;
+            blur.setAttribute("stdDeviation", "0 " + Math.min(8, speed).toFixed(2));
+        }
+        if (t < 1) {
+            requestAnimationFrame(step);
+        } else {
+            scores.classList.remove("blurring");
+            if (blur) blur.setAttribute("stdDeviation", "0 0");
+        }
+    }
+    requestAnimationFrame(step);
+}
+const jumptopbtn = document.querySelector(".jumptop");
+const jumpbottombtn = document.querySelector(".jumpbottom");
+if (jumptopbtn) jumptopbtn.addEventListener("click", function() {smoothjump(0)});
+if (jumpbottombtn) jumpbottombtn.addEventListener("click", function() {
+    smoothjump(contentheight() - host.clientHeight);
+});
+
+function pollscroll() {
+    // reacts to the list's content length changing too (board switch, search,
+    // initial load), not just scroll position, so just recheck every frame
+    updatejumplinks();
+    requestAnimationFrame(pollscroll);
+}
+requestAnimationFrame(pollscroll);
 
 const fontsdone = document.fonts && document.fonts.ready
     ? document.fonts.ready : Promise.resolve();

@@ -4,7 +4,7 @@
     position: fixed; inset: 0;
     z-index: 0; overflow: hidden;
     isolation: isolate; pointer-events: none;
-    background-color: #a7723b;
+    background-color: black;
 }
 
 .bg, .pillars, .bigstars, .stripes, .vignette {
@@ -12,7 +12,7 @@
     pointer-events: none;
 }
 .bg {
-    z-index: 4; opacity: 0.45; 
+    z-index: 2; opacity: 0.45;
     mix-blend-mode: screen; overflow: hidden
 }
 .bg::before {
@@ -30,7 +30,7 @@
 }
 
 .vignette {
-    z-index: 3;
+    z-index: 5;
     background: linear-gradient(180deg,
         #050177 0%, #050177 4%,
         rgba(5,1,119,0) 16%, rgba(5,1,119,0) 92%,
@@ -57,7 +57,7 @@
 .golden .plmagenta {background: #fe9b00}
 
 .pillars {
-    z-index: 2; left: 50%;
+    z-index: 4; left: 50%;
     width: var(--u); right: auto;
     transform: translateX(-50%);
 }
@@ -104,7 +104,7 @@
 /*//////////////////////////////////////////////////////////////////////*/
 
 .bigstars {
-    z-index: 1; left: 50%;
+    z-index: 3; left: 50%;
     width: var(--u); right: auto;
     transform: translateX(-50%);
     overflow: hidden;
@@ -133,28 +133,33 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+/* Game::DrawGameBackground tiles a near-black starfield, then lays eight
+   45deg quads over it, 150 game units wide each (screen is 640 wide), cycling
+   through a palindrome palette and scrolling ticks/5 units a frame - so one
+   1200 unit loop takes 100s. alpha is 0.65 above the board, 0.5 below it. */
 .stripes {
-    z-index: 5; overflow: hidden;
-    mix-blend-mode: multiply; opacity: 0.9;
+    z-index: 1; overflow: hidden;
+    opacity: 0.85;
 }
+.golden .stripes {opacity: 0.4}
 .stripes::before {
     content: ""; position: absolute;
-    top: calc(var(--u) * -0.05); left: calc(var(--u) * -0.05);
-    right: calc(var(--u) * -0.8); bottom: calc(var(--u) * -0.8);
-    background-image: repeating-linear-gradient(135deg,
-        #bb85fb 0 calc(var(--u) * 0.1285),
-        #ea97e6 calc(var(--u) * 0.1285) calc(var(--u) * 0.3855),
-        #fbf8c8 calc(var(--u) * 0.3855) calc(var(--u) * 0.6425),
-        #ea97e6 calc(var(--u) * 0.6425) calc(var(--u) * 0.8995),
-        #bb85fb calc(var(--u) * 0.8995) calc(var(--u) * 1.028));
-    animation: stripescroll 23s linear infinite;
+    top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.8);
+    left: calc(var(--u) * -0.05); right: calc(var(--u) * -1.95);
+    background-image: repeating-linear-gradient(-45deg,
+        #feaa3a 0 calc(var(--u) * 0.16573),
+        #ea5e47 calc(var(--u) * 0.16573) calc(var(--u) * 0.33146),
+        #b6554e calc(var(--u) * 0.33146) calc(var(--u) * 0.49718),
+        #713e4f calc(var(--u) * 0.49718) calc(var(--u) * 0.66291),
+        #524b8f calc(var(--u) * 0.66291) calc(var(--u) * 0.82864),
+        #713e4f calc(var(--u) * 0.82864) calc(var(--u) * 0.99437),
+        #b6554e calc(var(--u) * 0.99437) calc(var(--u) * 1.16010),
+        #ea5e47 calc(var(--u) * 1.16010) calc(var(--u) * 1.32583));
+    animation: stripescroll 100s linear infinite;
 }
 @keyframes stripescroll {
     from {transform: translate3d(0, 0, 0)}
-    to {
-        transform: translate3d(calc(var(--u) * -0.727),
-            calc(var(--u) * -0.727), 0);
-    }
+    to {transform: translate3d(calc(var(--u) * -1.875), 0, 0)}
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -215,6 +220,7 @@
     padding-top: 34cqw; padding-bottom: 32cqw;
 }
 .scores > div {position: absolute; left: 0; right: 0}
+.scores.blurring {filter: url(#vblur)}
 
 /* shh! */
 .celestial {
@@ -350,6 +356,23 @@
 [data-role=qr] .logo .inner {fill: url(#lgpop3)}
 [data-role=upcoming] .logo .inner {fill: url(#lgpop6)}
 [data-role=glossary] .logo .inner {fill: url(#lgpop7)}
+
+.jumplink {
+    position: absolute; left: 50%;
+    transform: translateX(-50%); z-index: 7;
+    background: rgba(3,16,77,0.85); color: #d5d9f0;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600; font-size: calc(var(--u) * 0.022);
+    padding: 0.45em 1em; margin: 0; border: none;
+    border-radius: 999px; text-transform: none;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.15), 0 0.15em 0.4em rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.jumplink.show {opacity: 1; pointer-events: auto}
+.jumplink:active {filter: brightness(1.3)}
+.jumptop {top: calc(var(--u) * 0.19)}
+.jumpbottom {bottom: calc(var(--u) * 0.26)}
 
 .qrwrap .popup {width: calc(var(--u) * 0.62)}
 .qrwrap .pucontent {padding: calc(var(--u) * 0.03) 0 calc(var(--u) * 0.05)}

@@ -18,6 +18,14 @@
 </head>
     <body>
 
+        <svg width="0" height="0" style="position: absolute">
+            <defs>
+                <filter id="vblur" x="-20%" y="-150%" width="140%" height="400%">
+                    <feGaussianBlur stdDeviation="0 0" edgeMode="duplicate"/>
+                </filter>
+            </defs>
+        </svg>
+
         <div class="sky">
 
             <div class="pillars left">
@@ -263,6 +271,9 @@
                     <text x="30" y="130" class="shine">Today's Scores</text></g>
             </svg>
             </div>
+
+            <button class="jumplink jumptop" type="button">Jump to top</button>
+            <button class="jumplink jumpbottom" type="button">Jump to bottom</button>
 
             <div class="footer">
                 <div class="footrow">
