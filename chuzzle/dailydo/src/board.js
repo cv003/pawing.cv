@@ -120,9 +120,10 @@ function paintrows(at, host) {
             row.parts.name.textContent = entry.name;
             row.parts.score.textContent = entry.score;
             row.classList.toggle("guest", isguest(entry.full));
+            row.classList.toggle("noflag", !!entry.placeholder);
             const flag = row.parts.flag;
             const art = "assets/images/flags/" + entry.cc + ".png";
-            if (flag.getAttribute("src") !== art) {
+            if (!entry.placeholder && flag.getAttribute("src") !== art) {
                 flag.classList.remove("drawn");
                 flag.src = art;
                 if (flag.complete && flag.naturalWidth) flag.classList.add("drawn");

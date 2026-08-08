@@ -101,7 +101,7 @@ function daylabel(back) {
 }
 
 function boardtitle() {
-    if (allmode) return "All " + boards[boardat].label + " Scores";
+    if (allmode) return "Combined Scores";
     if (boards[boardat].weekly || dayat === 0) return boards[boardat].title;
     if (dayat === 1) return "Yesterday's Scores";
     return daylabel(dayat) + " Scores";
@@ -361,7 +361,7 @@ async function reload(dir, dayChanged) {
 
 function marktitle(count) {
     if (allmode) {
-        document.title = "All " + boards[boardat].label + " Scores! (" + count + ")";
+        document.title = "Combined " + boards[boardat].label + " Scores! (" + count + ")";
         return;
     }
     document.title = (dayat === calendarreach ? "Partial " : "")
@@ -606,7 +606,7 @@ function makeprofile() {
         const entry = board[row.dataset.at];
         if (!entry) return;
         playsound("click", 0.7);
-        const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\""
+        const flag = entry.placeholder ? "" : "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\""
             + " onerror=\"this.onerror=null;this.src='assets/images/flags/--.png'\">";
         const country = countryname(entry.country) || entry.country;
 
@@ -734,10 +734,6 @@ function daysinrange() {
     return out;
 }
 
-// pulls the whole visible 2-week region for the current board into one
-// merged, score-sorted leaderboard - relies on the worker batching all of
-// those days into a single request instead of one per day, and reuses
-// whatever's already fresh in the local per-day cache on top of that
 async function loadallboard() {
     const key = boards[boardat].key;
     const wanted = daysinrange();
@@ -746,15 +742,13 @@ async function loadallboard() {
         const held = store[key + "/" + daykey(dayback(back))];
         return !held || !held.text || Date.now() - held.at >= boardage;
     });
-    if (missing.length) {
-        const got = await fetchdays(key, missing);
-        Object.keys(got).forEach(function(day) {remember(key + "/" + day, got[day])});
-    }
-    const fresh = readstore();
+    const got = missing.length ? await fetchdays(key, missing) : {};
     let merged = [];
     wanted.forEach(function(back) {
-        const held = fresh[key + "/" + daykey(dayback(back))];
-        if (held && held.text) merged = merged.concat(readboard(held.text));
+        const day = daykey(dayback(back));
+        const held = store[key + "/" + day];
+        const text = (held && held.text && Date.now() - held.at < boardage) ? held.text : got[day];
+        if (text) merged = merged.concat(readboard(text));
     });
     merged.sort(function(a, b) {return Number(b.score) - Number(a.score)});
     merged.forEach(function(e, i) {e.rank = i + 1});

@@ -316,6 +316,7 @@
     animation: ddsway 1.5s ease-in-out infinite alternate;
 }
 .scores > div.guest {filter: brightness(0.75)}
+.scores > div.noflag img {visibility: hidden}
 
 @keyframes ddsweep {
     from {transform: translateX(-100%)}
@@ -722,7 +723,15 @@
         #6020cf 80%, #ba9fe6 100%);
 }
 
-.pucontent .seeall {font-size: calc(var(--u) * 0.024)}
+.pucontent .seeall {
+    width: 85%; font-size: calc(var(--u) * 0.032);
+    padding-top: calc(var(--u) * 0.02); padding-bottom: calc(var(--u) * 0.02);
+    margin-top: calc(var(--u) * 0.02); margin-bottom: 0;
+    --r: calc(var(--u) * 0.003); --ink: #000;
+}
+.pucontent .seeall:active {
+    padding-top: calc(var(--u) * 0.02); padding-bottom: calc(var(--u) * 0.02);
+}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
