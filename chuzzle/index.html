@@ -14,6 +14,10 @@
     <!-- the css import is too slow so this will almost always load faster -->
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/blippo.woff2" crossorigin>
 
+    <!-- global.css carries the popup shell the news borrows, but it also styles
+         body and links, so it goes first and the page's own rules win below -->
+    <link rel="stylesheet" href="src/global.css">
+
     <style>
 
         @font-face {
@@ -48,7 +52,7 @@
             position: relative;
             display: inline-block;
             font-family: "blippo", system-ui, sans-serif; text-align: center;
-            font-size: 50px;
+            font-size: 50px; color: white;
             --r: 8px; --ink: #000;
             text-shadow: var(--ring); filter: drop-shadow(0 0.275em 0 black);
         }
@@ -158,14 +162,34 @@
 
     <button class="newschuzzle" type="button" title="read the in-game news">
         <img src="assets/images/pinkchuzzle.webp" draggable="false" alt="news">
-        <img class="newsbadge" src="assets/images/newstapme.webp" draggable="false" alt="">
     </button>
 
-    <div class="newswrap">
-        <div class="newspopup">
-            <button class="newsclose" type="button" title="close">&times;</button>
-            <div class="newstitle">News</div>
-            <div class="newsbody"></div>
+    <div class="calwrap newswrap" data-role="news">
+        <div class="popup">
+            <button class="closebtn" type="button" title="close">
+                <img src="assets/images/close.png" alt="">
+            </button>
+            <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+            <div class="pucontent">
+                <svg class="logo" viewBox="0 0 900 170">
+                    <defs>
+                        <linearGradient id="lgnews" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                            <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                            <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                            <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                        </linearGradient>
+                        <!-- .pucontent .logo .lgblack filters through this, and an svg
+                             element pointing at a missing filter does not render at all -->
+                        <filter id="lgfillholes" x="-30%" y="-30%" width="160%" height="160%">
+                            <feMorphology operator="dilate" radius="3"/>
+                        </filter>
+                    </defs>
+                    <g><text x="30" y="130" class="lgblack">News</text>
+                        <text x="30" y="130" class="inner">News</text></g>
+                </svg>
+                <div class="newsbody"></div>
+            </div>
         </div>
     </div>
 

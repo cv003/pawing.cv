@@ -1,17 +1,3 @@
-@font-face {
-    font-family: "chuzzle script";
-    src: url("../assets/fonts/chuzzlescript.woff2") format("woff2");
-    font-display: block;
-}
-/* the frontpage does not pull in global.css, so the news body brings its own */
-@font-face {
-    font-family: "nimbus sans becker";
-    src: url("../assets/fonts/nimbussansbeckerpblack.woff2") format("woff2");
-    font-display: swap; font-weight: 600;
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
 .newschuzzle {
     position: fixed; top: 0; left: 50%;
     transform: translateX(-50%);
@@ -24,101 +10,64 @@
 .newschuzzle img {width: 100%; height: auto; display: block}
 .newschuzzle:active {filter: brightness(1.15)}
 
-/* the sprite is cut off flat along the bottom because it peeks out from behind
-   something in game, so it hangs from the top edge here and bobs a little */
 @keyframes newsbob {
     0%, 100% {transform: translateX(-50%) translateY(0)}
     50% {transform: translateX(-50%) translateY(7%)}
 }
 
-/* clear of the eyes, which sit low and centre on the sprite. needs to beat
-   the .newschuzzle img width above, which is the more specific selector */
-.newschuzzle .newsbadge {
-    position: absolute; right: -30%; top: 2%;
-    width: 52%; height: auto;
-    opacity: 0; pointer-events: none;
-    transform: rotate(-8deg);
-    transition: opacity 0.25s ease;
-    animation: newsbadgepulse 0.9s ease-in-out infinite alternate;
-}
-.newschuzzle .newsbadge.on {opacity: 1}
-@keyframes newsbadgepulse {
-    from {transform: rotate(-8deg) scale(1)}
-    to {transform: rotate(-8deg) scale(1.09)}
-}
-
 /*//////////////////////////////////////////////////////////////////////*/
 
-.newswrap {
-    position: fixed; inset: 0; z-index: 20;
-    display: none; align-items: center; justify-content: center;
-    background: rgba(26,26,64,0.6);
-    padding: 3.5em 1em;
+.newswrap {z-index: 20}
+.newswrap .popup {
+    width: calc(100% - 90px); height: calc(var(--vh) - 90px);
+    margin: 45px;
 }
-.newswrap.on {display: flex}
-
-/* the same stacked ring the in-game popups use, see .popup in global.css */
-.newspopup {
-    position: relative; display: flex;
-    flex-direction: column; align-items: center;
-    width: 100%; max-width: 430px;
-    max-height: 100%; border-radius: 0.5em;
-    background: #ffd200; isolation: isolate;
-    padding: 0.7em 0.9em 1em;
-    box-shadow:
-        0 0 0 1px #FFD200, 0 0 0 3px #FFDC0E, 0 0 0 5px #FFE619,
-        0 0 0 7px #FFEF21, 0 0 0 9px #FFF928, 0 0 0 11px #FFD632,
-        0 0 0 13px #FFDD3A, 0 0 0 15px #FFE543, 0 0 0 17px #FFED4C,
-        0 0 0 19px #FFFF80, 0 0 0 21px #FFFF80, 0 0 0 23px #FFFF80,
-        0 0 0 25px #f0807e, 0 0 0 27px #fd8886, 0 0 0 29px #ff8d89,
-        0 0 0 31px #ff918c, 0 0 0 33px #ff928f,
-        0 0 0 42px rgba(0,0,0,0.25);
+.newswrap .pucontent {
+    height: 100%; width: 100%;
+    justify-content: flex-start;
+}
+.newswrap .pucontent .logo {
+    position: relative;
+    width: auto !important; flex: none;
+    height: calc(var(--u) * 0.11 * var(--boxratio, 1.2));
+    max-width: 60%;
+    margin-bottom: calc(var(--u) * 0.012);
 }
 
-.newstitle {
-    font-family: "chuzzle script", "blippo", cursive;
-    font-size: 2.6em; line-height: 1; font-weight: 400;
-    color: #b6ffb0; margin: 0 0 0.15em;
-    -webkit-text-stroke: 0.055em #4e4c02;
-    paint-order: stroke fill;
-}
-
-.newsclose {
-    position: absolute; top: -0.5em; right: -0.5em;
-    width: 2em; height: 2em; padding: 0; margin: 0;
-    border: none; border-radius: 50%; cursor: pointer;
-    background: radial-gradient(circle at 35% 30%, #b98cff 0%, #6a2bd0 70%, #3d1580 100%);
-    box-shadow: 0 0 0 3px #d9b3ff, 0 0.15em 0.3em rgba(0,0,0,0.5);
-    color: #cfe6ff; font-size: 1em; font-weight: 700;
-    font-family: system-ui, sans-serif; line-height: 1;
-}
-.newsclose:active {filter: brightness(1.3)}
-
-/* MLBoxEX::SetBox paints the panel Color(0.1, 0.1, 0.25, 0.85). in game that
-   lands over the dark scene behind the box, not over the yellow frame, so it
-   needs a dark backing here or the yellow bleeds through and turns it brown */
-.newsbody {
-    width: 100%; overflow-y: auto;
-    border-radius: 0.25em;
-    background: linear-gradient(rgba(26,26,64,0.85), rgba(26,26,64,0.85)) #071033;
+.newswrap .newsbody {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
+    align-items: stretch; justify-content: flex-start;
+    padding: 0; text-align: left;
     font-family: "nimbus sans becker", Arial, Helvetica, sans-serif;
-    font-weight: 700; font-size: 0.95em; line-height: 1.25;
-    color: #fff; text-align: left;
-    scrollbar-width: thin;
+    font-weight: 600; font-size: calc(var(--u) * 0.032);
+    line-height: 1.25;
+    scrollbar-width: none; -ms-overflow-style: none;
 }
-.newsloading {padding: 1.5em; text-align: center; opacity: 0.75}
+.newswrap .newsbody::-webkit-scrollbar {display: none}
+.newsloading {text-align: center; opacity: 0.75}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.newspage {position: relative; box-sizing: border-box}
-.newsgap {display: block; width: 100%}
-.newsimg {max-width: 100%; height: auto}
-.newslink {color: #7ec8ff; text-decoration: underline}
+.newsbody .newspage {
+    position: relative; display: block;
+    box-sizing: border-box;
+    width: 100%; top: 0;
+    padding: 0; margin: 0;
+    background: none; box-shadow: none;
+    border-radius: 0; text-align: left;
+}
+.newsbody .newscenter {text-align: center}
+.newsbody .newsimg {max-width: 100%; height: auto; display: inline-block}
 
-.newsfontarial {font-family: Arial, Helvetica, sans-serif}
-.newsfontsmall {font-size: 0.82em}
+.newsbody .newslink {
+    font-size: inherit; font-family: inherit; font-weight: inherit;
+    display: inline; text-decoration: none;
+    text-shadow: none; filter: none; color: inherit;
+}
+.newsbody .newsfontsmall {font-size: 0.82em}
 
-.newsblink {
+.newsbody .newsblink {
     color: var(--blinka);
     animation: newsblink var(--blinktime, 1s) steps(1) infinite;
 }
@@ -127,5 +76,7 @@
     50%, 100% {color: var(--blinkb)}
 }
 @media (prefers-reduced-motion: reduce) {
-    .newsblink, .newschuzzle, .newsbadge {animation: none}
+    .newschuzzle {animation: none}
 }
+
+[data-role=news] .logo .inner {fill: url(#lgnews)}
