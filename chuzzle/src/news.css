@@ -3,7 +3,7 @@
     transform: translateX(-50%);
     width: 150px; max-width: 34vw;
     padding: 0; margin: 0; border: none;
-    background: none; cursor: pointer;
+    background: none;
     z-index: 5; line-height: 0;
     animation: newsbob 3.2s ease-in-out infinite;
 }
@@ -46,10 +46,14 @@
 }
 .newswrap .newsbody::-webkit-scrollbar {display: none}
 .newsloading {text-align: center; opacity: 0.75}
+.newshash .newswrap {visibility: visible; opacity: 1; pointer-events: auto}
+.newshash .newswrap .popup {transform: scale(1)}
+.newshash .newswrap .pucontent {opacity: 1}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.newsbody .newspage {
+.newsbody .newspage,
+.newsbody .newscenter {
     position: relative; display: block;
     box-sizing: border-box;
     width: 100%; top: 0;
@@ -58,6 +62,12 @@
     border-radius: 0; text-align: left;
 }
 .newsbody .newscenter {text-align: center}
+
+.newsbody [data-border="10"] {padding: 2%}
+.newsbody [data-width="100%"] {width: 100%}
+.newsbody [data-boxed] {margin-inline: auto}
+.newsbody .newsgap {display: block; width: 100%}
+
 .newsbody .newsimg {max-width: 100%; height: auto; display: inline-block}
 
 .newsbody .newslink {
@@ -74,9 +84,6 @@
 @keyframes newsblink {
     0%, 49.99% {color: var(--blinka)}
     50%, 100% {color: var(--blinkb)}
-}
-@media (prefers-reduced-motion: reduce) {
-    .newschuzzle {animation: none}
 }
 
 [data-role=news] .logo .inner {fill: url(#lgnews)}

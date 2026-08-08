@@ -13,10 +13,8 @@
 
     <!-- the css import is too slow so this will almost always load faster -->
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/blippo.woff2" crossorigin>
-
-    <!-- global.css carries the popup shell the news borrows, but it also styles
-         body and links, so it goes first and the page's own rules win below -->
     <link rel="stylesheet" href="src/global.css">
+    <script>if (location.hash === "#news") document.documentElement.classList.add("newshash");</script>
 
     <style>
 
@@ -30,6 +28,7 @@
             color: white; height: var(--vh); margin: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
+            flex-wrap: nowrap; align-content: center;
         }
 
         .bg {
@@ -62,10 +61,10 @@
             display: inline-block;
             margin: 0 0.12em 0 0.05em;
         }
-        
         .text {
             margin-top: 0; max-width: 90%;
             width: auto; object-fit: contain;
+            cursor: url("assets/static/cursor-default.cur"), default;
         }
         .small {font-size: 0.9em; --r: 0.5em}
 
@@ -179,8 +178,6 @@
                             <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
                             <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
                         </linearGradient>
-                        <!-- .pucontent .logo .lgblack filters through this, and an svg
-                             element pointing at a missing filter does not render at all -->
                         <filter id="lgfillholes" x="-30%" y="-30%" width="160%" height="160%">
                             <feMorphology operator="dilate" radius="3"/>
                         </filter>
