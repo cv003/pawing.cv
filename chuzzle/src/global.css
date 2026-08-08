@@ -94,7 +94,7 @@ ul {padding-top: 1em; list-style: none; padding-left: 0}
 .logo .lgouter {stroke: #feff48; stroke-width: 30}
 .logo .lgmid {stroke: #60204a; stroke-width: 17}
 .logo .lgblack {stroke: rgba(96,32,74,0.25); stroke-width: 54}
-.pucontent .logo .lgblack {stroke: #4e4c02; stroke-width: 20; opacity: 1; filter: url(#lgfillholes)}
+.pucontent .logo .lgblack {stroke: #4e4c02; stroke-width: 30; opacity: 1; filter: url(#lgfillholes)}
 .logo .inner {fill: url(#lgrgb); stroke: none} .logo .lglight {fill: url(#lgfade); stroke: none}
 
 .dumbcontainer {

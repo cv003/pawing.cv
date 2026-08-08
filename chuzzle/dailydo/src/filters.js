@@ -1,6 +1,6 @@
 // country:UA / country:Ukraine / country:-- / country:Unknown
-// type:guest / type:user
-// guid:845934 / id:438290 / playerid:34392 / userid:20284
+// type:guest / type:user / type:guestold / type:guestnew / type:mine
+// guid:<1000000 / id:>7000000 / playerid:<=1453477 / userid:493
 // rank:<10 / rank:>69 / rank:<=190 / rank:42
 // score:<103 / score:>690 / score:<=54823 / score:1000
 
@@ -31,6 +31,12 @@ function countrymatches(entry, raw) {
     return name.toLowerCase() === want || name.toLowerCase().indexOf(want) >= 0;
 }
 
+function idmatches(entry, raw) {
+    const trimmed = raw.trim();
+    if (/^(<=|>=|<|>|=)/.test(trimmed)) return comparenum(Number(entry.id), parsecompare(trimmed));
+    return entry.id.indexOf(trimmed) >= 0;
+}
+
 const filtertoken = /(\w+):(\S+)/g;
 
 function parsesearch(text) {
@@ -52,9 +58,15 @@ function matchesfilters(entry, filters) {
             const guest = isguest(entry.full);
             if (want === "guest") return guest;
             if (want === "user") return !guest;
+            if (want === "guestold") return guest && guestera(entry.full) === "old";
+            if (want === "guestnew") return guest && guestera(entry.full) === "new";
+            if (want === "mine") {
+                const held = typeof readclaim === "function" ? readclaim() : null;
+                return !!held && !!held.guid && held.guid === entry.id;
+            }
             return true;
         }
-        if (f.key === "id") return entry.id.indexOf(f.value.trim()) >= 0;
+        if (f.key === "id") return idmatches(entry, f.value);
         if (f.key === "rank") return comparenum(entry.rank, parsecompare(f.value));
         if (f.key === "score") return comparenum(Number(entry.score), parsecompare(f.value));
         return true;

@@ -462,8 +462,10 @@ function makeidtip() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+function issnap() {return boards[boardat].key === "snap"}
+function claimkey() {return issnap() ? "chuzzlesnapclaim" : "chuzzleclaim"}
 function readclaim() {
-    try {return JSON.parse(localStorage.getItem("chuzzleclaim") || "null")} catch (e) {}
+    try {return JSON.parse(localStorage.getItem(claimkey()) || "null")} catch (e) {}
     return null;
 }
 function realid(id) {return !!id && id !== "0"}
@@ -485,12 +487,15 @@ function locateclaimed() {
 function findclaimed() {
     const found = locateclaimed();
     if (found >= 0) return found;
+    if (findwant()) return -1; // never inject that placeholder into search results!!
     if (board.length && board[board.length - 1].placeholder) return board.length - 1;
     const held = readclaim();
     if (!held) return -1;
     board = board.concat([{
-        cc: "--", country: "--", name: "...", full: "...", hunt: "",
-        rank: board.length + 1, raw: "...", score: "...",
+        cc: held.cc || "--", country: held.country || "--",
+        name: drawname(held.name || ""), full: held.name || "",
+        hunt: (held.name || "").toUpperCase(),
+        rank: board.length + 1, raw: held.name || "", score: "...",
         id: held.guid || "", placeholder: true,
     }]);
     return board.length - 1;
@@ -597,7 +602,7 @@ function makeprofile() {
 
         const guest = isguest(entry.full);
         const noguid = !realid(entry.id);
-        const joined = noguid ? null : joinlabel(entry.id);
+        const joined = noguid || issnap() ? null : joinlabel(entry.id);
         const facts = [];
         if (!guest) facts.push(["Nickname", entry.full]);
         facts.push(
@@ -610,9 +615,11 @@ function makeprofile() {
             const era = tag ? " <b class=\"eratag\">" + tag + "</b>" : "";
             facts.push(["Joined about", joined + era]);
         }
-        facts.push(null,
-            ["This day's Rank", "#" + entry.rank],
-            ["This day's Score", Number(entry.score).toLocaleString("en")]);
+        if (!entry.placeholder) {
+            facts.push(null,
+                ["This day's Rank", "#" + entry.rank],
+                ["This day's Score", Number(entry.score).toLocaleString("en")]);
+        }
         relabellogo(wrap.querySelector(".logo"), guest ? "Guest Info" : "Player Info");
         const held = readclaim();
         const mine = held && held.guid && held.guid === entry.id;
@@ -628,10 +635,10 @@ function makeprofile() {
 
         if (button) body.querySelector(".claim").onclick = function() {
             try {
-                if (mine) {localStorage.removeItem("chuzzleclaim")}
+                if (mine) {localStorage.removeItem(claimkey())}
                 else {
-                    localStorage.setItem("chuzzleclaim",
-                        JSON.stringify({guid: entry.id, name: entry.full}));
+                    localStorage.setItem(claimkey(),
+                        JSON.stringify({guid: entry.id, name: entry.full, cc: entry.cc, country: entry.country}));
                 }
             } catch (e) {}
             closepopup(wrap);
