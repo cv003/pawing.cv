@@ -5,15 +5,9 @@
     padding: 0; margin: 0; border: none;
     background: none;
     z-index: 5; line-height: 0;
-    animation: newsbob 3.2s ease-in-out infinite;
 }
 .newschuzzle img {width: 100%; height: auto; display: block}
 .newschuzzle:active {filter: brightness(1.15)}
-
-@keyframes newsbob {
-    0%, 100% {transform: translateX(-50%) translateY(0)}
-    50% {transform: translateX(-50%) translateY(7%)}
-}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -63,6 +57,7 @@
 }
 .newsbody .newscenter {text-align: center}
 
+.newsbody [data-border="5"] {padding-left: 5px}
 .newsbody [data-border="10"] {padding: 2%}
 .newsbody [data-width="100%"] {width: 100%}
 .newsbody [data-boxed] {margin-inline: auto}
