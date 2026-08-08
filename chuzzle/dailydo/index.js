@@ -469,7 +469,7 @@ function readclaim() {
 function realid(id) {return !!id && id !== "0"}
 
 // try guid first since it's possible that the person changed their nickname
-function findclaimed() {
+function locateclaimed() {
     const held = readclaim();
     if (!held || !board.length) return -1;
     if (realid(held.guid)) {
@@ -482,10 +482,24 @@ function findclaimed() {
     return -1;
 }
 
+function findclaimed() {
+    const found = locateclaimed();
+    if (found >= 0) return found;
+    if (board.length && board[board.length - 1].placeholder) return board.length - 1;
+    const held = readclaim();
+    if (!held) return -1;
+    board = board.concat([{
+        cc: "--", country: "--", name: "...", full: "...", hunt: "",
+        rank: board.length + 1, raw: "...", score: "...",
+        id: held.guid || "", placeholder: true,
+    }]);
+    return board.length - 1;
+}
+
 function jumptoclaimed() {
     const seat = findclaimed();
     claimedat = seat;
-    if (seat < 0) return;
+    if (seat < 0 || (board[seat] && board[seat].placeholder)) return;
     const host = document.querySelector(".scroller");
     fling.jump(padtop + (seat + 0.5) * rowheight - host.clientHeight / 2);
 }
@@ -710,6 +724,22 @@ drawsteppers();
 document.querySelector(".swleft").addEventListener("click", function() {switchday(1)});
 document.querySelector(".swright").addEventListener("click", function() {switchday(-1)});
 
+const clipneeds = 20;
+function updateswitcherclip() {
+    const switcher = document.querySelector(".switcher");
+    const scores = document.querySelector(".scores");
+    const left = document.querySelector(".swleft");
+    const right = document.querySelector(".swright");
+    if (!switcher || !scores || !left || !right) return;
+    const scoresBox = scores.getBoundingClientRect();
+    const leftBox = left.getBoundingClientRect();
+    const rightBox = right.getBoundingClientRect();
+    const leftClip = leftBox.right - scoresBox.left;
+    const rightClip = scoresBox.right - rightBox.left;
+    switcher.classList.toggle("clipped", leftClip > clipneeds || rightClip > clipneeds);
+}
+updateswitcherclip();
+
 const fontsdone = document.fonts && document.fonts.ready
     ? document.fonts.ready : Promise.resolve();
 
@@ -726,6 +756,7 @@ Promise.all([countriesready.then(loadboard), fontsdone]).then(function(got) {
     showfooter();
     markurl();
     if (count) marktitle(count);
+    updateswitcherclip();
     setInterval(refreshboard, boardage);
 });
 
@@ -740,6 +771,7 @@ window.addEventListener("resize", function() {
     paintedat = null;
     fling.jump(keep);
     tintswitcher();
+    updateswitcherclip();
 });
 
 /*//////////////////////////////////////////////////////////////////////*/

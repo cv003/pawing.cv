@@ -313,7 +313,7 @@
 .scores > div.mine img, .scores > div.mine score {
     animation: ddsway 1.5s ease-in-out infinite alternate;
 }
-.scores > div.guest {filter: saturate(0.25)}
+.scores > div.guest {filter: brightness(0.75)}
 
 @keyframes ddsweep {
     from {transform: translateX(-100%)}
@@ -485,7 +485,7 @@
     animation: ddswayarrow 1.5s ease-in-out infinite alternate;
 }
 .switcher .swleft img.arrow {animation-name: ddswayflip}
-@media (max-width: 660px) {.switcher {display: none}}
+.switcher.clipped {visibility: hidden; pointer-events: none}
 
 @keyframes ddswayarrow {
     from {transform: translateX(calc(var(--u) * -0.0078))}
@@ -827,6 +827,8 @@
     0%, 50% {color: #ffff00}
     50.01%, 100% {color: #ff0000}
 }
+.glossarycontent .blinky {color: #ccffff}
+.glossarycontent .stinky {color: #ffff00}
 
 .rulesdivider {
     height: 0.25em; margin: 0 -0.4em;
@@ -859,7 +861,7 @@
     display: flex; flex-direction: column;
     font-size: calc(var(--u, 16px) * 0.036); line-height: 1.4;
 }
-.previewdate {color: #a9aee6; font-weight: 400}
+.previewdate {color: #a9aee6; font-weight: 600}
 .previewgametype {font-weight: 700}
 
 .pucontent .glossaryhead {

@@ -247,7 +247,7 @@ function upcominghtml(date) {
         const out = computerulesfordate(at);
         const gt = rules.gametype[out.gametype];
         if (!gt) continue;
-        const label = at.toLocaleDateString(undefined, {weekday: "short", month: "short", day: "numeric"});
+        const label = at.toLocaleDateString("en", {weekday: "short", month: "short", day: "numeric"});
         rows.push("<div class=\"previewrow\">" + iconimg(gt.icon, gt.name)
             + "<span><b class=\"previewdate\">" + escapehtml(label) + "</b>"
             + "<b class=\"previewgametype\" style=\"color:" + csscolor(gt.color) + "\">"

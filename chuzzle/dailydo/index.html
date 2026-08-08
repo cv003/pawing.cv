@@ -248,6 +248,9 @@
                         <feMorphology radius="3" result="eroded"/><feFlood flood-color="#fff"/>
                         <feComposite in2="eroded" operator="in"/>
                     </filter>
+                    <filter id="lgfillholes" x="-30%" y="-30%" width="160%" height="160%">
+                        <feMorphology operator="dilate" radius="3"/>
+                    </filter>
                 </defs>
                 <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Today's Scores</text></mask>
                 <g><text x="30" y="130" class="lgblack">Today's Scores</text>
