@@ -184,6 +184,8 @@
     opacity: 0.5; pointer-events: none;
 }
 
+.allmode .switcher, .allmode .boardpick {visibility: hidden; pointer-events: none}
+
 .sliding {transition: transform 0.26s linear}
 .sliding.jumping {transition: none}
 .ghost {pointer-events: none}
@@ -719,6 +721,8 @@
     background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
         #6020cf 80%, #ba9fe6 100%);
 }
+
+.pucontent .seeall {font-size: calc(var(--u) * 0.024)}
 
 /*//////////////////////////////////////////////////////////////////////*/
 

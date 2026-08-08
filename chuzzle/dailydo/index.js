@@ -85,6 +85,7 @@ const boards = [
 const boardhost = "https://chuzzle.coolsite.cv/dailydo";
 let boardat = 0;
 let dayat = 0;
+let allmode = false;
 
 function dayback(back) {
     const d = new Date();
@@ -100,6 +101,7 @@ function daylabel(back) {
 }
 
 function boardtitle() {
+    if (allmode) return "All " + boards[boardat].label + " Scores";
     if (boards[boardat].weekly || dayat === 0) return boards[boardat].title;
     if (dayat === 1) return "Yesterday's Scores";
     return daylabel(dayat) + " Scores";
@@ -197,7 +199,7 @@ function prefetchdays() {
 }
 
 async function refreshboard() {
-    if (document.body.classList.contains("fetching")) return;
+    if (document.body.classList.contains("fetching") || allmode) return;
     const key = cachekey();
     const text = await fetchtext(key);
     if (key !== cachekey()) return;
@@ -358,6 +360,10 @@ async function reload(dir, dayChanged) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 function marktitle(count) {
+    if (allmode) {
+        document.title = "All " + boards[boardat].label + " Scores! (" + count + ")";
+        return;
+    }
     document.title = (dayat === calendarreach ? "Partial " : "")
         + boards[boardat].label + " for " + daylabel(dayat)
         + "! (" + count + ")";
@@ -394,21 +400,24 @@ function readurl() {
 }
 
 function switchday(step) {
+    if (allmode) return;
     const want = nextday(dayat, step);
     if (want < 0) return;
     dayat = want;
     reload(step, true);
 }
 function pickday(back) {
-    if (back === dayat || back < 0 || back > calendarreach) return;
+    if (back < 0 || back > calendarreach) return;
+    if (!allmode && back === dayat) return;
     const dir = back > dayat ? 1 : -1;
     dayat = back;
+    setallmode(false);
     reload(dir, true);
 }
 
 const boardscrolls = {};
 function pickboard(index) {
-    if (index === boardat) return;
+    if (allmode || index === boardat) return;
     boardscrolls[boards[boardat].key] = fling.at();
     const dir = index > boardat ? -1 : 1;
     boardat = index;
@@ -597,7 +606,8 @@ function makeprofile() {
         const entry = board[row.dataset.at];
         if (!entry) return;
         playsound("click", 0.7);
-        const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\">";
+        const flag = "<img src=\"assets/images/flags/" + entry.cc + ".png\" alt=\"\""
+            + " onerror=\"this.onerror=null;this.src='assets/images/flags/--.png'\">";
         const country = countryname(entry.country) || entry.country;
 
         const guest = isguest(entry.full);
@@ -713,12 +723,76 @@ function buildcalendar() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+function setallmode(on) {
+    allmode = on;
+    document.documentElement.classList.toggle("allmode", on);
+}
+
+function daysinrange() {
+    const out = [];
+    for (let back = 0; back <= calendarreach; back++) out.push(back);
+    return out;
+}
+
+// pulls the whole visible 2-week region for the current board into one
+// merged, score-sorted leaderboard - relies on the worker batching all of
+// those days into a single request instead of one per day, and reuses
+// whatever's already fresh in the local per-day cache on top of that
+async function loadallboard() {
+    const key = boards[boardat].key;
+    const wanted = daysinrange();
+    const store = readstore();
+    const missing = wanted.filter(function(back) {
+        const held = store[key + "/" + daykey(dayback(back))];
+        return !held || !held.text || Date.now() - held.at >= boardage;
+    });
+    if (missing.length) {
+        const got = await fetchdays(key, missing);
+        Object.keys(got).forEach(function(day) {remember(key + "/" + day, got[day])});
+    }
+    const fresh = readstore();
+    let merged = [];
+    wanted.forEach(function(back) {
+        const held = fresh[key + "/" + daykey(dayback(back))];
+        if (held && held.text) merged = merged.concat(readboard(held.text));
+    });
+    merged.sort(function(a, b) {return Number(b.score) - Number(a.score)});
+    merged.forEach(function(e, i) {e.rank = i + 1});
+    return merged;
+}
+
+async function pickall() {
+    if (allmode) return;
+    closepopup(document.querySelector("[data-role=calendar]"));
+    document.body.classList.add("fetching");
+    const merged = await loadallboard();
+    document.body.classList.remove("fetching");
+    setallmode(true);
+    fullboard = merged;
+    board = filtered(findwant());
+    measurelist(host, list);
+    claimedat = findclaimed();
+    paintedat = null; filled = -1;
+    fling.jump(0);
+    paintrows(0, host);
+    jumptoclaimed();
+    drawpicks();
+    relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
+    showfooter();
+    markurl();
+    marktitle(merged.length);
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
 // ..function slop 😭
 makeprofile();
 makefinder();
 buildrings();
 buildcalendar();
 makeidtip();
+const seeallbtn = document.querySelector(".seeall");
+if (seeallbtn) seeallbtn.addEventListener("click", pickall);
 
 const fling = makefling(document.querySelector(".scroller"), document.querySelector(".scores"));
 const host = document.querySelector(".scroller");
