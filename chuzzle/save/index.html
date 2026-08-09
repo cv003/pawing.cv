@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>Save Editor</title>
+        <link rel="icon" type="image/webp" href="../assets/images/icons/save.webp">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/blippo.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/harlowsolidlet.woff2">
+        <link rel="stylesheet" href="../src/base.css">
+        <link rel="stylesheet" href="../src/global.css">
+        <link rel="stylesheet" href="index.css">
+
+        <link rel="stylesheet" href="../src/cursor.css">
+</head>
+    <body>
+
+        <div class="bg"></div>
+
+        <div class="dumbcontainer">
+            <svg class="logo savelogo" viewBox="0 0 900 170">
+                <defs>
+                    <linearGradient id="lgrgb" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#cfd"/><stop offset="10%" stop-color="#afa"/>
+                        <stop offset="26%" stop-color="#aff"/><stop offset="42%" stop-color="#9bf"/>
+                        <stop offset="58%" stop-color="#aaf"/><stop offset="74%" stop-color="#c9f"/>
+                        <stop offset="88%" stop-color="#f9f"/><stop offset="100%" stop-color="#f8f"/>
+                    </linearGradient>
+                    <linearGradient id="lgfade" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                        <stop offset="30%" stop-color="#fff" stop-opacity="0.85"/>
+                        <stop offset="56%" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <filter id="erode">
+                        <feMorphology radius="2" result="eroded"/><feFlood flood-color="#fff"/>
+                        <feComposite in2="eroded" operator="in"/>
+                    </filter>
+                </defs>
+                <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Save Editor</text></mask>
+                <g><text x="30" y="130" class="lgdark">Save Editor</text>
+                    <text x="30" y="130" class="lgouter">Save Editor</text>
+                    <text x="30" y="130" class="lgmid">Save Editor</text>
+                    <text x="30" y="130" class="inner">Save Editor</text>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Save Editor</text></g>
+            </svg>
+        </div>
+
+        <div class="drop">
+            <img class="stinky" src="../assets/images/icons/save.webp" alt="" draggable="false">
+            <p class="pitch">Drop a <b>Chuzzle2.backup</b> folder's zip here, or just a
+                <b>profile.cfg</b>. Everything happens in this tab ~ nothing is uploaded.</p>
+            <label class="picker">
+                <input type="file" multiple accept=".zip,.cfg,.backup">
+                <span>Pick a file</span>
+            </label>
+            <p class="shout"></p>
+            <p class="leftalone"></p>
+        </div>
+
+        <div class="tabs"></div>
+        <div class="sheets"></div>
+
+        <div class="bar">
+            <button class="dotext" type="button">Download as text</button>
+            <button class="dosave" type="button">Save the file</button>
+        </div>
+
+    </body>
+
+    <script src="../src/global.js"></script>
+    <script src="src/zip.js"></script>
+    <script src="src/fields.js"></script>
+    <script src="index.js"></script>
+
+</html>

@@ -1,0 +1,240 @@
+/*
+
+  the shop's panel, minus the svg - nothing here has a ragged last row, so the
+  ring stack can stay an inset box-shadow on a rectangle.
+
+*/
+
+body {
+    background-color: #0c0823; padding: 0;
+    display: block; overflow-x: hidden;
+    overflow-y: auto;
+    height: auto; min-height: var(--vh);
+    /* index.js measures the bar once it appears */
+    padding-bottom: 7em;
+}
+html, body, * {scrollbar-width: none; -ms-overflow-style: none}
+*::-webkit-scrollbar {display: none !important; width: 0; height: 0}
+
+.bg {
+    position: fixed; z-index: -1;
+    left: -8vw; top: -8vh;
+    width: 116vw; height: 116vh;
+    opacity: 0.22; pointer-events: none;
+    background-image: url("../assets/images/bg.webp");
+    background-repeat: repeat; background-size: 600px 600px;
+    transform: rotate(-5deg);
+    animation: bgscroll 60s linear infinite;
+}
+@keyframes bgscroll {
+    from {background-position: 0 0}
+    to {background-position: 600px 600px}
+}
+@media (prefers-reduced-motion: reduce) {
+    .bg {animation: none}
+}
+
+.dumbcontainer {padding: 0.7em 0 0.9em}
+.savelogo {
+    width: auto !important;
+    height: min(126px, 19vw);
+    max-width: 94vw; overflow: visible;
+    filter: drop-shadow(0 0.07em 0 #000) drop-shadow(0 0.12em 0.06em #000)
+        drop-shadow(0 0 0.12em rgba(0,0,0,0.9));
+}
+.savelogo .lgdark {
+    fill: none; stroke: rgba(0,0,0,0.45); stroke-width: 46;
+    stroke-linejoin: round; stroke-linecap: round; stroke-miterlimit: 1;
+}
+.savelogo .lgouter {stroke: #feff48; stroke-width: 33}
+.savelogo .lgmid {stroke: #60204a; stroke-width: 16}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.panel, .drop {
+    width: min(940px, calc(100vw - 3.4em));
+    margin: 0 auto 1.6em; padding: 1.4em 1.5em 1.5em;
+    border-radius: 8px; box-sizing: border-box;
+    background: linear-gradient(180deg, #8b53a2 0%, #590c74 4%, #590c74 96%, #8b53a2 100%);
+    box-shadow:
+        inset 0 0 0 2px #8a0820, inset 0 0 0 5px #ff2500,
+        inset 0 0 0 7px #ffeb00, inset 0 0 0 8px #ffa900,
+        inset 0 0 0 9px #c67228,
+        0 0 0 4px #8b0aa2, 0 0 0 6px rgba(0,0,0,0.55);
+}
+
+.drop {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.7em;
+    text-align: center;
+}
+.drop.over {background: linear-gradient(180deg, #a76cbe 0%, #6d1b88 4%, #6d1b88 96%, #a76cbe 100%)}
+.stinky {
+    width: 84px; height: auto;
+    filter: drop-shadow(0 0.06em 0.12em rgba(0,0,0,0.55));
+}
+.pitch {
+    max-width: 34em; margin: 0; opacity: 1;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.95em; font-weight: 300; color: #e4cff2;
+}
+.pitch b {color: #ffe07a; font-weight: 600}
+
+.picker input {display: none}
+.picker span {
+    display: inline-block;
+    padding: 0.16em 1.1em 0.24em;
+    border-radius: 0.28em; color: white;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-weight: 100; font-size: 1.5em;
+    text-shadow: var(--ring);
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    box-shadow: 0 0 0 2px #05061e;
+    cursor: pointer;
+}
+.picker span:active {filter: brightness(1.6)}
+
+.shout, .leftalone {
+    margin: 0; max-width: 40em; opacity: 1;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.8em; font-weight: 300; color: #b79bd0;
+}
+.shout.bad {color: #ff9d7c}
+.leftalone b {color: #b79bd0; font-weight: 600}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.tabs {
+    display: none; flex-wrap: wrap;
+    justify-content: center; gap: 0.35em;
+    margin: 0 auto 1.4em;
+    width: min(940px, calc(100vw - 3.4em));
+}
+body.many .tabs {display: flex}
+.tabs button {
+    margin: 0; padding: 0.08em 0.85em 0.18em;
+    border: none; border-radius: 0.28em;
+    text-transform: none; color: white;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-weight: 100; font-size: 1.3em;
+    text-shadow: var(--ring);
+    background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%, #0a1a5e 80%, #5a63a0 100%);
+    box-shadow: 0 0 0 2px #05061e;
+}
+.tabs button.on {
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+}
+.tabs button:active {filter: brightness(1.6)}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.panel h2 {
+    margin: 0 0 0.7em -0.1em;
+    font-family: "blippo", "chuzzle", system-ui, sans-serif;
+    font-size: 1.7em; font-weight: 400;
+    text-align: left; color: #fff;
+    text-shadow: 0 0.07em 0 #2b1226, 0 0 0.2em rgba(0,0,0,0.8);
+}
+
+.fields {
+    display: grid; gap: 0.55em 1.2em;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.field {display: flex; flex-direction: column; gap: 0.2em}
+.field label {
+    display: flex; flex-direction: column;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    line-height: 1.15;
+}
+.field label b {font-size: 0.86em; font-weight: 600; color: white}
+.field label i {font-size: 0.7em; font-style: normal; color: #b79bd0}
+
+.field input, .stats input {
+    width: 100%; box-sizing: border-box;
+    padding: 0.3em 0.6em;
+    border: none; outline: none; border-radius: 0.35em;
+    background: #2d0027; color: white;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; font-weight: 600;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.field input:focus, .stats input:focus {box-shadow: inset 0 0 0 2px #feff48}
+.field input.wide {font-size: 0.72em}
+
+.flip {
+    align-self: flex-start; margin: 0;
+    padding: 0.22em 1.1em 0.28em;
+    border: none; border-radius: 0.35em;
+    text-transform: none; color: #d6c3e8;
+    background: #2d0027;
+    box-shadow: inset 0 0 0 2px #60204a;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; font-weight: 600;
+}
+.flip.on {background: #1f6b2e; color: white; box-shadow: inset 0 0 0 2px #43b458}
+
+.blob {
+    padding: 0.3em 0.6em; border-radius: 0.35em;
+    background: rgba(0,0,0,0.28); color: #9a86ad;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.78em; font-weight: 600; font-style: italic;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.stats {display: flex; flex-direction: column; gap: 0.35em}
+.statrow {
+    display: grid; align-items: center; gap: 0.6em;
+    grid-template-columns: minmax(9em, 1.6fr) 1fr 1fr 1fr;
+}
+.statrow > span {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.84em; font-weight: 600; color: white;
+}
+.statrow.head > span {
+    font-size: 0.72em; color: #b79bd0;
+    text-align: center;
+}
+.statrow.head > span:first-child {text-align: left}
+.missing {text-align: center; color: #7a6a8a}
+
+@media (max-width: 560px) {
+    .statrow {grid-template-columns: 1fr 1fr 1fr; gap: 0.25em 0.5em}
+    .statrow > span:first-child {grid-column: 1 / -1; margin-top: 0.4em}
+    .statrow.head {display: none}
+    .stats input {text-align: center}
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.bar {
+    position: fixed; z-index: 6;
+    left: 0; right: 0; bottom: 0;
+    display: none; justify-content: center;
+    gap: 0.6em; padding: 1.6em 0.75em 0.9em;
+    background: linear-gradient(180deg, rgba(12,8,35,0), #0c0823 40%);
+}
+body.loaded .bar {display: flex}
+.bar button {
+    margin: 0; padding: 0.1em 1em 0.2em;
+    border: none; border-radius: 0.28em;
+    text-transform: none; color: white;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-weight: 100; font-size: 1.45em;
+    text-shadow: var(--ring);
+    background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%, #0a1a5e 80%, #5a63a0 100%);
+    box-shadow: 0 0 0 2px #05061e;
+}
+.bar .dosave {
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+}
+body.edited .bar .dosave {
+    background: linear-gradient(140deg, #ffe27a 0%, #ffab13 35%, #f27c00 80%, #ffd77a 100%);
+    color: #3a1d00;
+}
+.bar button:active {filter: brightness(1.6)}
+
+@media (max-width: 560px) {
+    .bar {gap: 0.4em; padding: 1.4em 0.5em 0.8em}
+    .bar button {font-size: 1.15em; padding: 0.1em 0.7em 0.2em}
+}
