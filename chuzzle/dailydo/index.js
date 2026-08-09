@@ -79,8 +79,8 @@ function readboard(text) {
 const boards = [
     {key: "main", label: "Daily-Do", title: "Today's Scores"},
     {key: "gold", label: "Golden", title: "Tournament", weekly: true},
-    {key: "snap", label: "Snap", title: "Snap Scores", badge: "assets/images/snap2.webp"},
-    {key: "chuzzle", label: "Legacy", title: "Legacy Scores"}
+    {key: "chuzzle", label: "Legacy", title: "Legacy Scores"},
+    {key: "snap", label: "Snap", title: "Snap Scores", badge: "assets/images/snap2.webp"}
 ];
 const boardhost = "https://chuzzle.coolsite.cv/dailydo";
 let boardat = 0;
@@ -175,13 +175,26 @@ async function loadboard() {
         remember(board + "/" + day, text);
         if (back === dayat) mine = text;
     });
+    /* the oldest days in the calendar are wiped a piece at a time rather than
+       all at once - thirteen days back still answers, just with a few hundred
+       rows instead of a few thousand - so the archive wins on row count, not
+       merely when the live answer is empty */
+    const today = daykey(dayback(dayat));
+    if (await hasarchive(today)) {
+        const kept = await archivetext(today, board);
+        if (kept && kept.split(String.fromCharCode(10)).length
+            > mine.split(String.fromCharCode(10)).length) {
+            mine = kept;
+            remember(board + "/" + today, mine);
+        }
+    }
     return useboard(mine);
 }
 
 function neighbours() {
     const near = [dayat];
     [nextday(dayat, 1), nextday(dayat, -1)].forEach(function(back) {
-        if (back >= 0 && near.indexOf(back) < 0) near.push(back);
+        if (back !== null && near.indexOf(back) < 0) near.push(back);
     });
     return near;
 }
@@ -203,6 +216,7 @@ async function refreshboard() {
     const key = cachekey();
     const text = await fetchtext(key);
     if (key !== cachekey()) return;
+    if (!text && board.length) return; // a wiped day would blank the archive
     remember(key, text);
     const keep = fling.at();
     useboard(text);
@@ -210,6 +224,7 @@ async function refreshboard() {
     repaint(keep);
     if (typeof paintrulescontent === "function") paintrulescontent(dayat);
     showfooter();
+    showempty();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -225,14 +240,22 @@ function tintswitcher() {
         seat.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     });
 }
+// a day the arrows may step onto: the live fortnight, the week ahead, or an
+// older one a release still covers
+function dayopen(back) {
+    if (back <= calendarreach) return true;
+    if (typeof archivedaysnow !== "function") return false;
+    return archivedaysnow().indexOf(daykey(dayback(back))) >= 0;
+}
+
 function nextday(from, step) {
     const gold = !!boards[boardat].weekly;
-    const far = Math.max(calendarreach, from);
-    const near = Math.min(0, from);
+    const far = Math.max(calendaroldest(), from);
+    const near = Math.min(calendarnewest(), from);
     for (let at = from + step; at >= near && at <= far; at += step) {
-        if (!gold || isgoldday(at)) return at;
+        if ((!gold || isgoldday(at)) && dayopen(at)) return at;
     }
-    return -1;
+    return null;
 }
 
 function drawsteppers() {
@@ -240,8 +263,8 @@ function drawsteppers() {
         .forEach(function(pair) {
             const seat = document.querySelector(pair[0]);
             const back = pair[1];
-            seat.classList.toggle("gone", back < 0);
-            if (back >= 0) seat.querySelector(".lbl").textContent = daylabel(back);
+            seat.classList.toggle("gone", back === null);
+            if (back !== null) seat.querySelector(".lbl").textContent = daylabel(back);
         });
     tintswitcher();
 }
@@ -341,8 +364,10 @@ async function reload(dir, dayChanged) {
     includerulesslide = !!dayChanged;
     const ghosts = snapshot();
     if (dayChanged && typeof paintrulescontent === "function") paintrulescontent(dayat);
-    drawsteppers();
+    // drawpicks runs paintscene, which swaps the colour cycler the tints read -
+    // drawing the steppers first left them a board behind
     drawpicks();
+    drawsteppers();
     relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
     measurelist(host, list);
     board = filtered(findwant());
@@ -352,9 +377,11 @@ async function reload(dir, dayChanged) {
     jumptoclaimed();
     openlinkedplayer();
     showfooter();
+    showempty();
     slideswap(dir, ghosts);
     markurl();
     marktitle(count);
+    if (boards[boardat].weekly) checkgolden();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -395,19 +422,19 @@ function readurl() {
     }
     if (boards[boardat].weekly && !isgoldday(dayat)) {
         const near = nextday(dayat, 1);
-        if (near >= 0) dayat = near;
+        if (near !== null) dayat = near;
     }
 }
 
 function switchday(step) {
     if (allmode) return;
     const want = nextday(dayat, step);
-    if (want < 0) return;
+    if (want === null) return;
     dayat = want;
     reload(step, true);
 }
 function pickday(back) {
-    if (back < 0 || back > calendarreach) return;
+    if (back > calendaroldest() || back < calendarnewest()) return;
     if (!allmode && back === dayat) return;
     const dir = back > dayat ? 1 : -1;
     dayat = back;
@@ -430,6 +457,11 @@ function pickboard(index) {
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
+
+function showempty() {
+    const stage = document.querySelector(".dailydo");
+    if (stage) stage.classList.toggle("empty", fullboard.length === 0);
+}
 
 function showfooter() {
     const played = claimedat >= 0 && board[claimedat]
@@ -493,10 +525,64 @@ function locateclaimed() {
     return -1;
 }
 
+/* only players who placed high on a daily board during the week are in the
+   tournament at all, so a "..." row for someone who never got there reads as
+   "did not turn up on sunday" when really they were never entered. the week's
+   daily boards settle it, and they come back in one batched request. until
+   that answer arrives the row stays off, which is the quieter way round. */
+const goldtop = 100;
+let goldweek = null;
+let goldok = false;
+
+function goldendays() {
+    // the tournament is drawn on the sunday, so the week is it and the six before
+    const out = [];
+    for (let back = dayat; back < dayat + 7; back++) {
+        if (back >= 0 && back <= calendarreach) out.push(back);
+    }
+    return out;
+}
+
+async function checkgolden() {
+    const week = daykey(dayback(dayat));
+    if (goldweek === week) return;
+    goldweek = week;
+    goldok = false;
+
+    const held = readclaim();
+    if (!held || !realid(held.guid)) return;
+    const days = goldendays();
+    const store = readstore();
+    const missing = days.filter(function(back) {
+        const got = store["main/" + daykey(dayback(back))];
+        return !got || !got.text;
+    });
+    const fetched = missing.length ? await fetchdays("main", missing) : {};
+    if (goldweek !== week) return;
+
+    const seen = days.some(function(back) {
+        const day = daykey(dayback(back));
+        const got = store["main/" + day];
+        const text = (got && got.text) || fetched[day];
+        if (!text) return false;
+        return readboard(text).slice(0, goldtop).some(function(e) {
+            return e.id === held.guid;
+        });
+    });
+    if (!seen || !boards[boardat].weekly) return;
+
+    goldok = true;
+    claimedat = findclaimed();
+    paintedat = null; filled = -1;
+    paintrows(fling.at(), host);
+    showfooter();
+}
+
 function findclaimed() {
     const found = locateclaimed();
     if (found >= 0) return found;
     if (findwant()) return -1; // never inject that placeholder into search results!!
+    if (boards[boardat].weekly && !goldok) return -1;
     if (board.length && board[board.length - 1].placeholder) return board.length - 1;
     const held = readclaim();
     if (!held) return -1;
@@ -682,6 +768,31 @@ function daykey(date) {
     return date.getFullYear() + "-" + pad(date.getDate()) + "-" + pad(date.getMonth() + 1);
 }
 
+/* the grid is six rows: four weeks of past, the week today sits in, and one
+   week ahead. anything past the live fourteen days is still reachable as long
+   as a release holds it, and the week ahead stays open for poking at even
+   though the game has not played it yet - those days just come back empty */
+const gridrows = 6;
+const gridahead = 1;
+
+function gridfirst() {
+    const day = 86400000;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const monday = new Date(today.getTime() - ((today.getDay() + 6) % 7) * day);
+    monday.setDate(monday.getDate() - (gridrows - 1 - gridahead) * 7);
+    return monday;
+}
+
+// how far either side of today the calendar can reach, in "days back" units
+function calendaroldest() {
+    const day = 86400000;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((today.getTime() - gridfirst().getTime()) / day);
+}
+function calendarnewest() {return calendaroldest() - (gridrows * 7 - 1)}
+
 // this would "usually" go from sunday, but, like, are you people insane?? sunday as first day of the week?? hell no!!!!!
 function buildcalendar() {
     const grid = document.querySelector(".calgrid");
@@ -690,41 +801,47 @@ function buildcalendar() {
     const day = 86400000;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    const start = new Date(today.getTime() - (calendarreach + 7) * day);
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-    const oldest = today.getTime() - calendarreach * day;
-    const newest = today.getTime();
+    const start = gridfirst();
 
     for (const n of names) {
         const head = document.createElement("span");
         head.textContent = n;
         grid.appendChild(head);
     }
-    for (let i = 0; i < 42; i++) {
+    for (let i = 0; i < gridrows * 7; i++) {
         const at = new Date(start.getTime() + i * day);
         const cell = document.createElement("button");
         cell.textContent = at.getDate();
         cell.title = daykey(at);
+        const back = Math.round((today.getTime() - at.getTime()) / day);
         const weekend = at.getDay() === 0;
-        if (at.getTime() >= oldest && at.getTime() <= newest) {
-            cell.className = "live" + (at.getTime() === today.getTime() ? " today" : "")
-                + (weekend ? " weekend" : "");
-            cell.dataset.day = daykey(at);
-            const back = Math.round((today.getTime() - at.getTime()) / day);
-            if (back >= 0 && back <= calendarreach) cell.dataset.back = back;
-            if (back === calendarreach) cell.classList.add("thin");
-        } else if (weekend) {
-            cell.className = "weekend";
-        }
+
+        cell.dataset.day = daykey(at);
+        cell.dataset.back = back;
+        cell.className = (at.getTime() === today.getTime() ? "today " : "")
+            + (weekend ? "weekend " : "")
+            // live for the days raptisoft still answers for, and for the week
+            // ahead. older ones wait to hear whether a release covers them
+            + (back <= calendarreach ? "live" : "");
         grid.appendChild(cell);
     }
+
     grid.addEventListener("click", function(e) {
-        const cell = e.target.closest("button[data-back]");
+        const cell = e.target.closest("button.live[data-back]");
         if (!cell) return;
         closepopup(document.querySelector("[data-role=calendar]"));
         pickday(Number(cell.dataset.back));
     });
+
+    // the archived days arrive late, so the old cells light up when they do
+    if (typeof archivedays === "function") {
+        archivedays().then(function(days) {
+            grid.querySelectorAll("button[data-day]").forEach(function(cell) {
+                if (days.indexOf(cell.dataset.day) >= 0) cell.classList.add("live", "kept");
+            });
+            drawsteppers();
+        }).catch(function() {});
+    }
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -779,6 +896,7 @@ async function pickall() {
     drawpicks();
     relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
     showfooter();
+    showempty();
     markurl();
     marktitle(merged.length);
 }
@@ -890,9 +1008,11 @@ Promise.all([countriesready.then(loadboard), fontsdone]).then(function(got) {
     jumptoclaimed();
     openlinkedplayer();
     showfooter();
+    showempty();
     markurl();
     if (count) marktitle(count);
     updateswitcherclip();
+    if (boards[boardat].weekly) checkgolden();
     setInterval(refreshboard, boardage);
 });
 

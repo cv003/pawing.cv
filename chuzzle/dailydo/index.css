@@ -59,10 +59,13 @@
     --pltop: #fec800; --plmid: #feb200;
 }
 
+/* the star arcs are masked out of the corners behind these, so the group can
+   take a little transparency and let the stripes run through it */
 .pillars {
     z-index: 5; left: 50%;
     width: var(--u); right: auto;
     transform: translateX(-50%);
+    opacity: 0.92;
 }
 .pillars.right {transform: translateX(-50%) scaleX(-1)}
 
@@ -101,11 +104,24 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+/* the arcs run wider than the screen, so their far ends sit exactly where the
+   pillars stand and would show straight through once the pillars stop being
+   opaque. two mask layers unioned together keep everything above the tallest
+   pillar's cap plus the middle of the screen, which cuts the ends off in the
+   bottom corners and nothing else */
 .bigstars {
     z-index: 4; left: 50%;
     width: var(--u); right: auto;
     transform: translateX(-50%);
     overflow: hidden;
+    -webkit-mask-image:
+        linear-gradient(to bottom, #000 0 calc(var(--gu) * 200), transparent calc(var(--gu) * 240)),
+        linear-gradient(to right, transparent 0 22%, #000 32% 68%, transparent 78% 100%);
+    mask-image:
+        linear-gradient(to bottom, #000 0 calc(var(--gu) * 200), transparent calc(var(--gu) * 240)),
+        linear-gradient(to right, transparent 0 22%, #000 32% 68%, transparent 78% 100%);
+    -webkit-mask-composite: source-over;
+    mask-composite: add;
 }
 .ringclip {
     position: absolute; left: 50%;
@@ -220,6 +236,31 @@
 }
 .scores > div {position: absolute; left: 0; right: 0}
 .scores.blurring {filter: url(#vblur)}
+
+/* days the game never played, and days too old for even a release to hold */
+.noscores {
+    position: absolute; inset: 0; z-index: 2;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3cqw; pointer-events: none;
+    font-family: "chuzzle", "blippo"; font-size: 6cqw;
+    font-weight: 100; color: #ffd9bf;
+    --r: 0.13em; --ink: #261b19;
+    text-shadow: var(--ring), 0 0.14em 0 #261b19;
+}
+.empty .noscores {display: flex}
+.noscores img {
+    width: 34cqw; height: auto;
+    filter: drop-shadow(0 0.06em 0.12em rgba(0,0,0,0.55));
+    animation: noscoresbob 3.4s ease-in-out infinite;
+}
+@keyframes noscoresbob {
+    0%, 100% {transform: translateY(-1.5cqw)}
+    50% {transform: translateY(1.5cqw)}
+}
+@media (prefers-reduced-motion: reduce) {
+    .noscores img {animation: none}
+}
 
 /* shh! */
 .celestial {
@@ -507,6 +548,8 @@
 .jumplink.show {opacity: 1; pointer-events: auto}
 .jumptop {top: calc(var(--u) * 0.19)}
 .jumpbottom {bottom: calc(var(--u) * 0.24)}
+/* the board tabs are gone in combined mode, so the gap they left goes too */
+.allmode .jumpbottom {bottom: calc(var(--u) * 0.15)}
 .jumplink .caret {
     display: inline-block;
     color: inherit; font-weight: inherit;
@@ -535,33 +578,38 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+/* the rings and the width are in --u like the findbox's are, so the two line
+   up as one unit instead of the tabs' rounded corners poking out past it */
 .boardpick {
     position: fixed; z-index: 6;
     left: 50%; transform: translateX(-50%);
     bottom: calc(var(--u) * 0.145);
+    width: max-content; max-width: calc(var(--u) * 0.54);
     display: flex; overflow: hidden;
-    border-radius: calc(var(--vhu) * 1.1) calc(var(--vhu) * 1.1) 0 0;
+    border-radius: calc(var(--u) * 0.024) calc(var(--u) * 0.024) 0 0;
     clip-path: inset(-1.2vh -1.2vh 0 -1.2vh);
     box-shadow:
-        0 0 0 calc(var(--vhu) * 0.3) #60204a,
-        0 0 0 calc(var(--vhu) * 0.65) #feff48,
-        0 0 0 calc(var(--vhu) * 1) rgba(0,0,0,0.5);
+        0 0 0 calc(var(--u) * 0.012) #60204a,
+        0 0 0 calc(var(--u) * 0.02) #feff48,
+        0 0 0 calc(var(--u) * 0.032) rgba(0,0,0,0.5);
 }
 .boardpick button {
-    display: flex; align-items: center; gap: calc(var(--vhu) * 0.4);
-    margin: 0; padding: calc(var(--vhu) * 0.5) calc(var(--vhu) * 0.65); color: white;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 1 auto; min-width: 0;
+    gap: calc(var(--u) * 0.008);
+    margin: 0; padding: calc(var(--u) * 0.011) calc(var(--u) * 0.0125); color: white;
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-weight: 100 !important; font-size: calc(var(--vhu) * 2.1);
+    font-weight: 100 !important; font-size: calc(var(--u) * 0.038);
     text-transform: capitalize; white-space: nowrap;
     --r: 0.035em; --ink: #000;
     text-shadow: var(--ring);
     background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%,
         #0a1a5e 80%, #5a63a0 100%);
 }
-.boardpick button + button {box-shadow: inset calc(var(--vhu) * 0.3) 0 0 rgba(0,0,0,0.5)}
+.boardpick button + button {box-shadow: inset calc(var(--u) * 0.004) 0 0 rgba(0,0,0,0.5)}
 .boardpick .lbl {color: inherit}
 .boardpick button.away {display: none}
-.boardpick button img {height: calc(var(--vhu) * 1.9); width: auto}
+.boardpick button img {height: calc(var(--u) * 0.038); width: auto; flex: none}
 .boardpick button.on {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%,
         #1130bf 80%, #a2aee6 100%);
@@ -703,8 +751,11 @@
     text-shadow: var(--ring);
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75);
 }
+/* dimmed only means nothing can be shown for that day at all - past the live
+   fortnight with no release keeping it. archived days and the week ahead are
+   both open, the week ahead just has nothing in it yet */
 .pucontent .calgrid button:not(.live) {
-    opacity: 0.5; pointer-events: none;
+    opacity: 0.4; pointer-events: none;
 }
 .pucontent .calgrid button:focus,
 .pucontent .calgrid button:focus-visible {outline: none}
