@@ -4,7 +4,7 @@
 
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>Chuzzle Shop</title>
+        <title>What the favicon says!</title>
         <link rel="icon" type="image/webp" href="../assets/images/icons/shop.webp">
         <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/blippo.woff2">
         <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/harlowsolidlet.woff2">
@@ -22,16 +22,12 @@
         <div class="dumbcontainer">
             <svg class="logo shoplogo" viewBox="0 0 900 170">
                 <defs>
-                    <!-- vertically inverted against the other pages: cyan at the
-                         top, pink at the foot, the way the shop draws it -->
                     <linearGradient id="lgrgb" x2="0" y2="1">
                         <stop offset="0%" stop-color="#cfd"/><stop offset="10%" stop-color="#afa"/>
                         <stop offset="26%" stop-color="#aff"/><stop offset="42%" stop-color="#9bf"/>
                         <stop offset="58%" stop-color="#aaf"/><stop offset="74%" stop-color="#c9f"/>
                         <stop offset="88%" stop-color="#f9f"/><stop offset="100%" stop-color="#f8f"/>
                     </linearGradient>
-                    <!-- the shop's light is a band rather than a smooth fade,
-                         so it holds near solid for the first third -->
                     <linearGradient id="lgfade" x2="0" y2="1">
                         <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
                         <stop offset="30%" stop-color="#fff" stop-opacity="0.85"/>
@@ -41,7 +37,6 @@
                         <feMorphology radius="2" result="eroded"/><feFlood flood-color="#fff"/>
                         <feComposite in2="eroded" operator="in"/>
                     </filter>
-                    <!-- global.css hands the popup title this one -->
                     <filter id="lgfillholes" x="-30%" y="-30%" width="160%" height="160%">
                         <feMorphology operator="dilate" radius="3"/>
                     </filter>
@@ -55,29 +50,19 @@
             </svg>
         </div>
 
+        <div class="shelves"></div>
+
         <div class="bar">
             <div class="tabs"></div>
-            <div class="tools">
-                <label class="findbox">
-                    <input type="text" placeholder="Find an item..." spellcheck="false">
-                    <span class="clearfind">&times;</span>
-                </label>
-                <label class="sortbox">
-                    <select class="sort">
-                        <option value="shop">Shop order</option>
-                        <option value="cheap">Cheapest first</option>
-                        <option value="dear">Priciest first</option>
-                        <option value="name">By name</option>
-                        <option value="group">By group</option>
-                    </select>
-                </label>
+            <div class="findbox">
+                <input type="text" placeholder="Find an item..." spellcheck="false">
+                <span class="clearfind">&times;</span>
+                <div class="sortpick">
+                    <button class="sortnow" type="button">Shop order<span class="caret">^</span></button>
+                    <div class="sortmenu"></div>
+                </div>
             </div>
         </div>
-
-        <div class="shelf">
-            <div class="grid"></div>
-        </div>
-        <div class="tally"></div>
 
         <div class="calwrap" data-role="item">
             <div class="popup">
@@ -96,6 +81,8 @@
         </div>
 
     </body>
+
     <script src="../src/global.js"></script>
     <script src="index.js"></script>
+
 </html>

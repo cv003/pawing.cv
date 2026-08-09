@@ -1,9 +1,21 @@
+/*
+
+  matched against datainfo/media/shop_screen.jpg. the colours are sampled off
+  it rather than guessed: panel #590c74 with an #8b53a2 lip, amber #f7a500
+  hairlines between rows, a lavender #ac87b0 frame around every icon. the ring
+  stack round each shelf is drawn as an svg in index.js, not here - a box
+  shadow cannot follow a shape that steps in on its last row.
+
+*/
+
 body {
     background-color: #0c0823; padding: 0;
     display: block; overflow-x: hidden;
-    overflow-y: auto; scrollbar-width: none;
+    overflow-y: auto;
+    padding-bottom: 10em;
 }
-body::-webkit-scrollbar {display: none}
+html, body, * {scrollbar-width: none; -ms-overflow-style: none}
+*::-webkit-scrollbar {display: none !important; width: 0; height: 0}
 
 .bg {
     position: fixed; z-index: -1;
@@ -25,7 +37,7 @@ body::-webkit-scrollbar {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.dumbcontainer {padding: 0.7em 0 0.35em}
+.dumbcontainer {padding: 0.7em 0 0.9em}
 .shoplogo {
     width: auto !important;
     height: calc(10vw * var(--boxratio, 1.2));
@@ -43,105 +55,36 @@ body::-webkit-scrollbar {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.bar {
-    position: sticky; top: 0; z-index: 5;
+.shelves {
     display: flex; flex-direction: column;
-    align-items: center; gap: 0.5em;
-    padding: 0.5em 0.75em 0.7em;
-    background: linear-gradient(180deg, #0c0823 58%, rgba(12,8,35,0));
+    gap: 2.4em; margin: 0 auto;
+    width: min(1180px, calc(100vw - 3.4em));
+}
+.shelfwrap {display: block}
+.shelftitle {
+    margin: 0 0 0.45em 0.1em;
+    font-family: "blippo", "chuzzle", system-ui, sans-serif;
+    font-size: clamp(1.5em, 5vw, 2.2em);
+    font-weight: 400; text-align: left;
+    color: #ffd9bf; letter-spacing: 0.01em;
+    --r: 0.055em; --ink: #2b1226;
+    text-shadow: var(--ring), 0 0.07em 0 #2b1226;
 }
 
-.tabs {
-    display: flex; flex-wrap: wrap;
-    justify-content: center; gap: 0.35em;
-}
-/* the in-game buttons, right down to the blue - global.css uppercases every
-   bare button and gives it a top margin, so both go back off here */
-.tabs button {
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-size: clamp(1.05em, 4.4vw, 1.5em); font-weight: 100;
-    text-transform: capitalize; color: white;
-    margin: 0; padding: 0.05em 0.7em 0.14em;
-    border: none; border-radius: 0.28em;
-    background: linear-gradient(150deg, #5a3ff0 0%, #132fbf 32%, #132fbf 78%, #8fa0ef 100%);
-    box-shadow: 0 0 0 2px #05061e, 0 0 0 4px #2b46d6;
-    --r: 0.05em; --ink: #000;
-    text-shadow: var(--ring);
-}
-.tabs button:active {transform: translateY(0.06em)}
-.tabs button.on {
-    background: linear-gradient(150deg, #ffe27a 0%, #ffab13 35%, #f27c00 80%, #ffd77a 100%);
-    color: #3a1d00; --ink: #ffeebb;
-    box-shadow: 0 0 0 2px #4a1c00, 0 0 0 4px #ffd24a;
-}
-
-.tools {
-    display: flex; flex-wrap: wrap;
-    justify-content: center; align-items: center; gap: 0.7em;
-}
-
-/* the daily-do search box, same rings and the same chuzzle face */
-.findbox, .sortbox {
-    position: relative; display: flex;
-    align-items: center; height: 2.1em;
-    padding: 0 0.85em; border-radius: 1.1em;
-    background: #2d0027;
-    box-shadow:
-        0 0 0 0.14em #60204a,
-        0 0 0 0.24em #feff48,
-        0 0 0 0.38em rgba(0,0,0,0.1);
-}
-.findbox input, .sortbox select {
-    border: none; outline: none; background: none;
-    color: white; width: min(11em, 42vw);
-    font-family: "chuzzle", "blippo", system-ui, sans-serif;
-    font-weight: 100; font-size: 1em; letter-spacing: 0.03em;
-}
-.sortbox select {width: auto; padding-right: 0.2em}
-.sortbox select option {color: black; background: #efeaff; font-family: system-ui, sans-serif}
-.findbox input::placeholder {color: darkgrey}
-.clearfind {
-    margin: 0 0 0 0.3em; padding: 0 0.15em;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-weight: 600; font-size: 1.2em; line-height: 1;
-    color: #8a7c96; visibility: hidden; cursor: pointer;
-}
-.findbox.typed .clearfind {visibility: visible}
-.clearfind:active {filter: brightness(1.6)}
-
-.tally {
-    margin: 0.7em auto 2.5em; text-align: center;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.8em; color: #8f84b8;
-    letter-spacing: 0.04em;
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-/* the ring stack only lines up on a square-ish corner: an inset shadow keeps
-   the element's own radius on every layer instead of shrinking it, so a big
-   radius makes the rings pile up in the corners. 8px is small enough to hide
-   that. the outer purple is a real (outset) ring, which does follow it */
-.shelf {
-    margin: 0 auto; padding: 13px;
-    width: min(1180px, calc(100vw - 1.6em));
-    border-radius: 8px;
-    background: linear-gradient(180deg, #8b53a2 0%, #590c74 10%, #590c74 90%, #8b53a2 100%);
-    box-shadow:
-        inset 0 0 0 2px #8a0820, inset 0 0 0 5px #ff2500,
-        inset 0 0 0 7px #ffeb00, inset 0 0 0 8px #ffa900,
-        inset 0 0 0 9px #c67228,
-        0 0 0 4px #8b0aa2, 0 0 0 6px rgba(0,0,0,0.55);
+.shelf {position: relative}
+.frame {
+    position: absolute; left: -18px; top: -18px;
+    pointer-events: none; overflow: visible;
 }
 
 .grid {
+    position: relative;
     display: grid; gap: 2px;
-    grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
-    background: #f7a500;
-    border-radius: 2px; overflow: hidden;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(100px, 27vw, 116px), 1fr));
 }
 
-/* one amber hairline between entries, which the 2px grid gap draws for free */
+/* the 2px gap shows the amber the svg fills behind, which is the hairline the
+   game rules between entries */
 .card {
     position: relative; display: flex;
     flex-direction: column; align-items: center;
@@ -181,33 +124,140 @@ body::-webkit-scrollbar {display: none}
     display: flex; align-items: center;
     justify-content: center; margin-top: auto;
 }
-.cardcost img {height: 2.1em; width: auto}
+.cardcost img {height: 2em; width: auto}
 .cardcost b {
-    margin-left: -0.8em; transform: translateY(0.22em);
+    margin-left: -0.72em; transform: translateY(0.3em);
     font-weight: 100; font-size: 1.15em;
     font-family: "chuzzle", "blippo";
-    color: white; --r: 0.08em; --ink: #000;
+    color: white; --r: 0.1em; --ink: #c9ab2d;
     text-shadow: var(--ring);
 }
 
 .pip {
     position: absolute; top: 0.2em; z-index: 2;
-    font-size: 0.6em; line-height: 1;
-    padding: 0.25em 0.5em; border-radius: 999px;
+    font-size: 0.55em; line-height: 1;
+    padding: 0.24em 0.48em; border-radius: 999px;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-weight: 600; color: #201000;
     box-shadow: 0 0 0 2px rgba(0,0,0,0.7);
 }
 .pipnotable {right: 0.2em; background: #ffd42a}
-.pipseason {left: 0.2em; background: #7ce0a0}
 .piplocked {left: 0.2em; background: #ff9d7c}
 
 .empty {
-    grid-column: 1 / -1; padding: 3em 0;
-    text-align: center; color: #c9a8dd;
-    background: #590c74;
+    padding: 4em 0; text-align: center;
+    color: #c9a8dd;
     font-family: "nimbus sans becker", system-ui, sans-serif;
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.bar {
+    position: fixed; z-index: 6;
+    left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.55em;
+    padding: 1.2em 0.75em 0.85em;
+    background: linear-gradient(180deg, rgba(12,8,35,0), #0c0823 42%);
+}
+
+.tabs {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 0.4em;
+}
+/* the in-game buttons, right down to the blue - global.css uppercases every
+   bare button and gives it a top margin, so both go back off here */
+.tabs button {
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-size: clamp(1.05em, 4.4vw, 1.5em); font-weight: 100;
+    text-transform: capitalize; color: white;
+    margin: 0; padding: 0.08em 0.85em 0.18em;
+    border: none; border-radius: 0.28em;
+    background: linear-gradient(150deg, #5a3ff0 0%, #132fbf 32%, #132fbf 78%, #8fa0ef 100%);
+    box-shadow: 0 0 0 2px #05061e;
+    --r: 0.05em; --ink: #000;
+    text-shadow: var(--ring);
+}
+.tabs button:active {transform: translateY(0.06em)}
+.tabs button.on {
+    background: linear-gradient(150deg, #b06cff 0%, #7a25e0 32%, #5a12b4 78%, #cfa8f2 100%);
+    box-shadow: 0 0 0 2px #1c0230;
+}
+
+/* the daily-do search box, same rings and the same chuzzle face */
+.findbox {
+    position: relative; display: flex;
+    align-items: center; height: 2.2em;
+    padding: 0 0.2em 0 0.95em;
+    border-radius: 1.1em; background: #2d0027;
+    box-shadow:
+        0 0 0 0.14em #60204a,
+        0 0 0 0.24em #feff48,
+        0 0 0 0.38em rgba(0,0,0,0.1);
+}
+.findbox input {
+    border: none; outline: none; background: none;
+    color: white; width: min(13em, 44vw);
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
+    font-weight: 100; font-size: 1em; letter-spacing: 0.03em;
+}
+.findbox input::placeholder {color: darkgrey}
+.findbox input::-webkit-search-cancel-button {-webkit-appearance: none; appearance: none}
+.clearfind {
+    margin: 0 0.15em; padding: 0 0.15em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600; font-size: 1.2em; line-height: 1;
+    color: #8a7c96; visibility: hidden; cursor: pointer;
+}
+.findbox.typed .clearfind {visibility: visible}
+.clearfind:active {filter: brightness(1.6)}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.sortpick {position: relative; margin-left: auto}
+.sortnow {
+    display: flex; align-items: center; gap: 0.3em;
+    margin: 0; padding: 0.18em 0.7em 0.22em;
+    border: none; border-radius: 0.9em;
+    text-transform: none; color: #ffd9bf;
+    background: #4a1240;
+    box-shadow: inset 0 0 0 2px #60204a;
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
+    font-weight: 100; font-size: 0.92em;
+    white-space: nowrap;
+}
+.sortnow:active, .sortpick.open .sortnow {background: #67195a; color: #fff}
+/* the font has no v, so the caret is a flipped ^ - same trick as the daily-do
+   jump link */
+.sortnow .caret {
+    display: inline-block; font-size: 0.9em;
+    transform: translateY(0.28em) scaleY(-1);
+    transform-origin: 50% 27.2%;
+}
+.sortpick.open .sortnow .caret {transform: translateY(0.1em)}
+
+.sortmenu {
+    position: absolute; right: -0.24em; bottom: calc(100% + 0.75em);
+    display: none; flex-direction: column;
+    min-width: 100%; padding: 0.25em;
+    border-radius: 0.7em; background: #2d0027;
+    box-shadow:
+        0 0 0 0.1em #60204a,
+        0 0 0 0.2em #feff48,
+        0 0.3em 0.6em rgba(0,0,0,0.55);
+}
+.sortpick.open .sortmenu {display: flex}
+.sortmenu button {
+    margin: 0; padding: 0.28em 0.8em 0.34em;
+    border: none; border-radius: 0.45em;
+    text-transform: none; text-align: left;
+    color: #d6c3e8; background: none;
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
+    font-weight: 100; font-size: 0.95em;
+    white-space: nowrap;
+}
+.sortmenu button:hover {background: #4a1240; color: white}
+.sortmenu button.on {background: #67195a; color: #ffd9bf}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -219,7 +269,14 @@ body::-webkit-scrollbar {display: none}
     width: 48px; height: 48px;
 }
 
-.itembody {gap: 0.5em}
+/* global.css lets the blue box run the full width, which throws the label and
+   its value to opposite edges - the extra inset pulls them back together */
+.itembody {
+    gap: 0.5em;
+    padding-left: 1.6em !important;
+    padding-right: 1.6em !important;
+    box-sizing: border-box;
+}
 .itembody .facts {
     display: grid; width: 100%;
     background: none !important; box-shadow: none !important;
@@ -262,11 +319,11 @@ body::-webkit-scrollbar {display: none}
     padding: 0 !important; top: 0 !important;
     width: auto !important;
 }
-.itembody .pricetag img {height: 2.9em; width: auto}
+.itembody .pricetag img {height: 2.5em; width: auto}
 .itembody .pricetag b {
-    margin-left: -0.78em; transform: translateY(0.22em);
+    margin-left: -0.72em; transform: translateY(0.3em);
     font-weight: 100; font-size: 1.6em;
     font-family: "chuzzle", "blippo";
-    color: white; --r: 0.08em; --ink: #000;
+    color: white; --r: 0.1em; --ink: #c9ab2d;
     text-shadow: var(--ring);
 }
