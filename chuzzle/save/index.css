@@ -3,6 +3,12 @@
   the shop's panel, minus the svg - nothing here has a ragged last row, so the
   ring stack can stay an inset box-shadow on a rectangle.
 
+  two things global.css does that have to be undone: a bare `label` gets
+  padding-left 25px, a negative bottom margin and z-index 999, which shoves
+  every field label right and floats it over the fixed bars; and chuzzle
+  script sits its caps about 0.17em above the middle of its line box, so a
+  button needs that much more padding on top than underneath to look centred.
+
 */
 
 body {
@@ -10,8 +16,6 @@ body {
     display: block; overflow-x: hidden;
     overflow-y: auto;
     height: auto; min-height: var(--vh);
-    /* index.js measures the bar once it appears */
-    padding-bottom: 7em;
 }
 html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 *::-webkit-scrollbar {display: none !important; width: 0; height: 0}
@@ -34,6 +38,8 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     .bg {animation: none}
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 .dumbcontainer {padding: 0.7em 0 0.9em}
 .savelogo {
     width: auto !important;
@@ -48,6 +54,12 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 }
 .savelogo .lgouter {stroke: #feff48; stroke-width: 33}
 .savelogo .lgmid {stroke: #60204a; stroke-width: 16}
+
+body.loaded:not(.athome) .start {display: none}
+body:not(.loaded) .topbar, body.athome .topbar {display: none}
+body:not(.loaded) .sheets, body.athome .sheets {display: none}
+body:not(.loaded) .bar, body.athome .bar {display: none}
+body:not(.loaded) .back {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -65,66 +77,96 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 
 .drop {
     display: flex; flex-direction: column;
-    align-items: center; gap: 0.7em;
+    align-items: center; gap: 0.8em;
     text-align: center;
 }
 .drop.over {background: linear-gradient(180deg, #a76cbe 0%, #6d1b88 4%, #6d1b88 96%, #a76cbe 100%)}
-.stinky {
-    width: 84px; height: auto;
-    filter: drop-shadow(0 0.06em 0.12em rgba(0,0,0,0.55));
-}
 .pitch {
     max-width: 34em; margin: 0; opacity: 1;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.95em; font-weight: 300; color: #e4cff2;
+    font-size: 1em; font-weight: 300; color: #e4cff2;
 }
 .pitch b {color: #ffe07a; font-weight: 600}
 
 .picker input {display: none}
-.picker span {
-    display: inline-block;
-    padding: 0.16em 1.1em 0.24em;
-    border-radius: 0.28em; color: white;
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-weight: 100; font-size: 1.5em;
-    text-shadow: var(--ring);
-    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-    box-shadow: 0 0 0 2px #05061e;
-    cursor: pointer;
-}
-.picker span:active {filter: brightness(1.6)}
-
-.shout, .leftalone {
+.shout {
     margin: 0; max-width: 40em; opacity: 1;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.8em; font-weight: 300; color: #b79bd0;
+    font-size: 0.85em; font-weight: 300; color: #b79bd0;
 }
 .shout.bad {color: #ff9d7c}
-.leftalone b {color: #b79bd0; font-weight: 600}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.tabs {
-    display: none; flex-wrap: wrap;
-    justify-content: center; gap: 0.35em;
-    margin: 0 auto 1.4em;
-    width: min(940px, calc(100vw - 3.4em));
-}
-body.many .tabs {display: flex}
-.tabs button {
-    margin: 0; padding: 0.08em 0.85em 0.18em;
-    border: none; border-radius: 0.28em;
-    text-transform: none; color: white;
+/* every chuzzle script button on the page, centred the hard way */
+.picker span, .tabs button, .subtabs button, .bar button, .back {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin: 0; border: none; text-transform: none;
+    color: white; line-height: 1;
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-weight: 100; font-size: 1.3em;
+    font-weight: 100; white-space: nowrap;
     text-shadow: var(--ring);
     background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%, #0a1a5e 80%, #5a63a0 100%);
     box-shadow: 0 0 0 2px #05061e;
 }
+.picker span:active, .tabs button:active, .subtabs button:active,
+.bar button:active, .back:active {filter: brightness(1.6)}
+
+.picker span {
+    padding: 0.42em 1.1em 0.08em;
+    border-radius: 0.28em; font-size: 1.5em;
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    cursor: pointer;
+}
+
+.topbar {
+    position: sticky; top: 0; z-index: 8;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.4em;
+    padding: 0.7em 0 0.9em;
+    background: linear-gradient(180deg, #0c0823 68%, rgba(12,8,35,0));
+}
+.filerow, .subtabs {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 0.35em;
+    width: min(940px, calc(100vw - 3.4em));
+}
+.tabs {display: contents}
+
+/* thirteen files wrap to seven rows on a phone and eat the screen, so the two
+   rows slide sideways instead */
+@media (max-width: 700px) {
+    .filerow, .subtabs {
+        flex-wrap: nowrap; overflow-x: auto;
+        justify-content: flex-start;
+        padding: 0 0.6em; box-sizing: border-box;
+    }
+    .filerow > *, .subtabs > * {flex: none}
+    .topbar {gap: 0.3em; padding: 0.5em 0 0.7em}
+}
+
+.back {
+    padding: 0.4em 0.9em 0.06em;
+    border-radius: 0.28em; font-size: 1.2em;
+    background: linear-gradient(140deg, #7a2a5e 0%, #4a0f38 30%, #4a0f38 80%, #a06a8c 100%);
+}
+.tabs button {
+    padding: 0.4em 0.75em 0.06em;
+    border-radius: 0.28em; font-size: 1.05em;
+    max-width: 14em;
+}
 .tabs button.on {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
 }
-.tabs button:active {filter: brightness(1.6)}
+.tabs button.raw {opacity: 0.72}
+.subtabs button {
+    padding: 0.36em 0.8em 0.05em;
+    border-radius: 0.22em; font-size: 1.05em;
+    background: linear-gradient(140deg, #3a1560 0%, #24063f 30%, #24063f 80%, #6a4f9c 100%);
+}
+.subtabs button.on {
+    background: linear-gradient(140deg, #b06cff 0%, #7a25e0 32%, #5a12b4 78%, #cfa8f2 100%);
+}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -135,50 +177,189 @@ body.many .tabs {display: flex}
     text-align: left; color: #fff;
     text-shadow: 0 0.07em 0 #2b1226, 0 0 0.2em rgba(0,0,0,0.8);
 }
+.aside {
+    margin: -0.3em 0 1em; opacity: 1; max-width: 46em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; font-weight: 300; color: #c9a8dd;
+}
 
 .fields {
-    display: grid; gap: 0.55em 1.2em;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    display: grid; gap: 0.8em 1.4em;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-items: start;
 }
-.field {display: flex; flex-direction: column; gap: 0.2em}
-.field label {
+.field {display: flex; flex-direction: column; gap: 0.25em}
+.field.span {grid-column: 1 / -1}
+.field .tag {
     display: flex; flex-direction: column;
+    padding: 0; margin: 0; z-index: auto;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    line-height: 1.15;
+    line-height: 1.15; color: white;
 }
-.field label b {font-size: 0.86em; font-weight: 600; color: white}
-.field label i {font-size: 0.7em; font-style: normal; color: #b79bd0}
+.field .tag b {font-size: 1em; font-weight: 600; color: white}
+.field .tag i {font-size: 0.78em; font-style: normal; color: #b79bd0}
 
-.field input, .stats input {
+.field input[type=text], .field input:not([type]), .field input[type=date],
+.stats input, .words input {
     width: 100%; box-sizing: border-box;
-    padding: 0.3em 0.6em;
+    padding: 0.32em 0.6em;
     border: none; outline: none; border-radius: 0.35em;
+    background: #2d0027; color: white;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.95em; font-weight: 600;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.field input:focus, .stats input:focus, .words input:focus {
+    box-shadow: inset 0 0 0 2px #feff48;
+}
+.field input.wide {font-size: 0.8em}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.switch {
+    align-self: flex-start; margin: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 5.2em; padding: 0.42em 1.1em 0.1em;
+    border: none; border-radius: 0.3em;
+    text-transform: none; line-height: 1;
+    color: white; font-weight: 100;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-size: 1.2em; text-shadow: var(--ring);
+    background: linear-gradient(140deg, #6b2b3a 0%, #4a0f1c 30%, #4a0f1c 80%, #a06a76 100%);
+    box-shadow: 0 0 0 2px #05061e;
+}
+.switch.on {
+    background: linear-gradient(140deg, #46d06a 0%, #12a03c 30%, #12a03c 80%, #a8eec0 100%);
+}
+.switch:active {filter: brightness(1.6)}
+
+.slide {display: flex; align-items: center; gap: 0.6em}
+.slide b {
+    min-width: 4.6em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; font-weight: 600; color: #ffe07a;
+}
+.slide input[type=range] {
+    flex: 1 1 auto; min-width: 0;
+    -webkit-appearance: none; appearance: none;
+    height: 0.5em; border-radius: 999px;
+    background: #2d0027; box-shadow: inset 0 0 0 2px #60204a;
+}
+.slide input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 1.15em; height: 1.15em; border-radius: 50%;
+    background: #ffd42a; box-shadow: 0 0 0 2px #4a1c00;
+}
+.slide input[type=range]::-moz-range-thumb {
+    width: 1.15em; height: 1.15em; border: none; border-radius: 50%;
+    background: #ffd42a; box-shadow: 0 0 0 2px #4a1c00;
+}
+.slide input[type=date] {flex: 1 1 auto; min-width: 0}
+.slide input[type=date]::-webkit-calendar-picker-indicator {filter: invert(1) opacity(0.7)}
+
+.flags {display: flex; flex-wrap: wrap; gap: 0.2em}
+.flag {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.9em; height: 1.9em; margin: 0; padding: 0;
+    border: none; border-radius: 0.28em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.78em; font-weight: 600;
+    color: #8a7c96; background: #2d0027;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.flag.on {color: #10240f; background: #46d06a; box-shadow: inset 0 0 0 2px #12a03c}
+
+.numlist {display: flex; flex-wrap: wrap; gap: 0.3em}
+.numlist.grid {
+    display: grid; gap: 0.25em;
+    grid-template-columns: repeat(auto-fill, minmax(5.4em, 1fr));
+}
+.numlist .slot input {width: 100%}
+.numlist:not(.grid) .slot input {width: 7em}
+.slot {display: flex; flex-direction: column; gap: 0.05em}
+.slot i {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.62em; font-style: normal; color: #8a7c96;
+    padding-left: 0.3em;
+}
+.slot input {
+    width: 100%; box-sizing: border-box;
+    padding: 0.25em 0.4em;
+    border: none; outline: none; border-radius: 0.3em;
     background: #2d0027; color: white;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.85em; font-weight: 600;
     box-shadow: inset 0 0 0 2px #60204a;
 }
-.field input:focus, .stats input:focus {box-shadow: inset 0 0 0 2px #feff48}
-.field input.wide {font-size: 0.72em}
 
-.flip {
-    align-self: flex-start; margin: 0;
-    padding: 0.22em 1.1em 0.28em;
-    border: none; border-radius: 0.35em;
-    text-transform: none; color: #d6c3e8;
-    background: #2d0027;
+.namelist {display: flex; flex-wrap: wrap; gap: 0.3em; align-items: center}
+.chip {
+    display: inline-flex; align-items: center;
+    border-radius: 0.35em; background: #2d0027;
     box-shadow: inset 0 0 0 2px #60204a;
+}
+.chip input {
+    width: 11em; padding: 0.3em 0.2em 0.3em 0.6em;
+    border: none; outline: none; background: none; color: white;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.85em; font-weight: 600;
 }
-.flip.on {background: #1f6b2e; color: white; box-shadow: inset 0 0 0 2px #43b458}
+.chip .drop {
+    margin: 0; padding: 0 0.5em 0 0.25em;
+    border: none; background: none; color: #8a7c96;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 1em; font-weight: 600; line-height: 1;
+}
+.chip .drop:active {color: #ff9d7c}
+.namelist .add {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin: 0; padding: 0.34em 0.8em 0.06em;
+    border: none; border-radius: 0.3em;
+    text-transform: none; line-height: 1;
+    color: white; font-weight: 100;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-size: 1.05em; text-shadow: var(--ring);
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    box-shadow: 0 0 0 2px #05061e;
+}
+.namelist .add:active {filter: brightness(1.6)}
 
 .blob {
-    padding: 0.3em 0.6em; border-radius: 0.35em;
+    align-self: flex-start;
+    padding: 0.32em 0.6em; border-radius: 0.35em;
     background: rgba(0,0,0,0.28); color: #9a86ad;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.78em; font-weight: 600; font-style: italic;
+    font-size: 0.85em; font-weight: 600; font-style: italic;
 }
+
+.pager {
+    display: flex; align-items: center;
+    justify-content: center; gap: 0.7em;
+    margin: 0 0 1em;
+}
+.pager span {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; font-weight: 600; color: #d6c3e8;
+}
+.pager button {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin: 0; padding: 0.36em 0.9em 0.05em;
+    border: none; border-radius: 0.28em;
+    text-transform: none; line-height: 1;
+    color: white; font-weight: 100;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-size: 1.1em; text-shadow: var(--ring);
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    box-shadow: 0 0 0 2px #05061e;
+}
+.pager button:disabled {filter: grayscale(1) brightness(0.6)}
+.pager button:not(:disabled):active {filter: brightness(1.6)}
+
+.words {
+    display: grid; gap: 0.25em;
+    grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr));
+}
+.words .slot input {font-size: 0.8em}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -189,10 +370,10 @@ body.many .tabs {display: flex}
 }
 .statrow > span {
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.84em; font-weight: 600; color: white;
+    font-size: 0.95em; font-weight: 600; color: white;
 }
 .statrow.head > span {
-    font-size: 0.72em; color: #b79bd0;
+    font-size: 0.8em; color: #b79bd0;
     text-align: center;
 }
 .statrow.head > span:first-child {text-align: left}
@@ -210,20 +391,13 @@ body.many .tabs {display: flex}
 .bar {
     position: fixed; z-index: 6;
     left: 0; right: 0; bottom: 0;
-    display: none; justify-content: center;
+    display: flex; justify-content: center;
     gap: 0.6em; padding: 1.6em 0.75em 0.9em;
     background: linear-gradient(180deg, rgba(12,8,35,0), #0c0823 40%);
 }
-body.loaded .bar {display: flex}
 .bar button {
-    margin: 0; padding: 0.1em 1em 0.2em;
-    border: none; border-radius: 0.28em;
-    text-transform: none; color: white;
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-weight: 100; font-size: 1.45em;
-    text-shadow: var(--ring);
-    background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%, #0a1a5e 80%, #5a63a0 100%);
-    box-shadow: 0 0 0 2px #05061e;
+    padding: 0.44em 1em 0.1em;
+    border-radius: 0.28em; font-size: 1.45em;
 }
 .bar .dosave {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
@@ -232,9 +406,8 @@ body.edited .bar .dosave {
     background: linear-gradient(140deg, #ffe27a 0%, #ffab13 35%, #f27c00 80%, #ffd77a 100%);
     color: #3a1d00;
 }
-.bar button:active {filter: brightness(1.6)}
 
 @media (max-width: 560px) {
     .bar {gap: 0.4em; padding: 1.4em 0.5em 0.8em}
-    .bar button {font-size: 1.15em; padding: 0.1em 0.7em 0.2em}
+    .bar button {font-size: 1.15em; padding: 0.42em 0.7em 0.08em}
 }

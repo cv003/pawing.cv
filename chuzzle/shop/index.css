@@ -167,7 +167,11 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 .tabs button {
     display: flex; align-items: center; justify-content: center;
     flex: 1 1 auto; min-width: 0;
-    margin: 0; padding: calc(var(--u) * 0.011) calc(var(--u) * 0.0125);
+    /* the caps of chuzzle script sit about 0.17em above the middle of their
+       line box, so the padding is split to put them back - the total is the
+       same as the daily-do's, so the switcher still meets the search box */
+    margin: 0;
+    padding: calc(var(--u) * 0.0175) calc(var(--u) * 0.0125) calc(var(--u) * 0.0045);
     border: none; color: white;
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
     font-weight: 100 !important; font-size: calc(var(--u) * 0.038);
@@ -216,7 +220,8 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 .sortpick {position: relative; flex: none}
 .sortnow {
     display: flex; align-items: center; gap: 0.3em;
-    margin: 0; padding: calc(var(--u) * 0.006) calc(var(--u) * 0.018);
+    margin: 0;
+    padding: calc(var(--u) * 0.0125) calc(var(--u) * 0.018) calc(var(--u) * 0.003);
     border: none; border-radius: calc(var(--u) * 0.024);
     text-transform: none; color: white;
     font-family: "chuzzle", "blippo", system-ui, sans-serif;
@@ -243,7 +248,7 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 }
 .sortpick.open .sortmenu {display: flex}
 .sortmenu button {
-    margin: 0; padding: 0.28em 0.8em 0.34em;
+    margin: 0; padding: 0.5em 0.8em 0.12em;
     border: none; border-radius: 0.45em;
     text-transform: none; text-align: left;
     color: white; background: none;

@@ -3,15 +3,20 @@
   opens a Chuzzle 2 save in the browser and writes it back out. nothing leaves
   the page - there is no upload anywhere in here.
 
-  both encrypted files are a repeating-key xor and nothing else, which is all
-  IOBuffer::Encrypt does. the two keys are string literals in the binary, and
+  the two encrypted files are a repeating-key xor and nothing else, which is
+  all IOBuffer::Encrypt does. the keys are string literals in the binary, and
   the bare "%s" in each is part of the key rather than a placeholder: Profile::
   Load memcpys the string verbatim, so dropping those two characters shifts
   everything past index 122 into noise. see datainfo/README.md.
 
-  the file is held as latin-1 text, one character per byte, so the parts this
-  page does not understand - the board in progress, the driver blob - survive
-  a round trip untouched.
+  a settings file is held as latin-1 text, one character per byte, so the parts
+  this page does not understand - the board in progress, the driver blob -
+  survive a round trip untouched. a value can also carry a 0x0a, which splits
+  it over "lines", so rebuilding joins them back rather than reflowing.
+
+  the rest of the backup is raw IOBuffer dumps with no reader written for them
+  yet, so those open as a table of 32 bit words instead. still editable, just
+  honest about what it is showing.
 
 */
 
@@ -21,6 +26,7 @@ const profilekey = "eh1591&073!l4rO594*V!qSYY<link _close><custom id=button;"
     + "Zeh1591&073!l4rO594*V!qSYY66wOOg8Yf7n1b7!63rmm";
 
 const line = /^([A-Za-z_][A-Za-z0-9_.]{1,40})=([\s\S]*?)(\r?)$/;
+const wordpage = 512;
 
 let held = [];
 let openat = 0;
@@ -75,7 +81,20 @@ function readsave(bytes) {
     if (!best || !best.fields.length) return null;
     const first = best.fields[0];
     if (first.at !== 0 || first.name.length < 3) return null;
+    /* a file of leading zeros xors straight back into the key, and the key has
+       an "=" in it, so puzzle.dat and chuzzle.save both come out looking like
+       one setting called "eh15". a name that is a prefix of its own key is
+       that, not a save */
+    if (best.key.indexOf(first.name) === 0) return null;
     return best;
+}
+
+// settings.txt is the same shape without the xor
+function readplain(bytes) {
+    const text = aslatin(bytes);
+    const fields = scan(text);
+    if (!fields.length || fields[0].at !== 0) return null;
+    return {key: null, text: text, fields: fields};
 }
 
 function rebuild(save) {
@@ -86,140 +105,226 @@ function rebuild(save) {
     return frombytes(rows.join("\n"));
 }
 
+function bytesof(one) {
+    if (one.kind === "binary") return one.bytes;
+    const raw = rebuild(one.save);
+    return one.save.key ? dexor(raw, one.save.key) : raw;
+}
+
 /*//////////////////////////////////////////////////////////////////////*/
 
-function escaped(text) {
-    return String(text == null ? "" : text)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+function sectionsof(one) {
+    // a 54 kb dump is a hundred and something screens of numbers, so it gets a
+    // pager inside the panel rather than that many subtabs
+    if (one.kind === "binary") return [{key: "words", name: "Words"}];
+    const used = {};
+    one.save.fields.forEach(function(field) {
+        if (/^(current|best|alltime)_m/.test(field.name)) {used.records = true; return}
+        used[fieldinfo(field.name).panel] = true;
+    });
+    const out = panels.filter(function(panel) {return used[panel.key]});
+    return out.length ? out : [{key: "rest", name: "Everything else"}];
 }
 
-function printable(value) {
-    return !/[\x00-\x08\x0b-\x1f\x7f-\x9f]/.test(value);
-}
-
-function rowof(field, at) {
+function fieldhtml(save, at) {
+    const field = save.fields[at];
     const info = fieldinfo(field.name);
-    const kind = info.binary || !printable(field.value) ? "blob" : valuekind(field.value);
     const stamp = readgamedate(field.value);
-    const note = stamp || info.note || "";
-
-    let control;
-    if (kind === "blob") {
-        control = "<span class=\"blob\">" + field.value.length + " bytes, not text</span>";
-    } else if (kind === "bool") {
-        control = "<button class=\"flip" + (field.value === "true" ? " on" : "") + "\""
-            + " type=\"button\" data-at=\"" + at + "\">"
-            + (field.value === "true" ? "Yes" : "No") + "</button>";
-    } else {
-        control = "<input data-at=\"" + at + "\" value=\"" + escaped(field.value) + "\""
-            + (kind === "int" || kind === "float" ? " inputmode=\"decimal\"" : "")
-            + (field.value.length > 30 ? " class=\"wide\"" : "") + ">";
-    }
-    return "<div class=\"field\" data-kind=\"" + kind + "\">"
-        + "<label><b>" + escaped(info.label) + "</b>"
-        + "<i>" + escaped(field.name) + (note ? " ~ " + escaped(note) : "") + "</i></label>"
-        + control + "</div>";
+    const note = info.note || (stamp && info.control !== "date" ? stamp : "");
+    // a long list left in one column leaves a tall hole beside it
+    const kind = controlkind(field.value, info);
+    const long = kind === "namelist" || kind === "flags"
+        || (kind === "numlist" && field.value.split(",").length > 6);
+    return "<div class=\"field" + (long ? " span" : "") + "\">"
+        + "<span class=\"tag\"><b>" + escaped(info.label) + "</b>"
+        + "<i>" + escaped(field.name) + (note ? " ~ " + escaped(note) : "") + "</i></span>"
+        + controlhtml(at, field.value, info) + "</div>";
 }
 
 function statrow(save, stat) {
     const cells = ["current", "best", "alltime"].map(function(era) {
         const at = save.fields.findIndex(function(f) {return f.name === era + "_" + stat});
         if (at < 0) return "<span class=\"missing\">-</span>";
-        return "<input data-at=\"" + at + "\" inputmode=\"decimal\" value=\""
-            + escaped(save.fields[at].value) + "\">";
+        return "<input data-at=\"" + at + "\" data-role=\"text\" inputmode=\"decimal\""
+            + " value=\"" + escaped(save.fields[at].value) + "\">";
     });
     return "<div class=\"statrow\"><span>" + escaped(prettyname(stat)) + "</span>"
         + cells.join("") + "</div>";
 }
 
-function recordspanel(save) {
+function recordshtml(save) {
     const has = statnames.filter(function(stat) {
         return save.fields.some(function(f) {return f.name === "alltime_" + stat});
     });
-    if (!has.length) return "";
-    return "<section class=\"panel\"><h2>Records</h2>"
-        + "<div class=\"stats\"><div class=\"statrow head\"><span></span>"
+    return "<div class=\"stats\"><div class=\"statrow head\"><span></span>"
         + "<span>This game</span><span>Best</span><span>All-time</span></div>"
-        + has.map(function(stat) {return statrow(save, stat)}).join("")
-        + "</div></section>";
+        + has.map(function(stat) {return statrow(save, stat)}).join("") + "</div>";
+}
+
+function wordshtml(one) {
+    const words = Math.floor(one.bytes.length / 4);
+    const view = new DataView(one.bytes.buffer, one.bytes.byteOffset, words * 4);
+    const spare = one.bytes.length % 4;
+    const pages = Math.max(1, Math.ceil(words / wordpage));
+    one.page = Math.max(0, Math.min(pages - 1, one.page || 0));
+    const from = one.page * wordpage;
+    const to = Math.min(words, from + wordpage);
+
+    let out = "<p class=\"aside\">Nobody has written a reader for this one yet, so it opens"
+        + " as little-endian 32 bit words. " + one.bytes.length + " bytes, " + words + " words"
+        + (spare ? ", and " + spare + " bytes over that stay as they are." : ".")
+        + "</p>";
+    if (pages > 1) {
+        out += "<div class=\"pager\">"
+            + "<button type=\"button\" data-role=\"page\" data-page=\"" + (one.page - 1)
+            + "\"" + (one.page ? "" : " disabled") + ">Back</button>"
+            + "<span>Words " + from + " to " + (to - 1) + " of " + words + "</span>"
+            + "<button type=\"button\" data-role=\"page\" data-page=\"" + (one.page + 1)
+            + "\"" + (one.page + 1 < pages ? "" : " disabled") + ">More</button></div>";
+    }
+    out += "<div class=\"words\">";
+    for (let i = from; i < to; i++) {
+        out += "<label class=\"slot\"><i>" + (i * 4) + "</i>"
+            + "<input data-word=\"" + i + "\" data-role=\"word\" inputmode=\"numeric\""
+            + " value=\"" + view.getUint32(i * 4, true) + "\"></label>";
+    }
+    return out + "</div>";
 }
 
 function paint() {
-    const save = held[openat] && held[openat].save;
+    const one = held[openat];
     const host = document.querySelector(".sheets");
-    if (!save) {
-        host.innerHTML = "";
-        return;
-    }
-    const bins = {};
-    save.fields.forEach(function(field, at) {
-        const info = fieldinfo(field.name);
-        if (info.panel === "records") return;
-        if (/^(current|best|alltime)_m/.test(field.name)) return;
-        (bins[info.panel] = bins[info.panel] || []).push(rowof(field, at));
-    });
+    if (!one) {host.innerHTML = ""; return}
 
-    host.innerHTML = panels.map(function(panel) {
-        if (panel.key === "records") return recordspanel(save);
-        const rows = bins[panel.key];
-        if (!rows || !rows.length) return "";
-        return "<section class=\"panel\"><h2>" + panel.name + "</h2>"
-            + "<div class=\"fields\">" + rows.join("") + "</div></section>";
+    const list = sectionsof(one);
+    if (!list.some(function(s) {return s.key === one.section})) one.section = list[0].key;
+    const now = list.find(function(s) {return s.key === one.section});
+
+    document.querySelector(".subtabs").innerHTML = list.map(function(section) {
+        return "<button type=\"button\" data-key=\"" + section.key + "\""
+            + (section.key === one.section ? " class=\"on\"" : "") + ">"
+            + escaped(section.name) + "</button>";
     }).join("");
-    wirefields();
+
+    let body;
+    if (one.kind === "binary") {
+        body = wordshtml(one);
+    } else if (one.section === "records") {
+        body = recordshtml(one.save);
+    } else {
+        const rows = [];
+        one.save.fields.forEach(function(field, at) {
+            if (/^(current|best|alltime)_m/.test(field.name)) return;
+            if (fieldinfo(field.name).panel === one.section) rows.push(fieldhtml(one.save, at));
+        });
+        body = "<div class=\"fields\">" + rows.join("") + "</div>";
+    }
+    host.innerHTML = "<section class=\"panel\"><h2>" + escaped(now.name) + "</h2>"
+        + body + "</section>";
+    clearbar();
 }
 
-function wirefields() {
-    const save = held[openat].save;
-    document.querySelectorAll(".sheets input").forEach(function(box) {
-        box.addEventListener("input", function() {
-            save.fields[Number(box.dataset.at)].value = box.value;
-            touched();
-        });
-    });
-    document.querySelectorAll(".sheets .flip").forEach(function(button) {
-        button.addEventListener("click", function() {
-            const field = save.fields[Number(button.dataset.at)];
-            field.value = field.value === "true" ? "false" : "true";
-            button.classList.toggle("on", field.value === "true");
-            button.textContent = field.value === "true" ? "Yes" : "No";
-            playsound("click", 0.6);
-            touched();
-        });
-    });
-}
+/*//////////////////////////////////////////////////////////////////////*/
 
-function touched() {
+function setvalue(at, value) {
+    held[openat].save.fields[at].value = value;
     document.body.classList.add("edited");
 }
 
-// the bar only turns up once a file is in, so its room is measured then
-function clearbar() {
-    const bar = document.querySelector(".bar");
-    const tall = document.body.classList.contains("loaded") ? bar.offsetHeight + 24 : 0;
-    document.body.style.paddingBottom = tall + "px";
+function setword(idx, value) {
+    const one = held[openat];
+    const view = new DataView(one.bytes.buffer, one.bytes.byteOffset);
+    const want = Math.max(0, Math.min(4294967295, Math.floor(Number(value) || 0)));
+    view.setUint32(idx * 4, want, true);
+    document.body.classList.add("edited");
 }
-window.addEventListener("resize", clearbar);
+
+function wiresheet() {
+    const host = document.querySelector(".sheets");
+    host.addEventListener("input", function(e) {
+        const box = e.target;
+        const role = box.dataset.role;
+        if (role === "text") {
+            setvalue(Number(box.dataset.at), box.value);
+        } else if (role === "word") {
+            setword(Number(box.dataset.word), box.value);
+        } else if (role === "volume") {
+            setvalue(Number(box.dataset.at), (box.value / 100).toFixed(6));
+            box.parentElement.querySelector("b").textContent = box.value + "%";
+        } else if (role === "date") {
+            const bits = box.value.split("-");
+            const stamp = bits.length === 3 ? bits[0] + bits[2] + bits[1] : "0";
+            setvalue(Number(box.dataset.at), stamp);
+            box.parentElement.querySelector("b").textContent = stamp;
+        } else if (role === "listpart") {
+            const group = box.closest(".numlist, .namelist");
+            setvalue(Number(box.dataset.at), joinparts(group, box.dataset.sep));
+        }
+    });
+
+    host.addEventListener("click", function(e) {
+        const button = e.target.closest("button[data-role]");
+        if (!button) return;
+        const role = button.dataset.role;
+        const at = Number(button.dataset.at);
+        if (role === "bool") {
+            const on = held[openat].save.fields[at].value !== "true";
+            setvalue(at, on ? "true" : "false");
+            button.classList.toggle("on", on);
+            button.textContent = on ? "On" : "Off";
+            playsound("click", 0.6);
+        } else if (role === "flag") {
+            const group = button.closest(".flags");
+            button.classList.toggle("on");
+            const bits = Array.prototype.map.call(group.querySelectorAll(".flag"), function(one) {
+                return one.classList.contains("on") ? "1" : "0";
+            });
+            setvalue(at, bits.join(","));
+            playsound("click", 0.5);
+        } else if (role === "listdrop") {
+            const group = button.closest(".namelist");
+            const sep = button.parentElement.querySelector("input").dataset.sep;
+            button.parentElement.remove();
+            setvalue(at, joinparts(group, sep));
+            playsound("click", 0.6);
+        } else if (role === "page") {
+            held[openat].page = Number(button.dataset.page);
+            playsound("click", 0.7);
+            paint();
+            window.scrollTo(0, 0);
+        } else if (role === "listadd") {
+            const group = button.closest(".namelist");
+            const sep = button.dataset.sep;
+            const chip = document.createElement("span");
+            chip.className = "chip";
+            chip.innerHTML = "<input data-at=\"" + at + "\" data-role=\"listpart\""
+                + " data-sep=\"" + escaped(sep) + "\" list=\"shopitems\" value=\"\">"
+                + "<button class=\"drop\" type=\"button\" data-at=\"" + at
+                + "\" data-role=\"listdrop\">&times;</button>";
+            group.insertBefore(chip, button);
+            chip.querySelector("input").focus();
+            playsound("click", 0.6);
+        }
+    });
+}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
 function drawtabs() {
-    const seat = document.querySelector(".tabs");
-    seat.innerHTML = held.map(function(one, at) {
-        return "<button type=\"button\" class=\"" + (at === openat ? "on" : "") + "\""
-            + " data-at=\"" + at + "\">" + escaped(one.label) + "</button>";
+    document.querySelector(".tabs").innerHTML = held.map(function(one, at) {
+        return "<button type=\"button\" class=\"" + (at === openat ? "on" : "")
+            + (one.kind === "binary" ? " raw" : "") + "\" data-at=\"" + at + "\">"
+            + escaped(one.label) + "</button>";
     }).join("");
-    seat.querySelectorAll("button").forEach(function(button) {
-        button.addEventListener("click", function() {
-            openat = Number(button.dataset.at);
-            playsound("click", 0.7);
-            drawtabs();
-            paint();
-        });
-    });
-    document.body.classList.toggle("many", held.length > 1);
 }
+
+function clearbar() {
+    const bar = document.querySelector(".bar");
+    const showing = document.body.classList.contains("loaded")
+        && !document.body.classList.contains("athome");
+    document.body.style.paddingBottom = showing ? (bar.offsetHeight + 24) + "px" : "0px";
+}
+window.addEventListener("resize", clearbar);
 
 function say(what, bad) {
     const seat = document.querySelector(".shout");
@@ -235,49 +340,54 @@ function shortname(path) {
     return file;
 }
 
+function readone(name, bytes) {
+    if (!bytes.length) return null;
+    const label = shortname(name);
+    const file = name.split("/").pop();
+    const crypt = readsave(bytes);
+    if (crypt) return {label: label, file: file, kind: "settings", save: crypt};
+    const plain = readplain(bytes);
+    if (plain) return {label: label, file: file, kind: "plain", save: plain};
+    return {label: label, file: file, kind: "binary", bytes: new Uint8Array(bytes)};
+}
+
 async function take(files) {
     const found = [];
-    const extras = [];
     for (const file of files) {
         const bytes = new Uint8Array(await file.arrayBuffer());
-        if (/\.(zip|backup)$/i.test(file.name) || (bytes[0] === 0x50 && bytes[1] === 0x4b)) {
+        if (bytes[0] === 0x50 && bytes[1] === 0x4b) {
             const parts = await unzip(bytes.buffer);
-            if (!parts) {extras.push(file.name + " is not a readable zip"); continue}
-            parts.forEach(function(part) {
-                if (!/\.cfg$/i.test(part.name)) {
-                    extras.push(part.name.split("/").pop() + " (" + part.bytes.length + " bytes)");
-                    return;
-                }
-                const save = readsave(part.bytes);
-                if (save) found.push({label: shortname(part.name), file: part.name.split("/").pop(), save: save});
-                else extras.push(part.name.split("/").pop() + " (not encrypted settings)");
-            });
-            continue;
+            if (parts) {
+                parts.forEach(function(part) {
+                    const one = readone(part.name, part.bytes);
+                    if (one) found.push(one);
+                });
+                continue;
+            }
         }
-        const save = readsave(bytes);
-        if (save) found.push({label: shortname(file.name), file: file.name, save: save});
-        else extras.push(file.name + " did not decode");
+        const one = readone(file.name, bytes);
+        if (one) found.push(one);
     }
 
     if (!found.length) {
-        say("Nothing in there decoded as a Chuzzle save" + (extras.length ? " ~ " + extras[0] : ""), true);
+        say("Nothing in there opened", true);
         return;
     }
-    // the profile with the most in it opens first, not whatever the zip
-    // happened to list first
-    found.sort(function(a, b) {return b.save.fields.length - a.save.fields.length});
+    // the richest profile first, then the plain text, then the raw dumps
+    const rank = {settings: 0, plain: 1, binary: 2};
+    found.sort(function(a, b) {
+        return rank[a.kind] - rank[b.kind]
+            || (b.save ? b.save.fields.length : 0) - (a.save ? a.save.fields.length : 0);
+    });
     held = found;
     openat = 0;
     document.body.classList.add("loaded");
-    document.body.classList.remove("edited");
+    document.body.classList.remove("edited", "athome");
     drawtabs();
     paint();
-    clearbar();
-    say(found.length + (found.length === 1 ? " file read" : " files read")
-        + (extras.length ? ", " + extras.length + " left alone" : "") + ". Nothing was uploaded.");
-    document.querySelector(".leftalone").innerHTML = extras.length
-        ? "<b>Left alone:</b> " + extras.map(escaped).join(", ")
-        : "";
+    const settings = found.filter(function(one) {return one.kind !== "binary"}).length;
+    say(found.length + " files opened, " + settings + " of them as settings."
+        + " Nothing was uploaded.");
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -289,6 +399,19 @@ function grab(bytes, name, type) {
     link.download = name;
     link.click();
     setTimeout(function() {URL.revokeObjectURL(url)}, 4000);
+}
+
+/* the prize lists hold shop item names, so the shop's own data feeds the
+   suggestions - one fetch of a file already sitting in the repo */
+function loadnames() {
+    fetch("../shop/shop.json").then(function(reply) {
+        return reply.ok ? reply.json() : null;
+    }).then(function(book) {
+        if (!book) return;
+        document.querySelector("#shopitems").innerHTML = book.items.map(function(item) {
+            return "<option value=\"" + escaped(item.name) + "\"></option>";
+        }).join("");
+    }).catch(function() {});
 }
 
 function wire() {
@@ -312,20 +435,48 @@ function wire() {
         if (e.dataTransfer && e.dataTransfer.files.length) take(e.dataTransfer.files);
     });
 
+    document.querySelector(".tabs").addEventListener("click", function(e) {
+        const button = e.target.closest("button[data-at]");
+        if (!button) return;
+        openat = Number(button.dataset.at);
+        playsound("click", 0.7);
+        drawtabs();
+        paint();
+        window.scrollTo(0, 0);
+    });
+    document.querySelector(".subtabs").addEventListener("click", function(e) {
+        const button = e.target.closest("button[data-key]");
+        if (!button) return;
+        held[openat].section = button.dataset.key;
+        playsound("click", 0.7);
+        paint();
+        window.scrollTo(0, 0);
+    });
+
+    document.querySelector(".back").addEventListener("click", function() {
+        playsound("click", 0.7);
+        document.body.classList.toggle("athome");
+        clearbar();
+        window.scrollTo(0, 0);
+    });
+
     document.querySelector(".dosave").addEventListener("click", function() {
         const one = held[openat];
         if (!one) return;
         playsound("click", 0.7);
-        grab(dexor(rebuild(one.save), one.save.key), one.file, "application/octet-stream");
+        grab(bytesof(one), one.file, "application/octet-stream");
         document.body.classList.remove("edited");
     });
     document.querySelector(".dotext").addEventListener("click", function() {
         const one = held[openat];
         if (!one) return;
         playsound("click", 0.7);
-        grab(frombytes(rebuild(one.save)), one.file.replace(/\.cfg$/, "") + ".txt", "text/plain");
+        grab(one.kind === "binary" ? one.bytes : rebuild(one.save),
+            one.file.replace(/\.[a-z]+$/, "") + ".txt", "text/plain");
     });
 }
 
 wire();
+wiresheet();
+loadnames();
 loadsounds(["click"]);
