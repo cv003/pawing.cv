@@ -195,6 +195,7 @@ function paint() {
 function setvalue(at, value) {
     held[openat].save.fields[at].value = value;
     document.body.classList.add("edited");
+    persist();
 }
 
 function setword(idx, value) {
@@ -203,6 +204,7 @@ function setword(idx, value) {
     const want = Math.max(0, Math.min(4294967295, Math.floor(Number(value) || 0)));
     view.setUint32(idx * 4, want, true);
     document.body.classList.add("edited");
+    persist();
 }
 
 function wiresheet() {
@@ -237,14 +239,17 @@ function wiresheet() {
             const on = held[openat].save.fields[at].value !== "true";
             setvalue(at, on ? "true" : "false");
             button.classList.toggle("on", on);
-            button.textContent = on ? "On" : "Off";
+            button.querySelector(".knob").textContent = on ? "on" : "off";
             playsound("click", 0.6);
         } else if (role === "flag") {
-            const group = button.closest(".flags");
-            button.classList.toggle("on");
-            const bits = Array.prototype.map.call(group.querySelectorAll(".flag"), function(one) {
-                return one.classList.contains("on") ? "1" : "0";
-            });
+            // flips just its own index in the current value rather than
+            // rebuilding from the DOM, so an unused slot (trophy #25 has no
+            // button at all) never shifts everything after it
+            const idx = Number(button.dataset.idx);
+            const bits = held[openat].save.fields[at].value.split(",");
+            const now = bits[idx].trim() !== "1";
+            bits[idx] = now ? "1" : "0";
+            button.classList.toggle("on", now);
             setvalue(at, bits.join(","));
             playsound("click", 0.5);
         } else if (role === "listdrop") {
@@ -358,6 +363,66 @@ function readone(name, bytes) {
     return Object.assign(base, {kind: "binary", bytes: new Uint8Array(bytes)});
 }
 
+/* everything opened stays in localStorage so a refresh does not mean picking
+   the file again - still entirely local, nothing here ever leaves the page.
+   a settings file keeps its own text plus the edited field list; a binary
+   dump keeps its bytes as base64, reusing aslatin's chunking so a 54 kb file
+   does not blow the call stack going through btoa/atob in one shot */
+const storekey = "chuzzlesave";
+
+function tobase64(bytes) {return btoa(aslatin(bytes))}
+function frombase64(text) {return frombytes(atob(text))}
+
+function serialize() {
+    return {
+        openat: openat,
+        files: held.map(function(one) {
+            const base = {label: one.label, file: one.file, profile: one.profile,
+                kind: one.kind, section: one.section, page: one.page};
+            if (one.kind === "binary") return Object.assign(base, {bytes64: tobase64(one.bytes)});
+            return Object.assign(base, {
+                key: one.save.key, text: one.save.text, fields: one.save.fields,
+            });
+        }),
+    };
+}
+
+function persist() {
+    if (!held.length) return;
+    try {localStorage.setItem(storekey, JSON.stringify(serialize()))}
+    catch (e) {}
+}
+
+function restore() {
+    let raw;
+    try {raw = localStorage.getItem(storekey)}
+    catch (e) {return false}
+    if (!raw) return false;
+    let book;
+    try {book = JSON.parse(raw)}
+    catch (e) {return false}
+    if (!book || !Array.isArray(book.files) || !book.files.length) return false;
+
+    held = book.files.map(function(one) {
+        if (one.kind === "binary") {
+            return {label: one.label, file: one.file, profile: one.profile,
+                kind: "binary", section: one.section, page: one.page,
+                bytes: frombase64(one.bytes64)};
+        }
+        return {label: one.label, file: one.file, profile: one.profile,
+            kind: one.kind, section: one.section, page: one.page,
+            save: {key: one.key, text: one.text, fields: one.fields}};
+    });
+    openat = Math.max(0, Math.min(held.length - 1, book.openat || 0));
+    return true;
+}
+
+function forgetsave() {
+    try {localStorage.removeItem(storekey)} catch (e) {}
+    held = [];
+    openat = 0;
+}
+
 async function take(files) {
     const found = [];
     for (const file of files) {
@@ -392,6 +457,7 @@ async function take(files) {
     document.body.classList.remove("edited", "athome");
     drawtabs();
     paint();
+    persist();
     const settings = found.filter(function(one) {return one.kind !== "binary"}).length;
     say(found.length + " files opened, " + settings + " of them as settings."
         + " Nothing was uploaded.");
@@ -485,3 +551,10 @@ wire();
 wiresheet();
 loadnames();
 loadsounds(["click"]);
+
+if (restore()) {
+    document.body.classList.add("loaded");
+    drawtabs();
+    paint();
+    say("Picked up where you left off. Nothing was uploaded.");
+}

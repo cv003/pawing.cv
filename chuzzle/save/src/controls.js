@@ -37,7 +37,7 @@ function controlkind(value, info) {
 
 // the ones that need a whole row to themselves
 function iswide(kind, value) {
-    return kind === "namelist" || kind === "flags"
+    return kind === "namelist" || kind === "flags" || kind === "trophies"
         || (kind === "numlist" && value.split(",").length > 4);
 }
 
@@ -126,11 +126,6 @@ function calhtml(at, value, shift) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* GotTrophy is the one 40-long flag list with a real identity per slot - the
-   trophy room shows a name and blurb per index, but those come off the
-   server's language table (RComm), not anything in the apk, so there is no
-   local source to pull them from. the grid stays numbered rather than
-   guessing at names that would just be wrong */
 function flagsbox(at, value) {
     const bits = value.split(",");
     const on = bits.filter(function(bit) {return bit.trim() === "1"}).length;
@@ -140,6 +135,28 @@ function flagsbox(at, value) {
                 + " data-at=\"" + at + "\" data-role=\"flag\" data-idx=\"" + idx + "\""
                 + " title=\"trophy #" + (idx + 1) + "\">"
                 + (idx + 1) + "</button>";
+        }).join("") + "</div></div>";
+}
+
+/* GotTrophy: one card per trophy with its real name and description, pulled
+   from the binary itself - see fields.js. #25 is blank on purpose, it is
+   never assigned in the game's own table. clicking a card toggles it, same
+   as the plain flag buttons everywhere else */
+function trophybox(at, value) {
+    const bits = value.split(",");
+    const on = bits.filter(function(bit) {return bit.trim() === "1"}).length;
+    return "<div class=\"flagwrap\"><span class=\"tally\">" + on + " of " + bits.length
+        + " held</span><div class=\"trophies\">" + bits.map(function(bit, idx) {
+            const troph = trophydata[idx] || {name: "", desc: ""};
+            const held = bit.trim() === "1";
+            if (!troph.name) {
+                return "<div class=\"trophy empty\"><i>#" + (idx + 1) + " - unused</i></div>";
+            }
+            return "<button class=\"trophy" + (held ? " on" : "") + "\" type=\"button\""
+                + " data-at=\"" + at + "\" data-role=\"flag\" data-idx=\"" + idx + "\">"
+                + "<span class=\"trophyicon\"></span>"
+                + "<span class=\"trophytext\"><b>" + escaped(troph.name) + "</b>"
+                + "<i>" + escaped(troph.desc) + "</i></span></button>";
         }).join("") + "</div></div>";
 }
 
@@ -179,6 +196,7 @@ function blobbox(value) {
 
 function controlhtml(at, value, info) {
     const kind = controlkind(value, info);
+    if (kind === "trophies") return trophybox(at, value);
     if (kind === "blob") return blobbox(value);
     if (kind === "bool") return boolbox(at, value);
     if (kind === "volume") return volumebox(at, value);

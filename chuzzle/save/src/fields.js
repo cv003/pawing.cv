@@ -9,6 +9,56 @@
 
 */
 
+/* all forty Trophy Room entries, name and description, pulled straight out of
+   the binary's own data - not the server. TrophyRoom::ShowInfo indexes a
+   packed {name, desc} pointer table via _TT(); the pointers are filled in at
+   load time by R_AARCH64_RELATIVE relocations (this is a PIE .so, so
+   .data.rel.ro is zeroed on disk), so reading it needed the relocation table,
+   not just the string dump. #25 is blank in the binary itself - never
+   assigned a trophy, not a reading error. see datainfo/README.md. */
+const trophydata = [
+    {name: "SEVEN AT ONCE", desc: "For popping seven Chuzzles in a single color group"},
+    {name: "EIGHT AT ONCE", desc: "For popping eight Chuzzles in a single color group"},
+    {name: "TOO MANY AT ONCE", desc: "For popping more than eight Chuzzles in a single color group"},
+    {name: "CHUZZLE BINGO", desc: "For simultaneously popping Chuzzles all the way across the board"},
+    {name: "ULTRA BINGO", desc: "For popping a single color group all the way across the board"},
+    {name: "JAILBREAKER", desc: "For breaking three or more locks at one time"},
+    {name: "TRIPLE COMBO", desc: "For popping three groups of Chuzzles at once"},
+    {name: "QUAD COMBO", desc: "For popping four groups of Chuzzles at once"},
+    {name: "MAD BOMBER", desc: "For Exploding 5 super Chuzzles in one chain reaction"},
+    {name: "MASTER BLASTER", desc: "For Exploding 8 super Chuzzles in one chain reaction"},
+    {name: "REACTOR", desc: "For causing a six step match cascade"},
+    {name: "SHOOT THE MOON", desc: "For matching 14 Chuzzles (any color) at one time"},
+    {name: "TEN GRAND", desc: "For popping 10,000 Chuzzles, ever"},
+    {name: "HUNDRED GRAND", desc: "For popping 100,000 Chuzzles, ever"},
+    {name: "MILLION DOLLAR BABY", desc: "For popping 1,000,000 Chuzzles, ever"},
+    {name: "CHUZZ BOMBER", desc: "For exploding 10,000 super Chuzzles, ever"},
+    {name: "LOCKSMITH", desc: "For breaking out 10,000 locked Chuzzles, ever"},
+    {name: "COLOR OF ZEN", desc: "For filling in the entire rainbow in Zen Chuzzle"},
+    {name: "FAT BLASTER", desc: "For popping 1,000 fat Chuzzles, ever"},
+    {name: "GAME OVER MAN", desc: "For completing 100 full games of any kind"},
+    {name: "DREAMY DOZEN", desc: "For reaching level 12 in Classic Chuzzle"},
+    {name: "BOTTOMS UP", desc: "For filling 1,000 bottles, anywhere, any time"},
+    {name: "BLITZER THAN BLITZ", desc: "<color cyan>Get it in CHUZZLE BLITZ<color white><BR><BR>For filling the bottle in less than half the time"},
+    {name: "PRISMATIC FANATIC", desc: "<color cyan>Get it in PRISMATIC CHUZZLE<color white><BR><BR>For blowing up all the rainbows instead of matching them"},
+    {name: "", desc: ""},
+    {name: "MAXIMUM FUNK", desc: "For funkifying every single cube on the level 2 world"},
+    {name: "MAXIMUM FUNK II", desc: "For funkifying every single cube on the level 4 world"},
+    {name: "MAXIMUM FUNK III", desc: "For funkifying every single cube on the level 6 world"},
+    {name: "MENTALIST", desc: "<color cyan>Get it in CHUZZLE MINDBENDER<color white><BR><BR>For matching the pattern at par or better"},
+    {name: "SPEED DEMON", desc: "<color cyan>Get it in SPEED CHUZZLE<color white><BR><BR>For filling the bottle without getting a single lock"},
+    {name: "MISTER MYSTERY", desc: "<color cyan>Get it in MYSTERY CHUZZLE<color white><BR><BR>For unmasking two or more mystery Chuzzles in a single move"},
+    {name: "LIL DEVIL", desc: "<color cyan>Get it in CHUZZLE DUEL<color white><BR><BR>For dropping FIVE LOCKS on your opponent in under two seconds"},
+    {name: "RAPTUROUS", desc: "<color cyan>Get it in CHUZZLE RAPTURE<color white><BR><BR>For completing the rapture with a four Chuzzle group or better"},
+    {name: "CHUZZLE IN 5", desc: "<color cyan>Get it in CHUZZLE IN 10<color white><BR><BR>For filling the bottle with more than five moves to spare"},
+    {name: "GOTCHA GACHA", desc: "<color cyan>Get it in CHUZZLE SURPRISE<color white><BR><BR>For popping six bubbles in a single color group"},
+    {name: "GOLD BRICKER", desc: "<color cyan>Get it in SUNCHUZZLE<color white><BR><BR>For turning two corners gold in a single move"},
+    {name: "STUNT DOUBLE", desc: "<color cyan>Get it in STUNT CHUZZLE<color white><BR><BR>For matching two stunt shapes in a single move"},
+    {name: "BLAST EM OUT", desc: "<color cyan>Get it in CHUZZLES IN CHAINS<color white><BR><BR>For blowing up at least one of the locks"},
+    {name: "IRON CHUZZLE", desc: "For getting all the way to the level 10 world"},
+    {name: "DAILY DUDE", desc: "For ranking in the top 100 scores of the Daily-Do!<if #got_daily_dude==0><BR><BR><color cyan>Check YESTERDAY'S scores in Daily-Do to get this trophy!<color white></if>"},
+];
+
 const statnames = [
     "mGamesWon", "mHighScore", "mHighestLevelReached", "mBestLevelWinPercent",
     "mChuzzlesPopped", "mFattyChuzzlesPopped", "mLocksBroken",
@@ -63,7 +113,7 @@ const known = {
     GoldenOneCount: {panel: "dailydo", label: "Golden ones won"},
     GoldenTornament: {panel: "dailydo", label: "Golden tournament", note: "spelt that way in the game"},
     LastTourneySeed: {panel: "dailydo", label: "Last tourney seed"},
-    GotTrophy: {panel: "dailydo", label: "Trophies held", note: "one 0 or 1 per trophy"},
+    GotTrophy: {panel: "dailydo", label: "Trophies held", control: "trophies"},
     GotTrophyTime: {panel: "dailydo", label: "Trophy dates", control: "text",
         note: "quoted, and the quotes hold commas"},
     GotTrophySeed: {panel: "dailydo", label: "Trophy seeds"},
