@@ -36,6 +36,11 @@
             redirectto = `https://archive.coolsite.cv/${archivepath}`;
         }
         else if (path.startsWith("contact")) {redirectto = "https://x.com/messages/compose?recipient_id=1565678264265457664&hellobro"}
+        // the chuzzarium shop page was /chuzzle/store before it was /chuzzle/shop
+        else if (path === "chuzzle/store" || path.startsWith("chuzzle/store/")) {
+            redirectto = "https://coolsite.cv/chuzzle/shop" + path.slice("chuzzle/store".length)
+                + location.search + location.hash;
+        }
         window.__redirectto = redirectto;
         
 

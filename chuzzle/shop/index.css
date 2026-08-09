@@ -1,0 +1,272 @@
+body {
+    background-color: #0c0823; padding: 0;
+    display: block; overflow-x: hidden;
+    overflow-y: auto; scrollbar-width: none;
+}
+body::-webkit-scrollbar {display: none}
+
+.bg {
+    position: fixed; z-index: -1;
+    left: -8vw; top: -8vh;
+    width: 116vw; height: 116vh;
+    opacity: 0.22; pointer-events: none;
+    background-image: url("../assets/images/bg.webp");
+    background-repeat: repeat; background-size: 600px 600px;
+    transform: rotate(-5deg);
+    animation: bgscroll 60s linear infinite;
+}
+@keyframes bgscroll {
+    from {background-position: 0 0}
+    to {background-position: 600px 600px}
+}
+@media (prefers-reduced-motion: reduce) {
+    .bg {animation: none}
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.dumbcontainer {padding: 0.7em 0 0.35em}
+.shoplogo {
+    width: auto !important;
+    height: calc(10vw * var(--boxratio, 1.2));
+    min-height: 70px; max-height: 128px; max-width: 92vw;
+    overflow: visible;
+    filter: drop-shadow(0 0.07em 0 #000) drop-shadow(0 0.12em 0.06em #000)
+        drop-shadow(0 0 0.12em rgba(0,0,0,0.9));
+}
+.shoplogo .lgdark {
+    fill: none; stroke: rgba(0,0,0,0.45); stroke-width: 46;
+    stroke-linejoin: round; stroke-linecap: round; stroke-miterlimit: 1;
+}
+.shoplogo .lgouter {stroke: #feff48; stroke-width: 33}
+.shoplogo .lgmid {stroke: #60204a; stroke-width: 11}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.bar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5em;
+    padding: 0.5em 0.75em 0.7em;
+    background: linear-gradient(180deg, #0c0823 58%, rgba(12,8,35,0));
+}
+
+.tabs {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 0.35em;
+}
+/* the in-game buttons, right down to the blue - global.css uppercases every
+   bare button and gives it a top margin, so both go back off here */
+.tabs button {
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-size: clamp(1.05em, 4.4vw, 1.5em); font-weight: 100;
+    text-transform: capitalize; color: white;
+    margin: 0; padding: 0.05em 0.7em 0.14em;
+    border: none; border-radius: 0.28em;
+    background: linear-gradient(150deg, #5a3ff0 0%, #132fbf 32%, #132fbf 78%, #8fa0ef 100%);
+    box-shadow: 0 0 0 2px #05061e, 0 0 0 4px #2b46d6;
+    --r: 0.05em; --ink: #000;
+    text-shadow: var(--ring);
+}
+.tabs button:active {transform: translateY(0.06em)}
+.tabs button.on {
+    background: linear-gradient(150deg, #ffe27a 0%, #ffab13 35%, #f27c00 80%, #ffd77a 100%);
+    color: #3a1d00; --ink: #ffeebb;
+    box-shadow: 0 0 0 2px #4a1c00, 0 0 0 4px #ffd24a;
+}
+
+.tools {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; align-items: center; gap: 0.7em;
+}
+
+/* the daily-do search box, same rings and the same chuzzle face */
+.findbox, .sortbox {
+    position: relative; display: flex;
+    align-items: center; height: 2.1em;
+    padding: 0 0.85em; border-radius: 1.1em;
+    background: #2d0027;
+    box-shadow:
+        0 0 0 0.14em #60204a,
+        0 0 0 0.24em #feff48,
+        0 0 0 0.38em rgba(0,0,0,0.1);
+}
+.findbox input, .sortbox select {
+    border: none; outline: none; background: none;
+    color: white; width: min(11em, 42vw);
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
+    font-weight: 100; font-size: 1em; letter-spacing: 0.03em;
+}
+.sortbox select {width: auto; padding-right: 0.2em}
+.sortbox select option {color: black; background: #efeaff; font-family: system-ui, sans-serif}
+.findbox input::placeholder {color: darkgrey}
+.clearfind {
+    margin: 0 0 0 0.3em; padding: 0 0.15em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600; font-size: 1.2em; line-height: 1;
+    color: #8a7c96; visibility: hidden; cursor: pointer;
+}
+.findbox.typed .clearfind {visibility: visible}
+.clearfind:active {filter: brightness(1.6)}
+
+.tally {
+    margin: 0.7em auto 2.5em; text-align: center;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.8em; color: #8f84b8;
+    letter-spacing: 0.04em;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* the ring stack only lines up on a square-ish corner: an inset shadow keeps
+   the element's own radius on every layer instead of shrinking it, so a big
+   radius makes the rings pile up in the corners. 8px is small enough to hide
+   that. the outer purple is a real (outset) ring, which does follow it */
+.shelf {
+    margin: 0 auto; padding: 13px;
+    width: min(1180px, calc(100vw - 1.6em));
+    border-radius: 8px;
+    background: linear-gradient(180deg, #8b53a2 0%, #590c74 10%, #590c74 90%, #8b53a2 100%);
+    box-shadow:
+        inset 0 0 0 2px #8a0820, inset 0 0 0 5px #ff2500,
+        inset 0 0 0 7px #ffeb00, inset 0 0 0 8px #ffa900,
+        inset 0 0 0 9px #c67228,
+        0 0 0 4px #8b0aa2, 0 0 0 6px rgba(0,0,0,0.55);
+}
+
+.grid {
+    display: grid; gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+    background: #f7a500;
+    border-radius: 2px; overflow: hidden;
+}
+
+/* one amber hairline between entries, which the 2px grid gap draws for free */
+.card {
+    position: relative; display: flex;
+    flex-direction: column; align-items: center;
+    gap: 0.3em; padding: 0.6em 0.35em 0.5em;
+    margin: 0; text-transform: none;
+    border: none; border-radius: 0;
+    background: linear-gradient(180deg, #8b53a2 0%, #590c74 22%, #590c74 100%);
+    text-align: center;
+}
+.card:hover {background: linear-gradient(180deg, #a76cbe 0%, #6d1b88 22%, #6d1b88 100%)}
+.card:active {background: linear-gradient(180deg, #6d1b88 0%, #48095e 22%, #48095e 100%)}
+
+/* one 16 wide atlas of 64px cells, so the cell is picked by position - see
+   datainfo/tools/parseshop.py. the frame round it is the game's own */
+.icon {
+    width: 64px; height: 64px;
+    border-radius: 9px;
+    background-image: url("assets/icons.webp");
+    background-size: 1024px 704px;
+    box-shadow:
+        0 0 0 2px #4c2f56,
+        0 0 0 6px #ac87b0,
+        0 0 0 7px #50365a,
+        0 0.12em 0.2em rgba(0,0,0,0.4);
+}
+
+.cardname {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.8em; font-weight: 600;
+    color: #fffbfd; line-height: 1.1;
+    text-shadow: 0 0.12em 0 rgba(0,0,0,0.55);
+    padding-top: 0.15em;
+}
+/* in game the count starts a third of the way into the coin and runs past it,
+   sitting a little below the coin's middle */
+.cardcost {
+    display: flex; align-items: center;
+    justify-content: center; margin-top: auto;
+}
+.cardcost img {height: 2.1em; width: auto}
+.cardcost b {
+    margin-left: -0.8em; transform: translateY(0.22em);
+    font-weight: 100; font-size: 1.15em;
+    font-family: "chuzzle", "blippo";
+    color: white; --r: 0.08em; --ink: #000;
+    text-shadow: var(--ring);
+}
+
+.pip {
+    position: absolute; top: 0.2em; z-index: 2;
+    font-size: 0.6em; line-height: 1;
+    padding: 0.25em 0.5em; border-radius: 999px;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600; color: #201000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.7);
+}
+.pipnotable {right: 0.2em; background: #ffd42a}
+.pipseason {left: 0.2em; background: #7ce0a0}
+.piplocked {left: 0.2em; background: #ff9d7c}
+
+.empty {
+    grid-column: 1 / -1; padding: 3em 0;
+    text-align: center; color: #c9a8dd;
+    background: #590c74;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* the popup is sized in --u on the daily-do, which has a fixed stage - this
+   page is a plain scrolling document, so it goes by the viewport instead */
+.calwrap .popup {width: min(420px, calc(100vw - 100px))}
+.calwrap .closebtn {
+    top: -24px; right: -30px;
+    width: 48px; height: 48px;
+}
+
+.itembody {gap: 0.5em}
+.itembody .facts {
+    display: grid; width: 100%;
+    background: none !important; box-shadow: none !important;
+    border-radius: 0; padding: 0; top: 0;
+    grid-template-columns: auto 1fr;
+    gap: 0.15em 1em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600; font-size: 0.82em;
+    letter-spacing: 0.03em; text-align: left;
+}
+.itembody .facts i {color: #8ea2e0; font-style: normal; white-space: nowrap}
+.itembody .facts u {color: white; text-decoration: none; text-align: right}
+.itembody .facts .gap {grid-column: 1 / -1; height: 0.5em}
+
+.itembody .bigicon {
+    width: 96px; height: 96px;
+    border-radius: 13px;
+    background-image: url("assets/icons.webp");
+    background-size: 1536px 1056px;
+    box-shadow:
+        0 0 0 3px #4c2f56,
+        0 0 0 9px #ac87b0,
+        0 0 0 10px #50365a,
+        0 0.12em 0.2em rgba(0,0,0,0.4);
+    margin-bottom: 0.3em;
+}
+/* the shop writes the blurb in bold italic lavender */
+.itembody .blurb {
+    background: none !important; box-shadow: none !important;
+    padding: 0 !important; top: 0 !important;
+    width: 100% !important;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.95em; font-style: italic;
+    color: #c9a8dd; text-align: center;
+}
+.itembody .pricetag {
+    display: flex; flex-direction: row;
+    align-items: center; justify-content: center;
+    background: none !important; box-shadow: none !important;
+    padding: 0 !important; top: 0 !important;
+    width: auto !important;
+}
+.itembody .pricetag img {height: 2.9em; width: auto}
+.itembody .pricetag b {
+    margin-left: -0.78em; transform: translateY(0.22em);
+    font-weight: 100; font-size: 1.6em;
+    font-family: "chuzzle", "blippo";
+    color: white; --r: 0.08em; --ink: #000;
+    text-shadow: var(--ring);
+}

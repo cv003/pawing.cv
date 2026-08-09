@@ -5,7 +5,7 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>Chuzzle Shop</title>
-        <link rel="icon" type="image/webp" href="../assets/images/icons/store.webp">
+        <link rel="icon" type="image/webp" href="../assets/images/icons/shop.webp">
         <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/blippo.woff2">
         <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/harlowsolidlet.woff2">
         <link rel="preload" as="image" href="assets/icons.webp">
@@ -20,17 +20,38 @@
         <div class="bg"></div>
 
         <div class="dumbcontainer">
-            <svg class="logo" viewBox="0 0 900 170">
+            <svg class="logo shoplogo" viewBox="0 0 900 170">
                 <defs>
+                    <!-- vertically inverted against the other pages: cyan at the
+                         top, pink at the foot, the way the shop draws it -->
                     <linearGradient id="lgrgb" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
-                        <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
-                        <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
-                        <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                        <stop offset="0%" stop-color="#cfd"/><stop offset="10%" stop-color="#afa"/>
+                        <stop offset="26%" stop-color="#aff"/><stop offset="42%" stop-color="#9bf"/>
+                        <stop offset="58%" stop-color="#aaf"/><stop offset="74%" stop-color="#c9f"/>
+                        <stop offset="88%" stop-color="#f9f"/><stop offset="100%" stop-color="#f8f"/>
                     </linearGradient>
+                    <!-- the shop's light is a band rather than a smooth fade,
+                         so it holds near solid for the first third -->
+                    <linearGradient id="lgfade" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+                        <stop offset="30%" stop-color="#fff" stop-opacity="0.85"/>
+                        <stop offset="56%" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <filter id="erode">
+                        <feMorphology radius="2" result="eroded"/><feFlood flood-color="#fff"/>
+                        <feComposite in2="eroded" operator="in"/>
+                    </filter>
+                    <!-- global.css hands the popup title this one -->
+                    <filter id="lgfillholes" x="-30%" y="-30%" width="160%" height="160%">
+                        <feMorphology operator="dilate" radius="3"/>
+                    </filter>
                 </defs>
-                <g><text x="30" y="130" class="lgblack">Chuzzle Shop</text>
-                    <text x="30" y="130" class="inner">Chuzzle Shop</text></g>
+                <mask id="lgcrop"><text x="30" y="130" filter="url(#erode)">Chuzzle Shop</text></mask>
+                <g><text x="30" y="130" class="lgdark">Chuzzle Shop</text>
+                    <text x="30" y="130" class="lgouter">Chuzzle Shop</text>
+                    <text x="30" y="130" class="lgmid">Chuzzle Shop</text>
+                    <text x="30" y="130" class="inner">Chuzzle Shop</text>
+                    <text x="30" y="130" class="lglight" mask="url(#lgcrop)">Chuzzle Shop</text></g>
             </svg>
         </div>
 
@@ -51,10 +72,12 @@
                     </select>
                 </label>
             </div>
-            <div class="tally"></div>
         </div>
 
-        <div class="grid"></div>
+        <div class="shelf">
+            <div class="grid"></div>
+        </div>
+        <div class="tally"></div>
 
         <div class="calwrap" data-role="item">
             <div class="popup">

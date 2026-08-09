@@ -1,4 +1,4 @@
-const shopfile = "store.json";
+const shopfile = "shop.json";
 const atlascols = 16;
 const atlascell = 64;
 
@@ -64,7 +64,7 @@ function cardof(item, at) {
         + "<span class=\"icon\" style=\"" + iconstyle(item.icon, 64) + "\"></span>"
         + "<span class=\"cardname\">" + escaped(item.name) + "</span>"
         + "<span class=\"cardcost\"><img src=\"assets/coin.webp\" alt=\"\">"
-        + item.cost + "</span></button>";
+        + "<b>x" + item.cost + "</b></span></button>";
 }
 
 function draw() {
@@ -133,7 +133,7 @@ function openitem(item) {
         "<span class=\"bigicon\" style=\"" + iconstyle(item.icon, 96) + "\"></span>"
         + (item.desc ? "<div class=\"blurb\">" + escaped(item.desc) + "</div>" : "")
         + "<div class=\"pricetag\"><img src=\"assets/coin.webp\" alt=\"\">"
-        + item.cost.toLocaleString("en") + "</div>"
+        + "<b>x" + item.cost.toLocaleString("en") + "</b></div>"
         + facts(item);
     openpopup(wrap);
 }
