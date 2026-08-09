@@ -59,7 +59,6 @@ function readsave(bytes) {
     return best;
 }
 
-// settings.txt is the same shape without the xor
 function readplain(bytes) {
     const text = aslatin(bytes);
     const fields = scan(text);
@@ -84,8 +83,6 @@ function bytesof(one) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 function sectionsof(one) {
-    // a 54 kb dump is a hundred and something screens of numbers, so it gets a
-    // pager inside the panel rather than that many subtabs
     if (one.kind === "binary") return [{key: "words", name: "Words"}];
     const used = {};
     one.save.fields.forEach(function(field) {
@@ -137,7 +134,7 @@ function wordshtml(one) {
     const from = one.page * wordpage;
     const to = Math.min(words, from + wordpage);
 
-    let out = "<p class=\"aside\">Nobody has written a reader for this one yet, so it opens"
+    let out = "<p class=\"aside\">No reader for this one yet, so it opens"
         + " as little-endian 32 bit words. " + one.bytes.length + " bytes, " + words + " words"
         + (spare ? ", and " + spare + " bytes over that stay as they are." : ".")
         + "</p>";
@@ -167,6 +164,7 @@ function paint() {
     if (!list.some(function(s) {return s.key === one.section})) one.section = list[0].key;
     const now = list.find(function(s) {return s.key === one.section});
 
+    document.querySelector(".partsrow").style.display = list.length > 1 ? "" : "none";
     document.querySelector(".parts").innerHTML = list.map(function(section) {
         return "<button type=\"button\" data-key=\"" + section.key + "\""
             + (section.key === one.section ? " class=\"on\"" : "") + ">"
@@ -186,7 +184,7 @@ function paint() {
         });
         body = "<div class=\"group\">" + rows.join("") + "</div>";
     }
-    host.innerHTML = "<section class=\"panel\"><h2>" + escaped(now.name) + "</h2>"
+    host.innerHTML = "<section class=\"section\"><h2>" + escaped(now.name) + "</h2>"
         + body + "</section>";
 }
 
@@ -238,16 +236,13 @@ function wiresheet() {
         if (role === "bool") {
             const on = held[openat].save.fields[at].value !== "true";
             setvalue(at, on ? "true" : "false");
-            button.classList.toggle("on", on);
-            button.querySelector(".knob").textContent = on ? "on" : "off";
+            button.querySelector("img").src = "assets/toggle" + (on ? "on" : "off") + ".webp";
             playsound("click", 0.6);
         } else if (role === "flag") {
-            // flips just its own index in the current value rather than
-            // rebuilding from the DOM, so an unused slot (trophy #25 has no
-            // button at all) never shifts everything after it
             const idx = Number(button.dataset.idx);
             const bits = held[openat].save.fields[at].value.split(",");
             const now = bits[idx].trim() !== "1";
+
             bits[idx] = now ? "1" : "0";
             button.classList.toggle("on", now);
             setvalue(at, bits.join(","));
@@ -329,7 +324,7 @@ function say(what, bad) {
     seat.classList.toggle("bad", !!bad);
 }
 
-// what each file in a backup actually is, rather than what it is called
+// tab names!
 const filenames = {
     "chuzzle2.cfg": "App settings",
     "settings.txt": "System",
@@ -355,7 +350,8 @@ function shortname(path) {
 function readone(name, bytes) {
     if (!bytes.length) return null;
     const file = name.split("/").pop();
-    const base = {label: shortname(name), file: file, profile: file === "profile.cfg"};
+    const base = {label: shortname(name), file: file, path: name,
+        profile: file === "profile.cfg"};
     const crypt = readsave(bytes);
     if (crypt) return Object.assign(base, {kind: "settings", save: crypt});
     const plain = readplain(bytes);
@@ -363,11 +359,8 @@ function readone(name, bytes) {
     return Object.assign(base, {kind: "binary", bytes: new Uint8Array(bytes)});
 }
 
-/* everything opened stays in localStorage so a refresh does not mean picking
-   the file again - still entirely local, nothing here ever leaves the page.
-   a settings file keeps its own text plus the edited field list; a binary
-   dump keeps its bytes as base64, reusing aslatin's chunking so a 54 kb file
-   does not blow the call stack going through btoa/atob in one shot */
+/*//////////////////////////////////////////////////////////////////////*/
+
 const storekey = "chuzzlesave";
 
 function tobase64(bytes) {return btoa(aslatin(bytes))}
@@ -377,8 +370,8 @@ function serialize() {
     return {
         openat: openat,
         files: held.map(function(one) {
-            const base = {label: one.label, file: one.file, profile: one.profile,
-                kind: one.kind, section: one.section, page: one.page};
+            const base = {label: one.label, file: one.file, path: one.path,
+                profile: one.profile, kind: one.kind, section: one.section, page: one.page};
             if (one.kind === "binary") return Object.assign(base, {bytes64: tobase64(one.bytes)});
             return Object.assign(base, {
                 key: one.save.key, text: one.save.text, fields: one.save.fields,
@@ -405,11 +398,11 @@ function restore() {
 
     held = book.files.map(function(one) {
         if (one.kind === "binary") {
-            return {label: one.label, file: one.file, profile: one.profile,
+            return {label: one.label, file: one.file, path: one.path, profile: one.profile,
                 kind: "binary", section: one.section, page: one.page,
                 bytes: frombase64(one.bytes64)};
         }
-        return {label: one.label, file: one.file, profile: one.profile,
+        return {label: one.label, file: one.file, path: one.path, profile: one.profile,
             kind: one.kind, section: one.section, page: one.page,
             save: {key: one.key, text: one.text, fields: one.fields}};
     });
@@ -445,7 +438,6 @@ async function take(files) {
         say("Nothing in there opened", true);
         return;
     }
-    // the richest profile first, then the plain text, then the raw dumps
     const rank = {settings: 0, plain: 1, binary: 2};
     found.sort(function(a, b) {
         return rank[a.kind] - rank[b.kind]
@@ -465,8 +457,19 @@ async function take(files) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-function grab(bytes, name, type) {
-    const url = URL.createObjectURL(new Blob([bytes], {type: type}));
+function zipname() {
+    const top = held[0].path.split("/")[0];
+    const shared = held.every(function(one) {return one.path.split("/")[0] === top});
+    return (shared && held[0].path.indexOf("/") >= 0 ? top : "chuzzle-save") + ".zip";
+}
+
+function saveeverything() {
+    const files = held.map(function(one) {return {name: one.path, bytes: bytesof(one)}});
+    grab(zipbytes(files), zipname());
+}
+
+function grab(blob, name) {
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = name;
@@ -474,8 +477,6 @@ function grab(bytes, name, type) {
     setTimeout(function() {URL.revokeObjectURL(url)}, 4000);
 }
 
-/* the prize lists hold shop item names, so the shop's own data feeds the
-   suggestions - one fetch of a file already sitting in the repo */
 function loadnames() {
     fetch("../shop/shop.json").then(function(reply) {
         return reply.ok ? reply.json() : null;
@@ -539,16 +540,14 @@ function wire() {
     });
 
     document.querySelector(".dosave").addEventListener("click", function() {
-        const one = held[openat];
-        if (!one) return;
+        if (!held.length) return;
         playsound("click", 0.7);
-        grab(bytesof(one), one.file, "application/octet-stream");
+        saveeverything();
         document.body.classList.remove("edited");
     });
 }
 
-wire();
-wiresheet();
+wire(); wiresheet();
 loadnames();
 loadsounds(["click"]);
 
@@ -556,5 +555,4 @@ if (restore()) {
     document.body.classList.add("loaded");
     drawtabs();
     paint();
-    say("Picked up where you left off. Nothing was uploaded.");
 }

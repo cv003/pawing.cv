@@ -43,11 +43,15 @@ function iswide(kind, value) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+// the whole switch - track, knob, ring and label - is one baked texture in
+// FunDialog.png (off at (59,93)-(145,123), on at (122,125)-(208,155)), so the
+// two states are just an image swap rather than anything built from parts
 function boolbox(at, value) {
     const on = value === "true";
-    return "<button class=\"toggle" + (on ? " on" : "") + "\" type=\"button\""
+    return "<button class=\"toggle\" type=\"button\""
         + " data-at=\"" + at + "\" data-role=\"bool\">"
-        + "<span class=\"knob\">" + (on ? "on" : "off") + "</span></button>";
+        + "<img src=\"assets/toggle" + (on ? "on" : "off") + ".webp\" alt=\"\" draggable=\"false\">"
+        + "</button>";
 }
 
 function textbox(at, value, kind) {
