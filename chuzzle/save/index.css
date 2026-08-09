@@ -1,13 +1,16 @@
 /*
 
-  the shop's panel, minus the svg - nothing here has a ragged last row, so the
-  ring stack can stay an inset box-shadow on a rectangle.
+  the settings screens the game itself draws, off datainfo/media/settings: a
+  yellow ringed block of rows with an amber rule between them, the name in bold
+  white on the left and the control on the right, a dark pill toggle whose knob
+  sits right for off and left with an orange ring for on, and a slider with a
+  navy groove and a gold star for a thumb.
 
   two things global.css does that have to be undone: a bare `label` gets
-  padding-left 25px, a negative bottom margin and z-index 999, which shoves
-  every field label right and floats it over the fixed bars; and chuzzle
-  script sits its caps about 0.17em above the middle of its line box, so a
-  button needs that much more padding on top than underneath to look centred.
+  padding-left 25px, a negative bottom margin and z-index 999, which shoves a
+  caption right and floats it over the sticky bar; and chuzzle script sits its
+  caps about 0.17em above the middle of its line box, so a button needs that
+  much more padding on top than underneath to look centred.
 
 */
 
@@ -16,6 +19,7 @@ body {
     display: block; overflow-x: hidden;
     overflow-y: auto;
     height: auto; min-height: var(--vh);
+    padding-bottom: 5em;
 }
 html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 *::-webkit-scrollbar {display: none !important; width: 0; height: 0}
@@ -58,7 +62,7 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 body.loaded:not(.athome) .start {display: none}
 body:not(.loaded) .topbar, body.athome .topbar {display: none}
 body:not(.loaded) .sheets, body.athome .sheets {display: none}
-body:not(.loaded) .bar, body.athome .bar {display: none}
+body:not(.loaded) .dosave, body.athome .dosave {display: none}
 body:not(.loaded) .back {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -98,19 +102,19 @@ body:not(.loaded) .back {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* every chuzzle script button on the page, centred the hard way */
-.picker span, .tabs button, .subtabs button, .bar button, .back {
+.picker span, .switcher button, .back, .dosave, .namelist .add,
+.pager button, .picknow, .cal button {
     display: inline-flex; align-items: center; justify-content: center;
     margin: 0; border: none; text-transform: none;
-    color: white; line-height: 1;
+    color: white; line-height: 1; white-space: nowrap;
     font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-weight: 100; white-space: nowrap;
-    text-shadow: var(--ring);
+    font-weight: 100; text-shadow: var(--ring);
     background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%, #0a1a5e 80%, #5a63a0 100%);
     box-shadow: 0 0 0 2px #05061e;
 }
-.picker span:active, .tabs button:active, .subtabs button:active,
-.bar button:active, .back:active {filter: brightness(1.6)}
+.picker span:active, .switcher button:active, .back:active, .dosave:active,
+.namelist .add:active, .pager button:not(:disabled):active,
+.picknow:active, .cal button:active {filter: brightness(1.6)}
 
 .picker span {
     padding: 0.42em 1.1em 0.08em;
@@ -119,88 +123,109 @@ body:not(.loaded) .back {display: none}
     cursor: pointer;
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 .topbar {
     position: sticky; top: 0; z-index: 8;
     display: flex; flex-direction: column;
-    align-items: center; gap: 0.4em;
-    padding: 0.7em 0 0.9em;
-    background: linear-gradient(180deg, #0c0823 68%, rgba(12,8,35,0));
+    align-items: center; gap: 0.55em;
+    padding: 0.7em 0 1em;
+    background: linear-gradient(180deg, #0c0823 70%, rgba(12,8,35,0));
 }
-.filerow, .subtabs {
-    display: flex; flex-wrap: wrap;
-    justify-content: center; gap: 0.35em;
-    width: min(940px, calc(100vw - 3.4em));
+.filerows {display: flex; flex-direction: column; align-items: center; gap: 0.4em}
+/* the strips keep their natural width and slide sideways when there are more
+   files than fit - shrinking them just overlaps the labels */
+.striprow {
+    display: flex; align-items: center;
+    justify-content: center; gap: 0.5em;
+    max-width: 100vw; padding: 0 1.5em;
+    box-sizing: border-box; overflow-x: auto;
 }
-.tabs {display: contents}
+.striprow::after {content: ""; flex: none; width: 0.1em}
 
-/* thirteen files wrap to seven rows on a phone and eat the screen, so the two
-   rows slide sideways instead */
-@media (max-width: 700px) {
-    .filerow, .subtabs {
-        flex-wrap: nowrap; overflow-x: auto;
-        justify-content: flex-start;
-        padding: 0 0.6em; box-sizing: border-box;
-    }
-    .filerow > *, .subtabs > * {flex: none}
-    .topbar {gap: 0.3em; padding: 0.5em 0 0.7em}
+/* the daily-do board switcher: one strip, rings round the outside and a hard
+   line between the buttons rather than a gap */
+.switcher {
+    display: flex; flex: none;
+    border-radius: 0.42em; overflow: hidden;
+    box-shadow:
+        0 0 0 2px #60204a,
+        0 0 0 4px #feff48,
+        0 0 0 7px rgba(0,0,0,0.45);
 }
-
-.back {
-    padding: 0.4em 0.9em 0.06em;
-    border-radius: 0.28em; font-size: 1.2em;
-    background: linear-gradient(140deg, #7a2a5e 0%, #4a0f38 30%, #4a0f38 80%, #a06a8c 100%);
+.switcher button {
+    flex: none;
+    padding: 0.4em 0.85em 0.08em;
+    font-size: 1.1em; border-radius: 0;
 }
-.tabs button {
-    padding: 0.4em 0.75em 0.06em;
-    border-radius: 0.28em; font-size: 1.05em;
-    max-width: 14em;
-}
-.tabs button.on {
+.switcher button + button {box-shadow: inset 2px 0 0 rgba(0,0,0,0.5)}
+.switcher button.on {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
 }
-.tabs button.raw {opacity: 0.72}
-.subtabs button {
-    padding: 0.36em 0.8em 0.05em;
-    border-radius: 0.22em; font-size: 1.05em;
+/* the file names read better in the ui face than in the script one */
+.files button, .others button {
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
+    padding: 0.3em 0.85em 0.22em;
+}
+.others button {
     background: linear-gradient(140deg, #3a1560 0%, #24063f 30%, #24063f 80%, #6a4f9c 100%);
 }
-.subtabs button.on {
+.others button.on {
     background: linear-gradient(140deg, #b06cff 0%, #7a25e0 32%, #5a12b4 78%, #cfa8f2 100%);
+}
+.back {
+    flex: none; padding: 0.4em 0.9em 0.06em;
+    border-radius: 0.28em; font-size: 1.1em;
+    background: linear-gradient(140deg, #7a2a5e 0%, #4a0f38 30%, #4a0f38 80%, #a06a8c 100%);
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
 
 .panel h2 {
-    margin: 0 0 0.7em -0.1em;
+    margin: 0 0 0.55em 0.1em;
     font-family: "blippo", "chuzzle", system-ui, sans-serif;
-    font-size: 1.7em; font-weight: 400;
+    font-size: 1.6em; font-weight: 400;
     text-align: left; color: #fff;
     text-shadow: 0 0.07em 0 #2b1226, 0 0 0.2em rgba(0,0,0,0.8);
 }
 .aside {
-    margin: -0.3em 0 1em; opacity: 1; max-width: 46em;
+    margin: -0.2em 0 1em; opacity: 1; max-width: 46em;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.85em; font-weight: 300; color: #c9a8dd;
 }
 
-.fields {
-    display: grid; gap: 0.8em 1.4em;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    align-items: start;
+.group {
+    border-radius: 0.4em; overflow: hidden;
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 7px rgba(0,0,0,0.35);
 }
-.field {display: flex; flex-direction: column; gap: 0.25em}
-.field.span {grid-column: 1 / -1}
-.field .tag {
+.row {
+    display: grid; align-items: center;
+    grid-template-columns: 1fr auto;
+    gap: 0.6em 1.2em; padding: 0.6em 0.9em;
+    background: linear-gradient(180deg, #6a2183 0%, #590c74 34%, #590c74 100%);
+}
+.row + .row {border-top: 2px solid #f7a500}
+.row.stacked {grid-template-columns: 1fr}
+.rname {
     display: flex; flex-direction: column;
     padding: 0; margin: 0; z-index: auto;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    line-height: 1.15; color: white;
+    line-height: 1.15;
 }
-.field .tag b {font-size: 1em; font-weight: 600; color: white}
-.field .tag i {font-size: 0.78em; font-style: normal; color: #b79bd0}
+.rname b {
+    font-size: 1.02em; font-weight: 600; color: white;
+    text-transform: uppercase; letter-spacing: 0.02em;
+}
+.rname i {font-size: 0.76em; font-style: normal; color: #c093d6}
+.rctl {display: flex; justify-content: flex-end; min-width: 0}
+.row.stacked .rctl {justify-content: flex-start}
 
-.field input[type=text], .field input:not([type]), .field input[type=date],
-.stats input, .words input {
+/*//////////////////////////////////////////////////////////////////////*/
+
+.panel label {padding: 0; margin: 0; z-index: auto; display: flex}
+
+.rctl input[type=text], .rctl input:not([type]),
+.stats input, .words input, .slot input {
     width: 100%; box-sizing: border-box;
     padding: 0.32em 0.6em;
     border: none; outline: none; border-radius: 0.35em;
@@ -209,61 +234,143 @@ body:not(.loaded) .back {display: none}
     font-size: 0.95em; font-weight: 600;
     box-shadow: inset 0 0 0 2px #60204a;
 }
-.field input:focus, .stats input:focus, .words input:focus {
+.rctl > input {min-width: 9em; width: auto}
+.rctl > input.wide {width: 100%; font-size: 0.82em}
+.rctl input:focus, .stats input:focus, .words input:focus, .slot input:focus {
     box-shadow: inset 0 0 0 2px #feff48;
 }
-.field input.wide {font-size: 0.8em}
 
-/*//////////////////////////////////////////////////////////////////////*/
-
-.switch {
-    align-self: flex-start; margin: 0;
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 5.2em; padding: 0.42em 1.1em 0.1em;
-    border: none; border-radius: 0.3em;
-    text-transform: none; line-height: 1;
-    color: white; font-weight: 100;
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-size: 1.2em; text-shadow: var(--ring);
-    background: linear-gradient(140deg, #6b2b3a 0%, #4a0f1c 30%, #4a0f1c 80%, #a06a76 100%);
-    box-shadow: 0 0 0 2px #05061e;
+.toggle {
+    position: relative; flex: none;
+    width: 6em; height: 2.3em; margin: 0; padding: 0;
+    border: none; border-radius: 0.55em;
+    background: #2d0027;
+    box-shadow: inset 0 0.1em 0.2em rgba(0,0,0,0.6);
 }
-.switch.on {
-    background: linear-gradient(140deg, #46d06a 0%, #12a03c 30%, #12a03c 80%, #a8eec0 100%);
+.toggle .knob {
+    position: absolute; top: 0.13em; bottom: 0.13em;
+    left: 50%; right: 0.13em;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 0.45em; background: #590c74;
+    box-shadow: 0 0 0 2px #7a3a92;
+    font-family: "chuzzle", "blippo", system-ui, sans-serif;
+    font-size: 1.05em; font-weight: 100; color: white;
+    transition: left 0.12s ease, right 0.12s ease;
 }
-.switch:active {filter: brightness(1.6)}
+.toggle.on .knob {
+    left: 0.13em; right: 50%;
+    box-shadow: 0 0 0 2px #ffb400, 0 0 0 4px #ff2500;
+}
+.toggle:active .knob {filter: brightness(1.4)}
 
-.slide {display: flex; align-items: center; gap: 0.6em}
+.slide {display: flex; align-items: center; gap: 0.7em; min-width: 13em}
 .slide b {
-    min-width: 4.6em;
+    min-width: 3.2em; text-align: right;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.85em; font-weight: 600; color: #ffe07a;
+    font-size: 0.9em; font-weight: 600; color: #ffe07a;
 }
 .slide input[type=range] {
     flex: 1 1 auto; min-width: 0;
     -webkit-appearance: none; appearance: none;
-    height: 0.5em; border-radius: 999px;
-    background: #2d0027; box-shadow: inset 0 0 0 2px #60204a;
+    height: 1.9em; background: none;
+}
+.slide input[type=range]::-webkit-slider-runnable-track {
+    height: 0.85em; border-radius: 999px;
+    background: #09124b;
+    box-shadow: 0 0 0 0.22em #7a3a92, 0 0 0 0.3em rgba(0,0,0,0.4);
+}
+.slide input[type=range]::-moz-range-track {
+    height: 0.85em; border-radius: 999px;
+    background: #09124b;
+    box-shadow: 0 0 0 0.22em #7a3a92, 0 0 0 0.3em rgba(0,0,0,0.4);
 }
 .slide input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none;
-    width: 1.15em; height: 1.15em; border-radius: 50%;
-    background: #ffd42a; box-shadow: 0 0 0 2px #4a1c00;
+    width: 1.9em; height: 1.9em; margin-top: -0.55em;
+    background: url("assets/star.webp") center/contain no-repeat;
+    filter: drop-shadow(0 0.08em 0.1em rgba(0,0,0,0.6));
 }
 .slide input[type=range]::-moz-range-thumb {
-    width: 1.15em; height: 1.15em; border: none; border-radius: 50%;
-    background: #ffd42a; box-shadow: 0 0 0 2px #4a1c00;
+    width: 1.9em; height: 1.9em; border: none;
+    background: url("assets/star.webp") center/contain no-repeat;
 }
-.slide input[type=date] {flex: 1 1 auto; min-width: 0}
-.slide input[type=date]::-webkit-calendar-picker-indicator {filter: invert(1) opacity(0.7)}
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* the shop's sort picker, doing duty as a date field */
+.pick {position: relative; flex: none}
+.picknow {
+    gap: 0.4em; padding: 0.4em 0.8em 0.08em;
+    border-radius: 0.35em; font-size: 1.05em;
+    background: #4a1240; color: #ffd9bf;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.pick.open .picknow {background: #67195a; color: white}
+.picknow .caret {
+    display: inline-block; font-size: 0.9em;
+    transform: translateY(0.28em) scaleY(-1);
+    transform-origin: 50% 27.2%;
+}
+.pick.open .picknow .caret {transform: translateY(0.1em)}
+
+.pickmenu {
+    position: absolute; right: 0; top: calc(100% + 0.5em);
+    display: none; z-index: 9;
+    padding: 0.5em; border-radius: 0.6em;
+    background: #2d0027;
+    box-shadow:
+        0 0 0 2px #60204a, 0 0 0 4px #feff48,
+        0 0.4em 0.8em rgba(0,0,0,0.6);
+}
+.pick.open .pickmenu {display: block}
+.calhead {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 0.4em;
+    margin-bottom: 0.4em;
+}
+.calhead span {
+    flex: 1 1 auto; text-align: center;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.88em; font-weight: 600; color: white;
+}
+.cal button {
+    padding: 0.3em 0.5em 0.06em;
+    border-radius: 0.28em; font-size: 0.95em;
+    background: #4a1240; box-shadow: inset 0 0 0 2px #60204a;
+}
+.calgrid {
+    display: grid; gap: 0.15em;
+    grid-template-columns: repeat(7, 2.1em);
+}
+.calgrid i {
+    display: flex; align-items: center; justify-content: center;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.7em; font-style: normal; color: #8a7c96;
+}
+.calgrid button {
+    width: 2.1em; height: 2em;
+    padding: 0.24em 0 0; border-radius: 0.25em;
+    font-size: 0.92em;
+}
+.calgrid button.on {
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    box-shadow: 0 0 0 2px #feff48;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.flagwrap {display: flex; flex-direction: column; gap: 0.35em; width: 100%}
+.tally {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.82em; font-weight: 600; color: #ffe07a;
+}
 .flags {display: flex; flex-wrap: wrap; gap: 0.2em}
 .flag {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 1.9em; height: 1.9em; margin: 0; padding: 0;
+    width: 2em; height: 2em; margin: 0; padding: 0;
     border: none; border-radius: 0.28em;
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.78em; font-weight: 600;
+    font-size: 0.8em; font-weight: 600;
     color: #8a7c96; background: #2d0027;
     box-shadow: inset 0 0 0 2px #60204a;
 }
@@ -271,26 +378,17 @@ body:not(.loaded) .back {display: none}
 
 .numlist {display: flex; flex-wrap: wrap; gap: 0.3em}
 .numlist.grid {
-    display: grid; gap: 0.25em;
+    display: grid; gap: 0.25em; width: 100%;
     grid-template-columns: repeat(auto-fill, minmax(5.4em, 1fr));
 }
-.numlist .slot input {width: 100%}
 .numlist:not(.grid) .slot input {width: 7em}
-.slot {display: flex; flex-direction: column; gap: 0.05em}
+.slot {display: flex; flex-direction: column; gap: 0.05em; z-index: auto}
 .slot i {
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.62em; font-style: normal; color: #8a7c96;
+    font-size: 0.62em; font-style: normal; color: #a98cbb;
     padding-left: 0.3em;
 }
-.slot input {
-    width: 100%; box-sizing: border-box;
-    padding: 0.25em 0.4em;
-    border: none; outline: none; border-radius: 0.3em;
-    background: #2d0027; color: white;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.85em; font-weight: 600;
-    box-shadow: inset 0 0 0 2px #60204a;
-}
+.slot input {padding: 0.25em 0.4em; font-size: 0.85em}
 
 .namelist {display: flex; flex-wrap: wrap; gap: 0.3em; align-items: center}
 .chip {
@@ -304,30 +402,23 @@ body:not(.loaded) .back {display: none}
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.85em; font-weight: 600;
 }
-.chip .drop {
-    margin: 0; padding: 0 0.5em 0 0.25em;
-    border: none; background: none; color: #8a7c96;
+.chipoff {
+    flex: none; width: auto; margin: 0;
+    padding: 0 0.5em 0 0.25em;
+    border: none; background: none; color: #a98cbb;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 1em; font-weight: 600; line-height: 1;
 }
-.chip .drop:active {color: #ff9d7c}
+.chipoff:active {color: #ff9d7c}
 .namelist .add {
-    display: inline-flex; align-items: center; justify-content: center;
-    margin: 0; padding: 0.34em 0.8em 0.06em;
-    border: none; border-radius: 0.3em;
-    text-transform: none; line-height: 1;
-    color: white; font-weight: 100;
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-size: 1.05em; text-shadow: var(--ring);
+    padding: 0.34em 0.8em 0.06em;
+    border-radius: 0.3em; font-size: 1.05em;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-    box-shadow: 0 0 0 2px #05061e;
 }
-.namelist .add:active {filter: brightness(1.6)}
 
 .blob {
-    align-self: flex-start;
     padding: 0.32em 0.6em; border-radius: 0.35em;
-    background: rgba(0,0,0,0.28); color: #9a86ad;
+    background: rgba(0,0,0,0.28); color: #c093d6;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.85em; font-weight: 600; font-style: italic;
 }
@@ -342,18 +433,11 @@ body:not(.loaded) .back {display: none}
     font-size: 0.85em; font-weight: 600; color: #d6c3e8;
 }
 .pager button {
-    display: inline-flex; align-items: center; justify-content: center;
-    margin: 0; padding: 0.36em 0.9em 0.05em;
-    border: none; border-radius: 0.28em;
-    text-transform: none; line-height: 1;
-    color: white; font-weight: 100;
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-size: 1.1em; text-shadow: var(--ring);
+    padding: 0.36em 0.9em 0.05em;
+    border-radius: 0.28em; font-size: 1.1em;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-    box-shadow: 0 0 0 2px #05061e;
 }
 .pager button:disabled {filter: grayscale(1) brightness(0.6)}
-.pager button:not(:disabled):active {filter: brightness(1.6)}
 
 .words {
     display: grid; gap: 0.25em;
@@ -363,51 +447,49 @@ body:not(.loaded) .back {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.stats {display: flex; flex-direction: column; gap: 0.35em}
+.stats {
+    border-radius: 0.4em; overflow: hidden;
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 7px rgba(0,0,0,0.35);
+}
 .statrow {
     display: grid; align-items: center; gap: 0.6em;
     grid-template-columns: minmax(9em, 1.6fr) 1fr 1fr 1fr;
+    padding: 0.45em 0.9em;
+    background: linear-gradient(180deg, #6a2183 0%, #590c74 34%, #590c74 100%);
 }
+.statrow + .statrow {border-top: 2px solid #f7a500}
 .statrow > span {
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.95em; font-weight: 600; color: white;
+    text-transform: uppercase; letter-spacing: 0.02em;
 }
 .statrow.head > span {
-    font-size: 0.8em; color: #b79bd0;
-    text-align: center;
+    font-size: 0.78em; color: #c093d6;
+    text-align: center; text-transform: none;
 }
 .statrow.head > span:first-child {text-align: left}
 .missing {text-align: center; color: #7a6a8a}
 
-@media (max-width: 560px) {
-    .statrow {grid-template-columns: 1fr 1fr 1fr; gap: 0.25em 0.5em}
-    .statrow > span:first-child {grid-column: 1 / -1; margin-top: 0.4em}
-    .statrow.head {display: none}
-    .stats input {text-align: center}
-}
-
 /*//////////////////////////////////////////////////////////////////////*/
 
-.bar {
-    position: fixed; z-index: 6;
-    left: 0; right: 0; bottom: 0;
-    display: flex; justify-content: center;
-    gap: 0.6em; padding: 1.6em 0.75em 0.9em;
-    background: linear-gradient(180deg, rgba(12,8,35,0), #0c0823 40%);
-}
-.bar button {
-    padding: 0.44em 1em 0.1em;
-    border-radius: 0.28em; font-size: 1.45em;
-}
-.bar .dosave {
+.dosave {
+    position: fixed; z-index: 7;
+    right: 1.2em; bottom: 1.2em;
+    padding: 0.46em 1.4em 0.1em;
+    border-radius: 0.32em; font-size: 1.5em;
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-}
-body.edited .bar .dosave {
-    background: linear-gradient(140deg, #ffe27a 0%, #ffab13 35%, #f27c00 80%, #ffd77a 100%);
-    color: #3a1d00;
+    box-shadow: 0 0 0 2px #05061e, 0 0.25em 0.5em rgba(0,0,0,0.5);
 }
 
-@media (max-width: 560px) {
-    .bar {gap: 0.4em; padding: 1.4em 0.5em 0.8em}
-    .bar button {font-size: 1.15em; padding: 0.42em 0.7em 0.08em}
+@media (max-width: 700px) {
+    .striprow {justify-content: flex-start; padding: 0 0.6em; box-sizing: border-box}
+    .striprow > * {flex: none}
+    .topbar {gap: 0.35em; padding: 0.5em 0 0.8em}
+    .row {grid-template-columns: 1fr; gap: 0.35em}
+    .rctl {justify-content: flex-start}
+    .statrow {grid-template-columns: 1fr 1fr 1fr; gap: 0.25em 0.5em}
+    .statrow > span:first-child {grid-column: 1 / -1}
+    .statrow.head {display: none}
+    .stats input {text-align: center}
+    .dosave {right: 0.7em; bottom: 0.7em; font-size: 1.25em}
 }

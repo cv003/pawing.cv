@@ -1,25 +1,3 @@
-/*
-
-  opens a Chuzzle 2 save in the browser and writes it back out. nothing leaves
-  the page - there is no upload anywhere in here.
-
-  the two encrypted files are a repeating-key xor and nothing else, which is
-  all IOBuffer::Encrypt does. the keys are string literals in the binary, and
-  the bare "%s" in each is part of the key rather than a placeholder: Profile::
-  Load memcpys the string verbatim, so dropping those two characters shifts
-  everything past index 122 into noise. see datainfo/README.md.
-
-  a settings file is held as latin-1 text, one character per byte, so the parts
-  this page does not understand - the board in progress, the driver blob -
-  survive a round trip untouched. a value can also carry a 0x0a, which splits
-  it over "lines", so rebuilding joins them back rather than reflowing.
-
-  the rest of the backup is raw IOBuffer dumps with no reader written for them
-  yet, so those open as a table of 32 bit words instead. still editable, just
-  honest about what it is showing.
-
-*/
-
 const appkey = "V!qSYY66wOOg8Yf7n1b7!63rmmh8b3K&+%sB16js2V7R?Zeh1591&073!l4rO594*";
 const profilekey = "eh1591&073!l4rO594*V!qSYY<link _close><custom id=button;"
     + "width=(#width/2)-25;height=58;ext=Okay;></link>66wOOh8b3K&+%sB16js2V7R?"
@@ -65,10 +43,6 @@ function scan(text) {
     return out;
 }
 
-/* try both keys and keep whichever actually reads as settings. the test is
-   that the very first line is a name=value, which the unencrypted binaries
-   never manage - xoring one of those does throw up the odd stray match
-   further in, so counting matches alone lets chuzzarium.cfg through */
 function readsave(bytes) {
     let best = null;
     [profilekey, appkey].forEach(function(key) {
@@ -81,10 +55,6 @@ function readsave(bytes) {
     if (!best || !best.fields.length) return null;
     const first = best.fields[0];
     if (first.at !== 0 || first.name.length < 3) return null;
-    /* a file of leading zeros xors straight back into the key, and the key has
-       an "=" in it, so puzzle.dat and chuzzle.save both come out looking like
-       one setting called "eh15". a name that is a prefix of its own key is
-       that, not a save */
     if (best.key.indexOf(first.name) === 0) return null;
     return best;
 }
@@ -131,14 +101,11 @@ function fieldhtml(save, at) {
     const info = fieldinfo(field.name);
     const stamp = readgamedate(field.value);
     const note = info.note || (stamp && info.control !== "date" ? stamp : "");
-    // a long list left in one column leaves a tall hole beside it
     const kind = controlkind(field.value, info);
-    const long = kind === "namelist" || kind === "flags"
-        || (kind === "numlist" && field.value.split(",").length > 6);
-    return "<div class=\"field" + (long ? " span" : "") + "\">"
-        + "<span class=\"tag\"><b>" + escaped(info.label) + "</b>"
+    return "<div class=\"row" + (iswide(kind, field.value) ? " stacked" : "") + "\">"
+        + "<span class=\"rname\"><b>" + escaped(info.label) + "</b>"
         + "<i>" + escaped(field.name) + (note ? " ~ " + escaped(note) : "") + "</i></span>"
-        + controlhtml(at, field.value, info) + "</div>";
+        + "<span class=\"rctl\">" + controlhtml(at, field.value, info) + "</span></div>";
 }
 
 function statrow(save, stat) {
@@ -200,7 +167,7 @@ function paint() {
     if (!list.some(function(s) {return s.key === one.section})) one.section = list[0].key;
     const now = list.find(function(s) {return s.key === one.section});
 
-    document.querySelector(".subtabs").innerHTML = list.map(function(section) {
+    document.querySelector(".parts").innerHTML = list.map(function(section) {
         return "<button type=\"button\" data-key=\"" + section.key + "\""
             + (section.key === one.section ? " class=\"on\"" : "") + ">"
             + escaped(section.name) + "</button>";
@@ -217,11 +184,10 @@ function paint() {
             if (/^(current|best|alltime)_m/.test(field.name)) return;
             if (fieldinfo(field.name).panel === one.section) rows.push(fieldhtml(one.save, at));
         });
-        body = "<div class=\"fields\">" + rows.join("") + "</div>";
+        body = "<div class=\"group\">" + rows.join("") + "</div>";
     }
     host.innerHTML = "<section class=\"panel\"><h2>" + escaped(now.name) + "</h2>"
         + body + "</section>";
-    clearbar();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -287,6 +253,31 @@ function wiresheet() {
             button.parentElement.remove();
             setvalue(at, joinparts(group, sep));
             playsound("click", 0.6);
+        } else if (role === "opencal") {
+            const pick = button.closest(".pick");
+            const open = !pick.classList.contains("open");
+            document.querySelectorAll(".pick.open").forEach(function(one) {
+                one.classList.remove("open");
+            });
+            if (open) {
+                pick.classList.add("open");
+                pick.querySelector(".pickmenu").innerHTML =
+                    calhtml(at, held[openat].save.fields[at].value, 0);
+            }
+            playsound("click", 0.6);
+        } else if (role === "calstep") {
+            const pick = button.closest(".pick");
+            pick.querySelector(".pickmenu").innerHTML =
+                calhtml(at, held[openat].save.fields[at].value, Number(button.dataset.shift));
+            playsound("click", 0.5);
+        } else if (role === "calpick") {
+            const pick = button.closest(".pick");
+            setvalue(at, button.dataset.stamp);
+            pick.querySelector(".picknow").innerHTML =
+                escaped(saydate(readstamp(button.dataset.stamp)))
+                + "<span class=\"caret\">^</span>";
+            pick.classList.remove("open");
+            playsound("click", 0.7);
         } else if (role === "page") {
             held[openat].page = Number(button.dataset.page);
             playsound("click", 0.7);
@@ -310,21 +301,22 @@ function wiresheet() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-function drawtabs() {
-    document.querySelector(".tabs").innerHTML = held.map(function(one, at) {
-        return "<button type=\"button\" class=\"" + (at === openat ? "on" : "")
-            + (one.kind === "binary" ? " raw" : "") + "\" data-at=\"" + at + "\">"
-            + escaped(one.label) + "</button>";
+function stripof(seat, mine) {
+    const strip = document.querySelector(seat);
+    const rows = held.map(function(one, at) {return {one: one, at: at}})
+        .filter(function(pair) {return pair.one.profile === mine});
+    strip.innerHTML = rows.map(function(pair) {
+        return "<button type=\"button\" data-at=\"" + pair.at + "\""
+            + (pair.at === openat ? " class=\"on\"" : "") + ">"
+            + escaped(pair.one.label) + "</button>";
     }).join("");
+    strip.parentElement.style.display = rows.length ? "" : "none";
 }
 
-function clearbar() {
-    const bar = document.querySelector(".bar");
-    const showing = document.body.classList.contains("loaded")
-        && !document.body.classList.contains("athome");
-    document.body.style.paddingBottom = showing ? (bar.offsetHeight + 24) + "px" : "0px";
+function drawtabs() {
+    stripof(".files", true);
+    stripof(".others", false);
 }
-window.addEventListener("resize", clearbar);
 
 function say(what, bad) {
     const seat = document.querySelector(".shout");
@@ -332,23 +324,38 @@ function say(what, bad) {
     seat.classList.toggle("bad", !!bad);
 }
 
+// what each file in a backup actually is, rather than what it is called
+const filenames = {
+    "chuzzle2.cfg": "App settings",
+    "settings.txt": "System",
+    "chuzzarium.cfg": "Chuzzarium",
+    "chuzzarium.cfg.backup": "Chuzzarium backup",
+    "chuzzle.save": "Chuzzle 2 game",
+    "chuzzle1_zen.save": "Chuzzle 1 zen",
+    "puzzle.dat": "Puzzles",
+    "puzzlebonus.dat": "Puzzle bonuses",
+    "_achievements.dat": "Achievements",
+    "storage-info.pb": "Storage info",
+    "profileInstalled": "Install marker",
+};
+
 function shortname(path) {
     const bits = path.split("/").filter(Boolean);
     const file = bits[bits.length - 1];
     const owner = bits[bits.length - 2];
     if (file === "profile.cfg" && owner) return owner;
-    return file;
+    return filenames[file] || file;
 }
 
 function readone(name, bytes) {
     if (!bytes.length) return null;
-    const label = shortname(name);
     const file = name.split("/").pop();
+    const base = {label: shortname(name), file: file, profile: file === "profile.cfg"};
     const crypt = readsave(bytes);
-    if (crypt) return {label: label, file: file, kind: "settings", save: crypt};
+    if (crypt) return Object.assign(base, {kind: "settings", save: crypt});
     const plain = readplain(bytes);
-    if (plain) return {label: label, file: file, kind: "plain", save: plain};
-    return {label: label, file: file, kind: "binary", bytes: new Uint8Array(bytes)};
+    if (plain) return Object.assign(base, {kind: "plain", save: plain});
+    return Object.assign(base, {kind: "binary", bytes: new Uint8Array(bytes)});
 }
 
 async function take(files) {
@@ -435,7 +442,15 @@ function wire() {
         if (e.dataTransfer && e.dataTransfer.files.length) take(e.dataTransfer.files);
     });
 
-    document.querySelector(".tabs").addEventListener("click", function(e) {
+    document.querySelector(".topbar").addEventListener("click", function(e) {
+        const part = e.target.closest(".parts button[data-key]");
+        if (!part) return;
+        held[openat].section = part.dataset.key;
+        playsound("click", 0.7);
+        paint();
+        window.scrollTo(0, 0);
+    });
+    document.querySelector(".filerows").addEventListener("click", function(e) {
         const button = e.target.closest("button[data-at]");
         if (!button) return;
         openat = Number(button.dataset.at);
@@ -444,19 +459,16 @@ function wire() {
         paint();
         window.scrollTo(0, 0);
     });
-    document.querySelector(".subtabs").addEventListener("click", function(e) {
-        const button = e.target.closest("button[data-key]");
-        if (!button) return;
-        held[openat].section = button.dataset.key;
-        playsound("click", 0.7);
-        paint();
-        window.scrollTo(0, 0);
+    document.addEventListener("click", function(e) {
+        if (e.target.closest(".pick")) return;
+        document.querySelectorAll(".pick.open").forEach(function(one) {
+            one.classList.remove("open");
+        });
     });
 
     document.querySelector(".back").addEventListener("click", function() {
         playsound("click", 0.7);
         document.body.classList.toggle("athome");
-        clearbar();
         window.scrollTo(0, 0);
     });
 
@@ -466,13 +478,6 @@ function wire() {
         playsound("click", 0.7);
         grab(bytesof(one), one.file, "application/octet-stream");
         document.body.classList.remove("edited");
-    });
-    document.querySelector(".dotext").addEventListener("click", function() {
-        const one = held[openat];
-        if (!one) return;
-        playsound("click", 0.7);
-        grab(one.kind === "binary" ? one.bytes : rebuild(one.save),
-            one.file.replace(/\.[a-z]+$/, "") + ".txt", "text/plain");
     });
 }
 
