@@ -308,6 +308,7 @@
 
         <div class="codediv">
             <div class="code">IMISSCHUZZLE1</div>
+            <div class="note">grants <span style="color:#b0dab0">zen</span>, <span style="color:#b0dab0">classic</span> and <span style="color:#b0dab0">classic speed</span> at the same time.</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -408,7 +409,7 @@
 
         <div class="codediv">
             <div class="code"><div>ADMODE <img src="assets/images/snap.webp" title="also available in chuzzle snap"></div></div>
-            <div class="note">the only code that is a <span style="color:#e4bf96">prefix</span>. you can put anything after it and it will <span style="color:#b0dab0">still work!</span></div>
+            <div class="note">the only code that is a <span style="color:#e4bf96">prefix</span>, and what you put after it isn't ignored: it's read as a <span style="color:#b0dab0">number</span> and stored as the ad mode, so ADMODE2 picks mode 2. plain ADMODE, or anything that's not a number lands on 0.</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -461,6 +462,7 @@
 
         <div class="codediv">
             <div class="code">CRYHAVOC</div>
+            <div class="note">"cry havoc, and let slip the dogs of war"</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -486,6 +488,7 @@
 
         <div class="codediv">
             <div class="code">ZENRESET</div>
+            <div class="note">there are frequent bug reports about zen mode softlocking, so this is currently the only fix to it.</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -511,6 +514,7 @@
 
         <div class="codediv">
             <div class="code">LEGACY</div>
+            <div class="note">android moved apps into their own private storage, and profiles saved before that move were left behind in the old spot. this asks android where that old spot was and copies the profiles across. it will <span style="color:#e4bf96">not</span> overwrite a game you already have</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -581,6 +585,7 @@
 
         <div class="codediv">
             <div class="code">TERRIBLEART</div>
+            <div class="note">rotates whatever chalkboard drawing is currently in the chuzzarium, so on the <span style="color:#b0dab0">next visit</span> it'll be a fresh one!</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -606,6 +611,7 @@
 
         <div class="codediv">
             <div class="code">TCHECK</div>
+            <div class="note">the golden tournament is only settled once, so if you skipped that day result never shows.. this makes the game ask the server again the next time you land on the <span style="color:#b0dab0">title screen</span>.</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -662,7 +668,7 @@
 
         <div class="codediv">
             <div class="code">XRESCUE<br>XRESCUE1<br>XRESCUE2<br>XRESCUE3<br>XRESCUE4<br>XRESCUE5</div>
-            <div class="note">diagnosis as to why people were losing data; X was added as a prefix to get rid of the original codes, as the issue was tracked down to be android's autosave. <a href="https://www.raptisoft-forums.com/discussion/comment/5897/#Comment_5897"><sup>[1]</sup></a></div>
+            <div class="note">diagnosis as to why people were losing data. X was added as a prefix to get rid of the original codes, as the issue was tracked down to be android's autosave. <a href="https://www.raptisoft-forums.com/discussion/comment/5897/#Comment_5897"><sup>[1]</sup></a></div>
         </div>
 
         <div class="codediv">
@@ -693,6 +699,7 @@
 
         <div class="codediv">
             <div class="code">SNAPSHOT</div>
+            <div class="note">copies the game you have going right now into a spare cloud slot, separate from your normal save. there has to be a game actually in progress or you get the first message instead</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
@@ -739,6 +746,7 @@
 
         <div class="codediv">
             <div class="code"><div>FIXCLOCK <img src="assets/images/snap.webp" title="also available in chuzzle snap"></div></div>
+            <div class="note">these things work based on device's time, so if that clock jumps it can leave them stuck mid action forever, so this skips the check that traps them. the game already tries to do this when it spots the issue, but it might not always be successful at detecting it</div>
             <div class="popup">
                 <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
                 <div class="pucontent">
