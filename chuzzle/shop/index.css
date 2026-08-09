@@ -1,18 +1,9 @@
-/*
-
-  matched against datainfo/media/shop_screen.jpg. the colours are sampled off
-  it rather than guessed: panel #590c74 with an #8b53a2 lip, amber #f7a500
-  hairlines between rows, a lavender #ac87b0 frame around every icon. the ring
-  stack round each shelf is drawn as an svg in index.js, not here - a box
-  shadow cannot follow a shape that steps in on its last row.
-
-*/
-
 body {
     background-color: #0c0823; padding: 0;
     display: block; overflow-x: hidden;
     overflow-y: auto;
-    padding-bottom: 10em;
+    height: auto; min-height: var(--vh);
+    padding-bottom: 14em;
 }
 html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 *::-webkit-scrollbar {display: none !important; width: 0; height: 0}
@@ -40,8 +31,8 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 .dumbcontainer {padding: 0.7em 0 0.9em}
 .shoplogo {
     width: auto !important;
-    height: calc(10vw * var(--boxratio, 1.2));
-    min-height: 70px; max-height: 128px; max-width: 92vw;
+    height: min(140px, 21vw);
+    max-width: 94vw;
     overflow: visible;
     filter: drop-shadow(0 0.07em 0 #000) drop-shadow(0 0.12em 0.06em #000)
         drop-shadow(0 0 0.12em rgba(0,0,0,0.9));
@@ -51,7 +42,7 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     stroke-linejoin: round; stroke-linecap: round; stroke-miterlimit: 1;
 }
 .shoplogo .lgouter {stroke: #feff48; stroke-width: 33}
-.shoplogo .lgmid {stroke: #60204a; stroke-width: 11}
+.shoplogo .lgmid {stroke: #60204a; stroke-width: 16}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -62,13 +53,12 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 }
 .shelfwrap {display: block}
 .shelftitle {
-    margin: 0 0 0.45em 0.1em;
+    margin: 0 0 0.45em -0.5em;
     font-family: "blippo", "chuzzle", system-ui, sans-serif;
     font-size: clamp(1.5em, 5vw, 2.2em);
     font-weight: 400; text-align: left;
-    color: #ffd9bf; letter-spacing: 0.01em;
-    --r: 0.055em; --ink: #2b1226;
-    text-shadow: var(--ring), 0 0.07em 0 #2b1226;
+    color: #fff; letter-spacing: 0.01em;
+    text-shadow: 0 0.07em 0 #2b1226, 0 0 0.2em rgba(0,0,0,0.8);
 }
 
 .shelf {position: relative}
@@ -83,22 +73,17 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     grid-template-columns: repeat(auto-fill, minmax(clamp(100px, 27vw, 116px), 1fr));
 }
 
-/* the 2px gap shows the amber the svg fills behind, which is the hairline the
-   game rules between entries */
 .card {
     position: relative; display: flex;
     flex-direction: column; align-items: center;
     gap: 0.3em; padding: 0.6em 0.35em 0.5em;
     margin: 0; text-transform: none;
     border: none; border-radius: 0;
-    background: linear-gradient(180deg, #8b53a2 0%, #590c74 22%, #590c74 100%);
-    text-align: center;
+    background: none; text-align: center;
 }
-.card:hover {background: linear-gradient(180deg, #a76cbe 0%, #6d1b88 22%, #6d1b88 100%)}
-.card:active {background: linear-gradient(180deg, #6d1b88 0%, #48095e 22%, #48095e 100%)}
+.card:hover {background: rgba(255,255,255,0.11)}
+.card:active {background: rgba(0,0,0,0.22)}
 
-/* one 16 wide atlas of 64px cells, so the cell is picked by position - see
-   datainfo/tools/parseshop.py. the frame round it is the game's own */
 .icon {
     width: 64px; height: 64px;
     border-radius: 9px;
@@ -118,31 +103,35 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     text-shadow: 0 0.12em 0 rgba(0,0,0,0.55);
     padding-top: 0.15em;
 }
-/* in game the count starts a third of the way into the coin and runs past it,
-   sitting a little below the coin's middle */
 .cardcost {
     display: flex; align-items: center;
     justify-content: center; margin-top: auto;
 }
-.cardcost img {height: 2em; width: auto}
+.coin {height: 2.35em; width: auto; flex: none}
 .cardcost b {
-    margin-left: -0.72em; transform: translateY(0.3em);
-    font-weight: 100; font-size: 1.15em;
+    margin-left: -0.88em; transform: translateY(0.34em);
+    font-weight: 100; font-size: 1.2em;
     font-family: "chuzzle", "blippo";
-    color: white; --r: 0.1em; --ink: #c9ab2d;
-    text-shadow: var(--ring);
+    color: white;
 }
 
-.pip {
-    position: absolute; top: 0.2em; z-index: 2;
-    font-size: 0.55em; line-height: 1;
-    padding: 0.24em 0.48em; border-radius: 999px;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-weight: 600; color: #201000;
-    box-shadow: 0 0 0 2px rgba(0,0,0,0.7);
+.cardcost b, .itembody .pricetag b {
+    --r: 0.105em; --ink: #c9ab2d;
+    --ring:
+        calc(var(--r) *  1.000) 0 0 var(--ink),
+        calc(var(--r) *  0.866) calc(var(--r) *  0.500) 0 var(--ink),
+        calc(var(--r) *  0.500) calc(var(--r) *  0.866) 0 var(--ink),
+        0 calc(var(--r) *  1.000) 0 var(--ink),
+        calc(var(--r) * -0.500) calc(var(--r) *  0.866) 0 var(--ink),
+        calc(var(--r) * -0.866) calc(var(--r) *  0.500) 0 var(--ink),
+        calc(var(--r) * -1.000) 0 0 var(--ink),
+        calc(var(--r) * -0.866) calc(var(--r) * -0.500) 0 var(--ink),
+        calc(var(--r) * -0.500) calc(var(--r) * -0.866) 0 var(--ink),
+        0 calc(var(--r) * -1.000) 0 var(--ink),
+        calc(var(--r) *  0.500) calc(var(--r) * -0.866) 0 var(--ink),
+        calc(var(--r) *  0.866) calc(var(--r) * -0.500) 0 var(--ink);
+    text-shadow: var(--ring);
 }
-.pipnotable {right: 0.2em; background: #ffd42a}
-.piplocked {left: 0.2em; background: #ff9d7c}
 
 .empty {
     padding: 4em 0; text-align: center;
@@ -156,57 +145,67 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     position: fixed; z-index: 6;
     left: 0; right: 0; bottom: 0;
     display: flex; flex-direction: column;
-    align-items: center; gap: 0.55em;
-    padding: 1.2em 0.75em 0.85em;
-    background: linear-gradient(180deg, rgba(12,8,35,0), #0c0823 42%);
+    align-items: center; gap: 0.5em;
+    padding: calc(var(--u) * 0.12) 0.75em calc(var(--u) * 0.04);
+    background: linear-gradient(180deg, rgba(12,8,35,0), #0c0823 38%);
+    pointer-events: none;
 }
+.bar > * {pointer-events: auto}
 
 .tabs {
-    display: flex; flex-wrap: wrap;
-    justify-content: center; gap: 0.4em;
-}
-/* the in-game buttons, right down to the blue - global.css uppercases every
-   bare button and gives it a top margin, so both go back off here */
-.tabs button {
-    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
-    font-size: clamp(1.05em, 4.4vw, 1.5em); font-weight: 100;
-    text-transform: capitalize; color: white;
-    margin: 0; padding: 0.08em 0.85em 0.18em;
-    border: none; border-radius: 0.28em;
-    background: linear-gradient(150deg, #5a3ff0 0%, #132fbf 32%, #132fbf 78%, #8fa0ef 100%);
-    box-shadow: 0 0 0 2px #05061e;
-    --r: 0.05em; --ink: #000;
-    text-shadow: var(--ring);
-}
-.tabs button:active {transform: translateY(0.06em)}
-.tabs button.on {
-    background: linear-gradient(150deg, #b06cff 0%, #7a25e0 32%, #5a12b4 78%, #cfa8f2 100%);
-    box-shadow: 0 0 0 2px #1c0230;
+    position: relative; z-index: 6;
+    width: min(calc(var(--u) * 0.68), calc(100vw - 2.4em));
+    display: flex; overflow: hidden;
+    border-radius: calc(var(--u) * 0.024) calc(var(--u) * 0.024) 0 0;
+    clip-path: inset(-1.2vh -1.2vh 0 -1.2vh);
+    box-shadow:
+        0 0 0 calc(var(--u) * 0.012) #60204a,
+        0 0 0 calc(var(--u) * 0.02) #feff48,
+        0 0 0 calc(var(--u) * 0.032) rgba(0,0,0,0.5);
 }
 
-/* the daily-do search box, same rings and the same chuzzle face */
+.tabs button {
+    display: flex; align-items: center; justify-content: center;
+    flex: 1 1 auto; min-width: 0;
+    margin: 0; padding: calc(var(--u) * 0.011) calc(var(--u) * 0.0125);
+    border: none; color: white;
+    font-family: "chuzzle script", "harlow solid", system-ui, sans-serif;
+    font-weight: 100 !important; font-size: calc(var(--u) * 0.038);
+    text-transform: capitalize; white-space: nowrap;
+    text-shadow: var(--ring);
+    background: linear-gradient(140deg, #2a1560 0%, #0a1a5e 30%, #0a1a5e 80%, #5a63a0 100%);
+}
+.tabs button + button {box-shadow: inset calc(var(--u) * 0.004) 0 0 rgba(0,0,0,0.5)}
+.tabs button.on {
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+}
+.tabs button:active {filter: brightness(1.6)}
+
 .findbox {
-    position: relative; display: flex;
-    align-items: center; height: 2.2em;
-    padding: 0 0.2em 0 0.95em;
-    border-radius: 1.1em; background: #2d0027;
+    position: relative; z-index: 7;
+    height: calc(var(--u) * 0.07);
+    width: min(calc(var(--u) * 0.88), calc(100vw - 2.4em));
+    display: flex; align-items: center;
+    padding: 0 calc(var(--u) * 0.012) 0 calc(var(--u) * 0.026);
+    border-radius: calc(var(--u) * 0.03); background: #2d0027;
     box-shadow:
-        0 0 0 0.14em #60204a,
-        0 0 0 0.24em #feff48,
-        0 0 0 0.38em rgba(0,0,0,0.1);
+        0 0 0 calc(var(--u) * 0.012) #60204a,
+        0 0 0 calc(var(--u) * 0.02) #feff48,
+        0 0 0 calc(var(--u) * 0.032) rgba(0,0,0,0.1);
 }
 .findbox input {
-    border: none; outline: none; background: none;
-    color: white; width: min(13em, 44vw);
+    flex: 1 1 auto; min-width: 0; width: auto;
+    border: none; outline: none; background: none; color: white;
     font-family: "chuzzle", "blippo", system-ui, sans-serif;
-    font-weight: 100; font-size: 1em; letter-spacing: 0.03em;
+    font-weight: 100; font-size: calc(var(--u) * 0.03);
+    letter-spacing: 0.03em;
 }
 .findbox input::placeholder {color: darkgrey}
 .findbox input::-webkit-search-cancel-button {-webkit-appearance: none; appearance: none}
 .clearfind {
-    margin: 0 0.15em; padding: 0 0.15em;
+    flex: none; margin: 0 calc(var(--u) * 0.008); padding: 0 calc(var(--u) * 0.004);
     font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-weight: 600; font-size: 1.2em; line-height: 1;
+    font-weight: 600; font-size: calc(var(--u) * 0.044); line-height: 1;
     color: #8a7c96; visibility: hidden; cursor: pointer;
 }
 .findbox.typed .clearfind {visibility: visible}
@@ -214,21 +213,17 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.sortpick {position: relative; margin-left: auto}
+.sortpick {position: relative; flex: none}
 .sortnow {
     display: flex; align-items: center; gap: 0.3em;
-    margin: 0; padding: 0.18em 0.7em 0.22em;
-    border: none; border-radius: 0.9em;
-    text-transform: none; color: #ffd9bf;
-    background: #4a1240;
-    box-shadow: inset 0 0 0 2px #60204a;
+    margin: 0; padding: calc(var(--u) * 0.006) calc(var(--u) * 0.018);
+    border: none; border-radius: calc(var(--u) * 0.024);
+    text-transform: none; color: white;
     font-family: "chuzzle", "blippo", system-ui, sans-serif;
-    font-weight: 100; font-size: 0.92em;
+    font-weight: 100; font-size: calc(var(--u) * 0.028);
     white-space: nowrap;
 }
-.sortnow:active, .sortpick.open .sortnow {background: #67195a; color: #fff}
-/* the font has no v, so the caret is a flipped ^ - same trick as the daily-do
-   jump link */
+.sortnow:active, .sortpick.open .sortnow {background: #67195a; color: white}
 .sortnow .caret {
     display: inline-block; font-size: 0.9em;
     transform: translateY(0.28em) scaleY(-1);
@@ -251,26 +246,22 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     margin: 0; padding: 0.28em 0.8em 0.34em;
     border: none; border-radius: 0.45em;
     text-transform: none; text-align: left;
-    color: #d6c3e8; background: none;
+    color: white; background: none;
     font-family: "chuzzle", "blippo", system-ui, sans-serif;
     font-weight: 100; font-size: 0.95em;
     white-space: nowrap;
 }
 .sortmenu button:hover {background: #4a1240; color: white}
-.sortmenu button.on {background: #67195a; color: #ffd9bf}
+.sortmenu button.on {background: #67195a}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the popup is sized in --u on the daily-do, which has a fixed stage - this
-   page is a plain scrolling document, so it goes by the viewport instead */
 .calwrap .popup {width: min(420px, calc(100vw - 100px))}
 .calwrap .closebtn {
     top: -24px; right: -30px;
     width: 48px; height: 48px;
 }
 
-/* global.css lets the blue box run the full width, which throws the label and
-   its value to opposite edges - the extra inset pulls them back together */
 .itembody {
     gap: 0.5em;
     padding-left: 1.6em !important;
@@ -303,7 +294,6 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
         0 0.12em 0.2em rgba(0,0,0,0.4);
     margin-bottom: 0.3em;
 }
-/* the shop writes the blurb in bold italic lavender */
 .itembody .blurb {
     background: none !important; box-shadow: none !important;
     padding: 0 !important; top: 0 !important;
@@ -319,11 +309,10 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     padding: 0 !important; top: 0 !important;
     width: auto !important;
 }
-.itembody .pricetag img {height: 2.5em; width: auto}
+.itembody .pricetag .coin {height: 2.8em}
 .itembody .pricetag b {
-    margin-left: -0.72em; transform: translateY(0.3em);
+    margin-left: -0.88em; transform: translateY(0.34em);
     font-weight: 100; font-size: 1.6em;
     font-family: "chuzzle", "blippo";
-    color: white; --r: 0.1em; --ink: #c9ab2d;
-    text-shadow: var(--ring);
+    color: white;
 }

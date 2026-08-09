@@ -1,25 +1,3 @@
-/*
-
-  every item the Chuzzarium shop can sell, straight out of the game's own
-  data/chuzzleshop.cfg. datainfo/tools/parseshop.py turns that file into
-  shop.json and packs Chuzzarium_DYNA/Icon[NNN].png into one atlas.
-
-  the field meanings are read off Shop::Initialize, not guessed:
-    type       wallpaper 1, food 2, gizmo 3, deko 4, scene 14 - the number is
-               the tab the item lands in, and gizmo and deko share one
-    data       atoi'd, the id the Chuzzarium builds the object from
-    gizmotype  a csv of the shapes one entry can turn into, so "Snow Globe"
-               with six numbers is six collectables under one shop card
-    musthave   a gift id: the item is not in the shop at all until HasGift()
-    cflag      a | separated list, and NOTABLE is the only flag the game reads
-    init       starting state handed to the object, always "1,0-68,0" here
-
-  one shelf per <gizmogroup>, ungrouped items first. the shelf frame is drawn
-  as an svg rather than a box-shadow so the last row can stop where the items
-  do and the rings still bend round the step - see drawframe().
-
-*/
-
 const shopfile = "shop.json";
 const atlascols = 16;
 const atlascell = 64;
@@ -37,8 +15,6 @@ const sorts = [
     {key: "name", label: "By name"},
 ];
 
-// scene items only appear once you own gift 109, and Shop::Initialize drops
-// anything with an unmet musthave before the panel ever sees it
 function locked(item) {return !!item.musthave || item.type === "scene"}
 
 function capital(text) {
@@ -87,7 +63,6 @@ function sorted(list) {
     return list;
 }
 
-// ungrouped first with no heading, then the gizmogroups in cfg order
 function shelved(list) {
     const loose = list.filter(function(item) {return !item.group});
     const out = loose.length ? [{name: null, items: sorted(loose)}] : [];
@@ -110,14 +85,17 @@ function shelved(list) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+function tintof(item) {
+    if (locked(item)) return "grey";
+    return item.notable ? "gold" : "plain";
+}
+
 function cardof(item, at) {
-    const pips = (item.notable ? "<span class=\"pip pipnotable\">Notable</span>" : "")
-        + (locked(item) ? "<span class=\"pip piplocked\">Hidden</span>" : "");
-    return "<button class=\"card\" type=\"button\" data-at=\"" + at + "\">"
-        + pips
+    return "<button class=\"card\" type=\"button\" data-at=\"" + at + "\""
+        + " data-tint=\"" + tintof(item) + "\">"
         + "<span class=\"icon\" style=\"" + iconstyle(item.icon, 64) + "\"></span>"
         + "<span class=\"cardname\">" + capital(escaped(item.name)) + "</span>"
-        + "<span class=\"cardcost\"><img src=\"assets/coin.webp\" alt=\"\">"
+        + "<span class=\"cardcost\"><img class=\"coin\" src=\"assets/coin.webp\" alt=\"\">"
         + "<b>x" + item.cost + "</b></span></button>";
 }
 
@@ -125,7 +103,7 @@ function draw() {
     const host = document.querySelector(".shelves");
     const list = wanted();
     if (!list.length) {
-        host.innerHTML = "<div class=\"empty\">Nothing matches that</div>";
+        host.innerHTML = "<div class=\"empty\">No matches...</div>";
         return;
     }
     host.innerHTML = shelved(list).map(function(rack) {
@@ -141,13 +119,6 @@ function draw() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the ring stack raptisoft draws round a list, from the content outward. as an
-   inset box-shadow every layer keeps the element's own corner radius instead of
-   shrinking it, and a rectangle cannot step in anyway - so it is drawn here as
-   one path stroked several times over, widest first, with the fill last on top.
-   every stroke is centred on the path, so each colour shows from the previous
-   half-width out to its own, and stroke-linejoin rounds all of it including
-   the inside corner of the step. */
 const rings = [
     ["rgba(0,0,0,0.55)", 15],
     ["#8b0aa2", 13],
@@ -191,8 +162,6 @@ function frameshape(grid) {
     const stepx = last.offsetLeft + last.offsetWidth + framepad;
     const stepy = last.offsetTop - gridgap + framepad;
     const p = framepad;
-    // the grid keeps its full width whatever it holds, so a shelf that does not
-    // fill its last row has to be cut back to where the items actually stop
     if (stepx >= w + p - 0.5) {
         return [[-p, -p], [w + p, -p], [w + p, h + p], [-p, h + p]];
     }
@@ -201,6 +170,25 @@ function frameshape(grid) {
     }
     return [[-p, -p], [w + p, -p], [w + p, stepy], [stepx, stepy], [stepx, h + p], [-p, h + p]];
 }
+
+const tints = {
+    plain: ["#8b53a2", "#590c74"],
+    grey: ["#8e8e93", "#3a3a40"],
+    gold: ["#d8ae43", "#6f4c06"],
+};
+
+function shelfgradient(id, kind, top, bottom) {
+    const pair = tints[kind] || tints.plain;
+    return "<linearGradient id=\"" + id + "\" gradientUnits=\"userSpaceOnUse\""
+        + " x1=\"0\" y1=\"" + top + "\" x2=\"0\" y2=\"" + bottom + "\">"
+        + "<stop offset=\"0%\" stop-color=\"" + pair[0] + "\"></stop>"
+        + "<stop offset=\"6%\" stop-color=\"" + pair[1] + "\"></stop>"
+        + "<stop offset=\"94%\" stop-color=\"" + pair[1] + "\"></stop>"
+        + "<stop offset=\"100%\" stop-color=\"" + pair[0] + "\"></stop>"
+        + "</linearGradient>";
+}
+
+let framecount = 0;
 
 function drawframe(shelf) {
     const grid = shelf.querySelector(".grid");
@@ -217,11 +205,31 @@ function drawframe(shelf) {
         return [pt[0] + frameroom, pt[1] + frameroom];
     }), framecurve);
 
-    svg.innerHTML = rings.map(function(ring) {
+    const tag = shelf.dataset.frame || (shelf.dataset.frame = "sh" + (++framecount));
+    const defs = "<defs><clipPath id=\"" + tag + "clip\"><path d=\"" + d + "\"></path></clipPath>"
+        + Object.keys(tints).map(function(kind) {
+            return shelfgradient(tag + kind, kind, frameroom, frameroom + grid.offsetHeight);
+        }).join("") + "</defs>";
+
+    const seats = Array.prototype.map.call(grid.querySelectorAll(".card"), function(card) {
+        return "<rect x=\"" + (card.offsetLeft + frameroom) + "\" y=\"" + (card.offsetTop + frameroom)
+            + "\" width=\"" + card.offsetWidth + "\" height=\"" + card.offsetHeight
+            + "\" fill=\"url(#" + tag + (card.dataset.tint || "plain") + ")\"></rect>";
+    }).join("");
+
+    svg.innerHTML = defs + rings.map(function(ring) {
         return "<path d=\"" + d + "\" fill=\"none\" stroke=\"" + ring[0] + "\""
             + " stroke-width=\"" + (ring[1] * 2) + "\" stroke-linejoin=\"round\"></path>";
-    }).join("") + "<path d=\"" + d + "\" fill=\"#f7a500\" stroke=\"none\"></path>";
+    }).join("")
+        + "<path d=\"" + d + "\" fill=\"#f7a500\" stroke=\"none\"></path>"
+        + "<g clip-path=\"url(#" + tag + "clip)\">" + seats + "</g>";
 }
+
+function clearbar() {
+    const bar = document.querySelector(".bar");
+    if (bar) document.body.style.paddingBottom = (bar.offsetHeight + 28) + "px";
+}
+window.addEventListener("resize", clearbar);
 
 let watcher = null;
 function watchshelves() {
@@ -234,6 +242,7 @@ function watchshelves() {
         drawframe(shelf);
         if (watcher) watcher.observe(shelf.querySelector(".grid"));
     });
+    clearbar();
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -255,11 +264,11 @@ function facts(item) {
     }
     rows.push(["Icon", "#" + item.icon]);
     if (item.init) rows.push(["Init", escaped(item.init)]);
-    if (item.notable) rows.push(["Flag", "NOTABLE"]);
+    if (item.notable) rows.push(["Flag", "Notable!"]);
     if (item.musthave) {
-        rows.push(null, ["Hidden until", "gift <b>" + item.musthave + "</b> is won"]);
+        rows.push(null, ["Hidden until", "Gift <b>" + item.musthave + "</b> is won"]);
     } else if (item.type === "scene") {
-        rows.push(null, ["Hidden until", "gift <b>109</b> is won"]);
+        rows.push(null, ["Hidden until", "Gift <b>109</b> is won"]);
     }
     return "<div class=\"facts\">" + rows.map(function(row) {
         if (!row) return "<span class=\"gap\"></span>";
@@ -271,8 +280,6 @@ function slugof(name) {
     return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-// item names run much longer than the "Player Info" sort of title the logo
-// was built for, so the height comes down until the trimmed box fits across
 function fitlogo(svg) {
     const box = (svg.getAttribute("viewBox") || "").split(/\s+/).map(Number);
     if (box.length < 4 || !box[2] || !box[3]) return;
@@ -290,7 +297,7 @@ function openitem(item) {
     wrap.querySelector(".itembody").innerHTML =
         "<span class=\"bigicon\" style=\"" + iconstyle(item.icon, 96) + "\"></span>"
         + (item.desc ? "<div class=\"blurb\">" + escaped(item.desc) + "</div>" : "")
-        + "<div class=\"pricetag\"><img src=\"assets/coin.webp\" alt=\"\">"
+        + "<div class=\"pricetag\"><img class=\"coin\" src=\"assets/coin.webp\" alt=\"\">"
         + "<b>x" + item.cost.toLocaleString("en") + "</b></div>"
         + facts(item);
     openpopup(wrap);
@@ -339,8 +346,6 @@ function maketabs() {
     });
 }
 
-// a real <select> cannot be styled anywhere near the rest of this, so the
-// picker is a button and a list that opens upward out of the search bar
 function makesort() {
     const pick = document.querySelector(".sortpick");
     const now = pick.querySelector(".sortnow");
@@ -414,16 +419,12 @@ fetch(shopfile).then(function(reply) {
     return reply.json();
 }).then(function(got) {
     book = got;
-    maketabs();
-    makesort();
-    wire();
-    draw();
+    maketabs(); makesort();
+    wire(); draw();
     const want = new URL(location.href).searchParams.get("item");
     const found = want && book.items.find(function(item) {return slugof(item.name) === want});
     if (found) openitem(found);
 }).catch(function() {
-    document.querySelector(".shelves").innerHTML =
-        "<div class=\"empty\">The shop data would not load</div>";
+    document.querySelector(".shelves").innerHTML = "<div class=\"empty\">Couldn't load data :(</div>";
 });
-
 loadsounds(["click"]);
