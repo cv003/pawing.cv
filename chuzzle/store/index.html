@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>Chuzzle Shop</title>
+        <link rel="icon" type="image/webp" href="../assets/images/icons/store.webp">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/blippo.woff2">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/fonts/harlowsolidlet.woff2">
+        <link rel="preload" as="image" href="assets/icons.webp">
+        <link rel="stylesheet" href="../src/base.css">
+        <link rel="stylesheet" href="../src/global.css">
+        <link rel="stylesheet" href="index.css">
+
+        <link rel="stylesheet" href="../src/cursor.css">
+</head>
+    <body>
+
+        <div class="bg"></div>
+
+        <div class="dumbcontainer">
+            <svg class="logo" viewBox="0 0 900 170">
+                <defs>
+                    <linearGradient id="lgrgb" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#f9f"/><stop offset="20%" stop-color="#c9f"/>
+                        <stop offset="40%" stop-color="#9bf"/><stop offset="50%" stop-color="#aff"/>
+                        <stop offset="60%" stop-color="#afa"/><stop offset="70%" stop-color="#ffa"/>
+                        <stop offset="90%" stop-color="#f98"/><stop offset="100%" stop-color="#f98"/>
+                    </linearGradient>
+                </defs>
+                <g><text x="30" y="130" class="lgblack">Chuzzle Shop</text>
+                    <text x="30" y="130" class="inner">Chuzzle Shop</text></g>
+            </svg>
+        </div>
+
+        <div class="bar">
+            <div class="tabs"></div>
+            <div class="tools">
+                <label class="findbox">
+                    <input type="text" placeholder="Find an item..." spellcheck="false">
+                    <span class="clearfind">&times;</span>
+                </label>
+                <label class="sortbox">
+                    <select class="sort">
+                        <option value="shop">Shop order</option>
+                        <option value="cheap">Cheapest first</option>
+                        <option value="dear">Priciest first</option>
+                        <option value="name">By name</option>
+                        <option value="group">By group</option>
+                    </select>
+                </label>
+            </div>
+            <div class="tally"></div>
+        </div>
+
+        <div class="grid"></div>
+
+        <div class="calwrap" data-role="item">
+            <div class="popup">
+                <button class="closebtn" type="button" aria-label="Close">
+                    <img src="../assets/images/close.png" alt="">
+                </button>
+                <div class="puglows"><span class="puw"></span><span class="pur"></span></div>
+                <div class="pucontent">
+                    <svg class="logo" viewBox="0 0 900 170">
+                        <g><text x="30" y="130" class="lgblack">Item</text>
+                            <text x="30" y="130" class="inner">Item</text></g>
+                    </svg>
+                    <div class="itembody"></div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+    <script src="../src/global.js"></script>
+    <script src="index.js"></script>
+</html>

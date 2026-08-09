@@ -1,184 +1,3 @@
-:root {
-    --baseu: min(var(--vh) * 0.5625, 100vw); 
-    --gu: calc(var(--u) / 414)
-}
-
-.sky {
-    position: fixed; inset: 0;
-    z-index: 0; overflow: hidden;
-    isolation: isolate; pointer-events: none;
-    background-color: black;
-}
-
-.bg, .pillars, .bigstars, .stripes, .vignette {
-    position: absolute; inset: 0;
-    pointer-events: none;
-}
-.bg {
-    z-index: 2; opacity: 0.45;
-    mix-blend-mode: screen; overflow: hidden
-}
-.bg::before {
-    content: ""; position: absolute;
-    left: 0; right: 0;
-    top: calc(var(--u) * -0.44); bottom: calc(var(--u) * -0.44);
-    background-image: url("assets/images/stars.webp");
-    background-repeat: repeat;
-    background-size: calc(var(--u) * 0.44) calc(var(--u) * 0.44);
-    animation: skydrift 90s linear infinite;
-}
-@keyframes skydrift {
-    from {transform: translate3d(0, 0, 0)}
-    to {transform: translate3d(0, calc(var(--u) * -0.44), 0)}
-}
-
-.vignette {
-    z-index: 3;
-    background: linear-gradient(180deg,
-        #050177 0%, #050177 4%,
-        rgba(5,1,119,0) 16%, rgba(5,1,119,0) 92%,
-        #050177 100%);
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-.sky, .pillar, body {transition: background-color 0.45s ease}
-.golden body, .golden .sky {background-color: #ff8000}
-
-.vignette::after {
-    content: ""; position: absolute; inset: 0;
-    opacity: 0; transition: opacity 0.45s ease;
-    background: linear-gradient(180deg,
-        #ffff80 0%, #ffff80 4%,
-        rgba(255,255,128,0) 16%, rgba(255,255,128,0) 92%,
-        #ffff80 100%);
-}
-.golden .vignette::after {opacity: 1}
-.golden .plred, .golden .plamber, .golden .plmagenta {
-    background: #fe9b00;
-    --pltop: #fec800; --plmid: #feb200;
-}
-
-/* the star arcs are masked out of the corners behind these, so the group can
-   take a little transparency and let the stripes run through it */
-.pillars {
-    z-index: 5; left: 50%;
-    width: var(--u); right: auto;
-    transform: translateX(-50%);
-    opacity: 0.92;
-}
-.pillars.right {transform: translateX(-50%) scaleX(-1)}
-
-.pillar {
-    position: absolute; bottom: 0;
-    width: calc(var(--gu) * 67);
-    border-radius: 999px 999px 0 0;
-    box-shadow: 0 0 0 calc(var(--gu) * 5) rgba(0,0,0,0.2);
-}
-.pillar::before {
-    content: ""; position: absolute;
-    inset: 0; border-radius: inherit;
-    background: radial-gradient(circle calc(var(--gu) * 55)
-        at calc(var(--gu) * 20) calc(var(--gu) * 14),
-        var(--pltop) 0%, var(--plmid) 42%, transparent 100%);
-}
-
-.plred {
-    top: calc(var(--gu) * 206);
-    left: calc(var(--gu) * -13.5);
-    background: #fe4203; z-index: 1;
-    --pltop: #fe9876; --plmid: #fe6d3c;
-}
-.plamber {
-    top: calc(var(--gu) * 306);
-    left: calc(var(--gu) * 56.5);
-    background: #fe9b0f; z-index: 2;
-    --pltop: #fec87c; --plmid: #feb246;
-}
-.plmagenta {
-    top: calc(var(--gu) * 406);
-    left: calc(var(--gu) * 16.5);
-    background: #c009c6; z-index: 3;
-    --pltop: #dd79e0; --plmid: #ce41d3;
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-/* the arcs run wider than the screen, so their far ends sit exactly where the
-   pillars stand and would show straight through once the pillars stop being
-   opaque. two mask layers unioned together keep everything above the tallest
-   pillar's cap plus the middle of the screen, which cuts the ends off in the
-   bottom corners and nothing else */
-.bigstars {
-    z-index: 4; left: 50%;
-    width: var(--u); right: auto;
-    transform: translateX(-50%);
-    overflow: hidden;
-    -webkit-mask-image:
-        linear-gradient(to bottom, #000 0 calc(var(--gu) * 200), transparent calc(var(--gu) * 240)),
-        linear-gradient(to right, transparent 0 22%, #000 32% 68%, transparent 78% 100%);
-    mask-image:
-        linear-gradient(to bottom, #000 0 calc(var(--gu) * 200), transparent calc(var(--gu) * 240)),
-        linear-gradient(to right, transparent 0 22%, #000 32% 68%, transparent 78% 100%);
-    -webkit-mask-composite: source-over;
-    mask-composite: add;
-}
-.ringclip {
-    position: absolute; left: 50%;
-    transform: translate(-50%, -50%);
-    -webkit-mask-image: linear-gradient(to bottom,
-        #000 0 62%, rgba(0,0,0,0.35) 70%, transparent 76%);
-    mask-image: linear-gradient(to bottom,
-        #000 0 62%, rgba(0,0,0,0.35) 70%, transparent 76%);
-}
-.ring {
-    position: absolute; left: 50%; top: 50%;
-    width: 0; height: 0;
-    animation: ringturn 90s linear infinite;
-}
-.ring img {
-    position: absolute;
-    opacity: 0.85; transform: translate(-50%, -50%);
-}
-@keyframes ringturn {
-    from {transform: rotate(0deg)}
-    to {transform: rotate(-360deg)}
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-.stripes {
-    z-index: 1; overflow: hidden;
-    opacity: 0.8; 
-}
-.stripes.front {
-    z-index: 6;
-    opacity: 0.5;
-}
-.golden .stripes {opacity: 0.4}
-.golden .stripes.front {opacity: 0.22}
-.stripes::before {
-    content: ""; position: absolute;
-    top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.05);
-    left: calc(var(--u) * -0.05); right: calc(var(--gu) * -1260);
-    background-image: repeating-linear-gradient(-45deg,
-        #feaa3a 0 calc(var(--gu) * 106.066),
-        #ea5e47 calc(var(--gu) * 106.066) calc(var(--gu) * 212.132),
-        #b6554e calc(var(--gu) * 212.132) calc(var(--gu) * 318.198),
-        #713e4f calc(var(--gu) * 318.198) calc(var(--gu) * 424.264),
-        #524b8f calc(var(--gu) * 424.264) calc(var(--gu) * 530.330),
-        #713e4f calc(var(--gu) * 530.330) calc(var(--gu) * 636.396),
-        #b6554e calc(var(--gu) * 636.396) calc(var(--gu) * 742.462),
-        #ea5e47 calc(var(--gu) * 742.462) calc(var(--gu) * 848.528));
-    animation: stripescroll 100s linear infinite;
-}
-@keyframes stripescroll {
-    from {transform: translate3d(0, 0, 0)}
-    to {transform: translate3d(calc(var(--gu) * -1200), 0, 0)}
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
 .dailydo, .ui {
     position: fixed; top: 0; left: 50%;
     height: var(--vh); width: var(--u);
@@ -237,18 +56,21 @@
 .scores > div {position: absolute; left: 0; right: 0}
 .scores.blurring {filter: url(#vblur)}
 
-/* days the game never played, and days too old for even a release to hold */
 .noscores {
     position: absolute; inset: 0; z-index: 2;
     display: none; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 3cqw; pointer-events: none;
+}
+.empty .noscores {display: flex}
+.empty .jumplink {display: none}
+
+.noscores span {
     font-family: "chuzzle", "blippo"; font-size: 6cqw;
     font-weight: 100; color: #ffd9bf;
     --r: 0.13em; --ink: #261b19;
     text-shadow: var(--ring), 0 0.14em 0 #261b19;
 }
-.empty .noscores {display: flex}
 .noscores img {
     width: 34cqw; height: auto;
     filter: drop-shadow(0 0.06em 0.12em rgba(0,0,0,0.55));
@@ -486,6 +308,59 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+.profile .sparkbox {
+    width: 100%; margin-top: calc(var(--u) * 0.03);
+    background: none; box-shadow: none;
+    border-radius: 0; padding: 0; top: 0;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600; font-size: calc(var(--u) * 0.028);
+    letter-spacing: 0.03em; text-align: left;
+}
+.profile .sparkbox i {color: #8ea2e0; font-style: normal}
+.profile .sparkbox u {
+    display: block; color: white;
+    text-decoration: none; text-align: center;
+    margin-top: calc(var(--u) * 0.008);
+    font-size: 0.88em;
+}
+.profile .sparkbox u b {color: #ffe07a; font-weight: inherit}
+.profile .sparkwait {color: #6f80b4; font-style: italic}
+
+.spark {
+    display: block; width: 100%;
+    aspect-ratio: 3 / 1; height: auto;
+    margin-top: calc(var(--u) * 0.012);
+    background: rgba(0,0,0,0.22);
+    border-radius: calc(var(--u) * 0.012);
+    box-shadow: inset 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.45);
+}
+.sparkfill {fill: rgba(255,224,122,0.16); stroke: none}
+.sparkline {
+    fill: none; stroke: #ffe07a;
+    stroke-width: 2.6; stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.sparkdot {fill: #fff2c4; stroke: #8a5a1c; stroke-width: 1.6}
+.sparkbest {fill: #fff; stroke: #b8791f; stroke-width: 2}
+.sparkgap {fill: none; stroke: rgba(255,255,255,0.22); stroke-width: 1.4}
+.sparktick {
+    fill: #6f80b4; font-size: 10px; text-anchor: end;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-weight: 600;
+}
+
+.profile .pucontent .sparkaxis {
+    display: flex; flex-direction: row;
+    justify-content: space-between; align-items: baseline;
+    width: 100%; top: 0; padding: 0;
+    margin-top: calc(var(--u) * 0.004);
+    background: none; box-shadow: none;
+    border-radius: 0; color: #6f80b4;
+    font-size: 0.8em;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
 .switcher {
     position: fixed; inset: 0;
     pointer-events: none; z-index: 4;
@@ -664,9 +539,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-
-/*//////////////////////////////////////////////////////////////////////*/
-
 .burstlayer {
     position: absolute; inset: 0;
     overflow: hidden; pointer-events: none; z-index: 0;
@@ -751,9 +623,7 @@
     text-shadow: var(--ring);
     box-shadow: 0 0 0 calc(var(--u) * 0.003) rgba(0,0,0,0.75);
 }
-/* dimmed only means nothing can be shown for that day at all - past the live
-   fortnight with no release keeping it. archived days and the week ahead are
-   both open, the week ahead just has nothing in it yet */
+
 .pucontent .calgrid button:not(.live) {
     opacity: 0.4; pointer-events: none;
 }
@@ -890,7 +760,7 @@
 .glossarycontent .rulesitem img {width: 2.6em; height: 2.6em}
 .glossarycontent .rulesitem > span {font-size: calc(var(--u, 16px) * 0.036)}
 
-/* if anyone wants to make chuzzle rap you could rhyme these two.. just saying.. */
+/* you could rhyme these two.. just saying.. */
 .blinky, .stinky {animation: rulesblink 1.2s steps(1) infinite}
 @keyframes rulesblink {
     0%, 50% {color: #ccffff}

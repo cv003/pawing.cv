@@ -79,7 +79,7 @@ function readboard(text) {
 const boards = [
     {key: "main", label: "Daily-Do", title: "Today's Scores"},
     {key: "gold", label: "Golden", title: "Tournament", weekly: true},
-    {key: "chuzzle", label: "Legacy", title: "Legacy Scores"},
+    {key: "legacy", label: "Legacy", title: "Legacy Scores"},
     {key: "snap", label: "Snap", title: "Snap Scores", badge: "assets/images/snap2.webp"}
 ];
 const boardhost = "https://chuzzle.coolsite.cv/dailydo";
@@ -724,10 +724,15 @@ function makeprofile() {
             ? "<button class=\"claim\" type=\"button\">"
                 + (mine ? "Forget me" : "This is me") + "</button>"
             : "";
+        // no id means nothing to look the other days up by, and the golden
+        // board is weekly so a fourteen day sweep would find two points
+        const graph = !noguid && !entry.placeholder && typeof sparkloading === "function"
+            ? sparkloading() : "";
         body.innerHTML = '<div class="facts">' + facts.map(function(f) {
             if (!f) return '<span class="gap"></span>';
             return "<i>" + f[0] + "</i><u>" + f[1] + "</u>";
-        }).join("") + "</div>" + button;
+        }).join("") + "</div>" + graph + button;
+        if (graph) drawhistory(body, boards[boardat].key, entry.id);
 
         if (button) body.querySelector(".claim").onclick = function() {
             try {
@@ -747,8 +752,6 @@ function makeprofile() {
         if (!noguid) {
             const url = new URL(location.href);
             url.searchParams.set("player", entry.id);
-            // pin board/day explicitly even at their defaults, so a link opened
-            // on "today" still points at the same day once today has moved on
             if (!allmode) {
                 url.searchParams.set("board", boards[boardat].key);
                 url.searchParams.set("day", daykey(dayback(dayat)));
@@ -768,10 +771,6 @@ function daykey(date) {
     return date.getFullYear() + "-" + pad(date.getDate()) + "-" + pad(date.getMonth() + 1);
 }
 
-/* the grid is six rows: four weeks of past, the week today sits in, and one
-   week ahead. anything past the live fourteen days is still reachable as long
-   as a release holds it, and the week ahead stays open for poking at even
-   though the game has not played it yet - those days just come back empty */
 const gridrows = 6;
 const gridahead = 1;
 
@@ -784,7 +783,6 @@ function gridfirst() {
     return monday;
 }
 
-// how far either side of today the calendar can reach, in "days back" units
 function calendaroldest() {
     const day = 86400000;
     const today = new Date();
@@ -820,8 +818,6 @@ function buildcalendar() {
         cell.dataset.back = back;
         cell.className = (at.getTime() === today.getTime() ? "today " : "")
             + (weekend ? "weekend " : "")
-            // live for the days raptisoft still answers for, and for the week
-            // ahead. older ones wait to hear whether a release covers them
             + (back <= calendarreach ? "live" : "");
         grid.appendChild(cell);
     }
@@ -833,7 +829,6 @@ function buildcalendar() {
         pickday(Number(cell.dataset.back));
     });
 
-    // the archived days arrive late, so the old cells light up when they do
     if (typeof archivedays === "function") {
         archivedays().then(function(days) {
             grid.querySelectorAll("button[data-day]").forEach(function(cell) {
@@ -949,9 +944,6 @@ function updatejumplinks() {
     bottom.classList.toggle("show", at < contentheight() - host.clientHeight - jumpslack);
 }
 
-// fling only exposes at()/jump(), both instant - this animates jump() over
-// several frames and blurs .scores vertically while it's moving fast, to
-// fake the look of a quick motion-blurred scroll instead of a hard cut
 function smoothjump(to) {
     const scores = document.querySelector(".scores");
     const blur = document.querySelector("#vblur feGaussianBlur");
@@ -987,8 +979,6 @@ if (jumpbottombtn) jumpbottombtn.addEventListener("click", function() {
 });
 
 function pollscroll() {
-    // reacts to the list's content length changing too (board switch, search,
-    // initial load), not just scroll position, so just recheck every frame
     updatejumplinks();
     requestAnimationFrame(pollscroll);
 }
@@ -999,19 +989,19 @@ const fontsdone = document.fonts && document.fonts.ready
 
 Promise.all([countriesready.then(loadboard), fontsdone]).then(function(got) {
     const count = got[0];
-    paintscene();
-    drawpicks();
+    paintscene(); drawpicks();
+
     relabellogo(document.querySelector(".dumbcontainer .logo"), boardtitle());
     measurelist(host, list);
     claimedat = findclaimed();
     paintrows(0, host);
-    jumptoclaimed();
-    openlinkedplayer();
-    showfooter();
-    showempty();
-    markurl();
+
+    jumptoclaimed(); openlinkedplayer();
+    showfooter(); showempty(); markurl();
+
     if (count) marktitle(count);
     updateswitcherclip();
+    
     if (boards[boardat].weekly) checkgolden();
     setInterval(refreshboard, boardage);
 });
