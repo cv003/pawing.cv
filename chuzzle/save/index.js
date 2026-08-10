@@ -8,6 +8,7 @@ const wordpage = 512;
 
 let held = [];
 let openat = 0;
+let shopitemnames = [];
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -97,7 +98,7 @@ function fieldhtml(save, at) {
     const field = save.fields[at];
     const info = fieldinfo(field.name);
     const stamp = readgamedate(field.value);
-    const note = info.note || (stamp && info.control !== "date" ? stamp : "");
+    const note = info.unknown ? "unknown" : info.note || (stamp && info.control !== "date" ? stamp : "");
     const kind = controlkind(field.value, info);
     return "<div class=\"row" + (iswide(kind, field.value) ? " stacked" : "") + "\">"
         + "<span class=\"rname\"><b>" + escaped(info.label) + "</b>"
@@ -248,7 +249,7 @@ function wiresheet() {
         if (role === "bool") {
             const on = held[openat].save.fields[at].value !== "true";
             setvalue(at, on ? "true" : "false");
-            button.querySelector("img").src = "assets/toggle" + (on ? "on" : "off") + ".webp";
+            button.querySelector("img").src = "assets/images/toggle" + (on ? "on" : "off") + ".webp";
             playsound("click", 0.6);
         } else if (role === "flag") {
             const idx = Number(button.dataset.idx);
@@ -261,7 +262,7 @@ function wiresheet() {
             playsound("click", 0.5);
         } else if (role === "listdrop") {
             const group = button.closest(".namelist");
-            const sep = button.parentElement.querySelector("input").dataset.sep;
+            const sep = button.parentElement.querySelector("select").dataset.sep;
             button.parentElement.remove();
             setvalue(at, joinparts(group, sep));
             playsound("click", 0.6);
@@ -303,12 +304,12 @@ function wiresheet() {
             const sep = button.dataset.sep;
             const chip = document.createElement("span");
             chip.className = "chip";
-            chip.innerHTML = "<input data-at=\"" + at + "\" data-role=\"listpart\""
-                + " data-sep=\"" + escaped(sep) + "\" list=\"shopitems\" value=\"\">"
-                + "<button class=\"drop\" type=\"button\" data-at=\"" + at
+            chip.innerHTML = "<select data-at=\"" + at + "\" data-role=\"listpart\""
+                + " data-sep=\"" + escaped(sep) + "\">" + itemoptions("") + "</select>"
+                + "<button class=\"chipoff\" type=\"button\" data-at=\"" + at
                 + "\" data-role=\"listdrop\">&times;</button>";
             group.insertBefore(chip, button);
-            chip.querySelector("input").focus();
+            chip.querySelector("select").focus();
             playsound("click", 0.6);
         }
     });
@@ -432,6 +433,7 @@ function forgetsave() {
 }
 
 async function take(files) {
+    await fielddataready;
     const found = [];
     for (const file of files) {
         const bytes = new Uint8Array(await file.arrayBuffer());
@@ -497,9 +499,8 @@ function loadnames() {
         return reply.ok ? reply.json() : null;
     }).then(function(book) {
         if (!book) return;
-        document.querySelector("#shopitems").innerHTML = book.items.map(function(item) {
-            return "<option value=\"" + escaped(item.name) + "\"></option>";
-        }).join("");
+        shopitemnames = book.items.map(function(item) {return item.name});
+        if (document.body.classList.contains("loaded")) paint();
     }).catch(function() {});
 }
 
@@ -566,8 +567,11 @@ wire(); wiresheet();
 loadnames();
 loadsounds(["click"]);
 
-if (restore()) {
-    document.body.classList.add("loaded");
-    drawtabs();
-    paint();
-}
+const fielddataready = loadfielddata();
+fielddataready.then(function() {
+    if (restore()) {
+        document.body.classList.add("loaded");
+        drawtabs();
+        paint();
+    }
+});

@@ -50,7 +50,7 @@ function boolbox(at, value) {
     const on = value === "true";
     return "<button class=\"toggle\" type=\"button\""
         + " data-at=\"" + at + "\" data-role=\"bool\">"
-        + "<img src=\"assets/toggle" + (on ? "on" : "off") + ".webp\" alt=\"\" draggable=\"false\">"
+        + "<img src=\"assets/images/toggle" + (on ? "on" : "off") + ".webp\" alt=\"\" draggable=\"false\">"
         + "</button>";
 }
 
@@ -164,7 +164,8 @@ function flagsbox(at, value) {
    evaluated from a save file alone, so the wrapper is dropped and the text
    inside is always shown rather than guessed at */
 function mltohtml(text) {
-    const flat = String(text).replace(/<\/?if[^>]*>/gi, "").replace(/<br\s*\/?>/gi, "\n");
+    const flat = String(text).replace(/<\/?if[^>]*>/gi, "")
+        .replace(/(<br\s*\/?>\s*){2,}/gi, "\n").replace(/<br\s*\/?>/gi, "\n");
     const runs = flat.split(/<color\s+([^>]+)>/i);
     let out = escaped(runs[0]).replace(/\n/g, "<br>");
     for (let i = 1; i < runs.length; i += 2) {
@@ -208,6 +209,21 @@ function numlistbox(at, value) {
         }).join("") + "</div>";
 }
 
+// a fixed set of item names, not free text - a chip that isn't one of them
+// (an id the shop doesn't know, or one from before a rename) stays selected
+// and marked unknown rather than silently dropped
+function itemoptions(bit) {
+    const found = shopitemnames.indexOf(bit) >= 0;
+    let out = bit ? "" : "<option value=\"\"" + (found ? "" : " selected") + "></option>";
+    if (bit && !found) {
+        out += "<option value=\"" + escaped(bit) + "\" selected>(unknown) " + escaped(bit) + "</option>";
+    }
+    return out + shopitemnames.map(function(name) {
+        return "<option value=\"" + escaped(name) + "\"" + (name === bit ? " selected" : "") + ">"
+            + escaped(name) + "</option>";
+    }).join("");
+}
+
 function namelistbox(at, value, sep) {
     // a trailing separator is how the game marks the end, so it is kept
     const tail = value.endsWith(sep);
@@ -216,9 +232,9 @@ function namelistbox(at, value, sep) {
     });
     return "<div class=\"namelist\" data-tail=\"" + (tail ? 1 : 0) + "\">"
         + bits.map(function(bit, idx) {
-            return "<span class=\"chip\"><input data-at=\"" + at + "\" data-role=\"listpart\""
-                + " data-sep=\"" + escaped(sep) + "\" data-idx=\"" + idx + "\""
-                + " list=\"shopitems\" value=\"" + escaped(bit) + "\">"
+            return "<span class=\"chip\"><select data-at=\"" + at + "\" data-role=\"listpart\""
+                + " data-sep=\"" + escaped(sep) + "\" data-idx=\"" + idx + "\">"
+                + itemoptions(bit) + "</select>"
                 + "<button class=\"chipoff\" type=\"button\" data-at=\"" + at + "\""
                 + " data-role=\"listdrop\" data-idx=\"" + idx + "\">&times;</button></span>";
         }).join("")
@@ -249,7 +265,7 @@ function controlhtml(at, value, info) {
 // a list control keeps no state of its own, so a change re-reads every box in
 // the same group and joins them again
 function joinparts(host, sep) {
-    const parts = Array.prototype.map.call(host.querySelectorAll("input"), function(box) {
+    const parts = Array.prototype.map.call(host.querySelectorAll("input, select"), function(box) {
         return box.value;
     });
     if (host.classList.contains("namelist") && host.dataset.tail === "1") parts.push("");

@@ -1,0 +1,72 @@
+{
+    "panels": [
+        {"key": "player", "name": "Player"},
+        {"key": "records", "name": "Records"},
+        {"key": "dailydo", "name": "Daily-Do"},
+        {"key": "puzzles", "name": "Puzzles"},
+        {"key": "runs", "name": "Difficulty"},
+        {"key": "rest", "name": "Other"}
+    ],
+    "statnames": [
+        "mGamesWon", "mHighScore", "mHighestLevelReached", "mBestLevelWinPercent",
+        "mChuzzlesPopped", "mFattyChuzzlesPopped", "mLocksBroken",
+        "mMostLocksOnscreenAtOnce", "mExplosiveChuzzlesCreated",
+        "mExplosiveChuzzlesSploded", "mMostExplosiveOnscreenAtOnce",
+        "mBottlesFilled", "mBonusItemsFound", "mCoinsFound", "mGameOvers"
+    ],
+    "known": {
+        "Name": {"panel": "player", "label": "Profile name", "control": "text"},
+        "Coins": {"panel": "player", "label": "Coins"},
+        "Tips": {"panel": "player", "label": "Tips", "unknown": true},
+        "HasTrophyRoom": {"panel": "player", "label": "Has a trophy room"},
+        "UnlockedGames": {"panel": "player", "label": "Unlocked games", "unknown": true},
+        "SawGames": {"panel": "player", "label": "Games seen", "unknown": true},
+        "BrandNew": {"panel": "player", "label": "Brand new profile"},
+        "New": {"panel": "player", "label": "New"},
+        "FirstGameOver": {"panel": "player", "label": "First game over"},
+        "SoundVolume": {"panel": "player", "label": "Sound volume", "control": "volume"},
+        "MusicVolume": {"panel": "player", "label": "Music volume", "control": "volume"},
+        "TapAndHold": {"panel": "player", "label": "Tap and hold"},
+
+        "LastDaily": {"panel": "dailydo", "label": "Last daily-do"},
+        "LastDailySeed": {"panel": "dailydo", "label": "Last daily seeds", "control": "datelist"},
+        "AwardedDailyDo": {"panel": "dailydo", "label": "Awarded on", "control": "date"},
+        "DDAlreadyPlayedVersion": {"panel": "dailydo", "label": "Played version"},
+        "DDGotXP": {"panel": "dailydo", "label": "Last xp day", "control": "date"},
+        "DDXP": {"panel": "dailydo", "label": "Daily-Do xp"},
+        "DDLevel": {"panel": "dailydo", "label": "Daily-Do level"},
+        "DDStreak": {"panel": "dailydo", "label": "Streak", "unknown": true},
+        "DDStreakDay": {"panel": "dailydo", "label": "Streak day", "note": "days, not a date"},
+        "DDRewards": {"panel": "dailydo", "label": "Reward ids"},
+        "DDPrizes": {"panel": "dailydo", "label": "Prizes taken", "control": "namelist", "sep": "|"},
+        "DDPendingPrizes": {"panel": "dailydo", "label": "Prizes waiting", "control": "namelist", "sep": ","},
+        "DDPendingPrizesBeta1": {"panel": "dailydo", "label": "Prizes waiting (beta)", "control": "namelist", "sep": ","},
+        "FreeDo": {"panel": "dailydo", "label": "Free plays"},
+        "ContinueDailyDo": {"panel": "dailydo", "label": "Continue day", "control": "date"},
+        "ContinueDailyDoVersion": {"panel": "dailydo", "label": "Continue version"},
+        "GoldenOne": {"panel": "dailydo", "label": "Golden one day", "control": "date"},
+        "GoldenOneCount": {"panel": "dailydo", "label": "Golden ones won"},
+        "GoldenTornament": {"panel": "dailydo", "label": "Golden tournament", "note": "spelt that way in the game"},
+        "LastTourneySeed": {"panel": "dailydo", "label": "Last tourney seed"},
+        "GotTrophy": {"panel": "dailydo", "label": "Trophies held", "control": "trophies"},
+        "GotTrophyTime": {"panel": "dailydo", "label": "Trophy dates", "control": "text", "note": "quoted, and the quotes hold commas"},
+        "GotTrophySeed": {"panel": "dailydo", "label": "Trophy seeds"},
+
+        "CurrentPuzzle": {"panel": "puzzles", "label": "Current puzzle"},
+        "RemindPuzzlePosters": {"panel": "puzzles", "label": "Remind about posters"},
+        "announcedpuzzletoday": {"panel": "puzzles", "label": "Announced today"},
+        "BottlesFilled_Zen": {"panel": "puzzles", "label": "Bottles filled in zen"},
+        "HighScore_ClassicChuzzle": {"panel": "puzzles", "label": "Classic high score"},
+        "HighScore_SpeedChuzzle": {"panel": "puzzles", "label": "Speed high score"},
+
+        "WinCount": {"panel": "runs", "label": "Wins per level", "unknown": true},
+        "DifficultyMod": {"panel": "runs", "label": "Difficulty per level"},
+        "CarryDifficultyMod": {"panel": "runs", "label": "Carried difficulty"},
+        "Bonus": {"panel": "runs", "label": "Bonus counters", "unknown": true},
+        "BossBattlesPlayed": {"panel": "runs", "label": "Boss battles played"},
+        "LastBossType": {"panel": "runs", "label": "Last boss types", "control": "numlist"},
+
+        "LastPlayedState": {"panel": "rest", "label": "Board in progress", "binary": true},
+        "OpenGL_Driver_Data": {"panel": "rest", "label": "Driver blob", "binary": true}
+    }
+}
