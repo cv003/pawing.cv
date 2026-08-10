@@ -1,0 +1,501 @@
+{
+    "puzzles": [
+        "THE FUR FLIES",
+        "ZENLIGHTENMENT",
+        "NINETEEN EIGHTY-WHAT?",
+        "THE GREAT CHWAVE",
+        "LEAPING CHUZZLE",
+        "FUZZLECTRIC SYMPHONY",
+        "CHUZZLE FIESTA!",
+        "CHUZZLE WONDERLAND!",
+        "FUZZY LOVE",
+        "BASKET CASE!",
+        "SNUG AS A CHUZZLE!",
+        "THE LONESOME OCTOBER",
+        "CHUZZLES OF CHEER",
+        "KISS ME, I'M FUZZY",
+        "STUFFED CHUZZLES",
+        "MOTHER OF ALL CHUZZLES",
+        "MAY FLOWERS",
+        "JUNE WEDDING",
+        "JULY PICNUZZLE",
+        "AUGUST BEACHES",
+        "SEPTEMBER SCHOOL DAZE",
+        "LAST LEAF OF OCTOBER",
+        "NOVEMBER RAINS",
+        "BRAND NEW JANUARY",
+        "WINDY MARCH",
+        "DECEMBER SNOWY SHUT-IN",
+        "FEBRUARY FIND"
+    ],
+    "pieces": [
+        {
+            "id": 1,
+            "puzzle": 0,
+            "name": "Scruffy Chuzzle",
+            "fname": "Scruffy"
+        },
+        {
+            "id": 2,
+            "puzzle": 0,
+            "name": "Celestial Chuzzle",
+            "fname": "Celestial"
+        },
+        {
+            "id": 3,
+            "puzzle": 0,
+            "name": "Peppermint Chuzzle",
+            "fname": "Peppermint"
+        },
+        {
+            "id": 4,
+            "puzzle": 0,
+            "name": "Mellow Chuzzle",
+            "fname": "Mellow"
+        },
+        {
+            "id": 5,
+            "puzzle": 0,
+            "name": "Minty Chuzzle",
+            "fname": "Limey"
+        },
+        {
+            "id": 100,
+            "puzzle": 0,
+            "name": "Bag of Coins",
+            "fname": "Coins"
+        },
+        {
+            "id": 101,
+            "puzzle": 1,
+            "name": "Happy Coins!",
+            "fname": "CoinsLeft"
+        },
+        {
+            "id": 102,
+            "puzzle": 1,
+            "name": "Happy Coins!",
+            "fname": "CoinsRight"
+        },
+        {
+            "id": 103,
+            "puzzle": 1,
+            "name": "Zen Chuzzle Game!",
+            "fname": "Zen"
+        },
+        {
+            "id": 6,
+            "puzzle": 1,
+            "name": "Shimmery Chuzzle",
+            "fname": "Shimmery"
+        },
+        {
+            "id": 7,
+            "puzzle": 1,
+            "name": "Clementine Chuzzle",
+            "fname": "Clementine"
+        },
+        {
+            "id": 8,
+            "puzzle": 1,
+            "name": "Beryl Chuzzle",
+            "fname": "Beryl"
+        },
+        {
+            "id": 9,
+            "puzzle": 1,
+            "name": "Squeakers Chuzzle",
+            "fname": "Squeakers"
+        },
+        {
+            "id": 10,
+            "puzzle": 2,
+            "name": "Embry Chuzzle",
+            "fname": "Embry"
+        },
+        {
+            "id": 11,
+            "puzzle": 2,
+            "name": "Wintergreen Chuzzle",
+            "fname": "Wintergreen"
+        },
+        {
+            "id": 12,
+            "puzzle": 2,
+            "name": "Bubblegum Chuzzle",
+            "fname": "Bubblegum"
+        },
+        {
+            "id": 104,
+            "puzzle": 2,
+            "name": "Classic Chuzzle!",
+            "fname": "Classic"
+        },
+        {
+            "id": 105,
+            "puzzle": 2,
+            "name": "The Coin Slot!",
+            "fname": "Coinslot"
+        },
+        {
+            "id": 13,
+            "puzzle": 3,
+            "name": "Stinky Chuzzle",
+            "fname": "Skunky"
+        },
+        {
+            "id": 14,
+            "puzzle": 3,
+            "name": "Dotty Chuzzle",
+            "fname": "Dotty"
+        },
+        {
+            "id": 15,
+            "puzzle": 3,
+            "name": "Stormy Chuzzle",
+            "fname": "Stormy"
+        },
+        {
+            "id": 16,
+            "puzzle": 3,
+            "name": "Melony Chuzzle",
+            "fname": "Melony"
+        },
+        {
+            "id": 17,
+            "puzzle": 3,
+            "name": "Squirky Chuzzle",
+            "fname": "Squirky"
+        },
+        {
+            "id": 18,
+            "puzzle": 4,
+            "name": "Tawny Chuzzle",
+            "fname": "Tawny"
+        },
+        {
+            "id": 200,
+            "puzzle": 4,
+            "name": "Grassy Wallpaper",
+            "fname": "Grass"
+        },
+        {
+            "id": 19,
+            "puzzle": 5,
+            "name": "Tutti Chuzzle",
+            "fname": "Tutti"
+        },
+        {
+            "id": 106,
+            "puzzle": 5,
+            "name": "Classic Speed Game!",
+            "fname": "Speed"
+        },
+        {
+            "id": 107,
+            "puzzle": 5,
+            "name": "The Chuzz Trio!",
+            "fname": "Trio"
+        },
+        {
+            "id": 108,
+            "puzzle": 5,
+            "name": "Awesome Piano!",
+            "fname": "Piano"
+        },
+        {
+            "id": 109,
+            "puzzle": 6,
+            "name": "Wide World Pack!",
+            "fname": "wideworld"
+        },
+        {
+            "id": 110,
+            "puzzle": 6,
+            "name": "Garden Pack!",
+            "fname": "dekopack"
+        },
+        {
+            "id": 111,
+            "puzzle": 6,
+            "name": "Playground Pack!",
+            "fname": "happyfunpack"
+        },
+        {
+            "id": 23,
+            "puzzle": 6,
+            "name": "Kittyball Chuzzle",
+            "fname": "kittyball"
+        },
+        {
+            "id": 24,
+            "puzzle": 7,
+            "name": "Cinnamon Chuzzle",
+            "fname": "Cinnamon"
+        },
+        {
+            "id": 25,
+            "puzzle": 7,
+            "name": "Trippy Chuzzle",
+            "fname": "Trippy"
+        },
+        {
+            "id": 26,
+            "puzzle": 7,
+            "name": "Confetti Chuzzle",
+            "fname": "Confetti"
+        },
+        {
+            "id": 201,
+            "puzzle": 7,
+            "name": "Ferntabulous Wallpaper",
+            "fname": "Fern"
+        },
+        {
+            "id": 202,
+            "puzzle": 7,
+            "name": "Shroomy Wallpaper",
+            "fname": "Shroomy"
+        },
+        {
+            "id": 203,
+            "puzzle": 7,
+            "name": "Mushroom Treat",
+            "fname": "Curious"
+        },
+        {
+            "id": 112,
+            "puzzle": 8,
+            "name": "Love Seat!",
+            "fname": "LoveSeat"
+        },
+        {
+            "id": 204,
+            "puzzle": 9,
+            "name": "Easter Egg",
+            "fname": "Egg1"
+        },
+        {
+            "id": 205,
+            "puzzle": 9,
+            "name": "Easter Egg",
+            "fname": "Egg2"
+        },
+        {
+            "id": 206,
+            "puzzle": 9,
+            "name": "Easter Egg",
+            "fname": "Egg3"
+        },
+        {
+            "id": 207,
+            "puzzle": 9,
+            "name": "Bunny Ears",
+            "fname": "BunnyEars"
+        },
+        {
+            "id": 208,
+            "puzzle": 9,
+            "name": "Blossom Wallpaper",
+            "fname": "Blossom"
+        },
+        {
+            "id": 30,
+            "puzzle": 10,
+            "name": "Hot Cocoa Chuzzle",
+            "fname": "HotCocoa"
+        },
+        {
+            "id": 209,
+            "puzzle": 10,
+            "name": "Apple Treat",
+            "fname": "ApplesIcon"
+        },
+        {
+            "id": 210,
+            "puzzle": 10,
+            "name": "Acorn Wallpaper",
+            "fname": "Acorns"
+        },
+        {
+            "id": 211,
+            "puzzle": 10,
+            "name": "Potted Mum",
+            "fname": "Mum1"
+        },
+        {
+            "id": 212,
+            "puzzle": 10,
+            "name": "Potted Mum",
+            "fname": "Mum2"
+        },
+        {
+            "id": 31,
+            "puzzle": 11,
+            "name": "Spooky Chuzzle",
+            "fname": "Spooky"
+        },
+        {
+            "id": 220,
+            "puzzle": 11,
+            "name": "Jack o Lantern",
+            "fname": "pumpkin1"
+        },
+        {
+            "id": 221,
+            "puzzle": 11,
+            "name": "Jack o Lantern",
+            "fname": "pumpkin2"
+        },
+        {
+            "id": 222,
+            "puzzle": 11,
+            "name": "Jack o Lantern",
+            "fname": "pumpkin3"
+        },
+        {
+            "id": 223,
+            "puzzle": 11,
+            "name": "Bat Buddy",
+            "fname": "bats"
+        },
+        {
+            "id": 224,
+            "puzzle": 12,
+            "name": "Christmas Joy",
+            "fname": "christmasstar"
+        },
+        {
+            "id": 225,
+            "puzzle": 13,
+            "name": "Shamrock Garland",
+            "fname": "Shamrock2"
+        },
+        {
+            "id": 226,
+            "puzzle": 13,
+            "name": "Shamrock Wallpaper",
+            "fname": "Shamrock1"
+        },
+        {
+            "id": 227,
+            "puzzle": 13,
+            "name": "Pot O' Gold",
+            "fname": "Potogold"
+        },
+        {
+            "id": 228,
+            "puzzle": 13,
+            "name": "Leprechaun Hat",
+            "fname": "Lephat"
+        },
+        {
+            "id": 33,
+            "puzzle": 14,
+            "name": "Pumpkin Spice Chuzzle",
+            "fname": "PumpkinSpice"
+        },
+        {
+            "id": 229,
+            "puzzle": 14,
+            "name": "Pumpkin Pie",
+            "fname": "PumpkinPie"
+        },
+        {
+            "id": 230,
+            "puzzle": 14,
+            "name": "Garlic Bread",
+            "fname": "Wheat1"
+        },
+        {
+            "id": 231,
+            "puzzle": 14,
+            "name": "Dinner Rolls",
+            "fname": "Wheat2"
+        },
+        {
+            "id": 232,
+            "puzzle": 14,
+            "name": "Cornucopia Bowl",
+            "fname": "Cornucopia"
+        },
+        {
+            "id": 233,
+            "puzzle": 15,
+            "name": "Mother's Day Bouquet",
+            "fname": "Roses"
+        },
+        {
+            "id": 234,
+            "puzzle": 16,
+            "name": "Hidey Flowers",
+            "fname": "HideyFlowers"
+        },
+        {
+            "id": 235,
+            "puzzle": 17,
+            "name": "Wedding Gifts",
+            "fname": "WeddingGift"
+        },
+        {
+            "id": 236,
+            "puzzle": 18,
+            "name": "Melon Food Bowl",
+            "fname": "MelonFoodBowl"
+        },
+        {
+            "id": 237,
+            "puzzle": 18,
+            "name": "Watermelon Slices",
+            "fname": "MelonSlices"
+        },
+        {
+            "id": 238,
+            "puzzle": 19,
+            "name": "Surf's Up Wallpaper",
+            "fname": "Waves"
+        },
+        {
+            "id": 239,
+            "puzzle": 21,
+            "name": "Last Leaf",
+            "fname": "LastLeaf"
+        },
+        {
+            "id": 240,
+            "puzzle": 22,
+            "name": "Rainy Day",
+            "fname": "Rainyday"
+        },
+        {
+            "id": 241,
+            "puzzle": 23,
+            "name": "Chuzzly Calendar",
+            "fname": "Calendar"
+        },
+        {
+            "id": 242,
+            "puzzle": 24,
+            "name": "Kite Garland",
+            "fname": "KiteGarland"
+        },
+        {
+            "id": 243,
+            "puzzle": 20,
+            "name": "Chalky Board",
+            "fname": "Chalkboard"
+        },
+        {
+            "id": 244,
+            "puzzle": 25,
+            "name": "The Fridge",
+            "fname": "Fridge"
+        },
+        {
+            "id": 245,
+            "puzzle": 26,
+            "name": "Snowdrops",
+            "fname": "Snowdrops"
+        }
+    ]
+}

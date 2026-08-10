@@ -2,16 +2,22 @@ let trophydata = [];
 let statnames = [];
 let panels = [];
 let known = {};
+let puzzledata = {puzzles: [], pieces: []};
+let chuzzariumdata = {furniture: {}};
 
 function loadfielddata() {
     return Promise.all([
         fetch("assets/static/fields.json").then(function(reply) {return reply.json()}),
         fetch("assets/static/trophies.json").then(function(reply) {return reply.json()}),
+        fetch("assets/static/puzzles.json").then(function(reply) {return reply.json()}),
+        fetch("assets/static/chuzzarium.json").then(function(reply) {return reply.json()}),
     ]).then(function(got) {
         known = got[0].known;
         panels = got[0].panels;
         statnames = got[0].statnames;
         trophydata = got[1];
+        puzzledata = got[2];
+        chuzzariumdata = got[3];
     });
 }
 

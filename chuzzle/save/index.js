@@ -340,12 +340,118 @@ function bytehex(bytes) {
     return Array.prototype.map.call(bytes, function(b) {return b.toString(16).padStart(2, "0")}).join(" ");
 }
 
-function chunkleafhtml(one, chunk) {
+// path is the list of child-indices from the root, e.g. [1,2,4] = root's
+// 2nd child's 3rd child's 5th child - it identifies a node's position in
+// the tree so a semantic overlay can be draped over the otherwise-generic
+// chunk reader without changing how bytes are actually read or written.
+// labels/shapes below only cover what the decompile work in datainfo/
+// actually confirmed - see datainfo/README.md for what each field size and
+// offset is based on, and where the semantics (not just the byte layout)
+// are still a guess rather than a confirmed name
+const chunkpiece = [
+    {name: "char 1", type: "char"}, {name: "int 1", type: "int"},
+    {name: "point 1 x", type: "float"}, {name: "point 1 y", type: "float"},
+    {name: "point 2 x", type: "float"}, {name: "point 2 y", type: "float"},
+    {name: "point 3 x", type: "float"}, {name: "point 3 y", type: "float"},
+    {name: "float 1", type: "float"}, {name: "float 2", type: "float"}, {name: "bool 1", type: "bool"},
+    {name: "float 3", type: "float"}, {name: "float 4", type: "float"}, {name: "bool 2", type: "bool"},
+    {name: "char 2", type: "char"}, {name: "char 3", type: "char"}, {name: "float 5", type: "float"},
+    {name: "bool 3", type: "bool"}, {name: "bool 4", type: "bool"},
+    {name: "point 4 x", type: "float"}, {name: "point 4 y", type: "float"},
+    {name: "float 6", type: "float"}, {name: "char 4", type: "char"},
+];
+const chunkrect = [
+    {name: "x", type: "float"}, {name: "y", type: "float"},
+    {name: "w", type: "float"}, {name: "h", type: "float"},
+];
+
+function chunkinfo(file, path) {
+    if (file === "puzzle.dat") {
+        if (path.length === 1) {
+            return [null, "Puzzle count", "Puzzles", "Gifts unlocked", "(reserved)"][path[0]] || null;
+        }
+        if (path.length === 2 && path[0] === 1) {
+            const name = puzzledata.puzzles[path[1]];
+            return {label: name ? "\"" + name + "\"" : "Puzzle " + path[1]};
+        }
+        if (path.length === 3 && path[0] === 1) return {label: "Piece " + (path[2] + 1)};
+    } else if (file === "chuzzarium.cfg") {
+        if (path.length === 1) {
+            const label = ["Chuzzarium state", "Rooms", "Placed items", "Item queue A", "Item queue B"][path[0]];
+            return label ? {label: label} : null;
+        }
+        if (path.length === 2 && path[0] === 1) {
+            return {label: "Room " + (path[1] + 1),
+                shape: [{name: "short 1", type: "short"}, {name: "short 2", type: "short"}].concat(chunkrect)};
+        }
+    } else if (file === "chuzzle1_zen.save") {
+        if (path.length === 1) {
+            if (path[0] === 0) return {label: "Game state"};
+            if (path[0] === 2) return {label: "Board rect", shape: chunkrect};
+        }
+        if (path.length === 2 && path[0] === 1) {
+            const label = ["Board state", "Eggs", "Chuzzle grid", "Zen progress", "(quest flag)", "Stunt pieces"];
+            return label[path[1]] ? {label: label[path[1]]} : null;
+        }
+        if (path.length === 3 && path[0] === 1 && path[1] === 2) {
+            return {label: "Piece " + (path[2] + 1), shape: chunkpiece};
+        }
+    } else if (file === "chuzzle.save") {
+        if (path.length === 1) {
+            const label = ["Overworld state (has a confirmed engine bug - see datainfo/README)",
+                "Grid squares", "Containers", "Extra"][path[0]];
+            return label ? {label: label} : null;
+        }
+        if (path.length === 2 && path[0] === 1) {
+            return {label: "Square " + (path[1] + 1), shape: [
+                {name: "short 1", type: "short"}, {name: "int 1", type: "int"},
+                {name: "char 1", type: "char"}, {name: "char 2", type: "char"}, {name: "char 3", type: "char"},
+                {name: "bool 1", type: "bool"}, {name: "int 2", type: "int"},
+            ]};
+        }
+        if (path.length === 2 && path[0] === 2) return {label: "Container " + (path[1] + 1)};
+    }
+    return null;
+}
+
+const chunktypesize = {char: 1, bool: 1, short: 2, ushort: 2, int: 4, uint: 4, float: 4};
+
+function chunktypedhtml(one, off, field) {
+    const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + off, chunktypesize[field.type]);
+    const value = field.type === "float" ? view.getFloat32(0, true).toFixed(3)
+        : field.type === "int" ? view.getInt32(0, true)
+        : field.type === "uint" ? view.getUint32(0, true)
+        : field.type === "short" ? view.getInt16(0, true)
+        : field.type === "ushort" ? view.getUint16(0, true)
+        : one.bytes[off];
+    return "<label class=\"chunkfield\"><i>" + escaped(field.name) + "</i>"
+        + "<input data-role=\"chunkfield\" data-off=\"" + off + "\" data-type=\"" + field.type
+        + "\" inputmode=\"decimal\" value=\"" + value + "\"></label>";
+}
+
+// a furniture/piece id showing up as a plain 4-byte int is otherwise
+// meaningless - naming it when it matches a known table (from
+// puzzledata.cfg or Chuzzarium's item-type switch) costs nothing since
+// it's a read-only hint alongside the still-editable hex, not a structural
+// guess about the chunk layout itself
+// scoped to chuzzarium furniture ids only - puzzle.dat piece ids (1-99ish)
+// collide constantly with ordinary small counts elsewhere in that file (a
+// puzzle's own item-count is indistinguishable from a piece id by value
+// alone), and pieces never actually sit in a bare 4-byte leaf on their own,
+// so there's no safe attachment point for that hint there
+function chunkidhint(file, value) {
+    return file === "chuzzarium.cfg" ? chuzzariumdata.furniture[value] || "" : "";
+}
+
+function chunkleafhtml(one, chunk, path) {
     const bytes = one.bytes.subarray(chunk.off, chunk.off + chunk.len);
     let hint = "";
     if (chunk.len === 4) {
         const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + chunk.off, 4);
-        hint = " <i>(int " + view.getInt32(0, true) + ", float " + view.getFloat32(0, true).toFixed(3) + ")</i>";
+        const num = view.getInt32(0, true);
+        const named = chunkidhint(one.file, num);
+        hint = " <i>(int " + num + (named ? " - " + escaped(named) : "")
+            + ", float " + view.getFloat32(0, true).toFixed(3) + ")</i>";
     } else if (printablebytes(bytes) && chunk.len > 1) {
         hint = " <i>\"" + escaped(aslatin(bytes)) + "\"</i>";
     }
@@ -353,13 +459,24 @@ function chunkleafhtml(one, chunk) {
         + "\" data-len=\"" + chunk.len + "\" value=\"" + escaped(bytehex(bytes)) + "\">" + hint + "</div>";
 }
 
-function chunkhtml(one, chunk) {
-    let out = "";
-    if (chunk.len) out += chunkleafhtml(one, chunk);
-    else if (!chunk.children.length) out += "<div class=\"chunkleaf empty\">empty</div>";
+function chunkhtml(one, chunk, path) {
+    const info = chunkinfo(one.file, path) || {};
+    let out = info.label ? "<div class=\"chunklabel\">" + escaped(info.label) + "</div>" : "";
+    if (info.shape && info.shape.reduce(function(n, f) {return n + chunktypesize[f.type]}, 0) === chunk.len) {
+        let off = chunk.off;
+        out += "<div class=\"chunktyped\">" + info.shape.map(function(f) {
+            const html = chunktypedhtml(one, off, f);
+            off += chunktypesize[f.type];
+            return html;
+        }).join("") + "</div>";
+    } else if (chunk.len) {
+        out += chunkleafhtml(one, chunk, path);
+    } else if (!chunk.children.length) {
+        out += "<div class=\"chunkleaf empty\">empty</div>";
+    }
     if (chunk.children.length) {
-        out += "<div class=\"chunklist\">" + chunk.children.map(function(c) {
-            return "<div class=\"chunknode\">" + chunkhtml(one, c) + "</div>";
+        out += "<div class=\"chunklist\">" + chunk.children.map(function(c, i) {
+            return "<div class=\"chunknode\">" + chunkhtml(one, c, path.concat(i)) + "</div>";
         }).join("") + "</div>";
     }
     return out;
@@ -392,9 +509,10 @@ function paint() {
                 + " packed or nested on save.</p>" + protohtml(decodeprotoroot(one.bytes));
         } else if (view === "chunks") {
             body = "<p class=\"aside\">Decoded as the game's own chunk format (the same recursive"
-                + " reader it uses to load this file). Field names aren't known, but every value is"
-                + " editable as hex - a 4-byte one also shows as a plain number for convenience.</p>"
-                + chunkhtml(one, decodechunktree(one.bytes));
+                + " reader it uses to load this file). Labelled sections and typed fields are ones"
+                + " confirmed from the decompile (see datainfo/README.md) - everything else is still"
+                + " editable as hex, a 4-byte one also showing as a plain number for convenience.</p>"
+                + chunkhtml(one, decodechunktree(one.bytes), []);
         } else {
             body = wordshtml(one);
         }
@@ -472,6 +590,20 @@ function wiresheet() {
             const off = Number(box.dataset.off);
             const bytes = held[openat].bytes;
             for (let i = 0; i < len; i++) bytes[off + i] = parseInt(clean.substr(i * 2, 2), 16);
+            document.body.classList.add("edited");
+            persist();
+        } else if (role === "chunkfield") {
+            const num = Number(box.value);
+            if (!isFinite(num)) return;
+            const type = box.dataset.type;
+            const view = new DataView(held[openat].bytes.buffer, held[openat].bytes.byteOffset
+                + Number(box.dataset.off));
+            if (type === "float") view.setFloat32(0, num, true);
+            else if (type === "int") view.setInt32(0, Math.trunc(num), true);
+            else if (type === "uint") view.setUint32(0, Math.trunc(num), true);
+            else if (type === "short") view.setInt16(0, Math.trunc(num), true);
+            else if (type === "ushort") view.setUint16(0, Math.trunc(num), true);
+            else held[openat].bytes[Number(box.dataset.off)] = Math.trunc(num) & 0xff;
             document.body.classList.add("edited");
             persist();
         } else if (role === "listpart") {
