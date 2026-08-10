@@ -254,6 +254,20 @@ function setvalueat(at, idx, value) {
     setvalue(at, bits.join(","));
 }
 
+// Android's AtomicFile pattern: chuzzarium.cfg.backup sits alongside
+// chuzzarium.cfg and is byte-identical in every sample seen. it has no tab
+// of its own (see hastab above) - instead every edit to the primary is
+// copied straight into the backup so the pair never actually diverges,
+// which is the one behavior an editor can safely reproduce without knowing
+// AtomicFile's own commit/restore timing
+function mirrorbackup(one) {
+    const twin = held.find(function(h) {
+        return h.file === one.file + ".backup"
+            && h.path.slice(0, h.path.length - h.file.length) === one.path.slice(0, one.path.length - one.file.length);
+    });
+    if (twin) twin.bytes = new Uint8Array(one.bytes);
+}
+
 function setword(idx, value) {
     const one = held[openat];
     const view = new DataView(one.bytes.buffer, one.bytes.byteOffset);
@@ -289,6 +303,7 @@ function wiresheet() {
             const off = Number(box.dataset.off);
             const bytes = held[openat].bytes;
             for (let i = 0; i < len; i++) bytes[off + i] = parseInt(clean.substr(i * 2, 2), 16);
+            mirrorbackup(held[openat]);
             document.body.classList.add("edited");
             persist();
         } else if (role === "chunkfield") {
@@ -303,6 +318,7 @@ function wiresheet() {
             else if (type === "short") view.setInt16(0, Math.trunc(num), true);
             else if (type === "ushort") view.setUint16(0, Math.trunc(num), true);
             else held[openat].bytes[Number(box.dataset.off)] = Math.trunc(num) & 0xff;
+            mirrorbackup(held[openat]);
             document.body.classList.add("edited");
             persist();
         } else if (role === "zenfield") {
@@ -465,12 +481,21 @@ function wiresheet() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+// files with no tab of their own: puzzlebonus.dat's flags show inside
+// puzzle.dat's Puzzles tab instead (a standalone 18-flag file felt out of
+// place); storage-info.pb is Google Play Services' own bookkeeping, not
+// anything the game wrote, so there's nothing to edit there; a "*.backup"
+// twin is Android's AtomicFile pattern - kept byte-identical to its primary
+// by mirrorbackup() below rather than shown as a second copy of the same tab
+function hastab(one) {
+    return one.file !== "puzzlebonus.dat" && one.file !== "storage-info.pb"
+        && !/\.backup$/.test(one.file);
+}
+
 function stripof(seat, mine) {
     const strip = document.querySelector(seat);
-    // puzzlebonus.dat has no tab of its own - its flags show inside puzzle.dat's
-    // Puzzles tab instead, since a standalone 18-flag file felt out of place
     const rows = held.map(function(one, at) {return {one: one, at: at}})
-        .filter(function(pair) {return pair.one.profile === mine && pair.one.file !== "puzzlebonus.dat"});
+        .filter(function(pair) {return pair.one.profile === mine && hastab(pair.one)});
     strip.innerHTML = rows.map(function(pair) {
         return "<button type=\"button\" data-at=\"" + pair.at + "\""
             + (pair.at === openat ? " class=\"on\"" : "") + ">"
@@ -495,13 +520,11 @@ const filenames = {
     "chuzzle2.cfg": "App settings",
     "settings.txt": "System",
     "chuzzarium.cfg": "Chuzzarium",
-    "chuzzarium.cfg.backup": "Chuzzarium backup",
     "chuzzle.save": "Chuzzle 2 game",
     "chuzzle1_zen.save": "Zen",
     "puzzle.dat": "Puzzles",
     "puzzlebonus.dat": "Puzzle bonuses",
     "_achievements.dat": "Achievements",
-    "storage-info.pb": "Storage info",
     "profileInstalled": "Install marker",
 };
 

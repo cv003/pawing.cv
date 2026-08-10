@@ -165,7 +165,7 @@ body:not(.loaded) .back {display: none}
     margin: 0 auto 1.6em;
 }
 .section h2 {
-    margin: 0 0 -0.32em 0.15em;
+    margin: 0 0 0.5em 0.15em;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 1.05em; font-weight: 600;
     text-align: left; color: white;
