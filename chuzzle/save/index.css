@@ -511,6 +511,39 @@ body:not(.loaded) .back {display: none}
 }
 .protoraw {color: #c093d6; font-weight: 400}
 
+.chunklist {
+    display: flex; flex-direction: column; gap: 0.25em; width: 100%;
+    padding: 0.5em; border-radius: 0.4em;
+    background: linear-gradient(180deg, #6a2183 0%, #590c74 34%, #590c74 100%);
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 17px #8b0aa2, 0 0 0 19px rgba(0,0,0,0.35);
+}
+.chunknode {
+    padding: 0.3em 0.4em; border-radius: 0.3em;
+    background: rgba(0,0,0,0.18);
+}
+.chunknode .chunklist {margin-top: 0.25em; padding: 0.35em; box-shadow: inset 0 0 0 2px #60204a}
+.chunkleaf {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4em;
+}
+.chunkleaf input {
+    width: auto; min-width: 4em; max-width: 100%;
+    padding: 0.2em 0.4em;
+    border: none; outline: none; border-radius: 0.3em;
+    background: #2d0027; color: white;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.78em; font-weight: 600; letter-spacing: 0.03em;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.chunkleaf input:focus {box-shadow: inset 0 0 0 2px #feff48}
+.chunkleaf i {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.75em; font-style: normal; color: #c093d6;
+}
+.chunkleaf.empty {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.75em; font-style: italic; color: #6a5a7a;
+}
+
 /*//////////////////////////////////////////////////////////////////////*/
 
 .stats {

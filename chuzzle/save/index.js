@@ -84,19 +84,22 @@ function bytesof(one) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 // classifies an unreadable file's bytes so both the tab label and the body
-// agree on which of the three binary views applies - cheap enough to redo
-// on every paint since even chuzzarium.cfg's 54KB fails the protobuf check
-// on its very first tag
+// agree on which of the four binary views applies - cheap enough to redo on
+// every paint since even chuzzarium.cfg's 54KB fails the protobuf check on
+// its very first tag, and the chunk-tree check is the same recursive walk
+// the game itself does to read these files
 function binaryviewof(one) {
     if (one.file === "_achievements.dat" && parseachievements(one.bytes)) return "achievements";
     if (decodeprotoroot(one.bytes)) return "proto";
+    if (decodechunktree(one.bytes)) return "chunks";
     return "words";
 }
 
 function sectionsof(one) {
     if (one.kind === "binary") {
         const view = binaryviewof(one);
-        const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields" : "Words";
+        const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields"
+            : view === "chunks" ? "Chunks" : "Words";
         return [{key: view, name: name}];
     }
     const used = {};
@@ -300,6 +303,68 @@ function protohtml(entries) {
     }).join("") + "</div>";
 }
 
+// the game's own SyncBuffer format (chuzzarium.cfg, puzzle.dat, puzzlebonus.dat,
+// chuzzle.save, chuzzle1_zen.save) - a chunk is [uint32 dataLen][dataLen raw
+// bytes][uint32 subChunkCount][subChunkCount more chunks], recursively, with
+// one trailing uint32 (a GlobalID/object-reference table count) after the
+// root chunk. every sample file has an empty (0) reference table, so that's
+// the only shape confirmed byte-exact - a nonzero one is rejected rather than
+// guessed at, since what follows it isn't known. see datainfo/README.md
+function decodechunk(bytes, view, at, end) {
+    if (at + 8 > end) return null;
+    const len = view.getUint32(at, true); at += 4;
+    if (at + len > end) return null;
+    const off = at; at += len;
+    if (at + 4 > end) return null;
+    const subs = view.getUint32(at, true); at += 4;
+    if (subs > 200000) return null;
+    const children = [];
+    for (let i = 0; i < subs; i++) {
+        const sub = decodechunk(bytes, view, at, end);
+        if (!sub) return null;
+        children.push(sub.chunk);
+        at = sub.at;
+    }
+    return {chunk: {off: off, len: len, children: children}, at: at};
+}
+
+function decodechunktree(bytes) {
+    if (bytes.length < 12) return null;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.length);
+    const root = decodechunk(bytes, view, 0, bytes.length - 4);
+    if (!root || root.at !== bytes.length - 4) return null;
+    return view.getUint32(bytes.length - 4, true) === 0 ? root.chunk : null;
+}
+
+function bytehex(bytes) {
+    return Array.prototype.map.call(bytes, function(b) {return b.toString(16).padStart(2, "0")}).join(" ");
+}
+
+function chunkleafhtml(one, chunk) {
+    const bytes = one.bytes.subarray(chunk.off, chunk.off + chunk.len);
+    let hint = "";
+    if (chunk.len === 4) {
+        const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + chunk.off, 4);
+        hint = " <i>(int " + view.getInt32(0, true) + ", float " + view.getFloat32(0, true).toFixed(3) + ")</i>";
+    } else if (printablebytes(bytes) && chunk.len > 1) {
+        hint = " <i>\"" + escaped(aslatin(bytes)) + "\"</i>";
+    }
+    return "<div class=\"chunkleaf\"><input data-role=\"chunkbytes\" data-off=\"" + chunk.off
+        + "\" data-len=\"" + chunk.len + "\" value=\"" + escaped(bytehex(bytes)) + "\">" + hint + "</div>";
+}
+
+function chunkhtml(one, chunk) {
+    let out = "";
+    if (chunk.len) out += chunkleafhtml(one, chunk);
+    else if (!chunk.children.length) out += "<div class=\"chunkleaf empty\">empty</div>";
+    if (chunk.children.length) {
+        out += "<div class=\"chunklist\">" + chunk.children.map(function(c) {
+            return "<div class=\"chunknode\">" + chunkhtml(one, c) + "</div>";
+        }).join("") + "</div>";
+    }
+    return out;
+}
+
 function paint() {
     const one = held[openat];
     const host = document.querySelector(".sheets");
@@ -325,6 +390,11 @@ function paint() {
             body = "<p class=\"aside\">Decoded as protobuf - field numbers only, since the .proto"
                 + " schema isn't available to name them. Read-only, to avoid mangling anything"
                 + " packed or nested on save.</p>" + protohtml(decodeprotoroot(one.bytes));
+        } else if (view === "chunks") {
+            body = "<p class=\"aside\">Decoded as the game's own chunk format (the same recursive"
+                + " reader it uses to load this file). Field names aren't known, but every value is"
+                + " editable as hex - a 4-byte one also shows as a plain number for convenience.</p>"
+                + chunkhtml(one, decodechunktree(one.bytes));
         } else {
             body = wordshtml(one);
         }
@@ -393,6 +463,15 @@ function wiresheet() {
             new DataView(one.bytes.buffer, one.bytes.byteOffset)
                 .setFloat32(Number(box.dataset.off), box.value / 100, true);
             box.parentElement.querySelector("b").textContent = box.value + "%";
+            document.body.classList.add("edited");
+            persist();
+        } else if (role === "chunkbytes") {
+            const len = Number(box.dataset.len);
+            const clean = box.value.replace(/\s+/g, "");
+            if (!/^[0-9a-fA-F]*$/.test(clean) || clean.length !== len * 2) return;
+            const off = Number(box.dataset.off);
+            const bytes = held[openat].bytes;
+            for (let i = 0; i < len; i++) bytes[off + i] = parseInt(clean.substr(i * 2, 2), 16);
             document.body.classList.add("edited");
             persist();
         } else if (role === "listpart") {
