@@ -474,6 +474,43 @@ body:not(.loaded) .back {display: none}
 }
 .words .slot input {font-size: 0.8em}
 
+.achlist {display: flex; flex-direction: column; gap: 0.3em; width: 100%}
+.achrow {
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 0.5em 0.8em; padding: 0.5em 0.7em;
+    border-radius: 0.35em; background: #2d0027;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.achrow i {
+    flex: 1 1 16em; min-width: 0; overflow-wrap: anywhere;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.78em; font-style: normal; color: #c093d6;
+}
+.achrow .slide {flex: none; width: 14em}
+
+.protolist {
+    display: flex; flex-direction: column; gap: 0.25em; width: 100%;
+    padding: 0.6em; border-radius: 0.4em;
+    background: linear-gradient(180deg, #6a2183 0%, #590c74 34%, #590c74 100%);
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 17px #8b0aa2, 0 0 0 19px rgba(0,0,0,0.35);
+}
+.protofield {
+    padding: 0.35em 0.5em; border-radius: 0.3em;
+    background: rgba(0,0,0,0.2);
+}
+.protofield > b {
+    display: block; margin-bottom: 0.15em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.72em; font-weight: 600; color: #ffe07a;
+}
+.protofield .protolist {margin-top: 0.3em; padding: 0.4em; box-shadow: inset 0 0 0 2px #60204a}
+.protostr, .protoraw {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; font-weight: 600; color: white;
+    word-break: break-all;
+}
+.protoraw {color: #c093d6; font-weight: 400}
+
 /*//////////////////////////////////////////////////////////////////////*/
 
 .stats {

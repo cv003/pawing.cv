@@ -83,8 +83,22 @@ function bytesof(one) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+// classifies an unreadable file's bytes so both the tab label and the body
+// agree on which of the three binary views applies - cheap enough to redo
+// on every paint since even chuzzarium.cfg's 54KB fails the protobuf check
+// on its very first tag
+function binaryviewof(one) {
+    if (one.file === "_achievements.dat" && parseachievements(one.bytes)) return "achievements";
+    if (decodeprotoroot(one.bytes)) return "proto";
+    return "words";
+}
+
 function sectionsof(one) {
-    if (one.kind === "binary") return [{key: "words", name: "Words"}];
+    if (one.kind === "binary") {
+        const view = binaryviewof(one);
+        const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields" : "Words";
+        return [{key: view, name: name}];
+    }
     const used = {};
     one.save.fields.forEach(function(field) {
         if (/^(current|best|alltime)_m/.test(field.name)) {used.records = true; return}
@@ -156,6 +170,136 @@ function wordshtml(one) {
     return out + "</div>";
 }
 
+// _achievements.dat: uint32 count, then that many {uint32 len, char id[len]
+// (a null-terminated Play Games achievement id, or the literal "DAILY_DUDE"
+// for the one local-only trophy with no cloud id), float32 percent}. found by
+// hand-decoding the hex - it round-trips to zero leftover bytes on a real
+// save, so the shape is trustworthy even without a decompile reference
+function parseachievements(bytes) {
+    if (bytes.length < 4) return null;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.length);
+    let at = 0;
+    const count = view.getUint32(at, true); at += 4;
+    if (count > 10000) return null;
+    const rows = [];
+    for (let i = 0; i < count; i++) {
+        if (at + 4 > bytes.length) return null;
+        const len = view.getUint32(at, true); at += 4;
+        if (len > 1000 || at + len + 4 > bytes.length) return null;
+        const idtext = aslatin(bytes.subarray(at, at + len)).replace(/\0+$/, "");
+        at += len;
+        const off = at;
+        const pct = view.getFloat32(at, true); at += 4;
+        rows.push({idtext: idtext, pct: pct, off: off});
+    }
+    return at === bytes.length ? rows : null;
+}
+
+function achievementshtml(rows) {
+    return "<p class=\"aside\">" + rows.length + " cached Play Games achievement entries, decoded"
+        + " by shape (no schema needed - see datainfo/README.md). Percent is editable; the id itself"
+        + " is read-only, an opaque Play Games id except for the one local-only <b>DAILY_DUDE</b>"
+        + " entry.</p><div class=\"achlist\">" + rows.map(function(r) {
+            const pct = Math.round(Math.max(0, Math.min(1, r.pct)) * 100);
+            return "<div class=\"achrow\"><i>" + escaped(r.idtext) + "</i>"
+                + "<div class=\"slide\"><input type=\"range\" min=\"0\" max=\"100\" step=\"1\""
+                + " data-role=\"achpct\" data-off=\"" + r.off + "\" value=\"" + pct + "\">"
+                + "<b>" + pct + "%</b></div></div>";
+        }).join("") + "</div>";
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+// a generic protobuf wire-format walker - no .proto schema, so field names
+// are unknown, but the shape (field number, wire type, nested messages) is
+// enough to make an otherwise-opaque blob readable. read-only: re-encoding
+// without the schema risks silently mangling packed/nested fields
+function readvarint(bytes, at) {
+    let result = 0n, shift = 0n;
+    while (at < bytes.length) {
+        const b = bytes[at++];
+        result |= BigInt(b & 0x7f) << shift;
+        if (!(b & 0x80)) return {value: result, at: at};
+        shift += 7n;
+        if (shift > 63n) return null;
+    }
+    return null;
+}
+
+function decodeproto(bytes, start, end, depth) {
+    if (depth > 6) return null;
+    const out = [];
+    let at = start;
+    while (at < end) {
+        const tag = readvarint(bytes, at);
+        if (!tag) return null;
+        const field = Number(tag.value >> 3n);
+        const wire = Number(tag.value & 7n);
+        at = tag.at;
+        if (field === 0 || field > 5000) return null;
+        const entry = {field: field, wire: wire};
+        if (wire === 0) {
+            const v = readvarint(bytes, at);
+            if (!v) return null;
+            entry.value = v.value;
+            at = v.at;
+        } else if (wire === 1) {
+            if (at + 8 > end) return null;
+            entry.value = new DataView(bytes.buffer, bytes.byteOffset + at, 8).getBigUint64(0, true);
+            at += 8;
+        } else if (wire === 2) {
+            const len = readvarint(bytes, at);
+            if (!len) return null;
+            at = len.at;
+            const l = Number(len.value);
+            if (l < 0 || at + l > end) return null;
+            entry.bytes = bytes.subarray(at, at + l);
+            entry.nested = decodeproto(bytes, at, at + l, depth + 1);
+            at += l;
+        } else if (wire === 5) {
+            if (at + 4 > end) return null;
+            entry.value = new DataView(bytes.buffer, bytes.byteOffset + at, 4).getUint32(0, true);
+            at += 4;
+        } else {
+            return null;
+        }
+        out.push(entry);
+    }
+    return out;
+}
+
+function decodeprotoroot(bytes) {
+    const out = decodeproto(bytes, 0, bytes.length, 0);
+    return out && out.length ? out : null;
+}
+
+function printablebytes(bytes) {
+    for (let i = 0; i < bytes.length; i++) {
+        const b = bytes[i];
+        if (b !== 9 && b !== 10 && b !== 13 && (b < 32 || b > 126)) return false;
+    }
+    return true;
+}
+
+function protohtml(entries) {
+    return "<div class=\"protolist\">" + entries.map(function(e) {
+        let val;
+        if (e.wire === 2 && e.nested) {
+            val = protohtml(e.nested);
+        } else if (e.wire === 2 && printablebytes(e.bytes)) {
+            val = "<span class=\"protostr\">" + escaped(aslatin(e.bytes)) + "</span>";
+        } else if (e.wire === 2) {
+            val = "<span class=\"protoraw\">" + e.bytes.length + " bytes: "
+                + Array.prototype.map.call(e.bytes, function(b) {
+                    return b.toString(16).padStart(2, "0");
+                }).join(" ") + "</span>";
+        } else {
+            val = "<span class=\"protoraw\">" + String(e.value) + "</span>";
+        }
+        return "<div class=\"protofield\"><b>field " + e.field + "</b>" + val + "</div>";
+    }).join("") + "</div>";
+}
+
 function paint() {
     const one = held[openat];
     const host = document.querySelector(".sheets");
@@ -174,7 +318,16 @@ function paint() {
 
     let body;
     if (one.kind === "binary") {
-        body = wordshtml(one);
+        const view = binaryviewof(one);
+        if (view === "achievements") {
+            body = achievementshtml(parseachievements(one.bytes));
+        } else if (view === "proto") {
+            body = "<p class=\"aside\">Decoded as protobuf - field numbers only, since the .proto"
+                + " schema isn't available to name them. Read-only, to avoid mangling anything"
+                + " packed or nested on save.</p>" + protohtml(decodeprotoroot(one.bytes));
+        } else {
+            body = wordshtml(one);
+        }
     } else if (one.section === "records") {
         body = recordshtml(one.save);
     } else {
@@ -235,6 +388,13 @@ function wiresheet() {
         } else if (role === "volume") {
             setvalue(Number(box.dataset.at), (box.value / 100).toFixed(6));
             box.parentElement.querySelector("b").textContent = box.value + "%";
+        } else if (role === "achpct") {
+            const one = held[openat];
+            new DataView(one.bytes.buffer, one.bytes.byteOffset)
+                .setFloat32(Number(box.dataset.off), box.value / 100, true);
+            box.parentElement.querySelector("b").textContent = box.value + "%";
+            document.body.classList.add("edited");
+            persist();
         } else if (role === "listpart") {
             const group = box.closest(".numlist, .namelist");
             setvalue(Number(box.dataset.at), joinparts(group, box.dataset.sep));
