@@ -1,7 +1,7 @@
 /*
 
   what the 104 settings in a profile.cfg are, and which panel each belongs in.
-  names not listed here still show up, under "Everything else", with a label
+  names not listed here still show up, under "Other", with a label
   worked out from the name.
 
   the three counter families - current_, best_ and alltime_ - are one table
@@ -73,18 +73,20 @@ const panels = [
     {key: "dailydo", name: "Daily-Do"},
     {key: "puzzles", name: "Puzzles"},
     {key: "runs", name: "Difficulty"},
-    {key: "rest", name: "Everything else"},
+    {key: "rest", name: "Other"},
 ];
 
-/* note is a plain hint, not a warning - dates are the game's own YYYYDDMM,
-   which reads back to front against every other date format on earth */
 const known = {
     Name: {panel: "player", label: "Profile name", control: "text"},
     Coins: {panel: "player", label: "Coins"},
-    Tips: {panel: "player", label: "Tips"},
+    Tips: {panel: "player", label: "Tips", note: "possibly an old value? no longer used"},
     HasTrophyRoom: {panel: "player", label: "Has a trophy room"},
-    UnlockedGames: {panel: "player", label: "Unlocked games"},
-    SawGames: {panel: "player", label: "Games seen"},
+    UnlockedGames: {panel: "player", label: "Unlocked games",
+        note: "a bit per game - which bit is which game is unconfirmed, no reader "
+            + "of this field was found in the decompile to trace it from"},
+    SawGames: {panel: "player", label: "Games seen",
+        note: "game ids, same unconfirmed id order as Unlocked games - "
+            + "the field name itself has no match anywhere in the decompile either"},
     BrandNew: {panel: "player", label: "Brand new profile"},
     New: {panel: "player", label: "New"},
     FirstGameOver: {panel: "player", label: "First game over"},
@@ -93,7 +95,7 @@ const known = {
     TapAndHold: {panel: "player", label: "Tap and hold"},
 
     LastDaily: {panel: "dailydo", label: "Last daily-do"},
-    LastDailySeed: {panel: "dailydo", label: "Last daily seeds"},
+    LastDailySeed: {panel: "dailydo", label: "Last daily seeds", control: "datelist"},
     AwardedDailyDo: {panel: "dailydo", label: "Awarded on", control: "date"},
     DDAlreadyPlayedVersion: {panel: "dailydo", label: "Played version"},
     DDGotXP: {panel: "dailydo", label: "Last xp day", control: "date"},

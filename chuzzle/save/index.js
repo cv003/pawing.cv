@@ -90,7 +90,7 @@ function sectionsof(one) {
         used[fieldinfo(field.name).panel] = true;
     });
     const out = panels.filter(function(panel) {return used[panel.key]});
-    return out.length ? out : [{key: "rest", name: "Everything else"}];
+    return out.length ? out : [{key: "rest", name: "Other"}];
 }
 
 function fieldhtml(save, at) {
@@ -101,7 +101,7 @@ function fieldhtml(save, at) {
     const kind = controlkind(field.value, info);
     return "<div class=\"row" + (iswide(kind, field.value) ? " stacked" : "") + "\">"
         + "<span class=\"rname\"><b>" + escaped(info.label) + "</b>"
-        + "<i>" + escaped(field.name) + (note ? " ~ " + escaped(note) : "") + "</i></span>"
+        + "<i>" + escaped(field.name) + (note ? " (" + escaped(note) + ")" : "") + "</i></span>"
         + "<span class=\"rctl\">" + controlhtml(at, field.value, info) + "</span></div>";
 }
 
@@ -196,6 +196,23 @@ function setvalue(at, value) {
     persist();
 }
 
+// datelist buttons carry data-idx so a comma slot is read/written on its own
+// rather than the whole field - plain single-date pickers just omit it
+function valueat(at, idx) {
+    const whole = held[openat].save.fields[at].value;
+    return idx == null ? whole : whole.split(",")[idx] || "0";
+}
+
+function setvalueat(at, idx, value) {
+    if (idx == null) {
+        setvalue(at, value);
+        return;
+    }
+    const bits = held[openat].save.fields[at].value.split(",");
+    bits[idx] = value;
+    setvalue(at, bits.join(","));
+}
+
 function setword(idx, value) {
     const one = held[openat];
     const view = new DataView(one.bytes.buffer, one.bytes.byteOffset);
@@ -217,11 +234,6 @@ function wiresheet() {
         } else if (role === "volume") {
             setvalue(Number(box.dataset.at), (box.value / 100).toFixed(6));
             box.parentElement.querySelector("b").textContent = box.value + "%";
-        } else if (role === "date") {
-            const bits = box.value.split("-");
-            const stamp = bits.length === 3 ? bits[0] + bits[2] + bits[1] : "0";
-            setvalue(Number(box.dataset.at), stamp);
-            box.parentElement.querySelector("b").textContent = stamp;
         } else if (role === "listpart") {
             const group = box.closest(".numlist, .namelist");
             setvalue(Number(box.dataset.at), joinparts(group, box.dataset.sep));
@@ -254,6 +266,7 @@ function wiresheet() {
             setvalue(at, joinparts(group, sep));
             playsound("click", 0.6);
         } else if (role === "opencal") {
+            const idx = button.dataset.idx == null ? null : Number(button.dataset.idx);
             const pick = button.closest(".pick");
             const open = !pick.classList.contains("open");
             document.querySelectorAll(".pick.open").forEach(function(one) {
@@ -262,17 +275,19 @@ function wiresheet() {
             if (open) {
                 pick.classList.add("open");
                 pick.querySelector(".pickmenu").innerHTML =
-                    calhtml(at, held[openat].save.fields[at].value, 0);
+                    calhtml(at, valueat(at, idx), 0, idx);
             }
             playsound("click", 0.6);
         } else if (role === "calstep") {
+            const idx = button.dataset.idx == null ? null : Number(button.dataset.idx);
             const pick = button.closest(".pick");
             pick.querySelector(".pickmenu").innerHTML =
-                calhtml(at, held[openat].save.fields[at].value, Number(button.dataset.shift));
+                calhtml(at, valueat(at, idx), Number(button.dataset.shift), idx);
             playsound("click", 0.5);
         } else if (role === "calpick") {
+            const idx = button.dataset.idx == null ? null : Number(button.dataset.idx);
             const pick = button.closest(".pick");
-            setvalue(at, button.dataset.stamp);
+            setvalueat(at, idx, button.dataset.stamp);
             pick.querySelector(".picknow").innerHTML =
                 escaped(saydate(readstamp(button.dataset.stamp)))
                 + "<span class=\"caret\">^</span>";

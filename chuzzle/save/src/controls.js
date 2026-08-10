@@ -37,7 +37,7 @@ function controlkind(value, info) {
 
 // the ones that need a whole row to themselves
 function iswide(kind, value) {
-    return kind === "namelist" || kind === "flags" || kind === "trophies"
+    return kind === "namelist" || kind === "flags" || kind === "trophies" || kind === "datelist"
         || (kind === "numlist" && value.split(",").length > 4);
 }
 
@@ -94,38 +94,53 @@ function saydate(when) {
     return when.toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"});
 }
 
-function datebox(at, value) {
+// idx is set only inside a datelist - one field holding several comma dates
+function pickattrs(at, idx) {
+    return " data-at=\"" + at + "\"" + (idx == null ? "" : " data-idx=\"" + idx + "\"");
+}
+
+function datebox(at, value, idx) {
     const when = readstamp(value);
-    return "<div class=\"pick date\" data-at=\"" + at + "\">"
-        + "<button class=\"picknow\" type=\"button\" data-role=\"opencal\" data-at=\"" + at + "\">"
+    return "<div class=\"pick date\"" + pickattrs(at, idx) + ">"
+        + "<button class=\"picknow\" type=\"button\" data-role=\"opencal\"" + pickattrs(at, idx) + ">"
         + (when ? escaped(saydate(when)) : "Not a date")
         + "<span class=\"caret\">^</span></button>"
         + "<div class=\"pickmenu cal\"></div></div>";
 }
 
-// the grid is rebuilt on every month step, so it takes the month to show
-function calhtml(at, value, shift) {
+// the grid is rebuilt on every month step, so it takes the month to show -
+// styled after the daily-do's own calendar (dailydo/index.css .calgrid)
+function calhtml(at, value, shift, idx) {
     const now = readstamp(value) || new Date();
     const view = new Date(now.getFullYear(), now.getMonth() + (shift || 0), 1);
     const first = (view.getDay() + 6) % 7;
     const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    const attrs = pickattrs(at, idx);
 
     let out = "<div class=\"calhead\">"
-        + "<button type=\"button\" data-role=\"calstep\" data-at=\"" + at + "\""
+        + "<button type=\"button\" data-role=\"calstep\"" + attrs
         + " data-shift=\"" + ((shift || 0) - 1) + "\">&lt;</button>"
         + "<span>" + monthnames[view.getMonth()] + " " + view.getFullYear() + "</span>"
-        + "<button type=\"button\" data-role=\"calstep\" data-at=\"" + at + "\""
+        + "<button type=\"button\" data-role=\"calstep\"" + attrs
         + " data-shift=\"" + ((shift || 0) + 1) + "\">&gt;</button></div><div class=\"calgrid\">";
-    out += daynames.map(function(one) {return "<i>" + one + "</i>"}).join("");
-    for (let i = 0; i < first; i++) out += "<span></span>";
+    out += daynames.map(function(one) {return "<span class=\"wd\">" + one + "</span>"}).join("");
+    for (let i = 0; i < first; i++) out += "<span class=\"pad\"></span>";
     for (let day = 1; day <= days; day++) {
         const same = now.getDate() === day && now.getMonth() === view.getMonth()
             && now.getFullYear() === view.getFullYear();
-        out += "<button type=\"button\" data-role=\"calpick\" data-at=\"" + at + "\""
+        out += "<button type=\"button\" data-role=\"calpick\"" + attrs
             + " data-stamp=\"" + writestamp(new Date(view.getFullYear(), view.getMonth(), day))
             + "\"" + (same ? " class=\"on\"" : "") + ">" + day + "</button>";
     }
     return out + "</div>";
+}
+
+// LastDailySeed: a couple of comma-joined date stamps rather than one
+function datelistbox(at, value) {
+    const bits = value.split(",");
+    return "<div class=\"numlist datelist\">" + bits.map(function(bit, idx) {
+        return "<label class=\"slot\"><i>" + (idx + 1) + "</i>" + datebox(at, bit, idx) + "</label>";
+    }).join("") + "</div>";
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -142,10 +157,27 @@ function flagsbox(at, value) {
         }).join("") + "</div></div>";
 }
 
+/* the trophy blurbs are MLRender source, straight out of the binary - see
+   fields.js. only three tags ever show up in them: <color X> runs until the
+   next <color> or the end, <BR> is a line break, and <if #cond==0>...</if>
+   wraps DAILY DUDE's one conditional reminder. #got_daily_dude can't be
+   evaluated from a save file alone, so the wrapper is dropped and the text
+   inside is always shown rather than guessed at */
+function mltohtml(text) {
+    const flat = String(text).replace(/<\/?if[^>]*>/gi, "").replace(/<br\s*\/?>/gi, "\n");
+    const runs = flat.split(/<color\s+([^>]+)>/i);
+    let out = escaped(runs[0]).replace(/\n/g, "<br>");
+    for (let i = 1; i < runs.length; i += 2) {
+        out += "<span style=\"color:" + csscolor(runs[i]) + "\">"
+            + escaped(runs[i + 1] || "").replace(/\n/g, "<br>") + "</span>";
+    }
+    return out;
+}
+
 /* GotTrophy: one card per trophy with its real name and description, pulled
-   from the binary itself - see fields.js. #25 is blank on purpose, it is
-   never assigned in the game's own table. clicking a card toggles it, same
-   as the plain flag buttons everywhere else */
+   from the binary itself. #25 is blank on purpose, it is never assigned in
+   the game's own table. clicking a card toggles it, same as the plain flag
+   buttons everywhere else. two to a row, same as the numbered grid controls */
 function trophybox(at, value) {
     const bits = value.split(",");
     const on = bits.filter(function(bit) {return bit.trim() === "1"}).length;
@@ -160,7 +192,7 @@ function trophybox(at, value) {
                 + " data-at=\"" + at + "\" data-role=\"flag\" data-idx=\"" + idx + "\">"
                 + "<span class=\"trophyicon\"></span>"
                 + "<span class=\"trophytext\"><b>" + escaped(troph.name) + "</b>"
-                + "<i>" + escaped(troph.desc) + "</i></span></button>";
+                + "<i>" + mltohtml(troph.desc) + "</i></span></button>";
         }).join("") + "</div></div>";
 }
 
@@ -205,6 +237,7 @@ function controlhtml(at, value, info) {
     if (kind === "bool") return boolbox(at, value);
     if (kind === "volume") return volumebox(at, value);
     if (kind === "date") return datebox(at, value);
+    if (kind === "datelist") return datelistbox(at, value);
     if (kind === "flags") return flagsbox(at, value);
     if (kind === "numlist") return numlistbox(at, value);
     if (kind === "namelist") return namelistbox(at, value, info.sep || ",");
