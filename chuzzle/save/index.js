@@ -84,12 +84,11 @@ function bytesof(one) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 // classifies an unreadable file's bytes so both the tab label and the body
-// agree on which of the four binary views applies - cheap enough to redo on
+// agree on which of the three binary views applies - cheap enough to redo on
 // every paint since even chuzzarium.cfg's 54KB fails the protobuf check on
 // its very first tag, and the chunk-tree check is the same recursive walk
 // the game itself does to read these files
 function binaryviewof(one) {
-    if (one.file === "_achievements.dat" && parseachievements(one.bytes)) return "achievements";
     if (decodeprotoroot(one.bytes)) return "proto";
     if (decodechunktree(one.bytes)) return "chunks";
     return "words";
@@ -103,8 +102,7 @@ function sectionsof(one) {
         }
         if (markerfields(one)) return [{key: "marker", name: "Marker"}, {key: "words", name: "Raw"}];
         const view = binaryviewof(one);
-        const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields"
-            : view === "chunks" ? "Chunks" : "Words";
+        const name = view === "proto" ? "Fields" : view === "chunks" ? "Chunks" : "Words";
         return [{key: view, name: name}];
     }
     const used = {};
@@ -205,9 +203,7 @@ function paint() {
         body = wordshtml(one);
     } else if (one.kind === "binary") {
         const view = binaryviewof(one);
-        if (view === "achievements") {
-            body = achievementshtml(parseachievements(one.bytes));
-        } else if (view === "proto") {
+        if (view === "proto") {
             body = "<p class=\"aside\">Google Play Services feature-flag bookkeeping, not game data.</p>"
                 + protohtml(decodeprotoroot(one.bytes));
         } else if (view === "chunks") {
@@ -268,6 +264,20 @@ function mirrorbackup(one) {
     if (twin) twin.bytes = new Uint8Array(one.bytes);
 }
 
+// GotTrophy's own comma-separated bits are per-profile, but Play Games
+// achievements aren't - there's one _achievements.dat for the whole install,
+// so whichever profile's Trophies subtab you're editing is the one that
+// quietly updates it. a trophy with no cloud id (or a missing/dropped
+// achievements.dat) just skips this - see achtoggle() in binary.js
+function synctrophy(idx, on) {
+    const ach = held.find(function(h) {return h.file === "_achievements.dat"});
+    const achid = trophydata[idx] && achtrophyof(trophydata[idx]);
+    if (!ach || !achid) return;
+    achtoggle(ach, achid, on);
+    document.body.classList.add("edited");
+    persist();
+}
+
 function setword(idx, value) {
     const one = held[openat];
     const view = new DataView(one.bytes.buffer, one.bytes.byteOffset);
@@ -289,13 +299,6 @@ function wiresheet() {
         } else if (role === "volume") {
             setvalue(Number(box.dataset.at), (box.value / 100).toFixed(6));
             box.parentElement.querySelector("b").textContent = box.value + "%";
-        } else if (role === "achpct") {
-            const one = held[openat];
-            new DataView(one.bytes.buffer, one.bytes.byteOffset)
-                .setFloat32(Number(box.dataset.off), box.value / 100, true);
-            box.parentElement.querySelector("b").textContent = box.value + "%";
-            document.body.classList.add("edited");
-            persist();
         } else if (role === "chunkbytes") {
             const len = Number(box.dataset.len);
             const clean = box.value.replace(/\s+/g, "");
@@ -371,6 +374,7 @@ function wiresheet() {
             bits[idx] = now ? "1" : "0";
             button.classList.toggle("on", now);
             setvalue(at, bits.join(","));
+            if (held[openat].save.fields[at].name === "GotTrophy") synctrophy(idx, now);
             playsound("click", 0.5);
         } else if (role === "listdrop") {
             const group = button.closest(".namelist");
@@ -486,10 +490,15 @@ function wiresheet() {
 // place); storage-info.pb is Google Play Services' own bookkeeping, not
 // anything the game wrote, so there's nothing to edit there; a "*.backup"
 // twin is Android's AtomicFile pattern - kept byte-identical to its primary
-// by mirrorbackup() below rather than shown as a second copy of the same tab
+// by mirrorbackup() below rather than shown as a second copy of the same tab;
+// _achievements.dat is just a second copy of GotTrophy (each profile's own
+// trophy field) with real names swapped for opaque cloud ids - the Trophies
+// subtab under each profile edits both at once via synctrophy() below, so a
+// standalone tab for the id list would only ever show the same 40 trophies
+// a second time under worse labels
 function hastab(one) {
     return one.file !== "puzzlebonus.dat" && one.file !== "storage-info.pb"
-        && !/\.backup$/.test(one.file);
+        && one.file !== "_achievements.dat" && !/\.backup$/.test(one.file);
 }
 
 function stripof(seat, mine) {
@@ -524,7 +533,6 @@ const filenames = {
     "chuzzle1_zen.save": "Zen",
     "puzzle.dat": "Puzzles",
     "puzzlebonus.dat": "Puzzle bonuses",
-    "_achievements.dat": "Achievements",
     "profileInstalled": "Install marker",
 };
 

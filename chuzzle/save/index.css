@@ -474,20 +474,6 @@ body:not(.loaded) .back {display: none}
 }
 .words .slot input {font-size: 0.8em}
 
-.achlist {display: flex; flex-direction: column; gap: 0.3em; width: 100%}
-.achrow {
-    display: flex; flex-wrap: wrap; align-items: center;
-    gap: 0.5em 0.8em; padding: 0.5em 0.7em;
-    border-radius: 0.35em; background: #2d0027;
-    box-shadow: inset 0 0 0 2px #60204a;
-}
-.achrow i {
-    flex: 1 1 16em; min-width: 0; overflow-wrap: anywhere;
-    font-family: "nimbus sans becker", system-ui, sans-serif;
-    font-size: 0.78em; font-style: normal; color: #c093d6;
-}
-.achrow .slide {flex: none; width: 14em}
-
 .protolist {
     display: flex; flex-direction: column; gap: 0.25em; width: 100%;
     padding: 0.6em; border-radius: 0.4em;

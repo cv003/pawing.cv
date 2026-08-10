@@ -1,6 +1,7 @@
 {
     "panels": [
         {"key": "player", "name": "Player"},
+        {"key": "trophies", "name": "Trophies"},
         {"key": "records", "name": "Records"},
         {"key": "dailydo", "name": "Daily-Do"},
         {"key": "puzzles", "name": "Puzzles"},
@@ -48,9 +49,9 @@
         "GoldenOneCount": {"panel": "dailydo", "label": "Golden ones won"},
         "GoldenTornament": {"panel": "dailydo", "label": "Golden tournament", "note": "spelt that way in the game"},
         "LastTourneySeed": {"panel": "dailydo", "label": "Last tourney seed"},
-        "GotTrophy": {"panel": "dailydo", "label": "Trophies held", "control": "trophies"},
-        "GotTrophyTime": {"panel": "dailydo", "label": "Trophy dates", "control": "text", "note": "quoted \"Received <date> @ <time>\" strings, one per trophy id, so the quotes hold commas"},
-        "GotTrophySeed": {"panel": "dailydo", "label": "Trophy seeds", "note": "per trophy id, set to that day's daily-do seed at the moment it was earned"},
+        "GotTrophy": {"panel": "trophies", "label": "Trophies held", "control": "trophies"},
+        "GotTrophyTime": {"panel": "trophies", "label": "Trophy dates", "control": "text", "note": "quoted \"Received <date> @ <time>\" strings, one per trophy id, so the quotes hold commas"},
+        "GotTrophySeed": {"panel": "trophies", "label": "Trophy seeds", "note": "per trophy id, set to that day's daily-do seed at the moment it was earned"},
 
         "CurrentPuzzle": {"panel": "puzzles", "label": "Current puzzle", "note": "an id - registered but no read site found to confirm what it points at"},
         "RemindPuzzlePosters": {"panel": "puzzles", "label": "Remind about posters"},

@@ -32,14 +32,49 @@ function parseachievements(bytes) {
     return at === bytes.length ? rows : null;
 }
 
-function achievementshtml(rows) {
-    return "<div class=\"achlist\">" + rows.map(function(r) {
-            const pct = Math.round(Math.max(0, Math.min(1, r.pct)) * 100);
-            return "<div class=\"achrow\"><i>" + escaped(r.idtext) + "</i>"
-                + "<div class=\"slide\"><input type=\"range\" min=\"0\" max=\"100\" step=\"1\""
-                + " data-role=\"achpct\" data-off=\"" + r.off + "\" value=\"" + pct + "\">"
-                + "<b>" + pct + "%</b></div></div>";
-        }).join("") + "</div>";
+function achievementbytes(rows) {
+    let len = 4;
+    rows.forEach(function(r) {len += 4 + r.idtext.length + 1 + 4});
+    const out = new Uint8Array(len);
+    const view = new DataView(out.buffer);
+    let at = 0;
+    view.setUint32(at, rows.length, true); at += 4;
+    rows.forEach(function(r) {
+        const id = frombytes(r.idtext);
+        view.setUint32(at, id.length + 1, true); at += 4;
+        out.set(id, at); at += id.length + 1;
+        view.setFloat32(at, r.pct, true); at += 4;
+    });
+    return out;
+}
+
+// every SubmitAchievement call site in the binary (decomp/270/decompiled.c,
+// e.g. line 27785 and 440535) passes a literal 1.0 for the percent - there is
+// no incremental achievement anywhere in this build, only unlocked or not.
+// so a 0-100% slider on the raw id was both showing the wrong control (this
+// can only ever be 0% or 100% in a real save) and the wrong label (the id is
+// an opaque "CgkI..." string, not a name). LocalizeOS(char*)
+// (decompiled.c:26674) turned out to be the trophy-name -> id lookup table -
+// see tools/readtrophies.py's ACHIEVEMENT_IDS - so trophies.json now carries
+// the real id per trophy and this renders all 40 as togglable rows instead
+function achtrophyof(t) {
+    return t.achievement || (t.name === "DAILY DUDE" ? "DAILY_DUDE" : null);
+}
+
+// GotTrophy (each profile's own comma-separated bit field, control kind
+// "trophies" in controls.js) and _achievements.dat (one shared id list for
+// the whole install, Play Games achievements aren't per-profile) both track
+// the same 40 trophies under different labels, so there's no reason to make
+// someone edit both - the Trophies subtab's flag toggle calls this to keep
+// the id list in step. `want` is explicit (not a flip) since the caller
+// already knows the new GotTrophy state
+function achtoggle(one, achid, want) {
+    const rows = parseachievements(one.bytes) || [];
+    const at = rows.findIndex(function(r) {return r.idtext === achid});
+    if (at >= 0 && !want) rows.splice(at, 1);
+    else if (at < 0 && want) rows.push({idtext: achid, pct: 1});
+    else return;
+    one.bytes = achievementbytes(rows);
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -283,8 +318,8 @@ function markerpagehtml() {
             control = "<input data-role=\"markerfield\" data-off=\"" + field.off
                 + "\" inputmode=\"numeric\" value=\"" + value + "\">";
         }
-        return "<div class=\"row\"><p class=\"rname\"><b>" + escaped(field.name) + "</b>"
-            + "<i>" + escaped(field.note) + (stamp ? " - " + escaped(stamp) : "") + "</i></p>"
+        return "<div class=\"row\"><span class=\"rname\"><b>" + escaped(field.name) + "</b>"
+            + "<i>" + escaped(field.note) + (stamp ? " - " + escaped(stamp) : "") + "</i></span>"
             + "<span class=\"rctl\">" + control + "</span></div>";
     }).join("") + "</div>";
 }
@@ -592,16 +627,16 @@ function zentotal(one, spot) {
 function zenrowhtml(one, spot, title, note, name, round) {
     const raw = zenread(one, spot, name);
     const value = round ? Math.round(raw * 1000) / 1000 : raw;
-    return "<div class=\"row\"><p class=\"rname\"><b>" + escaped(title) + "</b>"
-        + (note ? "<i>" + escaped(note) + "</i>" : "") + "</p><span class=\"rctl\">"
+    return "<div class=\"row\"><span class=\"rname\"><b>" + escaped(title) + "</b>"
+        + (note ? "<i>" + escaped(note) + "</i>" : "") + "</span><span class=\"rctl\">"
         + "<input data-role=\"zenfield\" data-name=\"" + escaped(name)
         + "\" inputmode=\"decimal\" value=\"" + value + "\"></span></div>";
 }
 
 function zenboolhtml(one, spot, title, note, name) {
     const on = zenread(one, spot, name) !== 0;
-    return "<div class=\"row\"><p class=\"rname\"><b>" + escaped(title) + "</b>"
-        + (note ? "<i>" + escaped(note) + "</i>" : "") + "</p><span class=\"rctl\">"
+    return "<div class=\"row\"><span class=\"rname\"><b>" + escaped(title) + "</b>"
+        + (note ? "<i>" + escaped(note) + "</i>" : "") + "</span><span class=\"rctl\">"
         + "<button class=\"toggle\" type=\"button\" data-role=\"zenbool\" data-name=\"" + escaped(name)
         + "\"><img src=\"assets/images/toggle" + (on ? "on" : "off")
         + ".webp\" alt=\"\" draggable=\"false\"></button></span></div>";
@@ -623,8 +658,8 @@ function zenrefresh(one, spot) {
 function zenpagehtml() {
     const one = held[openat];
     const spot = zenrecord(one);
-    if (!spot) return "<div class=\"group\"><div class=\"row\"><p class=\"rname\"><b>No zen record"
-        + "</b><i>this file has no saved zen session</i></p></div></div>";
+    if (!spot) return "<div class=\"group\"><div class=\"row\"><span class=\"rname\"><b>No zen record"
+        + "</b><i>this file has no saved zen session</i></span></div></div>";
 
     const lit = zenlit(one, spot);
     const slots = [1, 2, 3, 4, 5].map(function(i) {
@@ -637,19 +672,19 @@ function zenpagehtml() {
         + zenrowhtml(one, spot, "Gold trinkets", "1000 coins each, a 6th rolls into a rainbow one", "gold trinkets")
         + zenrowhtml(one, spot, "Rainbow trinkets", "7500 coins each, no cap", "rainbow trinkets")
         + zenrowhtml(one, spot, "Rainbow bar", "15 coins each, 0 to 6 - filling it to 6 grants the COLOR OF ZEN trophy", "rainbow bar", true)
-        + zenrowhtml(one, spot, "Rainbows finished", "how many times the bar has filled and reset", "rainbows finished")
-        + "<div class=\"row\"><p class=\"rname\"><b>Rainbow slots</b>"
-        + "<i>2 coins each, lit left to right</i></p>"
+        + zenrowhtml(one, spot, "Rainbows finished", "", "rainbows finished")
+        + "<div class=\"row\"><span class=\"rname\"><b>Rainbow slots</b>"
+        + "<i>2 coins each, lit left to right</i></span>"
         + "<span class=\"rctl\"><span class=\"zenslots\">" + slots + "</span></span></div>"
-        + "<div class=\"row\"><p class=\"rname\"><b>Worth on cash out</b>"
-        + "<i>what the game would pay for everything above</i></p>"
+        + "<div class=\"row\"><span class=\"rname\"><b>Worth on cash out</b>"
+        + "<i>what the game would pay for everything above</i></span>"
         + "<span class=\"rctl\"><b class=\"zentotal\">" + zentotal(one, spot) + " coins</b></span></div>"
         + "</div>"
         + "<div class=\"group zensecond\">"
         + zenboolhtml(one, spot, "Session in progress", "a board is paused mid-run", "session active")
         + zenrowhtml(one, spot, "Level bar", "0 to 10000, lights the next slot on the way up", "level progress", true)
         + zenrowhtml(one, spot, "Slots lit", "the game's own count, kept in step with the buttons above", "slots lit")
-        + zenrowhtml(one, spot, "Combo meter", "grows while a run is going", "combo meter", true)
+        + zenrowhtml(one, spot, "Combo meter", "", "combo meter", true)
         + zenrowhtml(one, spot, "Fizz meter", "0 to 3, the end-of-bar particle burst", "fizz meter", true)
         + "</div>";
 }
