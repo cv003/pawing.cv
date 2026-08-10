@@ -98,6 +98,9 @@ function binaryviewof(one) {
 function sectionsof(one) {
     if (one.kind === "binary") {
         if (one.file === "puzzle.dat") return [{key: "puzzles", name: "Puzzles"}];
+        if (one.file === "chuzzle1_zen.save" && zenrecord(one)) {
+            return [{key: "zen", name: "Zen"}, {key: "chunks", name: "Raw"}];
+        }
         const view = binaryviewof(one);
         const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields"
             : view === "chunks" ? "Chunks" : "Words";
@@ -153,10 +156,8 @@ function wordshtml(one) {
     const from = one.page * wordpage;
     const to = Math.min(words, from + wordpage);
 
-    let out = "<p class=\"aside\">No reader for this one yet, so it opens"
-        + " as little-endian 32 bit words. " + one.bytes.length + " bytes, " + words + " words"
-        + (spare ? ", and " + spare + " bytes over that stay as they are." : ".")
-        + "</p>";
+    let out = "<p class=\"aside\">" + one.bytes.length + " bytes, " + words + " little-endian words"
+        + (spare ? ", " + spare + " left over." : ".") + "</p>";
     if (pages > 1) {
         out += "<div class=\"pager\">"
             + "<button type=\"button\" data-role=\"page\" data-page=\"" + (one.page - 1)
@@ -174,427 +175,7 @@ function wordshtml(one) {
     return out + "</div>";
 }
 
-// _achievements.dat: uint32 count, then that many {uint32 len, char id[len]
-// (a null-terminated Play Games achievement id, or the literal "DAILY_DUDE"
-// for the one local-only trophy with no cloud id), float32 percent}. found by
-// hand-decoding the hex - it round-trips to zero leftover bytes on a real
-// save, so the shape is trustworthy even without a decompile reference
-function parseachievements(bytes) {
-    if (bytes.length < 4) return null;
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.length);
-    let at = 0;
-    const count = view.getUint32(at, true); at += 4;
-    if (count > 10000) return null;
-    const rows = [];
-    for (let i = 0; i < count; i++) {
-        if (at + 4 > bytes.length) return null;
-        const len = view.getUint32(at, true); at += 4;
-        if (len > 1000 || at + len + 4 > bytes.length) return null;
-        const idtext = aslatin(bytes.subarray(at, at + len)).replace(/\0+$/, "");
-        at += len;
-        const off = at;
-        const pct = view.getFloat32(at, true); at += 4;
-        rows.push({idtext: idtext, pct: pct, off: off});
-    }
-    return at === bytes.length ? rows : null;
-}
-
-function achievementshtml(rows) {
-    return "<p class=\"aside\">" + rows.length + " cached Play Games achievement entries, decoded"
-        + " by shape (no schema needed - see datainfo/README.md). Percent is editable; the id itself"
-        + " is read-only, an opaque Play Games id except for the one local-only <b>DAILY_DUDE</b>"
-        + " entry.</p><div class=\"achlist\">" + rows.map(function(r) {
-            const pct = Math.round(Math.max(0, Math.min(1, r.pct)) * 100);
-            return "<div class=\"achrow\"><i>" + escaped(r.idtext) + "</i>"
-                + "<div class=\"slide\"><input type=\"range\" min=\"0\" max=\"100\" step=\"1\""
-                + " data-role=\"achpct\" data-off=\"" + r.off + "\" value=\"" + pct + "\">"
-                + "<b>" + pct + "%</b></div></div>";
-        }).join("") + "</div>";
-}
-
 /*//////////////////////////////////////////////////////////////////////*/
-
-// puzzle.dat: root -> [A: puzzle count int, B: one chunk per puzzle (data
-// is a 4-byte item count, one 14-byte child per collected piece: int piece
-// id, bool, char, two floats), C: gifts array, D: reserved]. the per-item
-// shape is confirmed byte-exact against a real save (zero leftover bytes at
-// 14 bytes/item) - a purely-decompiled reading of the same call site had
-// suggested a buggy 28-byte overload, corrected here by direct decoding,
-// same lesson as the chuzzle1_zen.save Plane/RaptPoint mixup. see
-// datainfo/README.md. real piece art comes from Puzzles_DYNA/<fname>_Color.png
-// in the decompile, converted to assets/images/pieces/<fname>.webp
-function puzzlepiecehtml(puzzleidx, piece, held) {
-    return "<button class=\"piece" + (held ? " on" : "") + "\" type=\"button\""
-        + " data-role=\"piece\" data-puzzle=\"" + puzzleidx + "\" data-piece=\"" + piece.id + "\""
-        + " title=\"" + escaped(piece.name) + "\">"
-        + "<img src=\"assets/images/pieces/" + escaped(piece.fname) + ".webp\" alt=\"\" draggable=\"false\">"
-        + "<i>" + escaped(piece.name) + "</i></button>";
-}
-
-function bonusflagshtml() {
-    const bonus = held.find(function(h) {return h.file === "puzzlebonus.dat"});
-    if (!bonus) return "";
-    const root = decodechunktree(bonus.bytes);
-    if (!root || !root.children.length) return "";
-    const child = root.children[0];
-    const view = new DataView(bonus.bytes.buffer, bonus.bytes.byteOffset);
-    const count = view.getUint32(child.off, true);
-    const flagsoff = child.off + 4;
-    let out = "";
-    for (let i = 0; i < count; i++) {
-        const on = bonus.bytes[flagsoff + i] !== 0;
-        out += "<button class=\"bonusflag" + (on ? " on" : "") + "\" type=\"button\""
-            + " data-role=\"bonusflag\" data-off=\"" + (flagsoff + i) + "\">" + (i + 1) + "</button>";
-    }
-    return "<div class=\"puzzlecard\"><h3>Puzzle bonuses"
-        + "<i>puzzlebonus.dat, merged in - meaning of each flag isn't confirmed</i></h3>"
-        + "<div class=\"bonusflags\">" + out + "</div></div>";
-}
-
-function puzzleitemid(item) {
-    return new DataView(item.data.buffer, item.data.byteOffset).getInt32(0, true);
-}
-
-function puzzlepageshtml() {
-    const one = held.find(function(h) {return h.file === "puzzle.dat"});
-    if (!one) return "<p class=\"aside\">No puzzle.dat in this backup.</p>";
-    const tree = copychunktree(one.bytes);
-    if (!tree || !tree.children[1]) {
-        return "<p class=\"aside\">Couldn't parse puzzle.dat as the expected chunk shape.</p>";
-    }
-    // a piece's id doesn't reliably sit under its own puzzle's chunk - e.g. a
-    // real save had "CHUZZLE FIESTA!"'s chunk holding 24 ids that mostly
-    // belong to five other, earlier puzzles. whatever the game's real
-    // bucketing rule is (session-based? most-recently-played chunk?), it
-    // isn't "one puzzle's chunk = only that puzzle's pieces" - so collected
-    // status is read as one set gathered from every chunk, matched back to
-    // pieces by id rather than by which chunk happened to store it
-    const collected = {};
-    tree.children[1].children.forEach(function(punode) {
-        punode.children.forEach(function(item) {collected[puzzleitemid(item)] = true});
-    });
-    const cards = puzzledata.puzzles.map(function(name, idx) {
-        const pieces = puzzledata.pieces.filter(function(p) {return p.puzzle === idx});
-        const got = pieces.filter(function(p) {return collected[p.id]}).length;
-        return "<div class=\"puzzlecard\"><h3>\"" + escaped(name) + "\"<span>" + got + " of "
-            + pieces.length + "</span></h3><div class=\"piecegrid\">" + pieces.map(function(p) {
-                return puzzlepiecehtml(idx, p, !!collected[p.id]);
-            }).join("") + "</div></div>";
-    });
-    return "<p class=\"aside\">Click a piece to mark it collected or not. Piece art is the game's"
-        + " own (Puzzles_DYNA), positions inside a puzzle aren't stored anywhere, so pieces are shown"
-        + " as a tray rather than a jigsaw. A collected piece's id doesn't always sit under its own"
-        + " puzzle's entry in the file (see datainfo/README.md), so this reads collected status across"
-        + " the whole file rather than just one puzzle's own slot.</p>"
-        + bonusflagshtml() + cards.join("");
-}
-
-/*//////////////////////////////////////////////////////////////////////*/
-
-// a generic protobuf wire-format walker - no .proto schema, so field names
-// are unknown, but the shape (field number, wire type, nested messages) is
-// enough to make an otherwise-opaque blob readable. read-only: re-encoding
-// without the schema risks silently mangling packed/nested fields
-function readvarint(bytes, at) {
-    let result = 0n, shift = 0n;
-    while (at < bytes.length) {
-        const b = bytes[at++];
-        result |= BigInt(b & 0x7f) << shift;
-        if (!(b & 0x80)) return {value: result, at: at};
-        shift += 7n;
-        if (shift > 63n) return null;
-    }
-    return null;
-}
-
-function decodeproto(bytes, start, end, depth) {
-    if (depth > 6) return null;
-    const out = [];
-    let at = start;
-    while (at < end) {
-        const tag = readvarint(bytes, at);
-        if (!tag) return null;
-        const field = Number(tag.value >> 3n);
-        const wire = Number(tag.value & 7n);
-        at = tag.at;
-        if (field === 0 || field > 5000) return null;
-        const entry = {field: field, wire: wire};
-        if (wire === 0) {
-            const v = readvarint(bytes, at);
-            if (!v) return null;
-            entry.value = v.value;
-            at = v.at;
-        } else if (wire === 1) {
-            if (at + 8 > end) return null;
-            entry.value = new DataView(bytes.buffer, bytes.byteOffset + at, 8).getBigUint64(0, true);
-            at += 8;
-        } else if (wire === 2) {
-            const len = readvarint(bytes, at);
-            if (!len) return null;
-            at = len.at;
-            const l = Number(len.value);
-            if (l < 0 || at + l > end) return null;
-            entry.bytes = bytes.subarray(at, at + l);
-            entry.nested = decodeproto(bytes, at, at + l, depth + 1);
-            at += l;
-        } else if (wire === 5) {
-            if (at + 4 > end) return null;
-            entry.value = new DataView(bytes.buffer, bytes.byteOffset + at, 4).getUint32(0, true);
-            at += 4;
-        } else {
-            return null;
-        }
-        out.push(entry);
-    }
-    return out;
-}
-
-function decodeprotoroot(bytes) {
-    const out = decodeproto(bytes, 0, bytes.length, 0);
-    return out && out.length ? out : null;
-}
-
-function printablebytes(bytes) {
-    for (let i = 0; i < bytes.length; i++) {
-        const b = bytes[i];
-        if (b !== 9 && b !== 10 && b !== 13 && (b < 32 || b > 126)) return false;
-    }
-    return true;
-}
-
-function protohtml(entries) {
-    return "<div class=\"protolist\">" + entries.map(function(e) {
-        let val;
-        if (e.wire === 2 && e.nested) {
-            val = protohtml(e.nested);
-        } else if (e.wire === 2 && printablebytes(e.bytes)) {
-            val = "<span class=\"protostr\">" + escaped(aslatin(e.bytes)) + "</span>";
-        } else if (e.wire === 2) {
-            val = "<span class=\"protoraw\">" + e.bytes.length + " bytes: "
-                + Array.prototype.map.call(e.bytes, function(b) {
-                    return b.toString(16).padStart(2, "0");
-                }).join(" ") + "</span>";
-        } else {
-            val = "<span class=\"protoraw\">" + String(e.value) + "</span>";
-        }
-        return "<div class=\"protofield\"><b>field " + e.field + "</b>" + val + "</div>";
-    }).join("") + "</div>";
-}
-
-// the game's own SyncBuffer format (chuzzarium.cfg, puzzle.dat, puzzlebonus.dat,
-// chuzzle.save, chuzzle1_zen.save) - a chunk is [uint32 dataLen][dataLen raw
-// bytes][uint32 subChunkCount][subChunkCount more chunks], recursively, with
-// one trailing uint32 (a GlobalID/object-reference table count) after the
-// root chunk. every sample file has an empty (0) reference table, so that's
-// the only shape confirmed byte-exact - a nonzero one is rejected rather than
-// guessed at, since what follows it isn't known. see datainfo/README.md
-function decodechunk(bytes, view, at, end) {
-    if (at + 8 > end) return null;
-    const len = view.getUint32(at, true); at += 4;
-    if (at + len > end) return null;
-    const off = at; at += len;
-    if (at + 4 > end) return null;
-    const subs = view.getUint32(at, true); at += 4;
-    if (subs > 200000) return null;
-    const children = [];
-    for (let i = 0; i < subs; i++) {
-        const sub = decodechunk(bytes, view, at, end);
-        if (!sub) return null;
-        children.push(sub.chunk);
-        at = sub.at;
-    }
-    return {chunk: {off: off, len: len, children: children}, at: at};
-}
-
-function decodechunktree(bytes) {
-    if (bytes.length < 12) return null;
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.length);
-    const root = decodechunk(bytes, view, 0, bytes.length - 4);
-    if (!root || root.at !== bytes.length - 4) return null;
-    return view.getUint32(bytes.length - 4, true) === 0 ? root.chunk : null;
-}
-
-function bytehex(bytes) {
-    return Array.prototype.map.call(bytes, function(b) {return b.toString(16).padStart(2, "0")}).join(" ");
-}
-
-// a mutable copy of the same tree (owned Uint8Array per node instead of an
-// offset into the original buffer) for the few files where an edit needs to
-// add/remove a whole chunk rather than just overwrite bytes in place -
-// re-encodes back to a fresh byte array afterward
-function copychunk(bytes, node) {
-    return {
-        data: bytes.slice(node.off, node.off + node.len),
-        children: node.children.map(function(c) {return copychunk(bytes, c)}),
-    };
-}
-
-function copychunktree(bytes) {
-    const root = decodechunktree(bytes);
-    return root ? copychunk(bytes, root) : null;
-}
-
-function encodechunk(node) {
-    const kids = node.children.map(encodechunk);
-    const kidlen = kids.reduce(function(n, k) {return n + k.length}, 0);
-    const out = new Uint8Array(8 + node.data.length + kidlen);
-    const view = new DataView(out.buffer);
-    view.setUint32(0, node.data.length, true);
-    out.set(node.data, 4);
-    view.setUint32(4 + node.data.length, node.children.length, true);
-    let at = 8 + node.data.length;
-    kids.forEach(function(k) {out.set(k, at); at += k.length});
-    return out;
-}
-
-function encodechunktree(root) {
-    const body = encodechunk(root);
-    const out = new Uint8Array(body.length + 4);
-    out.set(body, 0);
-    return out; // trailing reference-table count stays zero
-}
-
-// path is the list of child-indices from the root, e.g. [1,2,4] = root's
-// 2nd child's 3rd child's 5th child - it identifies a node's position in
-// the tree so a semantic overlay can be draped over the otherwise-generic
-// chunk reader without changing how bytes are actually read or written.
-// labels/shapes below only cover what the decompile work in datainfo/
-// actually confirmed - see datainfo/README.md for what each field size and
-// offset is based on, and where the semantics (not just the byte layout)
-// are still a guess rather than a confirmed name
-const chunkpiece = [
-    {name: "char 1", type: "char"}, {name: "int 1", type: "int"},
-    {name: "point 1 x", type: "float"}, {name: "point 1 y", type: "float"},
-    {name: "point 2 x", type: "float"}, {name: "point 2 y", type: "float"},
-    {name: "point 3 x", type: "float"}, {name: "point 3 y", type: "float"},
-    {name: "float 1", type: "float"}, {name: "float 2", type: "float"}, {name: "bool 1", type: "bool"},
-    {name: "float 3", type: "float"}, {name: "float 4", type: "float"}, {name: "bool 2", type: "bool"},
-    {name: "char 2", type: "char"}, {name: "char 3", type: "char"}, {name: "float 5", type: "float"},
-    {name: "bool 3", type: "bool"}, {name: "bool 4", type: "bool"},
-    {name: "point 4 x", type: "float"}, {name: "point 4 y", type: "float"},
-    {name: "float 6", type: "float"}, {name: "char 4", type: "char"},
-];
-const chunkrect = [
-    {name: "x", type: "float"}, {name: "y", type: "float"},
-    {name: "w", type: "float"}, {name: "h", type: "float"},
-];
-
-function chunkinfo(file, path) {
-    if (file === "puzzle.dat") {
-        if (path.length === 1) {
-            return [null, "Puzzle count", "Puzzles", "Gifts unlocked", "(reserved)"][path[0]] || null;
-        }
-        if (path.length === 2 && path[0] === 1) {
-            const name = puzzledata.puzzles[path[1]];
-            return {label: name ? "\"" + name + "\"" : "Puzzle " + path[1]};
-        }
-        if (path.length === 3 && path[0] === 1) return {label: "Piece " + (path[2] + 1)};
-    } else if (file === "chuzzarium.cfg") {
-        if (path.length === 1) {
-            const label = ["Chuzzarium state", "Rooms", "Placed items", "Item queue A", "Item queue B"][path[0]];
-            return label ? {label: label} : null;
-        }
-        if (path.length === 2 && path[0] === 1) {
-            return {label: "Room " + (path[1] + 1),
-                shape: [{name: "short 1", type: "short"}, {name: "short 2", type: "short"}].concat(chunkrect)};
-        }
-    } else if (file === "chuzzle1_zen.save") {
-        if (path.length === 1) {
-            if (path[0] === 0) return {label: "Game state"};
-            if (path[0] === 2) return {label: "Board rect", shape: chunkrect};
-        }
-        if (path.length === 2 && path[0] === 1) {
-            const label = ["Board state", "Eggs", "Chuzzle grid", "Zen progress", "(quest flag)", "Stunt pieces"];
-            return label[path[1]] ? {label: label[path[1]]} : null;
-        }
-        if (path.length === 3 && path[0] === 1 && path[1] === 2) {
-            return {label: "Piece " + (path[2] + 1), shape: chunkpiece};
-        }
-    } else if (file === "chuzzle.save") {
-        if (path.length === 1) {
-            const label = ["Overworld state (has a confirmed engine bug - see datainfo/README)",
-                "Grid squares", "Containers", "Extra"][path[0]];
-            return label ? {label: label} : null;
-        }
-        if (path.length === 2 && path[0] === 1) {
-            return {label: "Square " + (path[1] + 1), shape: [
-                {name: "short 1", type: "short"}, {name: "int 1", type: "int"},
-                {name: "char 1", type: "char"}, {name: "char 2", type: "char"}, {name: "char 3", type: "char"},
-                {name: "bool 1", type: "bool"}, {name: "int 2", type: "int"},
-            ]};
-        }
-        if (path.length === 2 && path[0] === 2) return {label: "Container " + (path[1] + 1)};
-    }
-    return null;
-}
-
-const chunktypesize = {char: 1, bool: 1, short: 2, ushort: 2, int: 4, uint: 4, float: 4};
-
-function chunktypedhtml(one, off, field) {
-    const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + off, chunktypesize[field.type]);
-    const value = field.type === "float" ? view.getFloat32(0, true).toFixed(3)
-        : field.type === "int" ? view.getInt32(0, true)
-        : field.type === "uint" ? view.getUint32(0, true)
-        : field.type === "short" ? view.getInt16(0, true)
-        : field.type === "ushort" ? view.getUint16(0, true)
-        : one.bytes[off];
-    return "<label class=\"chunkfield\"><i>" + escaped(field.name) + "</i>"
-        + "<input data-role=\"chunkfield\" data-off=\"" + off + "\" data-type=\"" + field.type
-        + "\" inputmode=\"decimal\" value=\"" + value + "\"></label>";
-}
-
-// a furniture/piece id showing up as a plain 4-byte int is otherwise
-// meaningless - naming it when it matches a known table (from
-// puzzledata.cfg or Chuzzarium's item-type switch) costs nothing since
-// it's a read-only hint alongside the still-editable hex, not a structural
-// guess about the chunk layout itself
-// scoped to chuzzarium furniture ids only - puzzle.dat piece ids (1-99ish)
-// collide constantly with ordinary small counts elsewhere in that file (a
-// puzzle's own item-count is indistinguishable from a piece id by value
-// alone), and pieces never actually sit in a bare 4-byte leaf on their own,
-// so there's no safe attachment point for that hint there
-function chunkidhint(file, value) {
-    return file === "chuzzarium.cfg" ? chuzzariumdata.furniture[value] || "" : "";
-}
-
-function chunkleafhtml(one, chunk, path) {
-    const bytes = one.bytes.subarray(chunk.off, chunk.off + chunk.len);
-    let hint = "";
-    if (chunk.len === 4) {
-        const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + chunk.off, 4);
-        const num = view.getInt32(0, true);
-        const named = chunkidhint(one.file, num);
-        hint = " <i>(int " + num + (named ? " - " + escaped(named) : "")
-            + ", float " + view.getFloat32(0, true).toFixed(3) + ")</i>";
-    } else if (printablebytes(bytes) && chunk.len > 1) {
-        hint = " <i>\"" + escaped(aslatin(bytes)) + "\"</i>";
-    }
-    return "<div class=\"chunkleaf\"><input data-role=\"chunkbytes\" data-off=\"" + chunk.off
-        + "\" data-len=\"" + chunk.len + "\" value=\"" + escaped(bytehex(bytes)) + "\">" + hint + "</div>";
-}
-
-function chunkhtml(one, chunk, path) {
-    const info = chunkinfo(one.file, path) || {};
-    let out = info.label ? "<div class=\"chunklabel\">" + escaped(info.label) + "</div>" : "";
-    if (info.shape && info.shape.reduce(function(n, f) {return n + chunktypesize[f.type]}, 0) === chunk.len) {
-        let off = chunk.off;
-        out += "<div class=\"chunktyped\">" + info.shape.map(function(f) {
-            const html = chunktypedhtml(one, off, f);
-            off += chunktypesize[f.type];
-            return html;
-        }).join("") + "</div>";
-    } else if (chunk.len) {
-        out += chunkleafhtml(one, chunk, path);
-    } else if (!chunk.children.length) {
-        out += "<div class=\"chunkleaf empty\">empty</div>";
-    }
-    if (chunk.children.length) {
-        out += "<div class=\"chunklist\">" + chunk.children.map(function(c, i) {
-            return "<div class=\"chunknode\">" + chunkhtml(one, c, path.concat(i)) + "</div>";
-        }).join("") + "</div>";
-    }
-    return out;
-}
 
 function paint() {
     const one = held[openat];
@@ -615,20 +196,16 @@ function paint() {
     let body;
     if (one.kind === "binary" && one.file === "puzzle.dat") {
         body = puzzlepageshtml();
+    } else if (one.kind === "binary" && one.section === "zen") {
+        body = zenpagehtml();
     } else if (one.kind === "binary") {
         const view = binaryviewof(one);
         if (view === "achievements") {
             body = achievementshtml(parseachievements(one.bytes));
         } else if (view === "proto") {
-            body = "<p class=\"aside\">Decoded as protobuf - field numbers only, since the .proto"
-                + " schema isn't available to name them. Read-only, to avoid mangling anything"
-                + " packed or nested on save.</p>" + protohtml(decodeprotoroot(one.bytes));
+            body = protohtml(decodeprotoroot(one.bytes));
         } else if (view === "chunks") {
-            body = "<p class=\"aside\">Decoded as the game's own chunk format (the same recursive"
-                + " reader it uses to load this file). Labelled sections and typed fields are ones"
-                + " confirmed from the decompile (see datainfo/README.md) - everything else is still"
-                + " editable as hex, a 4-byte one also showing as a plain number for convenience.</p>"
-                + chunkhtml(one, decodechunktree(one.bytes), []);
+            body = chunkhtml(one, decodechunktree(one.bytes), []);
         } else {
             body = wordshtml(one);
         }
@@ -722,6 +299,17 @@ function wiresheet() {
             else held[openat].bytes[Number(box.dataset.off)] = Math.trunc(num) & 0xff;
             document.body.classList.add("edited");
             persist();
+        } else if (role === "zenfield") {
+            const num = Number(box.value);
+            if (!isFinite(num)) return;
+            const one = held[openat];
+            const spot = zenrecord(one);
+            if (!spot) return;
+            zenwrite(one, spot, box.dataset.name, num);
+            if (box.dataset.name === "slots lit") zensetlit(one, spot, Math.max(0, Math.min(5, num)));
+            zenrefresh(one, spot);
+            document.body.classList.add("edited");
+            persist();
         } else if (role === "listpart") {
             const group = box.closest(".numlist, .namelist");
             setvalue(Number(box.dataset.at), joinparts(group, box.dataset.sep));
@@ -789,34 +377,47 @@ function wiresheet() {
             paint();
             window.scrollTo(0, 0);
         } else if (role === "piece") {
+            // gHasGiftList (chunk C) alone, matching HasGift()/GuaranteeGift()
+            // (decompiled.c:418105/418128) - chunk B looked promising but a
+            // real save had it holding a piece the player didn't actually
+            // have, so it's left alone entirely. see puzzlepageshtml
             const one = held.find(function(h) {return h.file === "puzzle.dat"});
             const tree = one && copychunktree(one.bytes);
-            if (!tree || !tree.children[1]) return;
-            const puzzlesnode = tree.children[1];
+            if (!tree || !tree.children[2]) return;
+            const giftnode = tree.children[2];
             const pieceid = Number(button.dataset.piece);
 
-            // a collected id can turn up under any puzzle's slot, not just its
-            // own (see puzzlepageshtml) - remove wherever it's actually sitting
-            let removed = false;
-            let punode;
-            puzzlesnode.children.forEach(function(p) {
-                const idx = p.children.findIndex(function(item) {return puzzleitemid(item) === pieceid});
-                if (idx >= 0) {p.children.splice(idx, 1); punode = p; removed = true}
-            });
-            if (!removed) {
-                punode = puzzlesnode.children[Number(button.dataset.puzzle)];
-                const data = new Uint8Array(14);
-                data[4] = 1;
-                new DataView(data.buffer).setInt32(0, pieceid, true);
-                punode.children.push({data: data, children: []});
-            }
-            new DataView(punode.data.buffer, punode.data.byteOffset)
-                .setUint32(0, punode.children.length, true);
+            const gifts = giftlistids(giftnode);
+            const giftat = gifts.indexOf(pieceid);
+            const removed = giftat >= 0;
+            if (removed) gifts.splice(giftat, 1);
+            else gifts.push(pieceid);
+            giftlistset(giftnode, gifts);
             one.bytes = encodechunktree(tree);
             document.body.classList.add("edited");
             persist();
             playsound("click", removed ? 0.5 : 0.7);
             paint();
+        } else if (role === "zenslot") {
+            const one = held[openat];
+            const spot = zenrecord(one);
+            if (!spot) return;
+            const idx = Number(button.dataset.idx);
+            zensetlit(one, spot, zenlit(one, spot) === idx ? idx - 1 : idx);
+            playsound("click", 0.7);
+            zenrefresh(one, spot);
+            document.body.classList.add("edited");
+            persist();
+        } else if (role === "zenbool") {
+            const one = held[openat];
+            const spot = zenrecord(one);
+            if (!spot) return;
+            const on = zenread(one, spot, button.dataset.name) === 0;
+            zenwrite(one, spot, button.dataset.name, on ? 1 : 0);
+            playsound("click", 0.7);
+            button.querySelector("img").src = "assets/images/toggle" + (on ? "on" : "off") + ".webp";
+            document.body.classList.add("edited");
+            persist();
         } else if (role === "bonusflag") {
             const bonus = held.find(function(h) {return h.file === "puzzlebonus.dat"});
             if (!bonus) return;
@@ -877,7 +478,7 @@ const filenames = {
     "chuzzarium.cfg": "Chuzzarium",
     "chuzzarium.cfg.backup": "Chuzzarium backup",
     "chuzzle.save": "Chuzzle 2 game",
-    "chuzzle1_zen.save": "Chuzzle 1 zen",
+    "chuzzle1_zen.save": "Zen",
     "puzzle.dat": "Puzzles",
     "puzzlebonus.dat": "Puzzle bonuses",
     "_achievements.dat": "Achievements",
@@ -908,6 +509,22 @@ function readone(name, bytes) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 const storekey = "chuzzlesave";
+const homekey = "chuzzlesavehome";
+
+// kept apart from the big serialized blob so pressing Back doesn't rewrite
+// a megabyte of base64 just to remember which screen you were looking at
+function sethome(home) {
+    document.body.classList.toggle("athome", home);
+    try {
+        if (home) localStorage.setItem(homekey, "1");
+        else localStorage.removeItem(homekey);
+    } catch (e) {}
+}
+
+function washome() {
+    try {return localStorage.getItem(homekey) === "1"}
+    catch (e) {return false}
+}
 
 function tobase64(bytes) {return btoa(aslatin(bytes))}
 function frombase64(text) {return frombytes(atob(text))}
@@ -993,7 +610,8 @@ async function take(files) {
     held = found;
     openat = 0;
     document.body.classList.add("loaded");
-    document.body.classList.remove("edited", "athome");
+    document.body.classList.remove("edited");
+    sethome(false);
     drawtabs();
     paint();
     persist();
@@ -1081,7 +699,7 @@ function wire() {
 
     document.querySelector(".back").addEventListener("click", function() {
         playsound("click", 0.7);
-        document.body.classList.toggle("athome");
+        sethome(!document.body.classList.contains("athome"));
         window.scrollTo(0, 0);
     });
 
@@ -1101,7 +719,10 @@ const fielddataready = loadfielddata();
 fielddataready.then(function() {
     if (restore()) {
         document.body.classList.add("loaded");
+        document.body.classList.toggle("athome", washome());
         drawtabs();
         paint();
+    } else {
+        sethome(false);
     }
 });
