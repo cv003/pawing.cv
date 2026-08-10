@@ -565,6 +565,53 @@ body:not(.loaded) .back {display: none}
 }
 .chunkfield input:focus {box-shadow: inset 0 0 0 2px #feff48}
 
+.puzzlecard {
+    margin: 0 0 0.6em; padding: 0.7em 0.9em;
+    border-radius: 0.4em;
+    background: linear-gradient(180deg, #6a2183 0%, #590c74 34%, #590c74 100%);
+    box-shadow: 0 0 0 2px #60204a, 0 0 0 4px rgba(0,0,0,0.3);
+}
+.puzzlecard h3 {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1em 0.5em;
+    margin: 0 0 0.5em; padding: 0;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 1em; font-weight: 600; color: white;
+}
+.puzzlecard h3 span {font-size: 0.7em; font-weight: 400; color: #ffe07a}
+.puzzlecard h3 i {font-size: 0.65em; font-style: italic; font-weight: 400; color: #a98cbb}
+
+.piecegrid {display: flex; flex-wrap: wrap; gap: 0.4em}
+.piece {
+    display: flex; flex-direction: column; align-items: center; gap: 0.2em;
+    width: 5.4em; margin: 0; padding: 0.4em 0.3em 0.3em;
+    border: none; border-radius: 0.35em;
+    background: rgba(0,0,0,0.25); text-align: center; text-transform: none;
+}
+.piece img {
+    width: 3.6em; height: 3.6em; object-fit: contain;
+    filter: grayscale(1) brightness(0.55) opacity(0.6);
+}
+.piece.on {background: #3c1f0a; box-shadow: inset 0 0 0 2px #ffb400}
+.piece.on img {filter: none}
+.piece i {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.6em; font-style: normal; color: #c093d6; line-height: 1.1;
+}
+.piece.on i {color: white}
+.piece:active {filter: brightness(1.3)}
+
+.bonusflags {display: flex; flex-wrap: wrap; gap: 0.25em}
+.bonusflag {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2em; height: 2em; margin: 0; padding: 0;
+    border: none; border-radius: 0.28em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.8em; font-weight: 600;
+    color: #8a7c96; background: #2d0027;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.bonusflag.on {color: #10240f; background: #46d06a; box-shadow: inset 0 0 0 2px #12a03c}
+
 /*//////////////////////////////////////////////////////////////////////*/
 
 .stats {

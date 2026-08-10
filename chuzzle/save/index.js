@@ -97,6 +97,7 @@ function binaryviewof(one) {
 
 function sectionsof(one) {
     if (one.kind === "binary") {
+        if (one.file === "puzzle.dat") return [{key: "puzzles", name: "Puzzles"}];
         const view = binaryviewof(one);
         const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields"
             : view === "chunks" ? "Chunks" : "Words";
@@ -209,6 +210,83 @@ function achievementshtml(rows) {
                 + " data-role=\"achpct\" data-off=\"" + r.off + "\" value=\"" + pct + "\">"
                 + "<b>" + pct + "%</b></div></div>";
         }).join("") + "</div>";
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+// puzzle.dat: root -> [A: puzzle count int, B: one chunk per puzzle (data
+// is a 4-byte item count, one 14-byte child per collected piece: int piece
+// id, bool, char, two floats), C: gifts array, D: reserved]. the per-item
+// shape is confirmed byte-exact against a real save (zero leftover bytes at
+// 14 bytes/item) - a purely-decompiled reading of the same call site had
+// suggested a buggy 28-byte overload, corrected here by direct decoding,
+// same lesson as the chuzzle1_zen.save Plane/RaptPoint mixup. see
+// datainfo/README.md. real piece art comes from Puzzles_DYNA/<fname>_Color.png
+// in the decompile, converted to assets/images/pieces/<fname>.webp
+function puzzlepiecehtml(puzzleidx, piece, held) {
+    return "<button class=\"piece" + (held ? " on" : "") + "\" type=\"button\""
+        + " data-role=\"piece\" data-puzzle=\"" + puzzleidx + "\" data-piece=\"" + piece.id + "\""
+        + " title=\"" + escaped(piece.name) + "\">"
+        + "<img src=\"assets/images/pieces/" + escaped(piece.fname) + ".webp\" alt=\"\" draggable=\"false\">"
+        + "<i>" + escaped(piece.name) + "</i></button>";
+}
+
+function bonusflagshtml() {
+    const bonus = held.find(function(h) {return h.file === "puzzlebonus.dat"});
+    if (!bonus) return "";
+    const root = decodechunktree(bonus.bytes);
+    if (!root || !root.children.length) return "";
+    const child = root.children[0];
+    const view = new DataView(bonus.bytes.buffer, bonus.bytes.byteOffset);
+    const count = view.getUint32(child.off, true);
+    const flagsoff = child.off + 4;
+    let out = "";
+    for (let i = 0; i < count; i++) {
+        const on = bonus.bytes[flagsoff + i] !== 0;
+        out += "<button class=\"bonusflag" + (on ? " on" : "") + "\" type=\"button\""
+            + " data-role=\"bonusflag\" data-off=\"" + (flagsoff + i) + "\">" + (i + 1) + "</button>";
+    }
+    return "<div class=\"puzzlecard\"><h3>Puzzle bonuses"
+        + "<i>puzzlebonus.dat, merged in - meaning of each flag isn't confirmed</i></h3>"
+        + "<div class=\"bonusflags\">" + out + "</div></div>";
+}
+
+function puzzleitemid(item) {
+    return new DataView(item.data.buffer, item.data.byteOffset).getInt32(0, true);
+}
+
+function puzzlepageshtml() {
+    const one = held.find(function(h) {return h.file === "puzzle.dat"});
+    if (!one) return "<p class=\"aside\">No puzzle.dat in this backup.</p>";
+    const tree = copychunktree(one.bytes);
+    if (!tree || !tree.children[1]) {
+        return "<p class=\"aside\">Couldn't parse puzzle.dat as the expected chunk shape.</p>";
+    }
+    // a piece's id doesn't reliably sit under its own puzzle's chunk - e.g. a
+    // real save had "CHUZZLE FIESTA!"'s chunk holding 24 ids that mostly
+    // belong to five other, earlier puzzles. whatever the game's real
+    // bucketing rule is (session-based? most-recently-played chunk?), it
+    // isn't "one puzzle's chunk = only that puzzle's pieces" - so collected
+    // status is read as one set gathered from every chunk, matched back to
+    // pieces by id rather than by which chunk happened to store it
+    const collected = {};
+    tree.children[1].children.forEach(function(punode) {
+        punode.children.forEach(function(item) {collected[puzzleitemid(item)] = true});
+    });
+    const cards = puzzledata.puzzles.map(function(name, idx) {
+        const pieces = puzzledata.pieces.filter(function(p) {return p.puzzle === idx});
+        const got = pieces.filter(function(p) {return collected[p.id]}).length;
+        return "<div class=\"puzzlecard\"><h3>\"" + escaped(name) + "\"<span>" + got + " of "
+            + pieces.length + "</span></h3><div class=\"piecegrid\">" + pieces.map(function(p) {
+                return puzzlepiecehtml(idx, p, !!collected[p.id]);
+            }).join("") + "</div></div>";
+    });
+    return "<p class=\"aside\">Click a piece to mark it collected or not. Piece art is the game's"
+        + " own (Puzzles_DYNA), positions inside a puzzle aren't stored anywhere, so pieces are shown"
+        + " as a tray rather than a jigsaw. A collected piece's id doesn't always sit under its own"
+        + " puzzle's entry in the file (see datainfo/README.md), so this reads collected status across"
+        + " the whole file rather than just one puzzle's own slot.</p>"
+        + bonusflagshtml() + cards.join("");
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -338,6 +416,42 @@ function decodechunktree(bytes) {
 
 function bytehex(bytes) {
     return Array.prototype.map.call(bytes, function(b) {return b.toString(16).padStart(2, "0")}).join(" ");
+}
+
+// a mutable copy of the same tree (owned Uint8Array per node instead of an
+// offset into the original buffer) for the few files where an edit needs to
+// add/remove a whole chunk rather than just overwrite bytes in place -
+// re-encodes back to a fresh byte array afterward
+function copychunk(bytes, node) {
+    return {
+        data: bytes.slice(node.off, node.off + node.len),
+        children: node.children.map(function(c) {return copychunk(bytes, c)}),
+    };
+}
+
+function copychunktree(bytes) {
+    const root = decodechunktree(bytes);
+    return root ? copychunk(bytes, root) : null;
+}
+
+function encodechunk(node) {
+    const kids = node.children.map(encodechunk);
+    const kidlen = kids.reduce(function(n, k) {return n + k.length}, 0);
+    const out = new Uint8Array(8 + node.data.length + kidlen);
+    const view = new DataView(out.buffer);
+    view.setUint32(0, node.data.length, true);
+    out.set(node.data, 4);
+    view.setUint32(4 + node.data.length, node.children.length, true);
+    let at = 8 + node.data.length;
+    kids.forEach(function(k) {out.set(k, at); at += k.length});
+    return out;
+}
+
+function encodechunktree(root) {
+    const body = encodechunk(root);
+    const out = new Uint8Array(body.length + 4);
+    out.set(body, 0);
+    return out; // trailing reference-table count stays zero
 }
 
 // path is the list of child-indices from the root, e.g. [1,2,4] = root's
@@ -499,7 +613,9 @@ function paint() {
     }).join("");
 
     let body;
-    if (one.kind === "binary") {
+    if (one.kind === "binary" && one.file === "puzzle.dat") {
+        body = puzzlepageshtml();
+    } else if (one.kind === "binary") {
         const view = binaryviewof(one);
         if (view === "achievements") {
             body = achievementshtml(parseachievements(one.bytes));
@@ -672,6 +788,45 @@ function wiresheet() {
             playsound("click", 0.7);
             paint();
             window.scrollTo(0, 0);
+        } else if (role === "piece") {
+            const one = held.find(function(h) {return h.file === "puzzle.dat"});
+            const tree = one && copychunktree(one.bytes);
+            if (!tree || !tree.children[1]) return;
+            const puzzlesnode = tree.children[1];
+            const pieceid = Number(button.dataset.piece);
+
+            // a collected id can turn up under any puzzle's slot, not just its
+            // own (see puzzlepageshtml) - remove wherever it's actually sitting
+            let removed = false;
+            let punode;
+            puzzlesnode.children.forEach(function(p) {
+                const idx = p.children.findIndex(function(item) {return puzzleitemid(item) === pieceid});
+                if (idx >= 0) {p.children.splice(idx, 1); punode = p; removed = true}
+            });
+            if (!removed) {
+                punode = puzzlesnode.children[Number(button.dataset.puzzle)];
+                const data = new Uint8Array(14);
+                data[4] = 1;
+                new DataView(data.buffer).setInt32(0, pieceid, true);
+                punode.children.push({data: data, children: []});
+            }
+            new DataView(punode.data.buffer, punode.data.byteOffset)
+                .setUint32(0, punode.children.length, true);
+            one.bytes = encodechunktree(tree);
+            document.body.classList.add("edited");
+            persist();
+            playsound("click", removed ? 0.5 : 0.7);
+            paint();
+        } else if (role === "bonusflag") {
+            const bonus = held.find(function(h) {return h.file === "puzzlebonus.dat"});
+            if (!bonus) return;
+            const off = Number(button.dataset.off);
+            const on = bonus.bytes[off] === 0;
+            bonus.bytes[off] = on ? 1 : 0;
+            button.classList.toggle("on", on);
+            document.body.classList.add("edited");
+            persist();
+            playsound("click", on ? 0.7 : 0.5);
         } else if (role === "listadd") {
             const group = button.closest(".namelist");
             const sep = button.dataset.sep;
@@ -692,8 +847,10 @@ function wiresheet() {
 
 function stripof(seat, mine) {
     const strip = document.querySelector(seat);
+    // puzzlebonus.dat has no tab of its own - its flags show inside puzzle.dat's
+    // Puzzles tab instead, since a standalone 18-flag file felt out of place
     const rows = held.map(function(one, at) {return {one: one, at: at}})
-        .filter(function(pair) {return pair.one.profile === mine});
+        .filter(function(pair) {return pair.one.profile === mine && pair.one.file !== "puzzlebonus.dat"});
     strip.innerHTML = rows.map(function(pair) {
         return "<button type=\"button\" data-at=\"" + pair.at + "\""
             + (pair.at === openat ? " class=\"on\"" : "") + ">"
