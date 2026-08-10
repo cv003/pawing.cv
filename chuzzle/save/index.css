@@ -135,7 +135,7 @@ body:not(.loaded) .back {display: none}
     flex: 1 1 auto; min-width: 0;
     padding: 0.4em 0.85em 0.16em;
     font-size: 1.05em; border-radius: 0.16em;
-    background: none;
+    background: #191048;
 }
 .switcher button.on {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
@@ -165,11 +165,11 @@ body:not(.loaded) .back {display: none}
     margin: 0 auto 1.6em;
 }
 .section h2 {
-    margin: 0 0 -0.3em 0.15em;
+    margin: 0 0 -0.6em 0.15em;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 1.05em; font-weight: 600;
     text-align: left; color: white;
-    text-transform: uppercase; letter-spacing: 0.02em;
+    letter-spacing: 0.02em;
     text-shadow: 0 0.07em 0 rgba(0,0,0,0.6);
 }
 .aside {
@@ -180,7 +180,7 @@ body:not(.loaded) .back {display: none}
 
 .group {
     border-radius: 0.4em; overflow: hidden;
-    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 7px #8b0aa2, 0 0 0 9px rgba(0,0,0,0.35);
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 17px #8b0aa2, 0 0 0 19px rgba(0,0,0,0.35);
 }
 .row {
     display: grid; align-items: center;
@@ -469,7 +469,7 @@ body:not(.loaded) .back {display: none}
     display: grid; gap: 0.25em; padding: 0.7em;
     border-radius: 0.4em;
     background: linear-gradient(180deg, #6a2183 0%, #590c74 34%, #590c74 100%);
-    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 7px #8b0aa2, 0 0 0 9px rgba(0,0,0,0.35);
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 17px #8b0aa2, 0 0 0 19px rgba(0,0,0,0.35);
     grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr));
 }
 .words .slot input {font-size: 0.8em}
@@ -478,7 +478,7 @@ body:not(.loaded) .back {display: none}
 
 .stats {
     border-radius: 0.4em; overflow: hidden;
-    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 7px #8b0aa2, 0 0 0 9px rgba(0,0,0,0.35);
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 17px #8b0aa2, 0 0 0 19px rgba(0,0,0,0.35);
 }
 .statrow {
     display: grid; align-items: center; gap: 0.6em;
