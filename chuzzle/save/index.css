@@ -614,6 +614,18 @@ body:not(.loaded) .back {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
+.rctl select {
+    min-width: 14em; padding: 0.32em 0.6em;
+    -webkit-appearance: none; appearance: none;
+    border: none; outline: none; border-radius: 0.35em;
+    background: #2d0027; color: white;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.95em; font-weight: 600; cursor: pointer;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.rctl select option {background: #2d0027; color: white}
+.rctl select:focus {box-shadow: inset 0 0 0 2px #feff48}
+
 .zensecond {margin-top: 1.6em}
 .zenslots {display: flex; gap: 0.3em}
 .zenslot {

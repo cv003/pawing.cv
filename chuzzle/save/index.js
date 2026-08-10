@@ -101,6 +101,7 @@ function sectionsof(one) {
         if (one.file === "chuzzle1_zen.save" && zenrecord(one)) {
             return [{key: "zen", name: "Zen"}, {key: "chunks", name: "Raw"}];
         }
+        if (markerfields(one)) return [{key: "marker", name: "Marker"}, {key: "words", name: "Raw"}];
         const view = binaryviewof(one);
         const name = view === "achievements" ? "Achievements" : view === "proto" ? "Fields"
             : view === "chunks" ? "Chunks" : "Words";
@@ -198,12 +199,17 @@ function paint() {
         body = puzzlepageshtml();
     } else if (one.kind === "binary" && one.section === "zen") {
         body = zenpagehtml();
+    } else if (one.kind === "binary" && one.section === "marker") {
+        body = markerpagehtml();
+    } else if (one.kind === "binary" && one.section === "words") {
+        body = wordshtml(one);
     } else if (one.kind === "binary") {
         const view = binaryviewof(one);
         if (view === "achievements") {
             body = achievementshtml(parseachievements(one.bytes));
         } else if (view === "proto") {
-            body = protohtml(decodeprotoroot(one.bytes));
+            body = "<p class=\"aside\">Google Play Services feature-flag bookkeeping, not game data.</p>"
+                + protohtml(decodeprotoroot(one.bytes));
         } else if (view === "chunks") {
             body = chunkhtml(one, decodechunktree(one.bytes), []);
         } else {
@@ -308,6 +314,19 @@ function wiresheet() {
             zenwrite(one, spot, box.dataset.name, num);
             if (box.dataset.name === "slots lit") zensetlit(one, spot, Math.max(0, Math.min(5, num)));
             zenrefresh(one, spot);
+            document.body.classList.add("edited");
+            persist();
+        } else if (role === "markerfield") {
+            const num = Number(box.value);
+            if (!isFinite(num)) return;
+            const one = held[openat];
+            const field = markerfields(one).find(function(f) {return f.off === Number(box.dataset.off)});
+            markerwrite(one, field, num);
+            if (field.stamp) {
+                const stamp = stamphint(num);
+                box.closest(".row").querySelector(".rname i").textContent =
+                    field.note + (stamp ? " - " + stamp : "");
+            }
             document.body.classList.add("edited");
             persist();
         } else if (role === "listpart") {

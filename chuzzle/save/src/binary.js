@@ -200,6 +200,15 @@ function printablebytes(bytes) {
     return true;
 }
 
+// a bare number is unreadable but a date isn't, and "does this parse as a
+// recent unix millisecond stamp" needs no schema to answer - the window is
+// tight enough (2010 to 2100) that ordinary counters and ids don't land in it
+function stamphint(value) {
+    if (!(value >= 1262304000000 && value <= 4102444800000)) return "";
+    return new Date(value).toLocaleString("en-GB", {day: "numeric", month: "long",
+        year: "numeric", hour: "2-digit", minute: "2-digit"});
+}
+
 function protohtml(entries) {
     return "<div class=\"protolist\">" + entries.map(function(e) {
         let val;
@@ -213,9 +222,70 @@ function protohtml(entries) {
                     return b.toString(16).padStart(2, "0");
                 }).join(" ") + "</span>";
         } else {
-            val = "<span class=\"protoraw\">" + String(e.value) + "</span>";
+            const stamp = stamphint(Number(e.value));
+            val = "<span class=\"protoraw\">" + String(e.value)
+                + (stamp ? " <i>(" + escaped(stamp) + ")</i>" : "") + "</span>";
         }
         return "<div class=\"protofield\"><b>field " + e.field + "</b>" + val + "</div>";
+    }).join("") + "</div>";
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* profileInstalled is androidx.profileinstaller's bookkeeping, nothing the
+   game itself writes - four big-endian java DataOutputStream values, confirmed
+   against the shipped class (jadx of base.apk, sources/p059x/k.java, read back
+   by p059x/l.java): int schema version, int compilation status, long the
+   package's lastUpdateTime, long the size of the current ART profile. editing
+   it only changes whether android bothers recompiling the app's profile, so
+   it's labelled as such rather than dressed up as save data */
+
+const markerstatus = ["No profile yet", "Compiled with a profile",
+    "Profile queued for compilation", "Compiled, profile since changed"];
+
+function markerfields(one) {
+    if (one.file !== "profileInstalled" || one.bytes.length !== 24) return null;
+    return [
+        {off: 0, size: 4, name: "Format version", note: "the marker's own layout number, always 1"},
+        {off: 4, size: 4, name: "Compilation status", note: "what android last did with the profile", pick: markerstatus},
+        {off: 8, size: 8, name: "App last updated", note: "milliseconds, the install this marker belongs to", stamp: true},
+        {off: 16, size: 8, name: "Profile size", note: "bytes in the current ART profile"},
+    ];
+}
+
+// big-endian, and the two 8-byte ones go through BigInt only long enough to
+// come back as a plain number - both real values sit far under 2^53
+function markerread(one, field) {
+    const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + field.off);
+    return field.size === 4 ? view.getInt32(0, false) : Number(view.getBigInt64(0, false));
+}
+
+function markerwrite(one, field, value) {
+    const view = new DataView(one.bytes.buffer, one.bytes.byteOffset + field.off);
+    if (field.size === 4) view.setInt32(0, Math.trunc(value), false);
+    else view.setBigInt64(0, BigInt(Math.trunc(value)), false);
+}
+
+function markerpagehtml() {
+    const one = held[openat];
+    const fields = markerfields(one);
+    return "<div class=\"group\">" + fields.map(function(field) {
+        const value = markerread(one, field);
+        const stamp = field.stamp ? stamphint(value) : "";
+        let control;
+        if (field.pick) {
+            control = "<select data-role=\"markerfield\" data-off=\"" + field.off + "\">"
+                + field.pick.map(function(name, i) {
+                    return "<option value=\"" + i + "\"" + (i === value ? " selected" : "")
+                        + ">" + escaped(name) + "</option>";
+                }).join("") + "</select>";
+        } else {
+            control = "<input data-role=\"markerfield\" data-off=\"" + field.off
+                + "\" inputmode=\"numeric\" value=\"" + value + "\">";
+        }
+        return "<div class=\"row\"><p class=\"rname\"><b>" + escaped(field.name) + "</b>"
+            + "<i>" + escaped(field.note) + (stamp ? " - " + escaped(stamp) : "") + "</i></p>"
+            + "<span class=\"rctl\">" + control + "</span></div>";
     }).join("") + "</div>";
 }
 
