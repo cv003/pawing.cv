@@ -124,21 +124,18 @@ body:not(.loaded) .back {display: none}
 .striprow {
     display: flex; flex-wrap: wrap;
     align-items: center; justify-content: center;
-    gap: 0.15em 0.3em;
     width: min(940px, calc(100vw - 3em));
 }
-.filesrow {justify-content: flex-start}
-.spreadrow {
-    width: min(1400px, calc(100vw - 2em));
-    justify-content: space-evenly;
-}
+.filesrow, .spreadrow {width: min(1400px, calc(100vw - 2em))}
+.filesrow {justify-content: flex-start; gap: 0.3em}
+.spreadrow {justify-content: space-evenly}
 
 .switcher {display: contents}
 .switcher button {
     flex: 1 1 auto; min-width: 0;
     padding: 0.4em 0.85em 0.16em;
     font-size: 1.05em; border-radius: 0.16em;
-    background: rgba(255,255,255,0.05);
+    background: none;
 }
 .switcher button.on {
     background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
@@ -223,7 +220,8 @@ body:not(.loaded) .back {display: none}
 }
 .rctl > input {min-width: 9em; width: auto}
 .rctl > input.wide {width: 100%; font-size: 0.82em}
-.rctl input:focus, .stats input:focus, .words input:focus, .slot input:focus {
+.rctl input[type=text]:focus, .rctl input:not([type]):focus,
+.stats input:focus, .words input:focus, .slot input:focus {
     box-shadow: inset 0 0 0 2px #feff48;
 }
 
@@ -240,6 +238,7 @@ body:not(.loaded) .back {display: none}
 
 .slide {display: flex; align-items: center; gap: 0.6em; min-width: 13em}
 .slide b {
+    flex: none; min-width: 2.6em; text-align: right;
     font-family: "nimbus sans becker", system-ui, sans-serif;
     font-size: 0.9em; font-weight: 600; color: white;
 }
@@ -249,6 +248,7 @@ body:not(.loaded) .back {display: none}
     height: 1.9em; background: none;
     outline: none;
 }
+.slide input[type=range]:focus, .slide input[type=range]:focus-visible {outline: none}
 .slide input[type=range]::-moz-focus-outer {border: 0}
 .slide input[type=range]::-webkit-slider-runnable-track {
     height: 0.85em; border-radius: 999px;
@@ -280,7 +280,8 @@ body:not(.loaded) .back {display: none}
     background: #2d0027; color: white;
     box-shadow: inset 0 0 0 2px #60204a;
 }
-.pick.open .picknow, .picknow:focus-visible {box-shadow: inset 0 0 0 2px #feff48}
+.pick.open .picknow {background: #67195a; box-shadow: inset 0 0 0 2px #feff48}
+.picknow:focus-visible {box-shadow: inset 0 0 0 2px #feff48}
 .picknow:focus, .picknow:focus-visible {outline: none}
 .picknow .caret {
     display: inline-block; font-size: 0.9em;
@@ -290,13 +291,13 @@ body:not(.loaded) .back {display: none}
 .pick.open .picknow .caret {transform: translateY(0.1em)}
 
 .pickmenu {
-    position: absolute; right: 0; top: calc(100% + 0.5em);
+    position: absolute; right: -0.24em; top: calc(100% + 0.5em);
     display: none; z-index: 9; width: 15em;
-    padding: 0.5em; border-radius: 0.6em;
+    padding: 0.5em; border-radius: 0.7em;
     background: #2d0027;
     box-shadow:
-        0 0 0 2px #60204a, 0 0 0 4px #feff48,
-        0 0.4em 0.8em rgba(0,0,0,0.6);
+        0 0 0 0.1em #60204a, 0 0 0 0.2em #feff48,
+        0 0.3em 0.6em rgba(0,0,0,0.55);
 }
 .pick.open .pickmenu {display: block}
 .calhead {
@@ -365,6 +366,7 @@ body:not(.loaded) .back {display: none}
 .numlist:not(.grid) .slot input {width: 7em}
 .datelist {gap: 0.6em}
 .datelist .slot {gap: 0.15em}
+.datelist .pickmenu {right: auto; left: -0.24em}
 .slot {display: flex; flex-direction: column; gap: 0.05em; z-index: auto}
 .slot i {
     font-family: "nimbus sans becker", system-ui, sans-serif;

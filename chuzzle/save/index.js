@@ -247,8 +247,10 @@ function wiresheet() {
         const role = button.dataset.role;
         const at = Number(button.dataset.at);
         if (role === "bool") {
-            const on = held[openat].save.fields[at].value !== "true";
-            setvalue(at, on ? "true" : "false");
+            const zeroone = button.dataset.zeroone === "1";
+            const cur = held[openat].save.fields[at].value;
+            const on = zeroone ? cur !== "1" : cur !== "true";
+            setvalue(at, zeroone ? (on ? "1" : "0") : (on ? "true" : "false"));
             button.querySelector("img").src = "assets/images/toggle" + (on ? "on" : "off") + ".webp";
             playsound("click", 0.6);
         } else if (role === "flag") {

@@ -28,7 +28,7 @@ function fieldinfo(name) {
     if (known[name]) return known[name];
     const seasonal = /^has_(.+)_puzzle$/.exec(name);
     if (seasonal) {
-        return {panel: "puzzles", label: prettyname(seasonal[1]) + " puzzle"};
+        return {panel: "puzzles", label: prettyname(seasonal[1]) + " puzzle", control: "bool01"};
     }
     return {panel: "rest", label: prettyname(name)};
 }

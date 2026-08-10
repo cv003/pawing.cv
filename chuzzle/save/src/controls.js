@@ -46,10 +46,14 @@ function iswide(kind, value) {
 // the whole switch - track, knob, ring and label - is one baked texture in
 // FunDialog.png (off at (59,93)-(145,123), on at (122,125)-(208,155)), so the
 // two states are just an image swap rather than anything built from parts
-function boolbox(at, value) {
-    const on = value === "true";
+// most bool fields store "true"/"false", but a few (the char-typed
+// has_<season>_puzzle flags) store a plain "1"/"0" - data-zeroone tells
+// index.js which pair to write back on toggle rather than guessing
+function boolbox(at, value, kind) {
+    const zeroone = kind === "bool01";
+    const on = zeroone ? value === "1" : value === "true";
     return "<button class=\"toggle\" type=\"button\""
-        + " data-at=\"" + at + "\" data-role=\"bool\">"
+        + " data-at=\"" + at + "\" data-role=\"bool\"" + (zeroone ? " data-zeroone=\"1\"" : "") + ">"
         + "<img src=\"assets/images/toggle" + (on ? "on" : "off") + ".webp\" alt=\"\" draggable=\"false\">"
         + "</button>";
 }
@@ -250,7 +254,7 @@ function controlhtml(at, value, info) {
     const kind = controlkind(value, info);
     if (kind === "trophies") return trophybox(at, value);
     if (kind === "blob") return blobbox(value);
-    if (kind === "bool") return boolbox(at, value);
+    if (kind === "bool" || kind === "bool01") return boolbox(at, value, kind);
     if (kind === "volume") return volumebox(at, value);
     if (kind === "date") return datebox(at, value);
     if (kind === "datelist") return datelistbox(at, value);

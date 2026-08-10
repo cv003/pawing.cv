@@ -49,24 +49,26 @@
         "GoldenTornament": {"panel": "dailydo", "label": "Golden tournament", "note": "spelt that way in the game"},
         "LastTourneySeed": {"panel": "dailydo", "label": "Last tourney seed"},
         "GotTrophy": {"panel": "dailydo", "label": "Trophies held", "control": "trophies"},
-        "GotTrophyTime": {"panel": "dailydo", "label": "Trophy dates", "control": "text", "note": "quoted, and the quotes hold commas"},
-        "GotTrophySeed": {"panel": "dailydo", "label": "Trophy seeds"},
+        "GotTrophyTime": {"panel": "dailydo", "label": "Trophy dates", "control": "text", "note": "quoted \"Received <date> @ <time>\" strings, one per trophy id, so the quotes hold commas"},
+        "GotTrophySeed": {"panel": "dailydo", "label": "Trophy seeds", "note": "per trophy id, set to that day's daily-do seed at the moment it was earned"},
 
-        "CurrentPuzzle": {"panel": "puzzles", "label": "Current puzzle"},
+        "CurrentPuzzle": {"panel": "puzzles", "label": "Current puzzle", "note": "an id - registered but no read site found to confirm what it points at"},
         "RemindPuzzlePosters": {"panel": "puzzles", "label": "Remind about posters"},
-        "announcedpuzzletoday": {"panel": "puzzles", "label": "Announced today"},
+        "announcedpuzzletoday": {"panel": "puzzles", "label": "Announced day", "note": "a DateToInt-encoded day, not a boolean despite the name - stops the same puzzle being announced twice"},
         "BottlesFilled_Zen": {"panel": "puzzles", "label": "Bottles filled in zen"},
         "HighScore_ClassicChuzzle": {"panel": "puzzles", "label": "Classic high score"},
         "HighScore_SpeedChuzzle": {"panel": "puzzles", "label": "Speed high score"},
 
         "WinCount": {"panel": "runs", "label": "Wins per level", "unknown": true},
-        "DifficultyMod": {"panel": "runs", "label": "Difficulty per level"},
-        "CarryDifficultyMod": {"panel": "runs", "label": "Carried difficulty"},
+        "DifficultyMod": {"panel": "runs", "label": "Difficulty per world level", "note": "per overworld level id, incremented by 1 as you play it"},
+        "CarryDifficultyMod": {"panel": "runs", "label": "Carried difficulty per world level", "note": "per overworld level id, same indexing as Difficulty per world level"},
         "Bonus": {"panel": "runs", "label": "Bonus counters", "unknown": true},
         "BossBattlesPlayed": {"panel": "runs", "label": "Boss battles played"},
         "LastBossType": {"panel": "runs", "label": "Last boss types", "control": "numlist"},
 
-        "LastPlayedState": {"panel": "rest", "label": "Board in progress", "binary": true},
-        "OpenGL_Driver_Data": {"panel": "rest", "label": "Driver blob", "binary": true}
+        "LastPlayedState": {"panel": "rest", "label": "Decoy data (board)", "binary": true,
+            "note": "Settings::Reload overwrites this with randomised filler bytes on every load - looks like an anti-tamper measure, not real board state"},
+        "OpenGL_Driver_Data": {"panel": "rest", "label": "Decoy data (driver)", "binary": true,
+            "note": "same randomised-filler treatment as Decoy data (board), not a real GL driver string"}
     }
 }
