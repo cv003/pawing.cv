@@ -450,7 +450,7 @@ const chunkzen = [
 // that tile becomes reachable. the rest, and every other field on this
 // record, have no confirmed read site and stay honest placeholders
 const gridsquare = [
-    {name: "flags (bit0 used, bit1 unlocked)", type: "short"}, {name: "int 1", type: "int"},
+    {name: "flags", type: "short"}, {name: "int 1", type: "int"},
     {name: "char 1", type: "char"}, {name: "char 2", type: "char"}, {name: "char 3", type: "char"},
     {name: "bool 1", type: "bool"}, {name: "int 2", type: "int"},
 ];
@@ -514,6 +514,34 @@ const gridcontainerochuzzle = [
     {name: "point 5 x", type: "float"}, {name: "point 5 y", type: "float"},
     {name: "bool 2", type: "bool"}, {name: "short 2", type: "short"},
 ];
+
+// scrolling through 133 separately-typed square cards just to flip one bit
+// isn't something a normal player is going to do, so the one edit that's
+// both confirmed-safe and actually wanted here - unlocking a tile - gets
+// its own toggle grid instead. only bit 1 (unlocked) is exposed; bit 0
+// tracks whether a level node's footprint has been stamped onto this tile
+// and flipping it without actually placing/removing that node would just
+// desync the two, so it stays out of this view (still reachable on Raw)
+function classicgrid(one) {
+    const root = decodechunktree(one.bytes);
+    const squares = root && root.children[1] && root.children[1].children;
+    if (!squares || !squares.length) return null;
+    return {view: new DataView(one.bytes.buffer, one.bytes.byteOffset), squares: squares};
+}
+
+function classicgridhtml(one) {
+    const grid = classicgrid(one);
+    if (!grid) return "<p class=\"aside\">No grid squares in this file.</p>";
+    const unlocked = grid.squares.filter(function(s) {return grid.view.getUint16(s.off, true) & 2}).length;
+    return "<div class=\"flagwrap\"><div class=\"levelhead\">"
+        + "<span class=\"tally\">" + unlocked + " of " + grid.squares.length + " unlocked</span>"
+        + "<button class=\"unlockall\" type=\"button\" data-role=\"unlockalllevels\">Unlock all</button>"
+        + "</div><div class=\"levelgrid\">" + grid.squares.map(function(s, idx) {
+            const on = (grid.view.getUint16(s.off, true) & 2) !== 0;
+            return "<button class=\"levelsq" + (on ? " on" : "") + "\" type=\"button\""
+                + " data-role=\"levelunlock\" data-off=\"" + s.off + "\">" + (idx + 1) + "</button>";
+        }).join("") + "</div></div>";
+}
 
 function chunkinfo(file, path) {
     if (file === "puzzle.dat") {

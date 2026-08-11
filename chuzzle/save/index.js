@@ -83,11 +83,6 @@ function bytesof(one) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// classifies an unreadable file's bytes so both the tab label and the body
-// agree on which of the three binary views applies - cheap enough to redo on
-// every paint since even chuzzarium.cfg's 54KB fails the protobuf check on
-// its very first tag, and the chunk-tree check is the same recursive walk
-// the game itself does to read these files
 function binaryviewof(one) {
     if (decodeprotoroot(one.bytes)) return "proto";
     if (decodechunktree(one.bytes)) return "chunks";
@@ -101,6 +96,9 @@ function sectionsof(one) {
             return [{key: "zen", name: "Zen"}];
         }
         if (markerfields(one)) return [{key: "marker", name: "Marker"}, {key: "words", name: "Raw"}];
+        if (one.file === "chuzzle.save" && classicgrid(one)) {
+            return [{key: "grid", name: "Levels"}, {key: "chunks", name: "Raw"}];
+        }
         const view = binaryviewof(one);
         const name = view === "proto" ? "Fields" : view === "chunks" ? "Chunks" : "Words";
         return [{key: view, name: name}];
@@ -201,6 +199,8 @@ function paint() {
         body = markerpagehtml();
     } else if (one.kind === "binary" && one.section === "words") {
         body = wordshtml(one);
+    } else if (one.kind === "binary" && one.section === "grid") {
+        body = classicgridhtml(one);
     } else if (one.kind === "binary") {
         const view = binaryviewof(one);
         if (view === "proto") {
@@ -233,8 +233,6 @@ function setvalue(at, value) {
     persist();
 }
 
-// datelist buttons carry data-idx so a comma slot is read/written on its own
-// rather than the whole field - plain single-date pickers just omit it
 function valueat(at, idx) {
     const whole = held[openat].save.fields[at].value;
     return idx == null ? whole : whole.split(",")[idx] || "0";
@@ -250,12 +248,6 @@ function setvalueat(at, idx, value) {
     setvalue(at, bits.join(","));
 }
 
-// Android's AtomicFile pattern: chuzzarium.cfg.backup sits alongside
-// chuzzarium.cfg and is byte-identical in every sample seen. it has no tab
-// of its own (see hastab above) - instead every edit to the primary is
-// copied straight into the backup so the pair never actually diverges,
-// which is the one behavior an editor can safely reproduce without knowing
-// AtomicFile's own commit/restore timing
 function mirrorbackup(one) {
     const twin = held.find(function(h) {
         return h.file === one.file + ".backup"
@@ -264,11 +256,6 @@ function mirrorbackup(one) {
     if (twin) twin.bytes = new Uint8Array(one.bytes);
 }
 
-// GotTrophy's own comma-separated bits are per-profile, but Play Games
-// achievements aren't - there's one _achievements.dat for the whole install,
-// so whichever profile's Trophies subtab you're editing is the one that
-// quietly updates it. a trophy with no cloud id (or a missing/dropped
-// achievements.dat) just skips this - see achtoggle() in binary.js
 function synctrophy(idx, on) {
     const ach = held.find(function(h) {return h.file === "_achievements.dat"});
     const achid = trophydata[idx] && achtrophyof(trophydata[idx]);
@@ -416,10 +403,6 @@ function wiresheet() {
             paint();
             window.scrollTo(0, 0);
         } else if (role === "piece") {
-            // gHasGiftList (chunk C) alone, matching HasGift()/GuaranteeGift()
-            // (decompiled.c:418105/418128) - chunk B looked promising but a
-            // real save had it holding a piece the player didn't actually
-            // have, so it's left alone entirely. see puzzlepageshtml
             const one = held.find(function(h) {return h.file === "puzzle.dat"});
             const tree = one && copychunktree(one.bytes);
             if (!tree || !tree.children[2]) return;
@@ -467,6 +450,34 @@ function wiresheet() {
             document.body.classList.add("edited");
             persist();
             playsound("click", on ? 0.7 : 0.5);
+        } else if (role === "levelunlock") {
+            const one = held[openat];
+            const off = Number(button.dataset.off);
+            const view = new DataView(one.bytes.buffer, one.bytes.byteOffset);
+            const flags = view.getUint16(off, true);
+            const on = (flags & 2) === 0;
+            view.setUint16(off, on ? flags | 2 : flags & ~2, true);
+            button.classList.toggle("on", on);
+            const tally = document.querySelector(".tally");
+            if (tally) {
+                const total = document.querySelectorAll(".levelsq").length;
+                const unlocked = document.querySelectorAll(".levelsq.on").length;
+                tally.textContent = unlocked + " of " + total + " unlocked";
+            }
+            document.body.classList.add("edited");
+            persist();
+            playsound("click", on ? 0.7 : 0.5);
+        } else if (role === "unlockalllevels") {
+            const one = held[openat];
+            const grid = classicgrid(one);
+            if (!grid) return;
+            grid.squares.forEach(function(s) {
+                grid.view.setUint16(s.off, grid.view.getUint16(s.off, true) | 2, true);
+            });
+            document.body.classList.add("edited");
+            persist();
+            playsound("click", 0.7);
+            paint();
         } else if (role === "listadd") {
             const group = button.closest(".namelist");
             const sep = button.dataset.sep;
@@ -492,9 +503,6 @@ function wiresheet() {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// LastNews's modal lives outside .sheets (it needs to sit above everything,
-// not just the current tab), so it gets its own small listener rather than
-// routing through wiresheet()'s delegated one
 function opentextmodal(at) {
     const host = document.createElement("div");
     host.innerHTML = richtextmodalhtml(at, held[openat].save.fields[at].value);
@@ -511,23 +519,12 @@ function opentextmodal(at) {
     });
     modal.querySelector("[data-role=textsource]").addEventListener("input", function(e) {
         setvalue(at, e.target.value);
-        modal.querySelector("[data-role=textpreview]").innerHTML = mltohtml(e.target.value);
+        modal.querySelector("[data-role=textpreview]").innerHTML = newshtml(e.target.value);
     });
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-// files with no tab of their own: puzzlebonus.dat's flags show inside
-// puzzle.dat's Puzzles tab instead (a standalone 18-flag file felt out of
-// place); storage-info.pb is Google Play Services' own bookkeeping, not
-// anything the game wrote, so there's nothing to edit there; a "*.backup"
-// twin is Android's AtomicFile pattern - kept byte-identical to its primary
-// by mirrorbackup() below rather than shown as a second copy of the same tab;
-// _achievements.dat is just a second copy of GotTrophy (each profile's own
-// trophy field) with real names swapped for opaque cloud ids - the Trophies
-// subtab under each profile edits both at once via synctrophy() below, so a
-// standalone tab for the id list would only ever show the same 40 trophies
-// a second time under worse labels
 function hastab(one) {
     return one.file !== "puzzlebonus.dat" && one.file !== "storage-info.pb"
         && one.file !== "_achievements.dat" && !/\.backup$/.test(one.file);
@@ -593,8 +590,6 @@ function readone(name, bytes) {
 const storekey = "chuzzlesave";
 const homekey = "chuzzlesavehome";
 
-// kept apart from the big serialized blob so pressing Back doesn't rewrite
-// a megabyte of base64 just to remember which screen you were looking at
 function sethome(home) {
     document.body.classList.toggle("athome", home);
     try {

@@ -161,29 +161,23 @@ function flagsbox(at, value) {
         }).join("") + "</div></div>";
 }
 
-/* MLRender source, straight out of the binary - see fields.js. the trophy
-   blurbs only ever use three tags: <color X> runs until the next <color> or
-   the end, <BR> is a line break, and <if #cond==0>...</if> wraps DAILY
-   DUDE's one conditional reminder (#got_daily_dude can't be evaluated from
-   a save file alone, so the wrapper is dropped and the text inside is
-   always shown rather than guessed at). LastNews is the same format but a
-   full popup layout with tags trophy blurbs never use - <br N> (a spacing
-   parameter), <link URL;text> (kept as text, URL dropped - a preview pane
-   isn't a place to open one from anyway), and layout-only ones
-   (<setup>/<page>/<center>/<font>/<blink>/<img>/<os ...>/<valign>) with no
-   plain-text equivalent worth building. those get a blanket strip at the
-   end rather than a named case each, so a markup tag this hasn't seen
-   before disappears instead of leaking into the preview as literal text */
+/* the trophy blurbs are MLRender source, straight out of the binary - see
+   fields.js. only three tags ever show up in them: <color X> runs until the
+   next <color> or the end, <BR> is a line break, and <if #cond==0>...</if>
+   wraps DAILY DUDE's one conditional reminder. #got_daily_dude can't be
+   evaluated from a save file alone, so the wrapper is dropped and the text
+   inside is always shown rather than guessed at. LastNews is the same
+   format but a full popup layout using tags trophy blurbs never do - that
+   one goes through the real news popup's own renderer (news.js newshtml())
+   instead of this simpler one */
 function mltohtml(text) {
     const flat = String(text).replace(/<\/?if[^>]*>/gi, "")
-        .replace(/<link[^>]*>/gi, "").replace(/<\/link>/gi, "")
-        .replace(/(<br[^>]*>\s*){2,}/gi, "\n").replace(/<br[^>]*>/gi, "\n");
+        .replace(/(<br\s*\/?>\s*){2,}/gi, "\n").replace(/<br\s*\/?>/gi, "\n");
     const runs = flat.split(/<color\s+([^>]+)>/i);
-    const clean = function(run) {return escaped(run).replace(/&lt;[^&]*&gt;/g, "")};
-    let out = clean(runs[0]).replace(/\n/g, "<br>");
+    let out = escaped(runs[0]).replace(/\n/g, "<br>");
     for (let i = 1; i < runs.length; i += 2) {
         out += "<span style=\"color:" + csscolor(runs[i]) + "\">"
-            + clean(runs[i + 1] || "").replace(/\n/g, "<br>") + "</span>";
+            + escaped(runs[i + 1] || "").replace(/\n/g, "<br>") + "</span>";
     }
     return out;
 }
@@ -300,16 +294,22 @@ function richtextbox(at, value) {
         + "Edit (" + value.length + " characters)</button>";
 }
 
+// the preview reuses the real news popup's own renderer (chuzzle/src/news.js
+// newshtml() + news.css), not the trophy-blurb mltohtml() above - LastNews
+// uses tags (<page>, <center>, <font>, <img>, <os>...) trophy blurbs never
+// do, and the game already has a renderer that understands all of them
 function richtextmodalhtml(at, value) {
     return "<div class=\"modalback\" data-role=\"closetext\">"
         + "<div class=\"modal\">"
-        + "<div class=\"modalhead\"><b>Last news</b>"
-        + "<button type=\"button\" data-role=\"closetext\">&times;</button></div>"
+        + "<div class=\"modalglows\"><span></span></div>"
+        + "<div class=\"modalhead\"><b>Last news</b></div>"
+        + "<button class=\"closebtn\" type=\"button\" data-role=\"closetext\" title=\"close\">"
+        + "<img src=\"assets/images/close.png\" alt=\"\"></button>"
         + "<div class=\"modalbody\">"
         + "<textarea data-at=\"" + at + "\" data-role=\"textsource\" spellcheck=\"false\">"
         + escaped(value) + "</textarea>"
-        + "<div class=\"modalpreview\"><div class=\"newscard\" data-role=\"textpreview\">"
-        + mltohtml(value) + "</div></div>"
+        + "<div class=\"modalpreview newscard newsbody\" data-role=\"textpreview\">"
+        + newshtml(value) + "</div>"
         + "</div></div></div>";
 }
 

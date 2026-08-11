@@ -22,9 +22,6 @@ html, body, * {scrollbar-width: none; -ms-overflow-style: none}
     from {background-position: 0 0}
     to {background-position: 600px 600px}
 }
-@media (prefers-reduced-motion: reduce) {
-    .bg {animation: none}
-}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
@@ -84,7 +81,7 @@ body:not(.loaded) .back {display: none}
 /*//////////////////////////////////////////////////////////////////////*/
 
 .picker span, .switcher button, .back, .dosave, .namelist .add,
-.pager button {
+.pager button, .richtextopen, .unlockall {
     display: inline-flex; align-items: center; justify-content: center;
     margin: 0; border: none; text-transform: none;
     color: white; line-height: 1; white-space: nowrap;
@@ -94,7 +91,8 @@ body:not(.loaded) .back {display: none}
     box-shadow: 0 0 0 2px #05061e;
 }
 .picker span:active, .switcher button:active, .back:active, .dosave:active,
-.namelist .add:active, .pager button:not(:disabled):active {filter: brightness(1.6)}
+.namelist .add:active, .pager button:not(:disabled):active,
+.richtextopen:active, .unlockall:active {filter: brightness(1.6)}
 
 .picknow, .cal button {
     display: inline-flex; align-items: center; justify-content: center;
@@ -598,6 +596,24 @@ body:not(.loaded) .back {display: none}
 }
 .bonusflag.on {color: #10240f; background: #46d06a; box-shadow: inset 0 0 0 2px #12a03c}
 
+.levelhead {display: flex; align-items: center; justify-content: space-between; gap: 0.6em}
+.unlockall {
+    flex: none; padding: 0.34em 0.9em 0.06em;
+    border-radius: 0.3em; font-size: 0.85em;
+}
+.levelgrid {display: flex; flex-wrap: wrap; gap: 0.3em}
+.levelsq {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.3em; height: 2.3em; margin: 0; padding: 0;
+    border: none; border-radius: 0.3em;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.82em; font-weight: 600;
+    color: #8a7c96; background: #2d0027;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.levelsq.on {color: #10240f; background: #46d06a; box-shadow: inset 0 0 0 2px #12a03c}
+.levelsq:active {filter: brightness(1.3)}
+
 /*//////////////////////////////////////////////////////////////////////*/
 
 .rctl select {
@@ -674,11 +690,7 @@ body:not(.loaded) .back {display: none}
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.richtextopen {
-    padding: 0.36em 0.9em 0.08em;
-    border-radius: 0.3em; font-size: 0.95em;
-    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
-}
+.richtextopen {padding: 0.36em 0.9em 0.08em; border-radius: 0.3em; font-size: 0.95em}
 
 .resettable {display: flex; gap: 0.4em; align-items: center}
 .resettable input {width: 9em}
@@ -693,18 +705,29 @@ body:not(.loaded) .back {display: none}
 .modalback {
     position: fixed; inset: 0; z-index: 20;
     display: flex; align-items: center; justify-content: center;
-    padding: 2em; background: rgba(10,0,20,0.72);
+    background: rgba(10,0,20,0.85);
 }
 .modal {
+    position: relative; isolation: isolate;
     display: flex; flex-direction: column;
-    width: min(1000px, 100%); max-height: 100%;
-    border-radius: 0.5em; overflow: hidden;
+    width: calc(100% - 2.5em); height: calc(100% - 2.5em);
+    margin: 1.25em; border-radius: 0.6em; overflow: hidden;
     background: #2d0027;
     box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 10px #8b0aa2, 0 0.5em 2em rgba(0,0,0,0.6);
 }
+.modalglows {position: absolute; inset: -2em; border-radius: 1.5em; overflow: hidden; pointer-events: none; z-index: 0}
+.modalglows span {
+    position: absolute; inset: -2em; opacity: 0.5; filter: blur(6px); mix-blend-mode: screen;
+    background:
+        radial-gradient(circle at 0 0, #ffb400 0 6em, transparent 9em),
+        radial-gradient(circle at 100% 100%, #ffb400 0 6em, transparent 9em),
+        radial-gradient(circle at 100% 0, #ff5a00 0 7em, transparent 9em),
+        radial-gradient(circle at 0 100%, #ff5a00 0 7em, transparent 9em);
+}
 .modalhead {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.6em 0.9em;
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.7em 3em;
     background: linear-gradient(180deg, #6a2183 0%, #590c74 100%);
 }
 .modalhead b {
@@ -712,19 +735,19 @@ body:not(.loaded) .back {display: none}
     font-size: 1.1em; font-weight: 600; color: white;
     text-transform: uppercase; letter-spacing: 0.02em;
 }
-.modalhead button {
-    flex: none; width: 1.8em; height: 1.8em; margin: 0; padding: 0;
-    border: none; border-radius: 50%; line-height: 1;
-    font-size: 1.3em; color: white; background: rgba(255,255,255,0.12);
+.closebtn {
+    position: absolute; z-index: 2; top: -0.7em; right: -0.7em;
+    width: 2.6em; height: 2.6em; margin: 0; padding: 0; background: none;
 }
-.modalhead button:active {background: rgba(255,255,255,0.28)}
+.closebtn img {width: 100%; height: 100%; object-fit: contain}
+.closebtn:active img {content: url("assets/images/closeactive.png")}
 .modalbody {
-    display: grid; gap: 0.9em; padding: 0.9em;
-    grid-template-columns: 1fr 1fr;
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; gap: 0.9em; padding: 0.9em;
     overflow: auto;
 }
 .modalbody textarea {
-    box-sizing: border-box; width: 100%; min-height: 22em;
+    box-sizing: border-box; width: 100%; min-height: 12em; flex: 1 1 40%;
     padding: 0.6em 0.8em; resize: vertical;
     border: none; outline: none; border-radius: 0.35em;
     background: #1a0018; color: #d6c3e8;
@@ -733,7 +756,10 @@ body:not(.loaded) .back {display: none}
     box-shadow: inset 0 0 0 2px #60204a;
 }
 .modalbody textarea:focus {box-shadow: inset 0 0 0 2px #feff48}
-.modalpreview {min-height: 22em; border-radius: 0.35em; background: rgba(0,0,0,0.25); padding: 0.2em}
+.modalpreview {
+    flex: 1 1 60%; min-height: 12em; overflow: auto;
+    border-radius: 0.35em; background: rgba(0,0,0,0.25); padding: 0.2em;
+}
 .newscard {
     padding: 0.8em 1em;
     border-radius: 0.3em;
@@ -752,8 +778,5 @@ body:not(.loaded) .back {display: none}
     .stats input {text-align: center}
     .trophies {grid-template-columns: 1fr}
     .dosave {right: 0.3em; bottom: 0.3em; font-size: 1.25em}
-    .modalback {padding: 0}
-    .modal {border-radius: 0; max-height: 100vh}
-    .modalbody {grid-template-columns: 1fr}
-    .modalbody textarea, .modalpreview {min-height: 14em}
+    .modal {width: 100%; height: 100%; margin: 0; border-radius: 0}
 }
