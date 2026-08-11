@@ -161,20 +161,29 @@ function flagsbox(at, value) {
         }).join("") + "</div></div>";
 }
 
-/* the trophy blurbs are MLRender source, straight out of the binary - see
-   fields.js. only three tags ever show up in them: <color X> runs until the
-   next <color> or the end, <BR> is a line break, and <if #cond==0>...</if>
-   wraps DAILY DUDE's one conditional reminder. #got_daily_dude can't be
-   evaluated from a save file alone, so the wrapper is dropped and the text
-   inside is always shown rather than guessed at */
+/* MLRender source, straight out of the binary - see fields.js. the trophy
+   blurbs only ever use three tags: <color X> runs until the next <color> or
+   the end, <BR> is a line break, and <if #cond==0>...</if> wraps DAILY
+   DUDE's one conditional reminder (#got_daily_dude can't be evaluated from
+   a save file alone, so the wrapper is dropped and the text inside is
+   always shown rather than guessed at). LastNews is the same format but a
+   full popup layout with tags trophy blurbs never use - <br N> (a spacing
+   parameter), <link URL;text> (kept as text, URL dropped - a preview pane
+   isn't a place to open one from anyway), and layout-only ones
+   (<setup>/<page>/<center>/<font>/<blink>/<img>/<os ...>/<valign>) with no
+   plain-text equivalent worth building. those get a blanket strip at the
+   end rather than a named case each, so a markup tag this hasn't seen
+   before disappears instead of leaking into the preview as literal text */
 function mltohtml(text) {
     const flat = String(text).replace(/<\/?if[^>]*>/gi, "")
-        .replace(/(<br\s*\/?>\s*){2,}/gi, "\n").replace(/<br\s*\/?>/gi, "\n");
+        .replace(/<link[^>]*>/gi, "").replace(/<\/link>/gi, "")
+        .replace(/(<br[^>]*>\s*){2,}/gi, "\n").replace(/<br[^>]*>/gi, "\n");
     const runs = flat.split(/<color\s+([^>]+)>/i);
-    let out = escaped(runs[0]).replace(/\n/g, "<br>");
+    const clean = function(run) {return escaped(run).replace(/&lt;[^&]*&gt;/g, "")};
+    let out = clean(runs[0]).replace(/\n/g, "<br>");
     for (let i = 1; i < runs.length; i += 2) {
         out += "<span style=\"color:" + csscolor(runs[i]) + "\">"
-            + escaped(runs[i + 1] || "").replace(/\n/g, "<br>") + "</span>";
+            + clean(runs[i + 1] || "").replace(/\n/g, "<br>") + "</span>";
     }
     return out;
 }
@@ -250,6 +259,70 @@ function blobbox(value) {
     return "<span class=\"blob\">" + value.length + " bytes, not text</span>";
 }
 
+// a fixed short list of real values (PrivacyPolicy's two ad-consent strings,
+// so far) - a stored value outside the list stays selected and marked
+// unknown, same honesty rule as the shop item chips above
+function pickbox(at, value, options) {
+    const found = options.some(function(o) {return o.value === value});
+    let out = found ? "" : "<option value=\"" + escaped(value) + "\" selected>(unknown) "
+        + escaped(value) + "</option>";
+    out += options.map(function(o) {
+        return "<option value=\"" + escaped(o.value) + "\"" + (o.value === value ? " selected" : "") + ">"
+            + escaped(o.label) + "</option>";
+    }).join("");
+    return "<select data-at=\"" + at + "\" data-role=\"text\">" + out + "</select>";
+}
+
+// CurrentProfile is a free-text folder name naming whichever profile.cfg is
+// active - a dropdown of the profiles actually in this backup beats typing
+// one by hand, but a name that doesn't match any loaded profile (a backup
+// missing that folder, or one renamed since) stays selected and editable
+// rather than silently swapped for the first one in the list
+function profilebox(at, value) {
+    const names = held.filter(function(one) {return one.profile})
+        .map(function(one) {return one.path.split("/").filter(Boolean).slice(-2)[0]});
+    const found = names.indexOf(value) >= 0;
+    let out = found ? "" : "<option value=\"" + escaped(value) + "\" selected>(not in this backup) "
+        + escaped(value) + "</option>";
+    out += names.map(function(name) {
+        return "<option value=\"" + escaped(name) + "\"" + (name === value ? " selected" : "") + ">"
+            + escaped(name) + "</option>";
+    }).join("");
+    return "<select data-at=\"" + at + "\" data-role=\"text\">" + out + "</select>";
+}
+
+// LastNews is MLRender source for the whole news popup - same markup as the
+// trophy blurbs, just paragraphs long instead of a sentence, so a single-line
+// text box was unreadable and unusable. shows a live mltohtml() preview
+// beside the raw source in a modal rather than fake a full markup editor
+function richtextbox(at, value) {
+    return "<button class=\"richtextopen\" type=\"button\" data-role=\"opentext\" data-at=\"" + at + "\">"
+        + "Edit (" + value.length + " characters)</button>";
+}
+
+function richtextmodalhtml(at, value) {
+    return "<div class=\"modalback\" data-role=\"closetext\">"
+        + "<div class=\"modal\">"
+        + "<div class=\"modalhead\"><b>Last news</b>"
+        + "<button type=\"button\" data-role=\"closetext\">&times;</button></div>"
+        + "<div class=\"modalbody\">"
+        + "<textarea data-at=\"" + at + "\" data-role=\"textsource\" spellcheck=\"false\">"
+        + escaped(value) + "</textarea>"
+        + "<div class=\"modalpreview\"><div class=\"newscard\" data-role=\"textpreview\">"
+        + mltohtml(value) + "</div></div>"
+        + "</div></div></div>";
+}
+
+// announcedpuzzletoday only ever gets compared against "today" as an opaque
+// day-count (see datainfo/README) - there is no reachable date to decode it
+// into, so the useful control isn't a picker, it's a way to force the two
+// sides of that comparison to differ again so the game announces on next load
+function resettablebox(at, value, resetto) {
+    return "<div class=\"resettable\">" + textbox(at, value, "int")
+        + "<button type=\"button\" data-role=\"resetfield\" data-at=\"" + at + "\""
+        + " data-reset=\"" + resetto + "\">Clear</button></div>";
+}
+
 function controlhtml(at, value, info) {
     const kind = controlkind(value, info);
     if (kind === "trophies") return trophybox(at, value);
@@ -261,6 +334,10 @@ function controlhtml(at, value, info) {
     if (kind === "flags") return flagsbox(at, value);
     if (kind === "numlist") return numlistbox(at, value);
     if (kind === "namelist") return namelistbox(at, value, info.sep || ",");
+    if (kind === "pick") return pickbox(at, value, info.options);
+    if (kind === "profile") return profilebox(at, value);
+    if (kind === "richtext") return richtextbox(at, value);
+    if (kind === "resettable") return resettablebox(at, value, info.resetto || "0");
     return textbox(at, value, kind);
 }
 

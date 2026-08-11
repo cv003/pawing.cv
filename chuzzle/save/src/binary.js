@@ -550,9 +550,9 @@ function chunkinfo(file, path) {
     } else if (file === "chuzzle.save") {
         if (path.length === 1) {
             if (path[0] === 1) return {label: "Grid squares", shape: gridsquarehead};
-            const label = ["Overworld state (has a confirmed engine bug - see datainfo/README)",
+            const label = ["Overworld state (leave as-is - a real bug in the game itself means these bytes don't line up cleanly with real fields)",
                 null, "Containers",
-                "Bonus flags (Array<char> - empty in every sample seen)"][path[0]];
+                "Bonus flags (empty in every save seen so far)"][path[0]];
             return label ? {label: label} : null;
         }
         if (path.length === 2 && path[0] === 1) {

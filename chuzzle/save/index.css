@@ -672,6 +672,76 @@ body:not(.loaded) .back {display: none}
     box-shadow: 0 0 0 2px #05061e, 0 0.25em 0.5em rgba(0,0,0,0.5);
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+.richtextopen {
+    padding: 0.36em 0.9em 0.08em;
+    border-radius: 0.3em; font-size: 0.95em;
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+}
+
+.resettable {display: flex; gap: 0.4em; align-items: center}
+.resettable input {width: 9em}
+.resettable button {
+    flex: none; padding: 0.32em 0.7em 0.08em;
+    border-radius: 0.3em; font-size: 0.85em;
+    color: #ffb9a3; background: #2d0027;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.resettable button:active {color: #ff6a3e}
+
+.modalback {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2em; background: rgba(10,0,20,0.72);
+}
+.modal {
+    display: flex; flex-direction: column;
+    width: min(1000px, 100%); max-height: 100%;
+    border-radius: 0.5em; overflow: hidden;
+    background: #2d0027;
+    box-shadow: 0 0 0 3px #ffb400, 0 0 0 5px #ff5a00, 0 0 0 10px #8b0aa2, 0 0.5em 2em rgba(0,0,0,0.6);
+}
+.modalhead {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6em 0.9em;
+    background: linear-gradient(180deg, #6a2183 0%, #590c74 100%);
+}
+.modalhead b {
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 1.1em; font-weight: 600; color: white;
+    text-transform: uppercase; letter-spacing: 0.02em;
+}
+.modalhead button {
+    flex: none; width: 1.8em; height: 1.8em; margin: 0; padding: 0;
+    border: none; border-radius: 50%; line-height: 1;
+    font-size: 1.3em; color: white; background: rgba(255,255,255,0.12);
+}
+.modalhead button:active {background: rgba(255,255,255,0.28)}
+.modalbody {
+    display: grid; gap: 0.9em; padding: 0.9em;
+    grid-template-columns: 1fr 1fr;
+    overflow: auto;
+}
+.modalbody textarea {
+    box-sizing: border-box; width: 100%; min-height: 22em;
+    padding: 0.6em 0.8em; resize: vertical;
+    border: none; outline: none; border-radius: 0.35em;
+    background: #1a0018; color: #d6c3e8;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 0.82em; line-height: 1.5;
+    box-shadow: inset 0 0 0 2px #60204a;
+}
+.modalbody textarea:focus {box-shadow: inset 0 0 0 2px #feff48}
+.modalpreview {min-height: 22em; border-radius: 0.35em; background: rgba(0,0,0,0.25); padding: 0.2em}
+.newscard {
+    padding: 0.8em 1em;
+    border-radius: 0.3em;
+    color: white;
+    font-family: "nimbus sans becker", system-ui, sans-serif;
+    font-size: 0.85em; line-height: 1.5;
+}
+
 @media (max-width: 700px) {
     .topbar {gap: 0.35em; padding: 0.5em 0 0.8em}
     .row {grid-template-columns: 1fr; gap: 0.35em}
@@ -682,4 +752,8 @@ body:not(.loaded) .back {display: none}
     .stats input {text-align: center}
     .trophies {grid-template-columns: 1fr}
     .dosave {right: 0.3em; bottom: 0.3em; font-size: 1.25em}
+    .modalback {padding: 0}
+    .modal {border-radius: 0; max-height: 100vh}
+    .modalbody {grid-template-columns: 1fr}
+    .modalbody textarea, .modalpreview {min-height: 14em}
 }

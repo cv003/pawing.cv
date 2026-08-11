@@ -38,17 +38,40 @@ function doswhen() {
 function u16(view, at, value) {view.setUint16(at, value, true)}
 function u32(view, at, value) {view.setUint32(at, value, true)}
 
+// Chuzzle2's own restore code turned out to need real directory entries -
+// a zip that only lists files (however clearly their paths imply folders)
+// silently failed to import. every ancestor folder of every file gets its
+// own zero-length entry here, exactly like the backup the game itself
+// writes, in the order each one is first needed
+function withdirs(files) {
+    const seen = new Set();
+    const out = [];
+    files.forEach(function(file) {
+        const parts = file.name.split("/");
+        let path = "";
+        for (let i = 0; i < parts.length - 1; i++) {
+            path += parts[i] + "/";
+            if (!seen.has(path)) {seen.add(path); out.push({name: path, bytes: null})}
+        }
+        out.push(file);
+    });
+    return out;
+}
+
 function zipbytes(files) {
     const when = doswhen();
     const encoder = new TextEncoder();
     const locals = [];
     const centrals = [];
     let offset = 0;
+    const entries = withdirs(files);
 
-    files.forEach(function(file) {
+    entries.forEach(function(file) {
         const name = encoder.encode(file.name);
-        const bytes = file.bytes;
-        const crc = crc32(bytes);
+        const dir = file.bytes === null;
+        const bytes = dir ? new Uint8Array(0) : file.bytes;
+        const crc = dir ? 0 : crc32(bytes);
+        const attr = dir ? 0x10 : 0;
 
         const local = new Uint8Array(30 + name.length);
         const lview = new DataView(local.buffer);
@@ -68,7 +91,7 @@ function zipbytes(files) {
         u32(cview, 16, crc);
         u32(cview, 20, bytes.length); u32(cview, 24, bytes.length);
         u16(cview, 28, name.length); u16(cview, 30, 0); u16(cview, 32, 0);
-        u16(cview, 34, 0); u16(cview, 36, 0); u32(cview, 38, 0);
+        u16(cview, 34, 0); u16(cview, 36, 0); u32(cview, 38, attr);
         u32(cview, 42, offset);
         central.set(name, 46);
 
@@ -85,7 +108,7 @@ function zipbytes(files) {
     const eview = new DataView(end.buffer);
     u32(eview, 0, 0x06054b50);
     u16(eview, 4, 0); u16(eview, 6, 0);
-    u16(eview, 8, files.length); u16(eview, 10, files.length);
+    u16(eview, 8, entries.length); u16(eview, 10, entries.length);
     u32(eview, 12, centralsize); u32(eview, 16, centralstart);
     u16(eview, 20, 0);
 

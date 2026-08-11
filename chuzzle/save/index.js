@@ -98,7 +98,7 @@ function sectionsof(one) {
     if (one.kind === "binary") {
         if (one.file === "puzzle.dat") return [{key: "puzzles", name: "Puzzles"}];
         if (one.file === "chuzzle1_zen.save" && zenrecord(one)) {
-            return [{key: "zen", name: "Zen"}, {key: "chunks", name: "Raw"}];
+            return [{key: "zen", name: "Zen"}];
         }
         if (markerfields(one)) return [{key: "marker", name: "Marker"}, {key: "words", name: "Raw"}];
         const view = binaryviewof(one);
@@ -479,7 +479,39 @@ function wiresheet() {
             group.insertBefore(chip, button);
             chip.querySelector("select").focus();
             playsound("click", 0.6);
+        } else if (role === "resetfield") {
+            setvalue(at, button.dataset.reset);
+            button.previousElementSibling.value = button.dataset.reset;
+            playsound("click", 0.7);
+        } else if (role === "opentext") {
+            opentextmodal(at);
+            playsound("click", 0.6);
         }
+    });
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+// LastNews's modal lives outside .sheets (it needs to sit above everything,
+// not just the current tab), so it gets its own small listener rather than
+// routing through wiresheet()'s delegated one
+function opentextmodal(at) {
+    const host = document.createElement("div");
+    host.innerHTML = richtextmodalhtml(at, held[openat].save.fields[at].value);
+    const modal = host.firstElementChild;
+    document.body.appendChild(modal);
+    document.body.classList.add("modalopen");
+
+    const close = function() {
+        modal.remove();
+        document.body.classList.remove("modalopen");
+    };
+    modal.addEventListener("click", function(e) {
+        if (e.target.dataset.role === "closetext") close();
+    });
+    modal.querySelector("[data-role=textsource]").addEventListener("input", function(e) {
+        setvalue(at, e.target.value);
+        modal.querySelector("[data-role=textpreview]").innerHTML = mltohtml(e.target.value);
     });
 }
 

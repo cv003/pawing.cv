@@ -6,6 +6,7 @@
         {"key": "dailydo", "name": "Daily-Do"},
         {"key": "puzzles", "name": "Puzzles"},
         {"key": "runs", "name": "Difficulty"},
+        {"key": "system", "name": "System"},
         {"key": "rest", "name": "Other"}
     ],
     "statnames": [
@@ -53,9 +54,10 @@
         "GotTrophyTime": {"panel": "trophies", "label": "Trophy dates", "control": "text", "note": "quoted \"Received <date> @ <time>\" strings, one per trophy id, so the quotes hold commas"},
         "GotTrophySeed": {"panel": "trophies", "label": "Trophy seeds", "note": "per trophy id, set to that day's daily-do seed at the moment it was earned"},
 
-        "CurrentPuzzle": {"panel": "puzzles", "label": "Current puzzle", "note": "an id - registered but no read site found to confirm what it points at"},
+        "CurrentPuzzle": {"panel": "puzzles", "label": "Current puzzle", "note": "an id - purpose not confirmed"},
         "RemindPuzzlePosters": {"panel": "puzzles", "label": "Remind about posters"},
-        "announcedpuzzletoday": {"panel": "puzzles", "label": "Announced day", "note": "a DateToInt-encoded day, not a boolean despite the name - stops the same puzzle being announced twice"},
+        "announcedpuzzletoday": {"panel": "puzzles", "label": "Announced day", "control": "resettable",
+            "note": "not a real date, just today vs not-today - Clear lets the puzzle announce again next load"},
         "BottlesFilled_Zen": {"panel": "puzzles", "label": "Bottles filled in zen"},
         "HighScore_ClassicChuzzle": {"panel": "puzzles", "label": "Classic high score"},
         "HighScore_SpeedChuzzle": {"panel": "puzzles", "label": "Speed high score"},
@@ -68,8 +70,39 @@
         "LastBossType": {"panel": "runs", "label": "Last boss types", "control": "numlist"},
 
         "LastPlayedState": {"panel": "rest", "label": "Decoy data (board)", "binary": true,
-            "note": "Settings::Reload overwrites this with randomised filler bytes on every load - looks like an anti-tamper measure, not real board state"},
+            "note": "overwritten with random bytes every time the game loads - not real board state"},
         "OpenGL_Driver_Data": {"panel": "rest", "label": "Decoy data (driver)", "binary": true,
-            "note": "same randomised-filler treatment as Decoy data (board), not a real GL driver string"}
+            "note": "same random-filler treatment as Decoy data (board), not a real driver string"},
+
+        "Graphics.Resolution": {"panel": "system", "label": "Screen resolution", "note": "width,height in pixels"},
+        "Graphics.Fullscreen": {"panel": "system", "label": "Fullscreen"},
+        "System.OS": {"panel": "system", "label": "Platform", "control": "pick",
+            "note": "only Android ever shows up in this build - anything else stays editable but unrecognised",
+            "options": [{"value": "Android", "label": "Android"}]},
+        "NewsVersion": {"panel": "system", "label": "News version seen"},
+        "LastNews": {"panel": "system", "label": "Last news", "control": "richtext",
+            "note": "the news popup's own markup - opens an editor with a live preview"},
+        "News": {"panel": "system", "label": "News popup seen",
+            "note": "toggled together with News version seen when the feed updates"},
+        "System.Startups": {"panel": "system", "label": "Times launched"},
+        "CurrentProfile": {"panel": "system", "label": "Current profile", "control": "profile",
+            "note": "which profile folder Loaded profile path points at"},
+        "Audio.SoundVolume": {"panel": "system", "label": "Sound volume", "control": "volume"},
+        "Audio.MusicVolume": {"panel": "system", "label": "Music volume", "control": "volume"},
+        "LoadedProfileDir": {"panel": "system", "label": "Loaded profile path",
+            "note": "kept in sync with Current profile by the game"},
+        "failload": {"panel": "system", "label": "Fail load", "unknown": true},
+        "AutoCloud": {"panel": "system", "label": "Cloud sync enabled"},
+        "AskedAutoCloud": {"panel": "system", "label": "Asked about cloud sync"},
+        "PrivacyPolicy": {"panel": "system", "label": "Ad consent", "control": "pick",
+            "note": "anything other than these two resets to a fresh default the next time it's checked",
+            "options": [
+                {"value": "ADS:RELEVANT", "label": "Personalised ads"},
+                {"value": "ADS:LESSRELEVANT", "label": "Non-personalised ads"}
+            ]},
+        "WhitescreenRecovery": {"panel": "system", "label": "Whitescreen recovery"},
+        "LowMemoryMode": {"panel": "system", "label": "Low memory mode"},
+        "OneTimeTokens": {"panel": "system", "label": "One-time flags",
+            "note": "each flag name only takes effect once ever, comma-separated if more than one - the only confirmed name is DDSTREAK"}
     }
 }
