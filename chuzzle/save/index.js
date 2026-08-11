@@ -529,7 +529,7 @@ const filenames = {
     "chuzzle2.cfg": "App settings",
     "settings.txt": "System",
     "chuzzarium.cfg": "Chuzzarium",
-    "chuzzle.save": "Chuzzle 2 game",
+    "chuzzle.save": "Classic",
     "chuzzle1_zen.save": "Zen",
     "puzzle.dat": "Puzzles",
     "puzzlebonus.dat": "Puzzle bonuses",

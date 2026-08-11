@@ -442,6 +442,79 @@ const chunkzen = [
     {name: "fizz active", type: "bool"},
 ];
 
+// Overworld::GetGrid (decomp/270/decompiled.c:371650) confirms the "Grid
+// squares" chunk is a flat width*height array of these 14-byte records, one
+// per map tile. two of the flags bit's 16 bits are pinned to real behavior:
+// Overworld::StampUsed (:371967) sets bit 0 when a container's footprint is
+// stamped onto the grid; Overworld::UnlockLevel (:373066) sets bit 1 when
+// that tile becomes reachable. the rest, and every other field on this
+// record, have no confirmed read site and stay honest placeholders
+const gridsquare = [
+    {name: "flags (bit0 used, bit1 unlocked)", type: "short"}, {name: "int 1", type: "int"},
+    {name: "char 1", type: "char"}, {name: "char 2", type: "char"}, {name: "char 3", type: "char"},
+    {name: "bool 1", type: "bool"}, {name: "int 2", type: "int"},
+];
+// the chunk's own data (separate from its 14-byte-per-square children) is a
+// tiny 12-byte record synced right around the square loop in Overworld::Sync
+// (decomp/270/decompiled.c, count before the loop, current-level position
+// after it) - Overworld::WinCurrentLevel/UnlockLevel (:378603/:373066) both
+// compare a container's coordinates against this exact pair of ints to find
+// "the level the player is standing on", so it's a confirmed IPoint
+const gridsquarehead = [
+    {name: "square count (redundant with the child count above)", type: "int"},
+    {name: "current level x", type: "int"}, {name: "current level y", type: "int"},
+];
+
+// the inlined container loop in Overworld::Sync (decomp/270/decompiled.c,
+// right after the grid squares chunk) confirms this 43-byte record
+// byte-exact: an (x,y) grid coordinate, a float, a RaptRect (its clickable
+// screen bounds - real samples show plausible 100x70-ish rects), a second
+// float pair, one more float, then two single-byte presence flags and a
+// trailing char. the two presence flags are for a pair of polymorphic
+// children that only ever show up together with a class-id tag + nested
+// chunk when present (see gridcontainerochuzzle below) - so this shape only
+// matches len===43 (both absent); the 47-byte variant still falls back to
+// the raw hex view rather than fake a shape that doesn't fit every record
+const gridcontainer = [
+    {name: "grid x", type: "int"}, {name: "grid y", type: "int"},
+    {name: "float 1", type: "float"},
+    {name: "rect x", type: "float"}, {name: "rect y", type: "float"},
+    {name: "rect w", type: "float"}, {name: "rect h", type: "float"},
+    {name: "point 1 x", type: "float"}, {name: "point 1 y", type: "float"},
+    {name: "float 2", type: "float"},
+    {name: "has ochuzzle", type: "bool"}, {name: "has dancing chuzzles", type: "bool"},
+    {name: "char 1", type: "char"},
+];
+
+// the 4th field above (`has ochuzzle`) is a SmartPointer<OChuzzle> - the
+// small mascot animation that plays on a freshly-unlocked map tile
+// (Overworld::UnlockLevel constructs one and assigns it straight to this
+// field, decompiled.c:373130-373163) - confirmed the ONLY concrete class
+// this slot can ever hold by MyApp::Factory(int) (decompiled.c:373688-380 area),
+// the generic loader callback used when nothing else claims the class-id
+// tag: `if (param_1 == 0) { ... OChuzzle::OChuzzle(...) } else return null`.
+// `has dancing chuzzles` (the field right after) never carries its own
+// bytes despite also being a presence flag - no `DancingChuzzles::Sync`
+// exists anywhere in the binary, so it's reconstructed fresh from the
+// container's own fields on load rather than ever being serialized itself.
+// OChuzzle::Sync (decompiled.c:383623) is the nested chunk that shows up
+// when `has ochuzzle` is true - 81 bytes, byte-exact against three real
+// 47-byte containers in a sample save
+const gridcontainerochuzzle = [
+    {name: "char 1", type: "char"},
+    {name: "point 1 x", type: "float"}, {name: "point 1 y", type: "float"},
+    {name: "float 1", type: "float"}, {name: "int 1", type: "int"}, {name: "float 2", type: "float"},
+    {name: "point 2 x", type: "float"}, {name: "point 2 y", type: "float"},
+    {name: "int 2", type: "int"}, {name: "short 1", type: "short"},
+    {name: "float 3", type: "float"}, {name: "char 2", type: "char"}, {name: "bool 1", type: "bool"},
+    {name: "char 3", type: "char"},
+    {name: "point 3 x", type: "float"}, {name: "point 3 y", type: "float"},
+    {name: "point 4 x", type: "float"}, {name: "point 4 y", type: "float"},
+    {name: "float 4", type: "float"}, {name: "float 5", type: "float"}, {name: "float 6", type: "float"},
+    {name: "point 5 x", type: "float"}, {name: "point 5 y", type: "float"},
+    {name: "bool 2", type: "bool"}, {name: "short 2", type: "short"},
+];
+
 function chunkinfo(file, path) {
     if (file === "puzzle.dat") {
         if (path.length === 1) {
@@ -476,18 +549,21 @@ function chunkinfo(file, path) {
         }
     } else if (file === "chuzzle.save") {
         if (path.length === 1) {
+            if (path[0] === 1) return {label: "Grid squares", shape: gridsquarehead};
             const label = ["Overworld state (has a confirmed engine bug - see datainfo/README)",
-                "Grid squares", "Containers", "Extra"][path[0]];
+                null, "Containers",
+                "Bonus flags (Array<char> - empty in every sample seen)"][path[0]];
             return label ? {label: label} : null;
         }
         if (path.length === 2 && path[0] === 1) {
-            return {label: "Square " + (path[1] + 1), shape: [
-                {name: "short 1", type: "short"}, {name: "int 1", type: "int"},
-                {name: "char 1", type: "char"}, {name: "char 2", type: "char"}, {name: "char 3", type: "char"},
-                {name: "bool 1", type: "bool"}, {name: "int 2", type: "int"},
-            ]};
+            return {label: "Square " + (path[1] + 1), shape: gridsquare};
         }
-        if (path.length === 2 && path[0] === 2) return {label: "Container " + (path[1] + 1)};
+        if (path.length === 2 && path[0] === 2) {
+            return {label: "Container " + (path[1] + 1), shape: gridcontainer};
+        }
+        if (path.length === 3 && path[0] === 2) {
+            return {label: "OChuzzle (unlock animation queued here)", shape: gridcontainerochuzzle};
+        }
     }
     return null;
 }
