@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>wigle search</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20x%3D%2232%22%20y%3D%2237.5%22%20font-size%3D%2244%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E%3Ctspan%20x%3D%2232%22%20text-anchor%3D%22middle%22%3E%F0%9F%93%B6%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="base.css">
+
+    <style>
+
+        body {padding-bottom: 3em; max-width: 64em}
+        h2 {margin: 0}
+        a {color: #3a6ea5}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .tokenbox {
+            margin: 0.8em 0; padding: 0.8em 1em;
+            border: 1px solid #c5c5ca; background: #f7f7f9;
+            display: flex; flex-wrap: wrap;
+            gap: 0.5em; align-items: center;
+        }
+        .tokenbox input {
+            flex: 1 1 22em; padding: 0.3em 0.5em;
+            border: 1px solid #999;
+        }
+        .tokenbox .saved {color: #3a9d6a; font-family: monospace}
+
+        fieldset {
+            border: 1px solid #c5c5ca; margin: 0.8em 0;
+            padding: 0.6em 0.9em 0.9em;
+        }
+        legend {font-size: 0.85em; color: #555; padding: 0 0.3em}
+        .grid {
+            display: grid; gap: 0.5em 1em;
+            grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
+        }
+        .grid label {
+            display: flex; flex-direction: column;
+            align-items: flex-start; gap: 0.15em;
+            font-size: 0.85em; color: #444;
+        }
+        .grid label.inline {flex-direction: row; align-items: center; gap: 0.4em}
+        .grid input, .grid select {
+            width: 100%; padding: 0.3em 0.4em;
+            border: 1px solid #999; font-size: 0.95em;
+        }
+
+        button, .btn {
+            padding: 0.4em 1.1em; border: 1px solid #222;
+            background: #222; color: #fff; cursor: pointer;
+            font-size: 0.9em;
+        }
+        button:hover, .btn:hover {background: #000}
+        button:disabled {opacity: 0.4; cursor: default}
+        button.secondary, .btn.secondary {
+            background: #fff; color: #222;
+        }
+        button.secondary:hover {background: #eee}
+
+        .runrow {margin: 0.8em 0; display: flex; gap: 0.6em; align-items: center}
+        .status {font-size: 0.85em; color: #777}
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        .resultwrap {overflow: auto; margin-top: 0.8em}
+        table.results {
+            border-collapse: collapse; font-size: 0.8em;
+            width: 100%; min-width: 60em;
+        }
+        table.results th, table.results td {
+            border: 1px solid #e2e2e2; padding: 3px 6px;
+            text-align: left; white-space: nowrap;
+        }
+        table.results th {background: #eee}
+        table.results tbody tr:nth-child(even) {background: #fafafa}
+
+        .resultbar {
+            margin-top: 0.6em; display: flex;
+            gap: 0.6em; align-items: center;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <h2>wigle search</h2>
+
+    <div class="tokenbox" id="tokenbox">
+        <label>api token (base64)
+            <input type="password" id="tokeninput" placeholder="paste encoded token here" autocomplete="off">
+        </label>
+        <button id="savetoken">save</button>
+        <span class="saved" id="tokensaved" hidden>token saved</span>
+        <button class="secondary" id="cleartoken" hidden>clear</button>
+    </div>
+
+    <form id="searchform" autocomplete="off">
+
+        <fieldset>
+            <legend>ssid / network</legend>
+            <div class="grid">
+                <label>ssid (exact)
+                    <input type="text" data-param="ssid" placeholder="mynetwork">
+                </label>
+                <label>ssid like (wildcard, use %)
+                    <input type="text" data-param="ssidlike" placeholder="%coffee%">
+                </label>
+                <label>bssid / netid (mac)
+                    <input type="text" data-param="netid" placeholder="aa:bb:cc:dd:ee:ff">
+                </label>
+                <label>encryption
+                    <select data-param="encryption">
+                        <option value="">any</option>
+                        <option value="none">none / open</option>
+                        <option value="wep">wep</option>
+                        <option value="wpa">wpa</option>
+                        <option value="wpa2">wpa2</option>
+                        <option value="wpa3">wpa3</option>
+                    </select>
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>location</legend>
+            <div class="grid">
+                <label>min latitude
+                    <input type="number" step="any" data-param="latrange1" placeholder="34.0">
+                </label>
+                <label>max latitude
+                    <input type="number" step="any" data-param="latrange2" placeholder="34.2">
+                </label>
+                <label>min longitude
+                    <input type="number" step="any" data-param="longrange1" placeholder="-118.5">
+                </label>
+                <label>max longitude
+                    <input type="number" step="any" data-param="longrange2" placeholder="-118.2">
+                </label>
+                <label>closest lat (for radius search)
+                    <input type="number" step="any" data-param="closestLat">
+                </label>
+                <label>closest long (for radius search)
+                    <input type="number" step="any" data-param="closestLong">
+                </label>
+                <label>variance (degrees, w/ closest point)
+                    <input type="number" step="any" data-param="variance" placeholder="0.01">
+                </label>
+                <label>country
+                    <input type="text" data-param="country" placeholder="US">
+                </label>
+                <label>region / state
+                    <input type="text" data-param="region">
+                </label>
+                <label>city
+                    <input type="text" data-param="city">
+                </label>
+                <label>road
+                    <input type="text" data-param="road">
+                </label>
+                <label>postal code
+                    <input type="text" data-param="postalcode">
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>filters &amp; options</legend>
+            <div class="grid">
+                <label>free networks
+                    <select data-param="freenet">
+                        <option value="">any</option>
+                        <option value="true">only free</option>
+                        <option value="false">exclude free</option>
+                    </select>
+                </label>
+                <label>pay networks
+                    <select data-param="paynet">
+                        <option value="">any</option>
+                        <option value="true">only pay</option>
+                        <option value="false">exclude pay</option>
+                    </select>
+                </label>
+                <label>results per page (max 100)
+                    <input type="number" data-param="resultsPerPage" value="100" min="1" max="100">
+                </label>
+                <label class="inline">
+                    <input type="checkbox" data-param="onlymandatory" style="width:auto">
+                    only mandatory fields (faster)
+                </label>
+            </div>
+        </fieldset>
+
+        <div class="runrow">
+            <button type="submit" id="runbtn">search</button>
+            <button type="button" class="secondary" id="resetbtn">reset fields</button>
+            <span class="status" id="status"></span>
+        </div>
+
+    </form>
+
+    <div class="resultwrap" id="resultwrap" hidden>
+        <table class="results" id="resultstable"></table>
+    </div>
+    <div class="resultbar" id="resultbar" hidden>
+        <button class="secondary" id="loadmore">load more</button>
+        <button class="secondary" id="downloadcsv">download csv</button>
+        <span class="status" id="resultcount"></span>
+    </div>
+
+    <script>
+
+        const $ = s => document.querySelector(s);
+        const paramfields = Array.from(document.querySelectorAll("[data-param]"));
+        const status = $("#status"), resultcount = $("#resultcount");
+        const resultwrap = $("#resultwrap"), resultbar = $("#resultbar");
+        const table = $("#resultstable");
+
+        const cols = [
+            ["netid", "bssid"], ["ssid", "ssid"], ["encryption", "encryption"],
+            ["channel", "ch"], ["firsttime", "first seen"], ["lastupdt", "last seen"],
+            ["trilat", "lat"], ["trilong", "long"], ["city", "city"],
+            ["region", "region"], ["country", "country"], ["road", "road"],
+        ];
+
+        let rows = [];
+        let searchAfter = null;
+        let lastParams = null;
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function loadtoken() { return localStorage.getItem("wigle_token") || ""; }
+        function savetokenui() {
+            const tok = loadtoken();
+            $("#tokeninput").hidden = !!tok;
+            $("#savetoken").hidden = !!tok;
+            $("#tokensaved").hidden = !tok;
+            $("#cleartoken").hidden = !tok;
+        }
+        $("#savetoken").addEventListener("click", () => {
+            const v = $("#tokeninput").value.trim();
+            if (!v) return;
+            localStorage.setItem("wigle_token", v);
+            $("#tokeninput").value = "";
+            savetokenui();
+        });
+        $("#cleartoken").addEventListener("click", () => {
+            localStorage.removeItem("wigle_token");
+            savetokenui();
+        });
+        savetokenui();
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function loadfields() {
+            let o = {};
+            try { o = JSON.parse(localStorage.getItem("wigle_fields") || "{}"); } catch {}
+            paramfields.forEach(el => {
+                const k = el.dataset.param;
+                if (!(k in o)) return;
+                if (el.type === "checkbox") el.checked = !!o[k];
+                else el.value = o[k];
+            });
+        }
+        function savefields() {
+            const o = {};
+            paramfields.forEach(el => {
+                o[el.dataset.param] = el.type === "checkbox" ? el.checked : el.value;
+            });
+            localStorage.setItem("wigle_fields", JSON.stringify(o));
+        }
+        paramfields.forEach(el => el.addEventListener("change", savefields));
+        loadfields();
+
+        $("#resetbtn").addEventListener("click", () => {
+            paramfields.forEach(el => {
+                if (el.type === "checkbox") el.checked = false;
+                else if (el.tagName === "SELECT") el.value = "";
+                else if (el.dataset.param === "resultsPerPage") el.value = "100";
+                else el.value = "";
+            });
+            savefields();
+        });
+
+        /*//////////////////////////////////////////////////////////////////////*/
+
+        function buildparams() {
+            const p = new URLSearchParams();
+            paramfields.forEach(el => {
+                const k = el.dataset.param;
+                if (el.type === "checkbox") { if (el.checked) p.set(k, "true"); return; }
+                const v = el.value.trim();
+                if (v) p.set(k, v);
+            });
+            return p;
+        }
+
+        async function wigleFetch(params) {
+            const token = loadtoken();
+            const url = "https://api.wigle.net/api/v2/network/search?" + params.toString();
+            const headers = {Authorization: "Basic " + token};
+
+            try {
+                const r = await fetch(url, {headers});
+                if (r.ok) return await r.json();
+                if (r.status !== 0) {
+                    const body = await r.text().catch(() => "");
+                    throw new Error("HTTP " + r.status + (body ? (" - " + body.slice(0, 200)) : ""));
+                }
+            } catch (e) {}
+
+            const proxied = "https://cors.coolsite.cv/?url=" + encodeURIComponent(url);
+            const r2 = await fetch(proxied, {headers});
+            if (!r2.ok) throw new Error("proxy HTTP " + r2.status);
+            return await r2.json();
+        }
+
+        function fmt(v) { return v === null || v === undefined || v === "" ? "" : String(v); }
+
+        function renderrows() {
+            let html = "<tr>" + cols.map(c => "<th>" + c[1] + "</th>").join("") + "</tr>";
+            for (const row of rows) {
+                html += "<tr>" + cols.map(c => "<td>" + fmt(row[c[0]]).replace(/[&<>]/g, ch =>
+                    ({"&": "&amp;", "<": "&lt;", ">": "&gt;"})[ch]) + "</td>").join("") + "</tr>";
+            }
+            table.innerHTML = html;
+            resultwrap.hidden = rows.length === 0;
+            resultbar.hidden = rows.length === 0;
+            resultcount.textContent = rows.length + " result" + (rows.length === 1 ? "" : "s") +
+                (searchAfter ? " (more available)" : "");
+            $("#loadmore").disabled = !searchAfter;
+        }
+
+        async function runsearch(more) {
+            if (!loadtoken()) { status.textContent = "save an api token first"; return; }
+            const params = more ? new URLSearchParams(lastParams) : buildparams();
+            if (more && searchAfter) params.set("searchAfter", searchAfter);
+            if (!more) { rows = []; searchAfter = null; }
+            lastParams = params;
+
+            $("#runbtn").disabled = true; $("#loadmore").disabled = true;
+            status.textContent = "searching...";
+            try {
+                const data = await wigleFetch(params);
+                if (!data.success) throw new Error(data.message || "wigle api returned an error");
+                rows = rows.concat(data.results || []);
+                searchAfter = data.search_after || null;
+                status.textContent = "total matches on wigle: " + fmt(data.totalResults);
+                renderrows();
+            } catch (e) {
+                status.textContent = "error: " + (e && e.message ? e.message : String(e));
+            } finally {
+                $("#runbtn").disabled = false;
+                $("#loadmore").disabled = !searchAfter;
+            }
+        }
+
+        $("#searchform").addEventListener("submit", e => { e.preventDefault(); runsearch(false); });
+        $("#loadmore").addEventListener("click", () => runsearch(true));
+
+        $("#downloadcsv").addEventListener("click", () => {
+            const header = cols.map(c => c[1]).join(",");
+            const lines = rows.map(row => cols.map(c => {
+                const v = fmt(row[c[0]]).replace(/"/g, '""');
+                return '"' + v + '"';
+            }).join(","));
+            const csv = [header].concat(lines).join("\n");
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+            a.download = "wigle-search.csv";
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        });
+
+    </script>
+
+</body>
+</html>

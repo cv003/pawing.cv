@@ -120,7 +120,6 @@
             </select>
         </label>
         <label><input type="checkbox" class="dedupechk"> and dedupe</label>
-        <label><input type="checkbox" class="junkchk"> and exclude junk</label>
         <label><input type="checkbox" class="skip404chk"> and skip 404/410s</label>
     </div>
     <form class="domaininputrow" autocomplete="off">
@@ -132,7 +131,7 @@
     <div class="outputrow"></div>
     <script>
 
-        const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'junkchk', 'skip404chk'];
+        const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'skip404chk'];
 
         function element(cls) {return document.querySelector('.' + cls)}
         function allelements(cls) {return Array.from(document.getElementsByClassName(cls))}
@@ -141,7 +140,7 @@
             let o = {};
             persistkeys.forEach(k => {
                 let val;
-                if (k === "limitenabled" || k === "dedupechk" || k === "junkchk" || k === "skip404chk") val = element(k).checked;
+                if (k === "limitenabled" || k === "dedupechk" || k === "skip404chk") val = element(k).checked;
                 else val = element(k).value;
                 o[k] = val;
             });
@@ -154,7 +153,7 @@
             persistkeys.forEach(k => {
                 let val = o[k];
                 if (val != null) {
-                    if (k === "limitenabled" || k === "dedupechk" || k === "junkchk" || k === "skip404chk")
+                    if (k === "limitenabled" || k === "dedupechk" || k === "skip404chk")
                         element(k).checked = !!val;
                     else element(k).value = val;
                 }
@@ -241,20 +240,6 @@
                 return url.replace(/^https?:\/\//i,"").replace(/^www\d*\./i,"").replace(/\/+$/,"").toLowerCase();
             }
         }
-        function ERADICATEGARBAGE(url) { // not sure what classifies under garbage though
-            let u = url.toLowerCase().split("?")[0].split("#")[0];
-            return (
-                u.includes("/.well-known/") ||
-                u.includes("/wp-includes/") ||
-                u.includes("/wp-content/") ||
-                u.includes("/xmlrpc.php") ||
-                u.includes("/cgi-bin/") ||
-                u.includes("/feed/") ||
-                u.includes("/?author=") ||
-                u.match(/\/sitemap\d*\.xml$/)
-            );
-        }
-
         function buildcdxurl(domain) {
             let url = "https://web.archive.org/cdx/search/cdx?url="
                 + encodedurl(domain)
@@ -276,7 +261,6 @@
 
         function parsedatarows(lines) {
             const dedupeenabled = element('dedupechk').checked;
-            const junkenabled = element('junkchk').checked;
             const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
             let data = [];
             let dedupemap = dedupeenabled ? new Map() : null;
@@ -285,7 +269,6 @@
                 let parts = lines[i].split(/\s+/);
                 if (parts.length < 5) continue;
                 let original = parts[1];
-                if (junkenabled && ERADICATEGARBAGE(original)) continue;
                 if (gottaskipbadpages(parts[3])) continue;
 
                 if (dedupeenabled) {
@@ -305,117 +288,136 @@
             return data;
         }
 
+        function sleep(ms) {return new Promise(r => setTimeout(r, ms))}
+
+        const cdxroutes = [
+            {key: "proxy", build: u => "https://cors.coolsite.cv/?url=" + encodeURIComponent(u)},
+            {key: "allorigins", build: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u)},
+            {key: "codetabs", build: u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u)}
+        ];
+
         async function fetchcdxrowsstream(baseurl, progress) {
-            function shouldretryhttp(status) {
-                return status === 403 || status === 408 || status === 425 || status === 429 || status >= 500;
-            }
-
-            const attempts = ["proxymain", "direct"];
+            const retriesperroute = 1;
+            const sweeps = 5;
+            const responsetimeout = 25000;
+            const streamtimeout = 1200000;
             const dedupeenabled = element('dedupechk').checked;
-            const junkenabled = element('junkchk').checked;
             const hardlimit = element('limitenabled').checked ? (parseInt(element('limitval').value) || 5000) : Infinity;
+            let lasterror = null;
 
-            for (let a = 0; a < attempts.length; a++) {
-                const route = attempts[a];
-                let target = baseurl;
-                if (route === "proxymain") target = "https://cors.coolsite.cv/?url=" + encodeURIComponent(baseurl);
+            for (let sweep = 0; sweep < sweeps; sweep++) {
+              for (let a = 0; a < cdxroutes.length; a++) {
+                const route = cdxroutes[a].key;
+                const target = cdxroutes[a].build(baseurl);
 
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 1200000);
-                try {
-                    setprogress(progress, "beginning to stream data, this might take a while..");
-                    const resp = await fetch(target, {method: "GET", cache: "no-store", signal: controller.signal});
-                    if (!resp.ok) {
-                        const e = new Error(route + " HTTP " + resp.status);
-                        e.status = resp.status;
-                        throw e;
-                    }
-                    if (!resp.body) {
-                        const fallbacktxt = await resp.text();
-                        return parsedatarows((fallbacktxt || "").replace(/\r/g, "").split("\n"));
-                    }
+                for (let attempt = 0; attempt <= retriesperroute; attempt++) {
+                    const controller = new AbortController();
+                    let timeout = setTimeout(() => controller.abort(), responsetimeout);
+                    try {
+                        setprogress(progress, "trying via " + route + (attempt ? " (retry " + attempt + ")" : "")
+                            + (sweep ? " [pass " + (sweep + 1) + "]" : "") + "..");
+                        const resp = await fetch(target, {method: "GET", cache: "no-store", signal: controller.signal});
+                        clearTimeout(timeout);
+                        if (!resp.ok) {
+                            const e = new Error(route + " HTTP " + resp.status);
+                            e.status = resp.status;
+                            throw e;
+                        }
+                        timeout = setTimeout(() => controller.abort(), streamtimeout);
+                        setprogress(progress, "beginning to stream data, this might take a while..");
+                        if (!resp.body) {
+                            const fallbacktxt = await resp.text();
+                            return parsedatarows((fallbacktxt || "").replace(/\r/g, "").split("\n"));
+                        }
 
-                    const totalbytes = parseInt(resp.headers.get("content-length") || "0", 10) || 0;
-                    const reader = resp.body.getReader();
-                    const decoder = new TextDecoder();
-                    let processedbytes = 0;
-                    let carry = "";
-                    let data = [];
-                    let dedupemap = dedupeenabled ? new Map() : null;
-                    let stop = false;
+                        const totalbytes = parseInt(resp.headers.get("content-length") || "0", 10) || 0;
+                        const reader = resp.body.getReader();
+                        const decoder = new TextDecoder();
+                        let processedbytes = 0;
+                        let carry = "";
+                        let data = [];
+                        let dedupemap = dedupeenabled ? new Map() : null;
+                        let stop = false;
 
-                    while (!stop) {
-                        const {done, value} = await reader.read();
-                        if (done) break;
-                        processedbytes += value.byteLength;
-                        carry += decoder.decode(value, {stream: true});
-                        const lines = carry.split(/\r?\n/);
-                        carry = lines.pop() || "";
+                        while (!stop) {
+                            const {done, value} = await reader.read();
+                            if (done) break;
+                            processedbytes += value.byteLength;
+                            carry += decoder.decode(value, {stream: true});
+                            const lines = carry.split(/\r?\n/);
+                            carry = lines.pop() || "";
 
-                        for (let i = 0; i < lines.length; i++) {
-                            const line = lines[i].trim();
-                            if (!line) continue;
-                            const parts = line.split(/\s+/);
-                            if (parts.length < 5) continue;
-                            const original = parts[1];
-                            if (junkenabled && ERADICATEGARBAGE(original)) continue;
-                            if (gottaskipbadpages(parts[3])) continue;
+                            for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i].trim();
+                                if (!line) continue;
+                                const parts = line.split(/\s+/);
+                                if (parts.length < 5) continue;
+                                const original = parts[1];
+                                if (gottaskipbadpages(parts[3])) continue;
 
-                            if (dedupeenabled) {
-                                const timestamp = parts[0];
-                                const norm = normalizededupe(original);
-                                const prev = dedupemap.get(norm);
-                                if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
-                            } else {
-                                data.push(parts);
-                                if (data.length >= hardlimit) {
-                                    stop = true;
-                                    break;
+                                if (dedupeenabled) {
+                                    const timestamp = parts[0];
+                                    const norm = normalizededupe(original);
+                                    const prev = dedupemap.get(norm);
+                                    if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                                } else {
+                                    data.push(parts);
+                                    if (data.length >= hardlimit) {
+                                        stop = true;
+                                        break;
+                                    }
                                 }
+                            }
+
+                            const mbdone = (processedbytes / (1024 * 1024)).toFixed(1);
+                            const rowcount = dedupeenabled ? dedupemap.size : data.length;
+                            if (totalbytes > 0) {
+                                const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
+                                setprogress(progress, `streaming ${mbdone}/${mbtotal} MB.. (${rowcount} rows)`);
+                            } else {
+                                setprogress(progress, `streaming ${mbdone} MB.. (${rowcount} rows)`);
                             }
                         }
 
-                        const mbdone = (processedbytes / (1024 * 1024)).toFixed(1);
-                        const rowcount = dedupeenabled ? dedupemap.size : data.length;
-                        if (totalbytes > 0) {
-                            const mbtotal = (totalbytes / (1024 * 1024)).toFixed(1);
-                            setprogress(progress, `streaming ${mbdone}/${mbtotal} MB.. (${rowcount} rows)`);
-                        } else {
-                            setprogress(progress, `streaming ${mbdone} MB.. (${rowcount} rows)`);
-                        }
-                    }
-
-                    if (carry && !stop) {
-                        const line = carry.trim();
-                        if (line) {
-                            const parts = line.split(/\s+/);
-                            if (parts.length >= 5) {
-                                const original = parts[1];
-                                if (!((junkenabled && ERADICATEGARBAGE(original)) || gottaskipbadpages(parts[3]))) {
-                                    if (dedupeenabled) {
-                                        const timestamp = parts[0];
-                                        const norm = normalizededupe(original);
-                                        const prev = dedupemap.get(norm);
-                                        if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
-                                    } else if (data.length < hardlimit) {
-                                        data.push(parts);
+                        if (carry && !stop) {
+                            const line = carry.trim();
+                            if (line) {
+                                const parts = line.split(/\s+/);
+                                if (parts.length >= 5) {
+                                    const original = parts[1];
+                                    if (!gottaskipbadpages(parts[3])) {
+                                        if (dedupeenabled) {
+                                            const timestamp = parts[0];
+                                            const norm = normalizededupe(original);
+                                            const prev = dedupemap.get(norm);
+                                            if (!prev || prev[0] < timestamp) dedupemap.set(norm, parts);
+                                        } else if (data.length < hardlimit) {
+                                            data.push(parts);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    if (dedupeenabled) {
-                        data = Array.from(dedupemap.values());
-                        if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
-                    }
-                    return data;
-                } catch (e) {
-                    const status = e && typeof e.status === "number" ? e.status : 0;
-                    if (status && !shouldretryhttp(status)) throw e;
-                    if (a === attempts.length - 1) throw e;
-                } finally {clearTimeout(timeout)}
+                        if (dedupeenabled) {
+                            data = Array.from(dedupemap.values());
+                            if (Number.isFinite(hardlimit) && data.length > hardlimit) data = data.slice(0, hardlimit);
+                        }
+                        return data;
+                    } catch (e) {
+                        lasterror = e;
+                        if (attempt < retriesperroute) {
+                            await sleep(300 + Math.floor(Math.random() * 250));
+                        }
+                    } finally {clearTimeout(timeout)}
+                }
+              }
+              if (sweep < sweeps - 1) {
+                  const wait = 3000 * (sweep + 1) + Math.floor(Math.random() * 1000);
+                  setprogress(progress, "every route is down or throttled right now, waiting " + Math.round(wait / 1000) + "s before trying everything again..");
+                  await sleep(wait);
+              }
             }
-            return [];
+            throw lasterror || new Error("all routes failed");
         }
 
         function exportbuilder(data, domain) {
