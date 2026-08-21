@@ -53,7 +53,7 @@
     width: 100%; font-size: 4.9cqw;
     padding-top: 34cqw; padding-bottom: 32cqw;
 }
-.scores > div {position: absolute; left: 0; right: 0}
+.scores > div {position: absolute; top: 0; left: 0; right: 0}
 .scores.blurring {filter: url(#vblur)}
 
 .noscores {

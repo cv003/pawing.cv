@@ -176,9 +176,8 @@ function drawdifficulty(rng, gametype) {
     return {name: "Hard!", color: "1,0,0"};
 }
 
-function computerulesfordate(date) {
+function computerulesfordate(date, golden) {
     const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
-    const golden = date.getDay() === 0;
 
     const pool = buildgametypepool(monthlyseed(year, month), golden);
     const gametype = pool[day];
@@ -297,9 +296,9 @@ document.addEventListener("click", function(e) {
     if (e.target.closest(".glossarylink")) openextra(glossarywrap);
 });
 
-function rulescontenthtml(date) {
+function rulescontenthtml(date, golden) {
     if (!rules) return "";
-    const today = computerulesfordate(date);
+    const today = computerulesfordate(date, golden);
     const gt = rules.gametype[today.gametype];
     if (!gt) return "";
 
@@ -328,10 +327,16 @@ function rulestitlefor(back) {
     if (back === 1) return "Yesterday's Rules!";
     return (typeof daylabel === "function" ? daylabel(back) : "") + " Rules!";
 }
-function paintrulescontent(back) {
+
+function currentgolden() {
+    return typeof boards !== "undefined" && typeof boardat !== "undefined"
+        && !!boards[boardat].weekly;
+}
+function paintrulescontent(back, golden) {
     if (back === undefined) back = typeof dayat !== "undefined" ? dayat : 0;
+    if (golden === undefined) golden = currentgolden();
     const date = typeof dayback === "function" ? dayback(back) : new Date();
-    const html = rulescontenthtml(date);
+    const html = rulescontenthtml(date, golden);
     if (!html) return;
 
     document.querySelectorAll(".rulescontent").forEach(function(seat) {

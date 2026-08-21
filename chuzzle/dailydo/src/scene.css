@@ -146,10 +146,10 @@
 }
 .stripes.front {
     z-index: 6;
-    opacity: 0.35;
+    opacity: 0.45; mix-blend-mode: normal;
 }
 .golden .stripes {opacity: 0.3}
-.golden .stripes.front {opacity: 0.16}
+.golden .stripes.front {opacity: 0.3}
 .stripes::before {
     content: ""; position: absolute;
     top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.05);

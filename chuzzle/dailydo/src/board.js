@@ -141,7 +141,7 @@ function paintrows(at, host) {
             }
         }
         const top = padtop + index * rowheight - at;
-        row.style.top = top + "px";
+        row.style.transform = "translateY(" + top + "px)";
         const t = (top + rowheight / 2) / height * last;
         row.style.color = cyclerget(Math.max(0, Math.min(last - 0.001, t)));
     }

@@ -357,22 +357,22 @@ function slideswap(dir, ghosts) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-async function reload(dir, dayChanged) {
+async function reload(dir, rulesChanged) {
     document.body.classList.add("fetching");
     const count = await loadboard();
     document.body.classList.remove("fetching");
-    includerulesslide = !!dayChanged;
+    includerulesslide = !!rulesChanged;
     const ghosts = snapshot();
-    if (dayChanged && typeof paintrulescontent === "function") paintrulescontent(dayat);
-    // drawpicks runs paintscene, which swaps the colour cycler the tints read -
-    // drawing the steppers first left them a board behind
+    if (rulesChanged && typeof paintrulescontent === "function") paintrulescontent(dayat);
     drawpicks();
     drawsteppers();
     relabellogo(document.querySelector(".dumbcontainer:not(.ghost) .logo"), boardtitle());
     measurelist(host, list);
+
     board = filtered(findwant());
     claimedat = findclaimed();
     paintedat = null; filled = -1;
+
     paintrows(0, host);
     jumptoclaimed();
     openlinkedplayer();
@@ -381,6 +381,7 @@ async function reload(dir, dayChanged) {
     slideswap(dir, ghosts);
     markurl();
     marktitle(count);
+
     if (boards[boardat].weekly) checkgolden();
 }
 
@@ -448,7 +449,12 @@ function pickboard(index) {
     boardscrolls[boards[boardat].key] = fling.at();
     const dir = index > boardat ? -1 : 1;
     boardat = index;
-    reload(dir).then(function() {
+
+    if (boards[boardat].weekly && !isgoldday(dayat)) {
+        const near = nextday(dayat, 1);
+        if (near !== null) dayat = near;
+    }
+    reload(dir, true).then(function() {
         const saved = boardscrolls[boards[boardat].key];
         if (saved !== undefined) fling.jump(saved);
         else if (claimedat < 0) fling.jump(0);
@@ -525,11 +531,6 @@ function locateclaimed() {
     return -1;
 }
 
-/* only players who placed high on a daily board during the week are in the
-   tournament at all, so a "..." row for someone who never got there reads as
-   "did not turn up on sunday" when really they were never entered. the week's
-   daily boards settle it, and they come back in one batched request. until
-   that answer arrives the row stays off, which is the quieter way round. */
 const goldtop = 100;
 let goldweek = null;
 let goldok = false;
