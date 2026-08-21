@@ -1,12 +1,3 @@
-/*
-
-  the sky behind the board: the drifting starfield, the eight colour diagonal
-  bands, the three pillars and the star arch. all of it is reverse engineered
-  from Game::DrawGameBackground rather than the screenshots, so the numbers are
-  in game units - see datainfo/README.md.
-
-*/
-
 :root {
     --baseu: min(var(--vh) * 0.5625, 100vw); 
     --gu: calc(var(--u) / 414)
@@ -151,14 +142,14 @@
 
 .stripes {
     z-index: 1; overflow: hidden;
-    opacity: 0.8; 
+    opacity: 0.6; mix-blend-mode: screen;
 }
 .stripes.front {
     z-index: 6;
-    opacity: 0.5;
+    opacity: 0.35;
 }
-.golden .stripes {opacity: 0.4}
-.golden .stripes.front {opacity: 0.22}
+.golden .stripes {opacity: 0.3}
+.golden .stripes.front {opacity: 0.16}
 .stripes::before {
     content: ""; position: absolute;
     top: calc(var(--u) * -0.05); bottom: calc(var(--u) * -0.05);

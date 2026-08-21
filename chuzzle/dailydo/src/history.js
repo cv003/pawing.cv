@@ -1,25 +1,9 @@
-/*
-
-  the little score graph in a player's info popup. one point per day the
-  fourteen day window still answers for, so it reads as "how has this person
-  been doing lately" rather than a full career - the boards do not keep one.
-
-  the days come from the same two places the board itself uses, live first and
-  the github release when raptisoft has already eaten most of a day. that
-  matters here more than anywhere: day thirteen is down to a few hundred rows,
-  so a player who is really there would otherwise show up as a gap.
-
-*/
-
-const sparkdays = 14;
+const sparkdays = 14; // across the last two weeks
 const sparkwide = 300;
 const sparktall = 100;
-// a gutter on the left for the two rank labels, so no dot can sit under one
 const sparkleft = 42;
 const sparkright = 294;
 
-// shared with nothing on purpose - the board cache in index.js rotates to six
-// entries, which a fourteen day sweep would blow straight through
 const daytexts = {};
 
 function historydays() {
@@ -58,8 +42,6 @@ async function daytext(boardkey, back, live) {
     return text;
 }
 
-// a full readboard() of fourteen boards is sixty thousand objects for one
-// lookup, so this walks the raw lines and stops at the match
 function seatin(text, id) {
     if (!text) return null;
     const lines = text.split(String.fromCharCode(10));
@@ -93,10 +75,6 @@ async function loadhistory(boardkey, id) {
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the line plots rank, not score. one exceptional day is worth ten times an
-   ordinary one, so a score axis puts twelve days flat along the floor and one
-   spike at the end; rank is the board's own unit, it is bounded, and it is
-   what "form" means anyway. the scores are still in the dot titles */
 function sparkband(points) {
     const seats = points.filter(function(p) {return p.played})
         .map(function(p) {return p.rank});
@@ -182,12 +160,10 @@ function sparkcaption(points) {
         + ", played <b>" + played.length + "</b> of " + points.length + unit;
 }
 
-// two points is a line segment, not a shape - the golden board is weekly, so
-// it stays empty until the archive has a few more sundays in it
 function sparkblock(points) {
     if (points.length < 3) return "";
     return "<div class=\"sparkbox\">"
-        + "<i>Recent form</i>"
+        + "<i>Score history</i>"
         + sparksvg(points)
         + "<div class=\"sparkaxis\"><span>" + points[0].label + "</span>"
         + "<span>" + points[points.length - 1].label + "</span></div>"
@@ -197,9 +173,6 @@ function sparkblock(points) {
 /*//////////////////////////////////////////////////////////////////////*/
 
 let sparktoken = 0;
-
-// the popup is already open by the time the days land, so a token keeps a slow
-// answer from painting over whoever the user opened next
 function drawhistory(body, boardkey, id) {
     const seat = body.querySelector(".sparkbox");
     if (!seat) return;
@@ -213,6 +186,6 @@ function drawhistory(body, boardkey, id) {
 }
 
 function sparkloading() {
-    return "<div class=\"sparkbox waiting\"><i>Recent form</i>"
-        + "<span class=\"sparkwait\">reading the last days...</span></div>";
+    return "<div class=\"sparkbox waiting\"><i>Score history</i>"
+        + "<span class=\"sparkwait\">Loading, one second...</span></div>";
 }

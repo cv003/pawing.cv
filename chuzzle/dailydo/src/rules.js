@@ -178,12 +178,13 @@ function drawdifficulty(rng, gametype) {
 
 function computerulesfordate(date) {
     const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
+    const golden = date.getDay() === 0;
 
-    const pool = buildgametypepool(monthlyseed(year, month));
+    const pool = buildgametypepool(monthlyseed(year, month), golden);
     const gametype = pool[day];
 
     const rng = new RaptRandom();
-    rng.seed(dailyseed(year, month, day));
+    rng.seed(golden ? Math.floor(dailyseed(year, month, day) / 2) : dailyseed(year, month, day));
     const extra = {};
     const deck = shuffledeck(builddeck(gametype, day, rng, extra), rng);
     const target = drawtarget(rng);
@@ -202,8 +203,6 @@ function iconimg(path, alt) {
 function escapehtml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-
-// csscolor lives in src/global.js now, the news markup wants the same parser
 
 function markuptext(raw) {
     const re = /<_tc>|<blinky>|<_stinky>|<color ([^>]+)>/g;

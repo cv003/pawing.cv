@@ -453,8 +453,6 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-/* the rings and the width are in --u like the findbox's are, so the two line
-   up as one unit instead of the tabs' rounded corners poking out past it */
 .boardpick {
     position: fixed; z-index: 6;
     left: 50%; transform: translateX(-50%);
@@ -465,8 +463,7 @@
     clip-path: inset(-1.2vh -1.2vh 0 -1.2vh);
     box-shadow:
         0 0 0 calc(var(--u) * 0.012) #60204a,
-        0 0 0 calc(var(--u) * 0.02) #feff48,
-        0 0 0 calc(var(--u) * 0.032) rgba(0,0,0,0.5);
+        0 0 0 calc(var(--u) * 0.02) #feff48
 }
 .boardpick button {
     display: flex; align-items: center; justify-content: center;
@@ -824,7 +821,8 @@
     text-transform: capitalize; font-size: 1.15em;
     margin: 0; padding: 7px 0 3px;
     border-radius: 0.25em; color: white;
-    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, #1130bf 80%, #a2aee6 100%);
+    background: linear-gradient(140deg, #6225fd 0%, #1130bf 30%, 
+                                        #1130bf 80%, #a2aee6 100%);
     font-weight: 100;
     --r: 0.08em; --ink: #000;
     text-shadow: var(--ring);
@@ -833,5 +831,6 @@
 }
 .pucontent .upcominglink:active, .pucontent .glossarylink:active {
     padding: 7px 0 3px;
-    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%, #6020cf 80%, #ba9fe6 100%);
+    background: linear-gradient(140deg, #a259fd 0%, #6225fd 30%,
+                                        #6020cf 80%, #ba9fe6 100%);
 }

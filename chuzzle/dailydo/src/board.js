@@ -51,6 +51,7 @@ function makerow() {
     flag.onload = function() {flag.classList.add("drawn")};
     // some country codes (GG, AQ, BQ, BL, CW, IM, JE, MF, SS, SX..) have missing art in-game so they aren't recognizable..
     // on the site it'll show the country name on hover but won't have a texture
+    // maybe they'll be added in the pc version?
     flag.onerror = function() {
         if (!flag.src.endsWith("/--.png")) flag.src = "assets/images/flags/--.png";
     };

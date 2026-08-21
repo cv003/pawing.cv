@@ -22,7 +22,7 @@
         else if (path.startsWith("swatchling")) {redirectto = "https://coolsite.cv/utdr/swatchlings"}
         else if (path.startsWith("gdaudio")) {redirectto = "https://coolsite.cv/gd/audio"}
         else if (path.startsWith("dl")) {redirectto = "https://coolsite.cv/bookmarks"}
-        else if (path.startsWith("bestai")) {redirectto = "https://coolsite.cv/archive/bestai"}
+        else if (path.startsWith("bestai")) {redirectto = "https://archive.coolsite.cv/bestai"}
         else if (path.startsWith("csstrace") || path.startsWith("svgfavicon") || path.startsWith("testfile")) {
             var toolname = path.split("/")[0];
             redirectto = `https://coolsite.cv/tools/${toolname}`;
@@ -36,6 +36,7 @@
             redirectto = `https://archive.coolsite.cv/${archivepath}`;
         }
         else if (path.startsWith("contact")) {redirectto = "https://x.com/messages/compose?recipient_id=1565678264265457664&hellobro"}
+        else if (path.startsWith("chuzzle/save")) {redirectto = "https://archive.coolsite.cv/chuzzlesave"}
         // the chuzzarium shop page was /chuzzle/store before it was /chuzzle/shop
         else if (path === "chuzzle/store" || path.startsWith("chuzzle/store/")) {
             redirectto = "https://coolsite.cv/chuzzle/shop" + path.slice("chuzzle/store".length)
