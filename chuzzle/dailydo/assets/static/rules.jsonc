@@ -1,7 +1,6 @@
 // rules are deterministic per day. game type is selected for a pool for 35 and optional modifiers/bonus are drawn from separate daily seed RNG. 
-// see chuzzle/dailydo/rules.js for the selection algorithm and gating (including rules 30/31 and rule 19's day-of-month gate).
+// see chuzzle/dailydo/rules.js for the selection algorithm and gating (including rules 30/31 and rule 19's day of month gate thing)
 
-// the daily rules system balances predictability and variety by seeding a small fixed pool of game types and layering optional rules and a single powerup. 
 // each day's output can be reproduced from the date seed, which makes tournament scheduling consistent!
 
 // <color r,g,b>
@@ -64,10 +63,10 @@
             "text": "<blinky>Rainbow Chuzzles<_tc> are in play!  Match them for a <blinky>big bonus<_tc> that grows each time!"},
         {"id": 19, "icon": "rule/19stinky", "confidence": "confirmed",
             "text": "<_stinky>But wait a minute!  ALL LOCKS are actually STINKY CHUZZLE!  And Stinky won't match!<_tc>",
-            "note": "the whole line renders in the <_stinky> tag instead of <_tc>. gated to gametype 0/1 AND dayOfMonth % 3 == 1 (the day condition is new in 2.70). IsRuleOK requires id 10 or id 19 already selected before id 22 (same-color) can join - see the code note on id 22 below"},
+            "note": "gated to gametype 0/1 and dayOfMonth % 3 == 1. IsRuleOK requires id 10 or id 19 already selected before id 22 (same color) can join"},
         {"id": 20, "icon": "rule/20colortemplate", "confidence": "confirmed",
             "text": "Matching <blinky>%s CHUZZLES<_tc> will <blinky>%s<_tc> scores for the turn!",
-            "note": "templated: %s slots are a colour name (Red/Green/Blue/Orange/Yellow/Purple, gChuzzleColors order) and a multiplier word (double/triple - quadruple exists in the word table but is unreachable here). code checks 'if (ruleId == 0x14)' to tint an extra base-chuzzle icon with the same random colour via <color %s> and layer two accent icons (15/16 in the OLD wrong numbering, since renamed away) on top before the text - the special two-layer tinted icon render belongs to THIS rule, not id 18"},
+            "note": "%s slots are a color name and a multiplier word (double/triple, quadruple exists but is unreachable). code checks 'if (ruleId == 0x14)' to tint an extra base chuzzle icon with the same random color via <color %s> and layer two accent icons on top before the text"},
         {"id": 21, "icon": "rule/21comboscore", "confidence": "confirmed",
             "text": "You only <blinky>score points<_tc> if you make a <blinky>COMBO!<_tc>"},
         {"id": 22, "icon": "rule/22colormulti", "confidence": "confirmed",
@@ -89,10 +88,10 @@
             "text": "The board is <blinky>squished!<_tc> Less space means a tighter squeeze!"},
         {"id": 30, "icon": "rule/30poprandom", "confidence": "confirmed",
             "text": "A <blinky>random Chuzzle<_tc> will pop after each turn!",
-            "note": "new in 2.70 - not part of the build this was first reverse engineered against. gated to gametype != 2"},
+            "note": "new! (v2.70)"},
         {"id": 31, "icon": "rule/31stinkyportrait", "confidence": "confirmed",
             "text": "As you play, enjoy the fine art of the <blinky>Portrait of Stinky!<_tc>",
-            "note": "new in 2.70. gated to dayOfMonth % 3 == 0"}
+            "note": "new! (v2.70) gated to dayOfMonth % 3 == 0"}
     ],
 
     "bonus": [
