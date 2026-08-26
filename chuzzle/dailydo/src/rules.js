@@ -344,8 +344,9 @@ function paintrulescontent(back, golden) {
     });
 
     const title = rulestitlefor(back);
-    document.querySelectorAll(".rulestitle").forEach(function(el) {
-        if (!el.closest(".ghost")) el.textContent = title;
+    document.querySelectorAll(".logo").forEach(function(svg) {
+        if (svg.closest(".ghost") || !svg.querySelector(".rulestitle")) return;
+        relabellogo(svg, title);
     });
     paintextras();
 }
