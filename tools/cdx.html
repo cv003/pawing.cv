@@ -44,9 +44,11 @@
             resize: vertical; font-family: inherit;
             font-size: inherit;
         }
+        .progresswrap {display: flex; align-items: flex-start; gap: 10px}
         .progress {white-space: pre-wrap}
         .progressline {margin: 4px 0}
         .progressline button {margin-left: 8px}
+        .stopbtn {flex-shrink: 0}
 
         /*//////////////////////////////////////////////////////////////////////*/
 
@@ -127,7 +129,10 @@
             autocomplete="off" rows="4"></textarea>
         <button type="submit" class="runbtn">run</button>
     </form>
-    <div class="progress"></div>
+    <div class="progresswrap">
+        <div class="progress"></div>
+        <button type="button" class="stopbtn" style="display:none">stop</button>
+    </div>
     <div class="outputrow"></div>
     <script>
 
@@ -291,12 +296,18 @@
         function sleep(ms) {return new Promise(r => setTimeout(r, ms))}
 
         const cdxroutes = [
+            {key: "direct", build: u => u},
             {key: "proxy", build: u => "https://cors.coolsite.cv/?url=" + encodeURIComponent(u)},
-            {key: "allorigins", build: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u)},
             {key: "codetabs", build: u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u)}
         ];
 
-        async function fetchcdxrowsstream(baseurl, progress) {
+        function waybackurl(parts) {
+            let date = parts[0], origurl = parts[1], mimetype = parts[2];
+            let prefix = mimetype === "text/html" ? "if_" : "im_";
+            return "https://web.archive.org/web/" + date + prefix + "/" + origurl;
+        }
+
+        async function fetchcdxrowsstream(baseurl, progress, control) {
             const retriesperroute = 1;
             const sweeps = 5;
             const responsetimeout = 25000;
@@ -311,6 +322,7 @@
                 const target = cdxroutes[a].build(baseurl);
 
                 for (let attempt = 0; attempt <= retriesperroute; attempt++) {
+                    if (control && control.stopped) throw Object.assign(new Error("stopped"), {stopped: true, partial: []});
                     const controller = new AbortController();
                     let timeout = setTimeout(() => controller.abort(), responsetimeout);
                     try {
@@ -340,6 +352,11 @@
                         let stop = false;
 
                         while (!stop) {
+                            if (control && control.stopped) {
+                                stop = true;
+                                try { await reader.cancel(); } catch { }
+                                break;
+                            }
                             const {done, value} = await reader.read();
                             if (done) break;
                             processedbytes += value.byteLength;
@@ -422,18 +439,12 @@
 
         function exportbuilder(data, domain) {
             let fmt = element('format').value;
-            let baseurl = "https://web.archive.org/web/";
             let downloadcontent = "";
             let downloadfilename = "";
             let mime = "text/plain;charset=utf-8";
 
             if (fmt === "archivesonly") {
-                let out = data.map(parts => {
-                    let date = parts[0], origurl = parts[1], mimetype = parts[2];
-                    let prefix = mimetype === "text/html" ? "if_" : "im_";
-                    let waurl = baseurl + date + prefix + "/" + origurl;
-                    return waurl;
-                }).filter(Boolean).join("\n");
+                let out = data.map(waybackurl).filter(Boolean).join("\n");
                 downloadcontent = out;
                 downloadfilename = "archive of " + domain + ".txt";
             }
@@ -481,16 +492,18 @@
                 return;
             }
 
+            const showarchivelinks = element('format').value !== "linksonly";
             let tlines = data.slice(0, 1000);
             let maxdate = 4, maxurl = 3, maxmime = 8, maxcode = 4, maxsize = 4;
             for (let i = 0; i < tlines.length; i++) {
                 let parts = tlines[i];
                 if (parts.length < 5) continue;
                 let [date, link, mime, code, len] = parts;
+                let displaylink = showarchivelinks ? waybackurl(parts) : link;
                 let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
                     '$1/$2/$3 $4:$5:$6');
                 maxdate = Math.max(maxdate, dstr.length);
-                maxurl = Math.max(maxurl, link.length);
+                maxurl = Math.max(maxurl, displaylink.length);
                 maxmime = Math.max(maxmime, mime.length);
                 maxcode = Math.max(maxcode, code.length);
                 maxsize = Math.max(maxsize, len.length);
@@ -512,17 +525,18 @@
         <col style="width:${maxcode + slack}ch">
         <col style="width:${maxsize + slack}ch">
       </colgroup>
-      <tr><th>latest archive date</th><th class="url-col">full url</th><th>mimetype</th><th>response code</th><th>size in bytes</th></tr>
+      <tr><th>latest archive date</th><th class="url-col">${showarchivelinks ? "archive url" : "full url"}</th><th>mimetype</th><th>response code</th><th>size in bytes</th></tr>
     `;
                 for (let i = 0; i < rows.length; i++) {
                     let parts = rows[i];
                     if (parts.length < 5) continue;
                     let [date, link, mime, code, len] = parts;
+                    let displaylink = showarchivelinks ? waybackurl(parts) : link;
                     let dstr = date.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,
                         '$1/$2/$3 $4:$5:$6');
                     tbl += `<tr>
           <td>${escapetext(dstr)}</td>
-          <td class="url-col"><a href="${escapetext(link)}" target="_blank">${escapetext(link)}</a></td>
+          <td class="url-col"><a href="${escapetext(displaylink)}" target="_blank">${escapetext(displaylink)}</a></td>
           <td>${escapetext(mime)}</td>
           <td>${escapetext(code)}</td>
           <td>${escapetext(len)}</td>
@@ -563,6 +577,23 @@
             return "error: " + msg;
         }
 
+        function armstopbtn(control) {
+            const btn = element('stopbtn');
+            btn.disabled = false;
+            btn.textContent = "stop";
+            btn.style.display = "";
+            const handler = () => {
+                control.stopped = true;
+                btn.disabled = true;
+                btn.textContent = "stopping..";
+            };
+            btn.addEventListener('click', handler);
+            return () => {
+                btn.removeEventListener('click', handler);
+                btn.style.display = "none";
+            };
+        }
+
         document.querySelector('.domaininputrow').addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const progressRoot = element('progress');
@@ -579,8 +610,11 @@
             if (urls.length === 1) {
                 const domain = urls[0];
                 const cdxUrl = buildcdxurl(domain);
+                const control = {stopped: false};
+                const disarm = armstopbtn(control);
                 try {
-                    const data = await fetchcdxrowsstream(cdxUrl, progressRoot);
+                    const data = await fetchcdxrowsstream(cdxUrl, progressRoot, control);
+                    disarm();
                     progressRoot.replaceChildren();
                     const row = document.createElement('div');
                     row.className = 'progressline';
@@ -588,9 +622,20 @@
                     progressRoot.appendChild(row);
                     showpreviewtable(data, output);
                 } catch (e) {
-                    const msg = (e && e.message) ? e.message : String(e);
-                    progressRoot.textContent = bettererrorformat(msg);
-                    showpreviewtable([], output);
+                    disarm();
+                    if (e && e.stopped) {
+                        const data = e.partial || [];
+                        progressRoot.replaceChildren();
+                        const row = document.createElement('div');
+                        row.className = 'progressline';
+                        filldonerow(row, domain, data, false);
+                        progressRoot.appendChild(row);
+                        showpreviewtable(data, output);
+                    } else {
+                        const msg = (e && e.message) ? e.message : String(e);
+                        progressRoot.textContent = bettererrorformat(msg);
+                        showpreviewtable([], output);
+                    }
                 }
             } else {
                 for (let i = 0; i < urls.length; i++) {
@@ -599,14 +644,23 @@
                     line.className = 'progressline';
                     progressRoot.appendChild(line);
                     const cdxUrl = buildcdxurl(domain);
+                    const control = {stopped: false};
+                    const disarm = armstopbtn(control);
                     try {
                         const data = await fetchcdxrowsstream(cdxUrl, (m) => {
                             line.textContent = '(' + domain + ') ' + m;
-                        });
+                        }, control);
+                        disarm();
                         filldonerow(line, domain, data, true);
                     } catch (e) {
-                        const msg = (e && e.message) ? e.message : String(e);
-                        line.textContent = '(' + domain + ') ' + bettererrorformat(msg);
+                        disarm();
+                        if (e && e.stopped) {
+                            filldonerow(line, domain, e.partial || [], true);
+                            break;
+                        } else {
+                            const msg = (e && e.message) ? e.message : String(e);
+                            line.textContent = '(' + domain + ') ' + bettererrorformat(msg);
+                        }
                     }
                 }
             }
