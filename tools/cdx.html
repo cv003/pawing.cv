@@ -123,6 +123,17 @@
         </label>
         <label><input type="checkbox" class="dedupechk"> and dedupe</label>
         <label><input type="checkbox" class="skip404chk"> and skip 404/410s</label>
+        <label> only between
+            <input type="text" class="datefrom" placeholder="from (yyyymmdd)" style="width:9em">
+            and
+            <input type="text" class="dateto" placeholder="to (yyyymmdd)" style="width:9em">
+        </label>
+        <label> mimetypes
+            <input type="text" class="mimefilter" placeholder="e.g. text/html,image/png" style="width:14em">
+        </label>
+        <label> status codes
+            <input type="text" class="statusfilter" placeholder="e.g. 200,301" style="width:8em">
+        </label>
     </div>
     <form class="domaininputrow" autocomplete="off">
         <textarea class="domainfield" placeholder="example.com&#10;a.e.x.com/file.html" spellcheck="false"
@@ -136,7 +147,8 @@
     <div class="outputrow"></div>
     <script>
 
-        const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'skip404chk'];
+        const persistkeys = ['format', 'limittype', 'limitval', 'limitenabled', 'matchtype', 'dedupechk', 'skip404chk',
+            'datefrom', 'dateto', 'mimefilter', 'statusfilter'];
 
         function element(cls) {return document.querySelector('.' + cls)}
         function allelements(cls) {return Array.from(document.getElementsByClassName(cls))}
@@ -163,6 +175,49 @@
                     else element(k).value = val;
                 }
             });
+        }
+
+        const lastresultscap = 20000;
+
+        function savelastrun(entries) {
+            try {
+                let total = 0;
+                for (const e of entries) total += (e.data ? e.data.length : 0);
+                if (total > lastresultscap) {
+                    localStorage.removeItem("iadl_lastrun");
+                    return;
+                }
+                localStorage.setItem("iadl_domaintext", element('domainfield').value);
+                localStorage.setItem("iadl_lastrun", JSON.stringify(entries));
+            } catch { }
+        }
+
+        function loadlastrun() {
+            let text = "";
+            try { text = localStorage.getItem("iadl_domaintext") || ""; } catch { }
+            if (text) element('domainfield').value = text;
+
+            let entries = null;
+            try { entries = JSON.parse(localStorage.getItem("iadl_lastrun") || "null"); } catch { }
+            if (!entries || !entries.length) return;
+
+            const progressRoot = element('progress');
+            const output = element('outputrow');
+            progressRoot.replaceChildren();
+            if (entries.length === 1) {
+                const row = document.createElement('div');
+                row.className = 'progressline';
+                filldonerow(row, entries[0].domain, entries[0].data, false);
+                progressRoot.appendChild(row);
+                showpreviewtable(entries[0].data, output);
+            } else {
+                entries.forEach(e => {
+                    const line = document.createElement('div');
+                    line.className = 'progressline';
+                    filldonerow(line, e.domain, e.data, true);
+                    progressRoot.appendChild(line);
+                });
+            }
         }
 
         function downloadBlob(content, filename, mimetype) {
@@ -245,12 +300,33 @@
                 return url.replace(/^https?:\/\//i,"").replace(/^www\d*\./i,"").replace(/\/+$/,"").toLowerCase();
             }
         }
+        function builddaterange(value) {
+            const digits = String(value || "").replace(/\D/g, "");
+            return digits;
+        }
+
         function buildcdxurl(domain) {
             let url = "https://web.archive.org/cdx/search/cdx?url="
                 + encodedurl(domain)
                 + "&output=txt"
                 + "&matchType=" + encodedurl(element('matchtype').value)
                 + "&fl=timestamp,original,mimetype,statuscode,length";
+
+            const from = builddaterange(element('datefrom').value);
+            const to = builddaterange(element('dateto').value);
+            if (from) url += "&from=" + encodedurl(from);
+            if (to) url += "&to=" + encodedurl(to);
+
+            const mimes = String(element('mimefilter').value || "").split(",").map(s => s.trim()).filter(Boolean);
+            if (mimes.length) {
+                const pattern = mimes.map(m => m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+                url += "&filter=" + encodedurl("mimetype:(" + pattern + ")");
+            }
+            const statuses = String(element('statusfilter').value || "").split(",").map(s => s.trim()).filter(Boolean);
+            if (statuses.length) {
+                const pattern = statuses.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+                url += "&filter=" + encodedurl("statuscode:(" + pattern + ")");
+            }
 
             let limittype = element('limittype').value;
             let limit = parseInt(element('limitval').value) || 5000;
@@ -562,6 +638,7 @@
             });
         });
         loadsettings();
+        loadlastrun();
         updatelimitcontrols();
         element('limitenabled').addEventListener('change', updatelimitcontrols);
 
@@ -607,6 +684,8 @@
                 return;
             }
 
+            const runresults = [];
+
             if (urls.length === 1) {
                 const domain = urls[0];
                 const cdxUrl = buildcdxurl(domain);
@@ -621,6 +700,7 @@
                     filldonerow(row, domain, data, false);
                     progressRoot.appendChild(row);
                     showpreviewtable(data, output);
+                    runresults.push({domain, data});
                 } catch (e) {
                     disarm();
                     if (e && e.stopped) {
@@ -631,6 +711,7 @@
                         filldonerow(row, domain, data, false);
                         progressRoot.appendChild(row);
                         showpreviewtable(data, output);
+                        runresults.push({domain, data});
                     } else {
                         const msg = (e && e.message) ? e.message : String(e);
                         progressRoot.textContent = bettererrorformat(msg);
@@ -652,10 +733,13 @@
                         }, control);
                         disarm();
                         filldonerow(line, domain, data, true);
+                        runresults.push({domain, data});
                     } catch (e) {
                         disarm();
                         if (e && e.stopped) {
-                            filldonerow(line, domain, e.partial || [], true);
+                            const data = e.partial || [];
+                            filldonerow(line, domain, data, true);
+                            runresults.push({domain, data});
                             break;
                         } else {
                             const msg = (e && e.message) ? e.message : String(e);
@@ -664,6 +748,7 @@
                     }
                 }
             }
+            if (runresults.length) savelastrun(runresults);
             alldone();
         });
 
